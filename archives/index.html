@@ -273,143 +273,38 @@
             
                 <div class="postShorten-content">
                     <p>객체 생성함에 있어서, 아이템1 에서 학습한 정적팩터리 와 생성자에는 똑같은 제약이 하나 있다. 선택적 매개변수가 많을때 적절히 대응하기 어렵다는 점이다. </p>
-<h2 id="아이템2-생성자에-매개변수가-많다면-빌더를-고려하라"><a href="#아이템2-생성자에-매개변수가-많다면-빌더를-고려하라" class="headerlink" title="아이템2. 생성자에 매개변수가 많다면 빌더를 고려하라."></a>아이템2. 생성자에 매개변수가 많다면 빌더를 고려하라.</h2><p>&lt;% blockquote %&gt;<br>점층적 생성자 패턴도 쓸 수는 있지만, 매개변수 개수가 많아지면 클라이언트 코드를 작성하거나 읽기 어렵다.<br>&lt;% endblockquote %&gt;</p>
-<h3 id="해결안1-생성자"><a href="#해결안1-생성자" class="headerlink" title="해결안1. 생성자"></a>해결안1. 생성자</h3><p>&lt;% codeblock 점층적 생성자 패턴 lang:java %&gt;<br>    NutiritionFacts coke = new NutritionFacts(240,8,100,35,27);<br>&lt;% endcodeblock %&gt;</p>
+<h2 id="아이템2-생성자에-매개변수가-많다면-빌더를-고려하라"><a href="#아이템2-생성자에-매개변수가-많다면-빌더를-고려하라" class="headerlink" title="아이템2. 생성자에 매개변수가 많다면 빌더를 고려하라."></a>아이템2. 생성자에 매개변수가 많다면 빌더를 고려하라.</h2><blockquote><p>점층적 생성자 패턴도 쓸 수는 있지만, 매개변수 개수가 많아지면 클라이언트 코드를 작성하거나 읽기 어렵다. </p>
+</blockquote>
+
+<h3 id="해결안1-생성자"><a href="#해결안1-생성자" class="headerlink" title="해결안1. 생성자"></a>해결안1. 생성자</h3><figure class="highlight java"><figcaption><span>점층적 생성자 패턴</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">NutiritionFacts coke = <span class="keyword">new</span> NutritionFacts(<span class="number">240</span>,<span class="number">8</span>,<span class="number">100</span>,<span class="number">35</span>,<span class="number">27</span>);</span><br></pre></td></tr></table></figure>
+
 <p>위 코드를 보았을때 무엇이 느껴지는가? 정말 해당 클래스 스펙을 확인하지 않고서는 식별이 어렵고, 개인적으로 IDE의 버프를 받아 변수명 힌트를 받지 않으면, 엄하게 다른 값 넣고, 삽질하는 경우를 갠적으로 좀 겪어봤다. </p>
-<h3 id="해결안2-자바빈즈-Java-Beans"><a href="#해결안2-자바빈즈-Java-Beans" class="headerlink" title="해결안2. 자바빈즈(Java Beans)"></a>해결안2. 자바빈즈(Java Beans)</h3><p>&lt;% codeblock 자바빈즈 lang:java %&gt;<br>    NutiritionFacts coke = new NutritionFacts();<br>    coke.setServingSize(240);<br>    coke.setServings(8);<br>    coke.setCalories(100);<br>    coke.setSodium(35);<br>    coke.setCarbohydrate(27);<br>&lt;% endcodeblock %&gt;</p>
+<h3 id="해결안2-자바빈즈-Java-Beans"><a href="#해결안2-자바빈즈-Java-Beans" class="headerlink" title="해결안2. 자바빈즈(Java Beans)"></a>해결안2. 자바빈즈(Java Beans)</h3><figure class="highlight java"><figcaption><span>자바빈즈</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">NutiritionFacts coke = <span class="keyword">new</span> NutritionFacts();</span><br><span class="line">coke.setServingSize(<span class="number">240</span>);</span><br><span class="line">coke.setServings(<span class="number">8</span>);</span><br><span class="line">coke.setCalories(<span class="number">100</span>);</span><br><span class="line">coke.setSodium(<span class="number">35</span>);</span><br><span class="line">coke.setCarbohydrate(<span class="number">27</span>);</span><br></pre></td></tr></table></figure>
+
 <p>위 코드는 현업에서 본인이 자주 사용했던 기법이다. 생성자 보다는 확실히 가독성 측면에서는 사용성이 편하지만, 이 부분도 사실 매개변수가 많아지면 불편함이 있고, 소스도 굉장히 길어져서 보기가 싫은 기억이 자주 있다. 그리고 객체 하나를 인스턴스 생성하려면, 위 코드처럼 여러개의 set메소드를 호출 해야한다. 그리고 생성자에서는 각 변수가 어떻게 나와야하는지 지정을 해주지만, 자바빈즈는 개발자가 set메서드를 입력해야하기 때문에 지정된 매개변수를 넣기가 힘들어서, 코드 일관성이 깨져서,버그를 유발시키기도하고, 또한 자바빈즈는 클래스를 불변클래스(아이템17)으로 만들수 없으며, 스레드 안정성을 얻으려면 추가적인 작업해줘야한다. (lock) 이런 단점을 보완 하기 위해 객체 Freezing을 수행한다고 한다.</p>
 <p>그럼 Object Freezing이란? 멀티 스레드 환경에서 객체내에 각 변수을 get할때 freeze 를 synchronized 가 되었는지 확인하고 freeze를 수행 하는데 멀티 스레드 환경이다 보니, 그 변수를 사용중에 있는데 set하는 불상사가 발생하게 된다면, 해당 변수가 set되어지는것을 방지하기 위해서 freeze된부분이 true이면 예외를 던져서 set하지 못하도록 막는 부분이 Object Freezing이다. 쉽게 말하면 화장실 변기에 앉아서 볼일을 보고있는데, 갑자기 뒷사람이 문을 열더니, 너 놔와! 하면서 내동댕이 치고, 쫒겨나는 현상이라 생각하면 될것 같다. 이런 상황을 미연에 방지하기 위해 사용중이라고 문밖에 표시를 하고, 문 잠그고 안전하게 볼일볼수있도록 도와주는 부분을 Freezing 한다라고 개인적으로 이해했다. </p>
-<h3 id="해결안3-빌더패턴"><a href="#해결안3-빌더패턴" class="headerlink" title="해결안3. 빌더패턴"></a>해결안3. 빌더패턴</h3><p>&lt;% codeblock 빌더패턴 심플 버전 lang:java %&gt;<br>    public class NutritionFacts {<br>        private final int servingSize;<br>        private final int servings;<br>        private final int calories;<br>        private final int fat;<br>        private final int sodium;<br>        private final int carbohydrate; </p>
-<pre><code>    public static class Builder &#123;
-        //필수 매개변수 
-        private final int servingSize; 
-        private final int servings;
+<h3 id="해결안3-빌더패턴"><a href="#해결안3-빌더패턴" class="headerlink" title="해결안3. 빌더패턴"></a>해결안3. 빌더패턴</h3><figure class="highlight java"><figcaption><span>빌더패턴 심플 버전</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">NutritionFacts</span> </span>&#123;</span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">int</span> servingSize;</span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">int</span> servings; </span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">int</span> calories; </span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">int</span> fat; </span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">int</span> sodium; </span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">int</span> carbohydrate; </span><br><span class="line">	</span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">Builder</span> </span>&#123;</span><br><span class="line">		<span class="comment">//필수 매개변수 </span></span><br><span class="line">		<span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">int</span> servingSize; </span><br><span class="line">		<span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">int</span> servings;</span><br><span class="line">		</span><br><span class="line">		</span><br><span class="line">		<span class="comment">//선택적 매개변수</span></span><br><span class="line">		<span class="keyword">private</span> <span class="keyword">int</span> calories = <span class="number">0</span>; </span><br><span class="line">		<span class="keyword">private</span> <span class="keyword">int</span> fat = <span class="number">0</span>; </span><br><span class="line">		<span class="keyword">private</span> <span class="keyword">int</span> sodium = <span class="number">0</span>; </span><br><span class="line">		<span class="keyword">private</span> <span class="keyword">int</span> carbohydrate = <span class="number">0</span>;</span><br><span class="line">		</span><br><span class="line">		<span class="function"><span class="keyword">public</span> <span class="title">Builder</span><span class="params">(<span class="keyword">int</span> servingSize, <span class="keyword">int</span> servings)</span> </span>&#123;</span><br><span class="line">			<span class="keyword">this</span>.servingSize = servingSize; </span><br><span class="line">			<span class="keyword">this</span>.servings = servings; </span><br><span class="line">		&#125;</span><br><span class="line">		</span><br><span class="line">		<span class="function"><span class="keyword">public</span> Builder <span class="title">calories</span><span class="params">(<span class="keyword">int</span> val)</span> </span>&#123;</span><br><span class="line">			calories = val; </span><br><span class="line">			<span class="keyword">return</span> <span class="keyword">this</span>; </span><br><span class="line">		&#125;</span><br><span class="line">		</span><br><span class="line">		<span class="function"><span class="keyword">public</span> Builder <span class="title">fat</span><span class="params">(<span class="keyword">int</span> val)</span> </span>&#123;</span><br><span class="line">			fat = val; </span><br><span class="line">			<span class="keyword">return</span> <span class="keyword">this</span>;</span><br><span class="line">		&#125;</span><br><span class="line">		</span><br><span class="line">		<span class="function"><span class="keyword">public</span> Builder <span class="title">sodium</span><span class="params">(<span class="keyword">int</span> val)</span> </span>&#123;</span><br><span class="line">			sodium = val; </span><br><span class="line">			<span class="keyword">return</span> <span class="keyword">this</span>; </span><br><span class="line">		&#125;</span><br><span class="line">		</span><br><span class="line">		<span class="function"><span class="keyword">public</span> Builder <span class="title">carbohydrate</span><span class="params">(<span class="keyword">int</span> val)</span> </span>&#123;</span><br><span class="line">			carbohydrate = val; </span><br><span class="line">			<span class="keyword">return</span> <span class="keyword">this</span>; </span><br><span class="line">		&#125;</span><br><span class="line">		</span><br><span class="line">		<span class="function"><span class="keyword">public</span> NuritionFacts <span class="title">build</span><span class="params">()</span> </span>&#123;</span><br><span class="line">			<span class="keyword">return</span> <span class="keyword">new</span> NuritionFacts(<span class="keyword">this</span>); </span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="function"><span class="keyword">private</span> <span class="title">NuritionFacts</span><span class="params">(Builder bulider)</span> </span>&#123;</span><br><span class="line">		servingSize = builder.servingSize; </span><br><span class="line">		servings = builder.servings; </span><br><span class="line">		calories = builder.calories; </span><br><span class="line">		fat = builder.fat; </span><br><span class="line">		sodium = builder.sodium; </span><br><span class="line">		carbohydrate = builder.carbohydrate; </span><br><span class="line">	&#125;</span><br><span class="line">	&#125;</span><br></pre></td></tr></table></figure>
 
-
-        //선택적 매개변수
-        private int calories = 0; 
-        private int fat = 0; 
-        private int sodium = 0; 
-        private int carbohydrate = 0;
-
-        public Builder(int servingSize, int servings) &#123;
-            this.servingSize = servingSize; 
-            this.servings = servings; 
-        &#125;
-
-        public Builder calories(int val) &#123;
-            calories = val; 
-            return this; 
-        &#125;
-
-        public Builder fat(int val) &#123;
-            fat = val; 
-            return this;
-        &#125;
-
-        public Builder sodium(int val) &#123;
-            sodium = val; 
-            return this; 
-        &#125;
-
-        public Builder carbohydrate(int val) &#123;
-            carbohydrate = val; 
-            return this; 
-        &#125;
-
-        public NuritionFacts build() &#123;
-            return new NuritionFacts(this); 
-        &#125;
-    &#125;
-
-    private NuritionFacts(Builder bulider) &#123;
-        servingSize = builder.servingSize; 
-        servings = builder.servings; 
-        calories = builder.calories; 
-        fat = builder.fat; 
-        sodium = builder.sodium; 
-        carbohydrate = builder.carbohydrate; 
-    &#125;
- &#125;</code></pre>
-<p>&lt;% endcodeblock %&gt;</p>
 <p>책에서는 핵심만 도드라져 보이도록 유효성 검사 코드는 생략했다고한다. 잘못된 매개변수임을 유효성 검토하려면, 빌더의 생성자와 메서드에서 입력매개변수를 검사하고, build 메서드가 호출하는 생성자에서 여러 매개변수에 걸친 불변식 (invariant)을 검사하자. (invalid메서드 만들어서 객체가 정말 유효한지 검증하자는 말이다.) </p>
-<p>&lt;% blockquote %&gt;<br>    Class Invariant?<br>    <a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Class_invariant">https://en.wikipedia.org/wiki/Class_invariant</a><br>    위 위키 사이트에 잘 명시가 되어있는데, 말이 어려워서 그렇지 결국 유효성 검증을 하라는 말이다.<br>    예를들어 1월은 1~31일까지 있는데 32일까지 나오는것로 표기되면 오류 이기 때문에, 객체 생성 시점 전에 assert를 하라는 소리이다.<br>&lt;% endblockquote %&gt;</p>
-<p>&lt;% codeblock 빌더패턴 인스턴스 생성부 lang:java %&gt;<br>    NutiritionFacts coke = new NutritionFacts.Builder(240,8).calories(100).sodium(35).carbohydrate(27).build();<br>&lt;% endcodeblock %&gt;</p>
+<blockquote><p>Class Invariant?<br><a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Class_invariant">https://en.wikipedia.org/wiki/Class_invariant</a><br>위 위키 사이트에 잘 명시가 되어있는데, 말이 어려워서 그렇지 결국 유효성 검증을 하라는 말이다.<br>예를들어 1월은 1~31일까지 있는데 32일까지 나오는것로 표기되면 오류 이기 때문에, 객체 생성 시점 전에 assert를 하라는 소리이다. </p>
+</blockquote>
+
+<figure class="highlight java"><figcaption><span>빌더패턴 인스턴스 생성부</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">NutiritionFacts coke = <span class="keyword">new</span> NutritionFacts.Builder(<span class="number">240</span>,<span class="number">8</span>).calories(<span class="number">100</span>).sodium(<span class="number">35</span>).carbohydrate(<span class="number">27</span>).build();</span><br></pre></td></tr></table></figure>
+
 <p>길고 긴 Builder를 작성하고 나면, 위와같이 간단하게(?) 객체를 생성할수 있다. 딱 봐도 가독성이 좋고, 필수 매개변수 와 옵션 매개변수를 나눌수가 있어서, 필수 매개변수 이외에 옵션으로 불필요 매개변수는 빼고 객체를 넣어도 상관이 없다.<br>그리고 <strong>빌더 패턴은 계층적으로 설계된 클래스와 함께 쓰기에 좋다.</strong> 주저리 주저리 하는것 보다 아래 코드를 보자. </p>
-<p>&lt;% codeblock Pizza Abstract Builder lang:java %&gt;<br>    public abstract class Pizza {<br>        public enum Topping {HAM, MUSHROOM, ONION, PEPPER, SAUAGE}<br>        final Set<Topping> toppings; </p>
-<pre><code>    abstract static class Builder&lt;T extends Builder&lt;T&gt;&gt; &#123;
-        EnumSet&lt;Topping&gt; toppings = EnumSet.noneOf(Topping.class);
-        public T addTopping(Topping topping) &#123;
-            toppings.add(Objects.requireNonNull(topping)); 
-            return self(); 
-        &#125;
+<figure class="highlight java"><figcaption><span>Pizza Abstract Builder</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">Pizza</span> </span>&#123;</span><br><span class="line">	<span class="keyword">public</span> <span class="class"><span class="keyword">enum</span> <span class="title">Topping</span> </span>&#123;HAM, MUSHROOM, ONION, PEPPER, SAUAGE&#125;</span><br><span class="line">	<span class="keyword">final</span> Set&lt;Topping&gt; toppings; </span><br><span class="line">	</span><br><span class="line">	<span class="keyword">abstract</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">Builder</span>&lt;<span class="title">T</span> <span class="keyword">extends</span> <span class="title">Builder</span>&lt;<span class="title">T</span>&gt;&gt; </span>&#123;</span><br><span class="line">		EnumSet&lt;Topping&gt; toppings = EnumSet.noneOf(Topping.class);</span><br><span class="line">		<span class="function"><span class="keyword">public</span> T <span class="title">addTopping</span><span class="params">(Topping topping)</span> </span>&#123;</span><br><span class="line">			toppings.add(Objects.requireNonNull(topping)); </span><br><span class="line">			<span class="keyword">return</span> self(); </span><br><span class="line">		&#125;</span><br><span class="line">		</span><br><span class="line">		<span class="function"><span class="keyword">abstract</span> Pizza <span class="title">build</span><span class="params">()</span></span>; </span><br><span class="line">		</span><br><span class="line">		<span class="comment">// 하위 클래스는 이 메서드를 재정의 하여 this를 반환하도록 해야한다. </span></span><br><span class="line">		<span class="function"><span class="keyword">protected</span> <span class="keyword">abstract</span> T <span class="title">self</span><span class="params">()</span></span>; </span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	Pizza(Builder&lt;?&gt; builder) &#123;</span><br><span class="line">		toppings = builder.toppings.clone(); <span class="comment">//아이템 50 참고 </span></span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-        abstract Pizza build(); 
+<figure class="highlight java"><figcaption><span>NyPizza Builder</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">NyPizza</span> <span class="keyword">extends</span> <span class="title">Pizza</span> </span>&#123; </span><br><span class="line">	<span class="keyword">public</span> <span class="class"><span class="keyword">enum</span> <span class="title">Size</span> </span>&#123;SMALL, MEDIUM, LARGE&#125;</span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">final</span> Size size; </span><br><span class="line">	</span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">Builder</span> <span class="keyword">extends</span> <span class="title">Pizza</span>.<span class="title">Builder</span>&lt;<span class="title">Builder</span>&gt; </span>&#123;</span><br><span class="line">		<span class="keyword">private</span> <span class="keyword">final</span> Size size; </span><br><span class="line">		</span><br><span class="line">		<span class="function">pubilc <span class="title">Builder</span><span class="params">(Size size)</span> </span>&#123;</span><br><span class="line">			<span class="keyword">this</span>.size = Objects.requireNonNull(size); </span><br><span class="line">		&#125;</span><br><span class="line">		</span><br><span class="line">		<span class="meta">@Override</span></span><br><span class="line">		<span class="function"><span class="keyword">public</span> NyPizza <span class="title">build</span><span class="params">()</span> </span>&#123;</span><br><span class="line">			<span class="keyword">return</span> <span class="keyword">new</span> NyPizza(<span class="keyword">this</span>); </span><br><span class="line">		&#125;</span><br><span class="line">		</span><br><span class="line">		<span class="meta">@Override</span> </span><br><span class="line">		<span class="function"><span class="keyword">public</span> <span class="keyword">protected</span> Builder <span class="title">self</span><span class="params">()</span> </span>&#123;</span><br><span class="line">			<span class="keyword">return</span> <span class="keyword">this</span>; </span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="function"><span class="keyword">private</span> <span class="title">NyPizza</span><span class="params">(Builder builder)</span> </span>&#123;</span><br><span class="line">		<span class="keyword">super</span>(builder); </span><br><span class="line">		size = builder.size; </span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-        // 하위 클래스는 이 메서드를 재정의 하여 this를 반환하도록 해야한다. 
-        protected abstract T self(); 
-    &#125;
+<figure class="highlight java"><figcaption><span>Calzone Builder</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Calzone</span> <span class="keyword">extends</span> <span class="title">Pizza</span> </span>&#123; </span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">boolean</span> sauceInside; </span><br><span class="line">	</span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">Builder</span> <span class="keyword">extends</span> <span class="title">Pizza</span>.<span class="title">Builder</span>&lt;<span class="title">Builder</span>&gt; </span>&#123;</span><br><span class="line">		<span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">boolean</span> sauceInside;</span><br><span class="line">		</span><br><span class="line">		<span class="function">pubilc Builder <span class="title">sauceInside</span><span class="params">()</span> </span>&#123;</span><br><span class="line">			sauceInside = <span class="keyword">true</span>; </span><br><span class="line">			<span class="keyword">return</span> <span class="keyword">this</span>; </span><br><span class="line">		&#125;</span><br><span class="line">		</span><br><span class="line">		<span class="meta">@Override</span></span><br><span class="line">		<span class="function"><span class="keyword">public</span> Calzone <span class="title">build</span><span class="params">()</span> </span>&#123;</span><br><span class="line">			<span class="keyword">return</span> <span class="keyword">new</span> Calzone(<span class="keyword">this</span>); </span><br><span class="line">		&#125;</span><br><span class="line">		</span><br><span class="line">		<span class="meta">@Override</span> </span><br><span class="line">		<span class="function"><span class="keyword">public</span> <span class="keyword">protected</span> Builder <span class="title">self</span><span class="params">()</span> </span>&#123;</span><br><span class="line">			<span class="keyword">return</span> <span class="keyword">this</span>; </span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="function"><span class="keyword">private</span> <span class="title">Calzone</span><span class="params">(Builder builder)</span> </span>&#123;</span><br><span class="line">		<span class="keyword">super</span>(builder); </span><br><span class="line">		sauceInside = builder.sauceInside; </span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-    Pizza(Builder&lt;?&gt; builder) &#123;
-        toppings = builder.toppings.clone(); //아이템 50 참고 
-    &#125;
-&#125;</code></pre>
-<p>&lt;% endcodeblock%&gt;</p>
-<p>&lt;% codeblock NyPizza Builder lang:java %&gt;<br>    public class NyPizza extends Pizza {<br>        public enum Size {SMALL, MEDIUM, LARGE}<br>        private final Size size; </p>
-<pre><code>    public static class Builder extends Pizza.Builder&lt;Builder&gt; &#123;
-        private final Size size; 
+<figure class="highlight java"><figcaption><span>Calzone Builder</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">NyPizza pizza = <span class="keyword">new</span> NyPizza.Builder(SMALL).addTopping(SAUSAGE).addTopping(ONION).build();</span><br><span class="line">CalZone calzone = <span class="keyword">new</span> Calzone.Builder().addTopping(HAM).sauceInside().build(); p</span><br></pre></td></tr></table></figure>
 
-        pubilc Builder(Size size) &#123;
-            this.size = Objects.requireNonNull(size); 
-        &#125;
-
-        @Override
-        public NyPizza build() &#123;
-            return new NyPizza(this); 
-        &#125;
-
-        @Override 
-        public protected Builder self() &#123;
-            return this; 
-        &#125;
-    &#125;
-
-    private NyPizza(Builder builder) &#123;
-        super(builder); 
-        size = builder.size; 
-    &#125;
-&#125;</code></pre>
-<p>&lt;% endcodeblock%&gt;</p>
-<p>&lt;% codeblock Calzone Builder lang:java %&gt;<br>    public class Calzone extends Pizza {<br>        private final boolean sauceInside; </p>
-<pre><code>    public static class Builder extends Pizza.Builder&lt;Builder&gt; &#123;
-        private final boolean sauceInside;
-
-        pubilc Builder sauceInside() &#123;
-            sauceInside = true; 
-            return this; 
-        &#125;
-
-        @Override
-        public Calzone build() &#123;
-            return new Calzone(this); 
-        &#125;
-
-        @Override 
-        public protected Builder self() &#123;
-            return this; 
-        &#125;
-    &#125;
-
-    private Calzone(Builder builder) &#123;
-        super(builder); 
-        sauceInside = builder.sauceInside; 
-    &#125;
-&#125;</code></pre>
-<p>&lt;% endcodeblock%&gt;</p>
-<p>&lt;% codeblock Calzone Builder lang:java %&gt;<br>    NyPizza pizza = new NyPizza.Builder(SMALL).addTopping(SAUSAGE).addTopping(ONION).build();<br>    CalZone calzone = new Calzone.Builder().addTopping(HAM).sauceInside().build(); p<br>&lt;% endcodeblock%&gt;</p>
 <p>위 코드 처럼 Pizza 추상 클래스를 확장받아서 NyPizza 와 Calzone를 구현하였다. 그래서 기본적으로 addTopping은 하위 클래스에서 사용하고,<br>각각 하위 클래스에서 필수 파라미터로 지정한 부분만 추가적으로 세팅을 한 부분을 확인 할 수 있다.(size, sauceInside)  </p>
 <p>이처럼 빌더패턴은 상당히 유연한 객체로 가변인수를 사용할수있고, 각각 적절한 메서드로 나눠서 선언할수도있고, 메서드를 여러번 호출하도록 하고 각 호출때 넘겨진 매개변수들을 하나의 필드로 모을수도 있다. 그리고 빌더에 넘기는 매개변수에 따라 다른 객체를 만들수도 있다.<br>(앞의 예제 처럼 가능하다는 것이다.)</p>
-<p>&lt;% blockquote %&gt;<br>    <strong>생성자나 정적 팩터리가 처리해야 할 매개변수가 많다면 벌더 패턴을 선택하는 게 더 낫다.</strong><br>    매개변수 중 다수가 필수가 아니거나 같은 타입이면 특히 더 그렇다. 빌더는 점층적 생성자보다 클라이언트 코드를 읽고 쓰기가 훨씬 간결하고,<br>    자바빈즈보다 훨씬 안전하다.<br>&lt;% endblockquote%&gt;</p>
+<blockquote><p><strong>생성자나 정적 팩터리가 처리해야 할 매개변수가 많다면 벌더 패턴을 선택하는 게 더 낫다.</strong><br>매개변수 중 다수가 필수가 아니거나 같은 타입이면 특히 더 그렇다. 빌더는 점층적 생성자보다 클라이언트 코드를 읽고 쓰기가 훨씬 간결하고,<br>자바빈즈보다 훨씬 안전하다. </p>
+</blockquote>
+
 
                     
                         
