@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="generator" content="codexdawn">
-    <title>Tag: Java,EffectiveJava,빌더패턴 - codexdawn</title>
+    <title>Tag: Java,EffectiveJava - codexdawn</title>
     <meta name="author" content="codexdawn">
     
     
@@ -18,7 +18,7 @@
     <script type="application/ld+json">{}</script>
     <meta property="og:type" content="blog">
 <meta property="og:title" content="codexdawn">
-<meta property="og:url" content="https://codexdawn.github.io/tags/Java-EffectiveJava-%EB%B9%8C%EB%8D%94%ED%8C%A8%ED%84%B4/index.html">
+<meta property="og:url" content="https://codexdawn.github.io/tags/Java-EffectiveJava/index.html">
 <meta property="og:site_name" content="codexdawn">
 <meta property="og:locale" content="en_US">
 <meta property="article:author" content="codexdawn">
@@ -237,6 +237,144 @@
                         ">
                 
     <section class="postShorten-group main-content-wrap">
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
+                            href="/2021/01/18/java-effective-1/"
+                            aria-label=": java-effective-1"
+                        >
+                            java-effective-1
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2021-01-18T08:06:18+00:00">
+	
+		    Jan 18, 2021
+    	
+    </time>
+    
+        <span>in </span>
+        
+    <a class="category-link" href="/categories/Effective-Java/">Effective Java</a>, <a class="category-link" href="/categories/Study/">Study</a>, <a class="category-link" href="/categories/%EA%B0%9D%EC%B2%B4-%EC%83%9D%EC%84%B1%EA%B3%BC-%ED%8C%8C%EA%B4%B4/">객체 생성과 파괴</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <p>기본적으로 자바에서는 인스턴스를 얻는 수단은 public 생성자이지만,<br>클래스는 생성자와 별도로 정적 팩터리 메서드를 제공 할수 있다. </p>
+<h2 id="아이템1-생성자-대신-정적-팩터리-메서드를-고려하라"><a href="#아이템1-생성자-대신-정적-팩터리-메서드를-고려하라" class="headerlink" title="아이템1. 생성자 대신 정적 팩터리 메서드를 고려하라."></a>아이템1. 생성자 대신 정적 팩터리 메서드를 고려하라.</h2><figure class="highlight java"><figcaption><span>Boolean.valueOf</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Boolean <span class="title">valueOf</span><span class="params">(<span class="keyword">boolean</span> b)</span> </span>&#123;</span><br><span class="line">	<span class="keyword">return</span> b ? Boolean.TRUE : Boolean.FALSE; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>위 메서드는 기본적으로 기본 타입인 boolean을 받아 Boolean 객체 참조로 변환해 준다. </p>
+<h3 id="장점1-이름을-가질수-있다-메서드의-목적을-분명하게-알수있다"><a href="#장점1-이름을-가질수-있다-메서드의-목적을-분명하게-알수있다" class="headerlink" title="장점1. 이름을 가질수 있다. (메서드의 목적을 분명하게 알수있다.)"></a>장점1. 이름을 가질수 있다. (메서드의 목적을 분명하게 알수있다.)</h3><p>자바에서 기본으로 제공하는 public생성자는 이름을 가질수없으며, 매개변수들이 포함되어 있는 생성자 역시 이름이 없다.<br>그래서 개발자들은 여러 생성자가 존재 할 경우, 어떤 역할을 하는지 한눈에 알아보기가 쉽지않을것이다.<br>이런 public생성자의 단점을 이름을 가질수있는 정적 팩터리 메서드가 해결 할 수있다. </p>
+<h3 id="장점2-호출될-때마다-인스턴스를-새로-생성하지-않아도-된다"><a href="#장점2-호출될-때마다-인스턴스를-새로-생성하지-않아도-된다" class="headerlink" title="장점2. 호출될 때마다 인스턴스를 새로 생성하지 않아도 된다."></a>장점2. 호출될 때마다 인스턴스를 새로 생성하지 않아도 된다.</h3><p>자바에서 public생성자를 호출 하려면 new 키워드로 인스턴스를 생성하게 되어있다.<br>하지만 정적 팩터리 메서드를 사용하면, 매번 인스턴스를 생성하지 않아도 된다.<br>특히 불변 클래스(immutable class; 아이템17)는 인스턴스를 미리 만들어놓거나 새로 생성한 인스턴스를 캐싱하여, 재활용하는 식으로 불필요한 객체 생성을 피할수 있다. (EX&gt; Boolean.valueOf) 따라서 같은 객체가 자주 요청되는 상황이라면 성능을 상당히 끌어올려 준다.</p>
+<blockquote><p>인스턴스 통제(instance-controlled) 클래스란? (ex&gt; 싱글턴)<br>=&gt; 반복된 요청에 같은 객체를 반환하는 식으로 정적 팩터리 방식의 클래스는 언제 어느 인스턴스를 살아 있게 할지를 철저히 통제 할수있다. </p>
+<p>인스턴스를 통제하는 이유는?<br>=&gt; 싱글턴, 인스턴스화 불가(Util성 클래스에서 생성자 막을때), 불변 값 클래스에서 동치인 인스턴스가 단 하나임을 보장 (a == b 일때, a.equals(b) 성립) </p>
+</blockquote>
+
+<h3 id="장점3-반환-타입의-하위-타입-객체를-반환할-수-있는-능력이-있다"><a href="#장점3-반환-타입의-하위-타입-객체를-반환할-수-있는-능력이-있다" class="headerlink" title="장점3. 반환 타입의 하위 타입 객체를 반환할 수 있는 능력이 있다."></a>장점3. 반환 타입의 하위 타입 객체를 반환할 수 있는 능력이 있다.</h3><p>제목이 거창해서 그렇지, 간단하게 생각하면 인터페이스를 반환 타입을 갖게하고, 실제로는 인터페이스를 구현하는 구현체를 리턴하는 방식 가장 대표적인 예는 <code>java.util.Collections</code> 이다. 이 컬렉션 프레임워크는 45개의 구현체 클래스를 사용하고 있지만, 실제로 사용하는 개발자는 45개나 되는 구현체를 굳이 알필요가 없도록, 정적 팩터리 메서드를 사용하였다.<br>자바8부터는 인터페이스가 정적 메서드(public static) 를 가질 수 없는 제한이 풀렸다. 자바9에서는 private 정적메서드까지 허락하지만,정적 필드와 정적 멤버 클래스는 여전히 public이어야함. </p>
+<h3 id="장점4-입력-매개변수에-따라-매번-다른-클래스의-객체를-반환할-수-있다"><a href="#장점4-입력-매개변수에-따라-매번-다른-클래스의-객체를-반환할-수-있다" class="headerlink" title="장점4. 입력 매개변수에 따라 매번 다른 클래스의 객체를 반환할 수 있다."></a>장점4. 입력 매개변수에 따라 매번 다른 클래스의 객체를 반환할 수 있다.</h3><p>장점3과 비슷한 맥락이지만, 차이점은 매개변수의 갯수의 차이다. EnumSet은 public생성자가 없이 오직 정적 팩터리만 제공하는데, 원소가 64개 이하면 RegularEnumSet을 65개이상이면 JumboEnumSet의 인스턴스를 반환하게 구현되어있다.<br>하지만 굳이 개발자가 하위타입의 리턴타입을 알 필요가 있을까? 당연 없다. </p>
+<h3 id="장점5-정적-팩터리-메서드를-작성하는-시점에는-반환할-객체의-클래스가-존재하지-않아도-된다"><a href="#장점5-정적-팩터리-메서드를-작성하는-시점에는-반환할-객체의-클래스가-존재하지-않아도-된다" class="headerlink" title="장점5. 정적 팩터리 메서드를 작성하는 시점에는 반환할 객체의 클래스가 존재하지 않아도 된다."></a>장점5. 정적 팩터리 메서드를 작성하는 시점에는 반환할 객체의 클래스가 존재하지 않아도 된다.</h3><p>이 책에서는 위 장점의 예를 둔 부분이, JDBC이다. JDBC로 개발할때를 생각하면 어느정도 이해를 할 수 있다.</p>
+<figure class="highlight java"><figcaption><span>jdbc example</span><a target="_blank" rel="noopener" href="https://www.tutorialspoint.com/jdbc-class-forname-vs-drivermanager-registerdriver">tutorialspoint.com</a></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//Registering the Driver</span></span><br><span class="line">   DriverManager.registerDriver(<span class="keyword">new</span> com.mysql.jdbc.Driver());       <span class="comment">//Class.forName으로 자주 씀. </span></span><br><span class="line">   <span class="comment">//Getting the connection</span></span><br><span class="line">   String mysqlUrl = <span class="string">&quot;jdbc:mysql://localhost/mydatabase&quot;</span>;</span><br><span class="line">   Connection con = DriverManager.getConnection(mysqlUrl, <span class="string">&quot;root&quot;</span>, <span class="string">&quot;password&quot;</span>);</span><br><span class="line">   System.out.println(<span class="string">&quot;Connection established: &quot;</span>+con);</span><br></pre></td></tr></table></figure>
+<p>위 코드에서 확인 할 수 있듯이, Connection을 사용하기 위해서 <code>DriverManager.registerDriver</code> 통해서 어떤 DB의 방언을 사용할것 인지 결정하고 (제공자등록API),<br>Connection인터페이스는 어떤 DB방언에도 연결할수있도록 서비스 인터페이스 역할을 담당하고, 결국 <code>DriverManager.getConnection</code>을 통해서 서비스에 접근하여 인스턴스를 얻을수있도록 한다. 여기서 DriverManager.getConnection 이 장점5의 의도이다.<br>그래서 우리가 서로 다른 DB의 방언을 제공자 등록 API를 통해 세팅하고, DB접근정보가 담겨있는 서비스접근 API를 통해서 Connection 인터페이스로 반환하게 할때, 마치 DB를 연결하기 위해 중간다리 역할 (브리지 패턴) 처럼 혹은 레고 처럼 조립되는 과정이 있다는걸 알수가 있다. 우리가 흔히 알고있는 DI(의존객체주입) 와 유사하다고 생각하면 된다. </p>
+<h3 id="단점1-상속을-하려면-public이나-protected-생성자가-필요하니-정적-팩터리-메서드만-제공하면-하위-클래스를-만들수-없다"><a href="#단점1-상속을-하려면-public이나-protected-생성자가-필요하니-정적-팩터리-메서드만-제공하면-하위-클래스를-만들수-없다" class="headerlink" title="단점1. 상속을 하려면 public이나 protected 생성자가 필요하니 정적 팩터리 메서드만 제공하면 하위 클래스를 만들수 없다."></a>단점1. 상속을 하려면 public이나 protected 생성자가 필요하니 정적 팩터리 메서드만 제공하면 하위 클래스를 만들수 없다.</h3><p>java.util.Collections 컬렉션 프레임워크 처럼 유틸리티 구현 클래스들은 상속할 수 없다는 이야기다. 글쓴이는 이 제약은 상속 보다는 컴포지션을 사용(아이템 18) 하도록 유도하고, 불변 타입(아이템 17)으로 만들려면 이 제약을 지켜야하기에 오히려 장점이 아닌가라고 생각했다.</p>
+<h3 id="단점2-정적-펙터리-메서드는-프로그래머가-찾기-힘들다"><a href="#단점2-정적-펙터리-메서드는-프로그래머가-찾기-힘들다" class="headerlink" title="단점2. 정적 펙터리 메서드는 프로그래머가 찾기 힘들다."></a>단점2. 정적 펙터리 메서드는 프로그래머가 찾기 힘들다.</h3><p>개발자들이 각자의 네이밍룰로 정적 펙터리 메서드를 구현하면, 그 메서드를 찾기위해서 클래스를 찾아서 분석 해야하는 비용이 생겨서, 찾기 어렵다고 표현한것이 아닐까? 추측해본다.<br>그래서 글쓴이는 from, of, valueOf. getInstance 등과 같은 범용적으로 사용되는 정적 팩터리 메서드를 예시로 들면서, 네이밍으로도 그 기능을 알 수 있도록 구현하는걸 추천하고 있다. </p>
+
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/2021/01/18/java-effective-1/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                Comment and share
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
+                            href="/2021/01/18/java-effective-4/"
+                            aria-label=": java-effective-4"
+                        >
+                            java-effective-4
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2021-01-18T05:23:31+00:00">
+	
+		    Jan 18, 2021
+    	
+    </time>
+    
+        <span>in </span>
+        
+    <a class="category-link" href="/categories/Effective-Java/">Effective Java</a>, <a class="category-link" href="/categories/Study/">Study</a>, <a class="category-link" href="/categories/%EA%B0%9D%EC%B2%B4-%EC%83%9D%EC%84%B1%EA%B3%BC-%ED%8C%8C%EA%B4%B4/">객체 생성과 파괴</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <p>단순히 정적 메서드와 정적 필드만을 담은 클래스로 만들고 싶을 때가 있다. 예컨데, <code>java.lang.Math</code>와 <code>java.ulti.Arrays</code> 처럼 기본 타입이 값이나 배열 관련 메서드들을 모아놓을수도 있으며,     <code>java.util.Collections</code> 처럼 특정 인터페이스를 구현하는 객체를 생성해주는 정적 팩터리 메서드를 모아 놓을수도 있다.(java8 부터는 이런 메서드를 인터페이스에 넣을 수 있다.) 마지막으로, final 클래스와 관련한 메서드들을 모아놓을 때도 사용한다. (final 클래스를 상속해서 하위 클래스에 메서드를 넣는 건 불가능하기 때문)</p>
+<h2 id="아이템4-인스턴스화를-막으려거든-private-생성자를-사용하라"><a href="#아이템4-인스턴스화를-막으려거든-private-생성자를-사용하라" class="headerlink" title="아이템4. 인스턴스화를 막으려거든 private 생성자를 사용하라."></a>아이템4. 인스턴스화를 막으려거든 private 생성자를 사용하라.</h2><p>정적 멤버만 담은 유틸리티 클래스는 인스턴스로 만들어 쓰려고 설계한 게 아니다. 하지만 생성자를 명시하지 않으면 컴파일러가 자동으로 기본생성자를 만들어준다. (public생성자 자동생성) </p>
+<p><strong>추상 클래스로 만드는 것으로는 인스턴스화를 막을 수 없다.</strong>  왜냐하면 하위클래스를 만들어서 인스턴스 생성하면 그만이기때문이다. 그리고 이를 본 사용자들은 상속해서 쓰라는 뜻으로 오해할 수 있어서 더 큰 문제를 야기 시킬수 있다. 다행히도 인스턴스화를 막는 방법은 아주 간단한다. </p>
+<p><strong>private 생성자를 추가하면 클래스의 인스턴스화를 막을수 있다.</strong> </p>
+<figure class="highlight java"><figcaption><span>인스턴스를 만들수없는 유틸클래스</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">UtilityClass</span> </span>&#123;</span><br><span class="line">	<span class="comment">//기본 생성자가 만들어지는 것을 막는다 (인스턴스화 방지용)</span></span><br><span class="line">	<span class="function"><span class="keyword">private</span> <span class="title">UtilityClass</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">throw</span> <span class="keyword">new</span> AssertionError(); </span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>위 와같이 private 생성자를 만들어두면, 인스턴스화가 안되며, 위 예시처럼 꼭 예외를 던질필요는 없으나, 개발자가 실수하지 않도록 명시를 해주는 편이 나쁘지는 않다. 또한 저자는 private생성자로 인스턴스 생성을 막았으면, 가독성을 위해서 위 예시처럼 주석을 달아두라고 권고하고있다. 그리고 이 방식은 상속을 불가능하게 하는 효과도 있다. 모든 생성자는 명시적인든 묵시적이든 상위 클래스의 생성자를 호출하게 되는데, 이를 private으로 선언했으니, 하위 클래스가 상위 클래스의 생성자에 접근할 길이 막혀버린다. </p>
+
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/2021/01/18/java-effective-4/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                Comment and share
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
     
     
     <article class="postShorten postShorten--thumbnailimg-bottom">
