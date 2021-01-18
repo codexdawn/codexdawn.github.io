@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="generator" content="codexdawn">
-    <title>java-effective-1 - codexdawn</title>
+    <title>Tag: 생성자,정적팩터리메서드 - codexdawn</title>
     <meta name="author" content="codexdawn">
     
     
@@ -15,18 +15,13 @@
             <link rel="alternate" type="application/atom+xml" title="RSS" href="/atom.xml">
         
     
-    <script type="application/ld+json">{"@context":"http://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"codexdawn","sameAs":["https://github.com/codexdawn","https://www.facebook.com/beherzt.dev","https://www.linkedin.com/in/sim-jisung-3048872a/","mailto:cloudkaiser@gmail.com"],"image":"https://www.gravatar.com/avatar/d97fd4b94c429915f1cb55eb27e7d4d9"},"articleBody":"기본적으로 자바에서는 인스턴스를 얻는 수단은 public 생성자이지만,클래스는 생성자와 별도로 정적 팩터리 메서드를 제공 할수 있다. \n아이템1. 생성자 대신 정적 팩터리 메서드를 고려하라.Boolean.valueOf123public static Boolean valueOf(boolean b) &#123;\treturn b ? Boolean.TRUE : Boolean.FALSE; &#125;\n\n위 메서드는 기본적으로 기본 타입인 boolean을 받아 Boolean 객체 참조로 변환해 준다. \n장점1. 이름을 가질수 있다. (메서드의 목적을 분명하게 알수있다.)자바에서 기본으로 제공하는 public생성자는 이름을 가질수없으며, 매개변수들이 포함되어 있는 생성자 역시 이름이 없다.그래서 개발자들은 여러 생성자가 존재 할 경우, 어떤 역할을 하는지 한눈에 알아보기가 쉽지않을것이다.이런 public생성자의 단점을 이름을 가질수있는 정적 팩터리 메서드가 해결 할 수있다. \n장점2. 호출될 때마다 인스턴스를 새로 생성하지 않아도 된다.자바에서 public생성자를 호출 하려면 new 키워드로 인스턴스를 생성하게 되어있다.하지만 정적 팩터리 메서드를 사용하면, 매번 인스턴스를 생성하지 않아도 된다.특히 불변 클래스(immutable class; 아이템17)는 인스턴스를 미리 만들어놓거나 새로 생성한 인스턴스를 캐싱하여, 재활용하는 식으로 불필요한 객체 생성을 피할수 있다. (EX&gt; Boolean.valueOf) 따라서 같은 객체가 자주 요청되는 상황이라면 성능을 상당히 끌어올려 준다.\n인스턴스 통제(instance-controlled) 클래스란? (ex&gt; 싱글턴)=&gt; 반복된 요청에 같은 객체를 반환하는 식으로 정적 팩터리 방식의 클래스는 언제 어느 인스턴스를 살아 있게 할지를 철저히 통제 할수있다. \n인스턴스를 통제하는 이유는?=&gt; 싱글턴, 인스턴스화 불가(Util성 클래스에서 생성자 막을때), 불변 값 클래스에서 동치인 인스턴스가 단 하나임을 보장 (a == b 일때, a.equals(b) 성립) \n\n\n장점3. 반환 타입의 하위 타입 객체를 반환할 수 있는 능력이 있다.제목이 거창해서 그렇지, 간단하게 생각하면 인터페이스를 반환 타입을 갖게하고, 실제로는 인터페이스를 구현하는 구현체를 리턴하는 방식 가장 대표적인 예는 java.util.Collections 이다. 이 컬렉션 프레임워크는 45개의 구현체 클래스를 사용하고 있지만, 실제로 사용하는 개발자는 45개나 되는 구현체를 굳이 알필요가 없도록, 정적 팩터리 메서드를 사용하였다.자바8부터는 인터페이스가 정적 메서드(public static) 를 가질 수 없는 제한이 풀렸다. 자바9에서는 private 정적메서드까지 허락하지만,정적 필드와 정적 멤버 클래스는 여전히 public이어야함. \n장점4. 입력 매개변수에 따라 매번 다른 클래스의 객체를 반환할 수 있다.장점3과 비슷한 맥락이지만, 차이점은 매개변수의 갯수의 차이다. EnumSet은 public생성자가 없이 오직 정적 팩터리만 제공하는데, 원소가 64개 이하면 RegularEnumSet을 65개이상이면 JumboEnumSet의 인스턴스를 반환하게 구현되어있다.하지만 굳이 개발자가 하위타입의 리턴타입을 알 필요가 있을까? 당연 없다. \n장점5. 정적 팩터리 메서드를 작성하는 시점에는 반환할 객체의 클래스가 존재하지 않아도 된다.이 책에서는 위 장점의 예를 둔 부분이, JDBC이다. JDBC로 개발할때를 생각하면 어느정도 이해를 할 수 있다.\njdbc exampletutorialspoint.com123456//Registering the Driver   DriverManager.registerDriver(new com.mysql.jdbc.Driver());       //Class.forName으로 자주 씀.    //Getting the connection   String mysqlUrl = &quot;jdbc:mysql://localhost/mydatabase&quot;;   Connection con = DriverManager.getConnection(mysqlUrl, &quot;root&quot;, &quot;password&quot;);   System.out.println(&quot;Connection established: &quot;+con);\n위 코드에서 확인 할 수 있듯이, Connection을 사용하기 위해서 DriverManager.registerDriver 통해서 어떤 DB의 방언을 사용할것 인지 결정하고 (제공자등록API),Connection인터페이스는 어떤 DB방언에도 연결할수있도록 서비스 인터페이스 역할을 담당하고, 결국 DriverManager.getConnection을 통해서 서비스에 접근하여 인스턴스를 얻을수있도록 한다. 여기서 DriverManager.getConnection 이 장점5의 의도이다.그래서 우리가 서로 다른 DB의 방언을 제공자 등록 API를 통해 세팅하고, DB접근정보가 담겨있는 서비스접근 API를 통해서 Connection 인터페이스로 반환하게 할때, 마치 DB를 연결하기 위해 중간다리 역할 (브리지 패턴) 처럼 혹은 레고 처럼 조립되는 과정이 있다는걸 알수가 있다. 우리가 흔히 알고있는 DI(의존객체주입) 와 유사하다고 생각하면 된다. \n단점1. 상속을 하려면 public이나 protected 생성자가 필요하니 정적 팩터리 메서드만 제공하면 하위 클래스를 만들수 없다.java.util.Collections 컬렉션 프레임워크 처럼 유틸리티 구현 클래스들은 상속할 수 없다는 이야기다. 글쓴이는 이 제약은 상속 보다는 컴포지션을 사용(아이템 18) 하도록 유도하고, 불변 타입(아이템 17)으로 만들려면 이 제약을 지켜야하기에 오히려 장점이 아닌가라고 생각했다.\n단점2. 정적 펙터리 메서드는 프로그래머가 찾기 힘들다.개발자들이 각자의 네이밍룰로 정적 펙터리 메서드를 구현하면, 그 메서드를 찾기위해서 클래스를 찾아서 분석 해야하는 비용이 생겨서, 찾기 어렵다고 표현한것이 아닐까? 추측해본다.그래서 글쓴이는 from, of, valueOf. getInstance 등과 같은 범용적으로 사용되는 정적 팩터리 메서드를 예시로 들면서, 네이밍으로도 그 기능을 알 수 있도록 구현하는걸 추천하고 있다. \n","dateCreated":"2021-01-15T15:17:09+00:00","dateModified":"2021-01-15T15:17:09+00:00","datePublished":"2021-01-15T15:17:09+00:00","description":"","headline":"java-effective-1","image":[],"mainEntityOfPage":{"@type":"WebPage","@id":"https://codexdawn.github.io/2021/01/15/java-effective-1/"},"publisher":{"@type":"Organization","name":"codexdawn","sameAs":["https://github.com/codexdawn","https://www.facebook.com/beherzt.dev","https://www.linkedin.com/in/sim-jisung-3048872a/","mailto:cloudkaiser@gmail.com"],"image":"https://www.gravatar.com/avatar/d97fd4b94c429915f1cb55eb27e7d4d9","logo":{"@type":"ImageObject","url":"https://www.gravatar.com/avatar/d97fd4b94c429915f1cb55eb27e7d4d9"}},"url":"https://codexdawn.github.io/2021/01/15/java-effective-1/","keywords":"Java,EffectiveJava"}</script>
-    <meta name="description" content="기본적으로 자바에서는 인스턴스를 얻는 수단은 public 생성자이지만,클래스는 생성자와 별도로 정적 팩터리 메서드를 제공 할수 있다.  아이템1. 생성자 대신 정적 팩터리 메서드를 고려하라.Boolean.valueOf123public static Boolean valueOf(boolean b) &amp;#123;	return b ? Boolean.TRUE : Bo">
-<meta property="og:type" content="blog">
-<meta property="og:title" content="java-effective-1">
-<meta property="og:url" content="https://codexdawn.github.io/2021/01/15/java-effective-1/index.html">
+    <script type="application/ld+json">{}</script>
+    <meta property="og:type" content="blog">
+<meta property="og:title" content="codexdawn">
+<meta property="og:url" content="https://codexdawn.github.io/tags/%EC%83%9D%EC%84%B1%EC%9E%90-%EC%A0%95%EC%A0%81%ED%8C%A9%ED%84%B0%EB%A6%AC%EB%A9%94%EC%84%9C%EB%93%9C/index.html">
 <meta property="og:site_name" content="codexdawn">
-<meta property="og:description" content="기본적으로 자바에서는 인스턴스를 얻는 수단은 public 생성자이지만,클래스는 생성자와 별도로 정적 팩터리 메서드를 제공 할수 있다.  아이템1. 생성자 대신 정적 팩터리 메서드를 고려하라.Boolean.valueOf123public static Boolean valueOf(boolean b) &amp;#123;	return b ? Boolean.TRUE : Bo">
 <meta property="og:locale" content="en_US">
-<meta property="article:published_time" content="2021-01-15T15:17:09.987Z">
-<meta property="article:modified_time" content="2021-01-15T15:17:09.987Z">
 <meta property="article:author" content="codexdawn">
-<meta property="article:tag" content="Java,EffectiveJava">
 <meta name="twitter:card" content="summary">
     
     
@@ -46,8 +41,6 @@
     
 
     
-        
-    
 </head>
 
     <body>
@@ -57,7 +50,7 @@
 
     
 
-<header id="header" data-behavior="5">
+<header id="header" data-behavior="2">
     <i id="btn-open-sidebar" class="fa fa-lg fa-bars"></i>
     <div class="header-title">
         <a
@@ -84,7 +77,7 @@
             <!-- Define author's picture -->
 
 
-<nav id="sidebar" data-behavior="5">
+<nav id="sidebar" data-behavior="2">
     <div class="sidebar-container">
         
         
@@ -238,25 +231,33 @@
 </nav>
 
             
-            <div id="main" data-behavior="5"
+            <div id="main" data-behavior="2"
                  class="
                         hasCoverMetaIn
                         ">
                 
-<article class="post">
+    <section class="postShorten-group main-content-wrap">
     
     
-        <div class="post-header main-content-wrap text-left">
-    
-        <h1 class="post-title">
-            java-effective-1
-        </h1>
-    
-    
-        <div class="post-meta">
-    <time datetime="2021-01-15T15:17:09+00:00">
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
+                            href="/2021/01/18/java-effective-1/"
+                            aria-label=": java-effective-1"
+                        >
+                            java-effective-1
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2021-01-18T05:31:59+00:00">
 	
-		    Jan 15, 2021
+		    Jan 18, 2021
     	
     </time>
     
@@ -268,13 +269,10 @@
     
 </div>
 
-    
-</div>
-
-    
-    <div class="post-content markdown">
-        <div class="main-content-wrap">
-            <p>기본적으로 자바에서는 인스턴스를 얻는 수단은 public 생성자이지만,<br>클래스는 생성자와 별도로 정적 팩터리 메서드를 제공 할수 있다. </p>
+            </div>
+            
+                <div class="postShorten-content">
+                    <p>기본적으로 자바에서는 인스턴스를 얻는 수단은 public 생성자이지만,<br>클래스는 생성자와 별도로 정적 팩터리 메서드를 제공 할수 있다. </p>
 <h2 id="아이템1-생성자-대신-정적-팩터리-메서드를-고려하라"><a href="#아이템1-생성자-대신-정적-팩터리-메서드를-고려하라" class="headerlink" title="아이템1. 생성자 대신 정적 팩터리 메서드를 고려하라."></a>아이템1. 생성자 대신 정적 팩터리 메서드를 고려하라.</h2><figure class="highlight java"><figcaption><span>Boolean.valueOf</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Boolean <span class="title">valueOf</span><span class="params">(<span class="keyword">boolean</span> b)</span> </span>&#123;</span><br><span class="line">	<span class="keyword">return</span> b ? Boolean.TRUE : Boolean.FALSE; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p>위 메서드는 기본적으로 기본 타입인 boolean을 받아 Boolean 객체 참조로 변환해 준다. </p>
@@ -292,122 +290,37 @@
 <h3 id="단점1-상속을-하려면-public이나-protected-생성자가-필요하니-정적-팩터리-메서드만-제공하면-하위-클래스를-만들수-없다"><a href="#단점1-상속을-하려면-public이나-protected-생성자가-필요하니-정적-팩터리-메서드만-제공하면-하위-클래스를-만들수-없다" class="headerlink" title="단점1. 상속을 하려면 public이나 protected 생성자가 필요하니 정적 팩터리 메서드만 제공하면 하위 클래스를 만들수 없다."></a>단점1. 상속을 하려면 public이나 protected 생성자가 필요하니 정적 팩터리 메서드만 제공하면 하위 클래스를 만들수 없다.</h3><p>java.util.Collections 컬렉션 프레임워크 처럼 유틸리티 구현 클래스들은 상속할 수 없다는 이야기다. 글쓴이는 이 제약은 상속 보다는 컴포지션을 사용(아이템 18) 하도록 유도하고, 불변 타입(아이템 17)으로 만들려면 이 제약을 지켜야하기에 오히려 장점이 아닌가라고 생각했다.</p>
 <h3 id="단점2-정적-펙터리-메서드는-프로그래머가-찾기-힘들다"><a href="#단점2-정적-펙터리-메서드는-프로그래머가-찾기-힘들다" class="headerlink" title="단점2. 정적 펙터리 메서드는 프로그래머가 찾기 힘들다."></a>단점2. 정적 펙터리 메서드는 프로그래머가 찾기 힘들다.</h3><p>개발자들이 각자의 네이밍룰로 정적 펙터리 메서드를 구현하면, 그 메서드를 찾기위해서 클래스를 찾아서 분석 해야하는 비용이 생겨서, 찾기 어렵다고 표현한것이 아닐까? 추측해본다.<br>그래서 글쓴이는 from, of, valueOf. getInstance 등과 같은 범용적으로 사용되는 정적 팩터리 메서드를 예시로 들면서, 네이밍으로도 그 기능을 알 수 있도록 구현하는걸 추천하고 있다. </p>
 
-            
-
-
-        </div>
-    </div>
-    <div id="post-footer" class="post-footer main-content-wrap">
-        
-            <div class="post-footer-tags">
-                <span class="text-color-light text-small">TAGGED IN</span><br/>
-                
-    <a class="tag tag--primary tag--small t-none-link" href="/tags/Java-EffectiveJava/" rel="tag">Java,EffectiveJava</a>
-
-            </div>
-        
-        
-            <div class="post-actions-wrap">
-    <nav>
-        <ul class="post-actions post-action-nav">
-            <li class="post-action">
-                
                     
-                <a
-                    class="post-action-btn btn btn--default tooltip--top"
-                    href="/2021/01/16/java-effective-2/"
-                    data-tooltip="java-effective-2"
-                    aria-label="PREVIOUS: java-effective-2"
-                >
-                    
-                        <i class="fa fa-angle-left" aria-hidden="true"></i>
-                        <span class="hide-xs hide-sm text-small icon-ml">PREVIOUS</span>
-                    </a>
-            </li>
-            <li class="post-action">
-                
-                    <a
-                        class="post-action-btn btn btn--disabled"
-                        aria-hidden="true"
-                    >
                         
-                        <span class="hide-xs hide-sm text-small icon-mr">NEXT</span>
-                        <i class="fa fa-angle-right" aria-hidden="true"></i>
-                    </a>
-            </li>
-        </ul>
-    </nav>
-    <ul class="post-actions post-action-share">
-        <li class="post-action hide-lg hide-md hide-sm">
-            <a
-                class="post-action-btn btn btn--default btn-open-shareoptions"
-                href="#btn-open-shareoptions"
-                aria-label="Share this post"
-            >
-                <i class="fa fa-share-alt" aria-hidden="true"></i>
-            </a>
-        </li>
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/2021/01/18/java-effective-1/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                Comment and share
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
         
-            
-            
-            <li class="post-action hide-xs">
-                <a
-                    class="post-action-btn btn btn--default"
-                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://codexdawn.github.io/2021/01/15/java-effective-1/"
-                    title="Share on Facebook"
-                    aria-label="Share on Facebook"
-                >
-                    <i class="fab fa-facebook" aria-hidden="true"></i>
-                </a>
-            </li>
-        
-            
-            
-            <li class="post-action hide-xs">
-                <a
-                    class="post-action-btn btn btn--default"
-                    target="new" href="https://twitter.com/intent/tweet?text=https://codexdawn.github.io/2021/01/15/java-effective-1/"
-                    title="Share on Twitter"
-                    aria-label="Share on Twitter"
-                >
-                    <i class="fab fa-twitter" aria-hidden="true"></i>
-                </a>
-            </li>
-        
-            
-            
-            <li class="post-action hide-xs">
-                <a
-                    class="post-action-btn btn btn--default"
-                    target="new" href="https://plus.google.com/share?url=https://codexdawn.github.io/2021/01/15/java-effective-1/"
-                    title="Share on Google+"
-                    aria-label="Share on Google+"
-                >
-                    <i class="fab fa-google-plus" aria-hidden="true"></i>
-                </a>
-            </li>
+    </article>
+    
+    <div class="pagination-bar">
+    <ul class="pagination">
         
         
-            
-        
-        <li class="post-action">
-            
-                <a class="post-action-btn btn btn--default" href="#" aria-label="Back to top">
-            
-                <i class="fa fa-list" aria-hidden="true"></i>
-            </a>
-        </li>
+        <li class="pagination-number">page 1 of 1</li>
     </ul>
 </div>
 
-
-        
-        
-            
-        
-    </div>
-</article>
-
+</section>
 
 
                 <footer id="footer" class="main-content-wrap">
@@ -417,151 +330,6 @@
 </footer>
 
             </div>
-            
-                <div id="bottom-bar" class="post-bottom-bar" data-behavior="5">
-                    <div class="post-actions-wrap">
-    <nav>
-        <ul class="post-actions post-action-nav">
-            <li class="post-action">
-                
-                    
-                <a
-                    class="post-action-btn btn btn--default tooltip--top"
-                    href="/2021/01/16/java-effective-2/"
-                    data-tooltip="java-effective-2"
-                    aria-label="PREVIOUS: java-effective-2"
-                >
-                    
-                        <i class="fa fa-angle-left" aria-hidden="true"></i>
-                        <span class="hide-xs hide-sm text-small icon-ml">PREVIOUS</span>
-                    </a>
-            </li>
-            <li class="post-action">
-                
-                    <a
-                        class="post-action-btn btn btn--disabled"
-                        aria-hidden="true"
-                    >
-                        
-                        <span class="hide-xs hide-sm text-small icon-mr">NEXT</span>
-                        <i class="fa fa-angle-right" aria-hidden="true"></i>
-                    </a>
-            </li>
-        </ul>
-    </nav>
-    <ul class="post-actions post-action-share">
-        <li class="post-action hide-lg hide-md hide-sm">
-            <a
-                class="post-action-btn btn btn--default btn-open-shareoptions"
-                href="#btn-open-shareoptions"
-                aria-label="Share this post"
-            >
-                <i class="fa fa-share-alt" aria-hidden="true"></i>
-            </a>
-        </li>
-        
-            
-            
-            <li class="post-action hide-xs">
-                <a
-                    class="post-action-btn btn btn--default"
-                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://codexdawn.github.io/2021/01/15/java-effective-1/"
-                    title="Share on Facebook"
-                    aria-label="Share on Facebook"
-                >
-                    <i class="fab fa-facebook" aria-hidden="true"></i>
-                </a>
-            </li>
-        
-            
-            
-            <li class="post-action hide-xs">
-                <a
-                    class="post-action-btn btn btn--default"
-                    target="new" href="https://twitter.com/intent/tweet?text=https://codexdawn.github.io/2021/01/15/java-effective-1/"
-                    title="Share on Twitter"
-                    aria-label="Share on Twitter"
-                >
-                    <i class="fab fa-twitter" aria-hidden="true"></i>
-                </a>
-            </li>
-        
-            
-            
-            <li class="post-action hide-xs">
-                <a
-                    class="post-action-btn btn btn--default"
-                    target="new" href="https://plus.google.com/share?url=https://codexdawn.github.io/2021/01/15/java-effective-1/"
-                    title="Share on Google+"
-                    aria-label="Share on Google+"
-                >
-                    <i class="fab fa-google-plus" aria-hidden="true"></i>
-                </a>
-            </li>
-        
-        
-            
-        
-        <li class="post-action">
-            
-                <a class="post-action-btn btn btn--default" href="#" aria-label="Back to top">
-            
-                <i class="fa fa-list" aria-hidden="true"></i>
-            </a>
-        </li>
-    </ul>
-</div>
-
-
-                </div>
-                
-    <div id="share-options-bar" class="share-options-bar" data-behavior="5">
-        <i id="btn-close-shareoptions" class="fa fa-times"></i>
-        <ul class="share-options">
-            
-                
-                
-                <li class="share-option">
-                    <a
-                        class="share-option-btn"
-                        target="new"
-                        href="https://www.facebook.com/sharer/sharer.php?u=https://codexdawn.github.io/2021/01/15/java-effective-1/"
-                        aria-label="Share on Facebook"
-                    >
-                        <i class="fab fa-facebook" aria-hidden="true"></i><span>Share on Facebook</span>
-                    </a>
-                </li>
-            
-                
-                
-                <li class="share-option">
-                    <a
-                        class="share-option-btn"
-                        target="new"
-                        href="https://twitter.com/intent/tweet?text=https://codexdawn.github.io/2021/01/15/java-effective-1/"
-                        aria-label="Share on Twitter"
-                    >
-                        <i class="fab fa-twitter" aria-hidden="true"></i><span>Share on Twitter</span>
-                    </a>
-                </li>
-            
-                
-                
-                <li class="share-option">
-                    <a
-                        class="share-option-btn"
-                        target="new"
-                        href="https://plus.google.com/share?url=https://codexdawn.github.io/2021/01/15/java-effective-1/"
-                        aria-label="Share on Google+"
-                    >
-                        <i class="fab fa-google-plus" aria-hidden="true"></i><span>Share on Google+</span>
-                    </a>
-                </li>
-            
-        </ul>
-    </div>
-
-
             
         </div>
         
@@ -599,8 +367,6 @@
 
 <!--SCRIPTS END-->
 
-
-    
 
 
 
