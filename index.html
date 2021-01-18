@@ -284,9 +284,14 @@
 <h3 id="싱글턴2-정적팩터리-방식의-싱글턴"><a href="#싱글턴2-정적팩터리-방식의-싱글턴" class="headerlink" title="싱글턴2. 정적팩터리 방식의 싱글턴"></a>싱글턴2. 정적팩터리 방식의 싱글턴</h3><figure class="highlight java"><figcaption><span>정적팩터리 방식의 싱글턴</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Elvis</span> </span>&#123;</span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> Elvis INSTANCE = <span class="keyword">new</span> Elvis(); </span><br><span class="line">	<span class="function"><span class="keyword">private</span> <span class="title">Elvis</span><span class="params">()</span> </span>&#123;&#125;</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Elvis <span class="title">getInstance</span><span class="params">()</span> </span>&#123;<span class="keyword">return</span> INSTANCE;&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">leaveTheBuilding</span><span class="params">()</span> </span>&#123;&#125;	</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <h4 id="싱글턴2의-장점"><a href="#싱글턴2의-장점" class="headerlink" title="싱글턴2의 장점"></a>싱글턴2의 장점</h4><ul>
-<li>마음만 먹으면 API를 바꾸지 않아도, 싱글턴이 아니게 변경 가능 </li>
-<li>정적 팩터리를 제네릭 싱글턴 팩터리로 만들 수 있음 (아이템 30)</li>
-<li>정적 팩터리의 메서드 참조를 공급자(supplier)로 사용할수 있음 (Supplier<Elvis> = Elvis::getInstance (아이템 43, 44))</li>
+<li><p>마음만 먹으면 API를 바꾸지 않아도, 싱글턴이 아니게 변경 가능 </p>
+</li>
+<li><p>정적 팩터리를 제네릭 싱글턴 팩터리로 만들 수 있음 (아이템 30)</p>
+</li>
+<li><p>정적 팩터리의 메서드 참조를 공급자(supplier)로 사용할수 있음</p>
+<figure class="highlight java"><figcaption><span>supplier 적용</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Supplier&lt;Elvis&gt; = Elvis::getInstance; </span><br></pre></td></tr></table></figure>
+
+</li>
 </ul>
 <p>싱글턴1,2 방식으로 싱글턴을 개발하면, 직렬화 할때 Serializable을 구현만 하면 안되고, 역직렬화 되었을때 인스턴스가 생성되는 부분을 초반에 조져야 한다. 역직렬화 공격을 방어하려면, 아래 코드를 확인해보자.</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F;싱글턴임을 보장해주는 readResolve 메서드 </span><br><span class="line">private Object readResolve() &#123;</span><br><span class="line">	&#x2F;&#x2F;진짜 Elvis는 반환하고, 가짜는 GC에 버린다. </span><br><span class="line">	return INSTANCE; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
