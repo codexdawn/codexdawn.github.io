@@ -581,7 +581,7 @@
 <li>SRP(Single Responseibliity Prinsiple) - 단일책임의원칙을 위반함 코드를 변경할 이유가 여럿 있기때문에</li>
 <li>OCP(Open Closed Prinsiple) - 개방폐쇄원칙 위반함. 새 직원 유형을 추가할때마다 코드를 변경해줘야 하기때문 </li>
 </ul>
-<blockquote><p>OOP에서 SOLID? (<a target="_blank" rel="noopener" href="https://ko.wikipedia.org/wiki/SOLID_(%EA%B0%9D%EC%B2%B4_%EC%A7%80%ED%96%A5_%EC%84%A4%EA%B3%84)">SOLID Wiki 참고</a>)<br>S : <strong>S__RP(Single Responsibility Principle) : 한 클래스는 하나의 책임만 가져아 한다.<br>O : __O__CP(Open/Closed Principle) : 소프트웨어 요소는 확장에는 열려 있으나, 변경에는 닫혀 있어야 한다.<br>L : __L</strong>(Liskov Substitution Principle) : 프로그램의 객체는 프로그램의 정확성을 깨뜨리지 않으면서 하위 타입의 인스턴스로 바꿀 수 있어야 한다.<br>I : <strong>I</strong>(Interface Segregation Principle) : 특정 클라이언트를 위한 인터페이스 여러개가 범용 인터페이스 하나보다 낫다.<br>D : <strong>D</strong>(Dependency Inversion Principle) : 프로그래머는 추상화에 의존해야지, 구체화에 의존하면 안된다. (의존성 주입은 이 원칙을 따름)</p>
+<blockquote><p>OOP에서 SOLID? (<a target="_blank" rel="noopener" href="https://ko.wikipedia.org/wiki/SOLID_(%EA%B0%9D%EC%B2%B4_%EC%A7%80%ED%96%A5_%EC%84%A4%EA%B3%84)">SOLID Wiki 참고</a>)<br>S : SRP(Single Responsibility Principle) : 한 클래스는 하나의 책임만 가져아 한다.<br>O : OCP(Open/Closed Principle) : 소프트웨어 요소는 확장에는 열려 있으나, 변경에는 닫혀 있어야 한다.<br>L : LSP(Liskov Substitution Principle) : 프로그램의 객체는 프로그램의 정확성을 깨뜨리지 않으면서 하위 타입의 인스턴스로 바꿀 수 있어야 한다.<br>I : ISP(Interface Segregation Principle) : 특정 클라이언트를 위한 인터페이스 여러개가 범용 인터페이스 하나보다 낫다.<br>D : DIP(Dependency Inversion Principle) : 프로그래머는 추상화에 의존해야지, 구체화에 의존하면 안된다. (의존성 주입은 이 원칙을 따름)</p>
 </blockquote>
 
 <p>그렇다면 위 switch문은 어떻게 개선 할 수 있을까? 아래 코드를 보자 </p>
