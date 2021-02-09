@@ -1,0 +1,630 @@
+
+<!DOCTYPE html>
+<html lang="en">
+    
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="generator" content="codexdawn">
+    <title>clean-code-6 - codexdawn</title>
+    <meta name="author" content="codexdawn">
+    
+    
+    
+        
+            <link rel="alternate" type="application/atom+xml" title="RSS" href="/atom.xml">
+        
+    
+    <script type="application/ld+json">{"@context":"http://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"codexdawn","sameAs":["https://github.com/codexdawn","https://www.facebook.com/beherzt.dev","https://www.linkedin.com/in/sim-jisung-3048872a/","mailto:cloudkaiser@gmail.com"],"image":"https://www.gravatar.com/avatar/d97fd4b94c429915f1cb55eb27e7d4d9"},"articleBody":"오류처리뭔가 잘못될 가능성은 늘 존재한다. 뭔가 잘못되면 바로 잡을 책임은 바로 우리 프로그래머에 있다. \n\n\n예외코드보다 예외를 사용하라\n예외가 지원되지 않았을 시절에는 오류코드로 예외처리를 사용하였다. \n근래 언어들이 예외처리가 지원되면서, 오류가 발생하면 예외로 던지는걸 추천하고있음. \n함수 호출 즉시 오류를 확인해야하기 때문에 예외처리를 하는것을 권장 \n\ntry-catch-finally\n코드를 작성할때 시작을 강제로 예외를 일으키는 테스트 케이스를 작성후 테스트를 통과하게 코드를 작성하는 방법을 권장 그러면 자연스럽게 try 블록의 트랜잭션 뻠위부터 구현하게 되므로 범위 내에서 트랜잭션 본질을 유지하기 쉽다. \n\n미확인(unchecked) 예외를 사용하라\nchecked 예외는 OCP를 위반한다. 메서드에서 확인된 예외를 던졌는데 catch 블록이 세 단계 위에 있다면 그 사이 메서드 모두가 선언부에 해당 예외를 정의해야한다. 즉, 하위 단계에서 코드를 변경하면 상위 단계 메서드 선언부를 전부 고쳐야 한다는 말이다. 모듈과 관련된 코드가 전혀 바뀌지 않았더라도 (선언부가 바뀌었으므로) 모듈을 다시 빌드한 다음 배포해야 한다는 말이다. \n\nchecked 예외는 사용하는 모든 함수를 강제적으로 예외를 처리하게 하기때문에, 캡슐화가 깨진다. 그렇다고 checked예외가 무조건 나쁜건 아니다. (중요한 라이브러리를 개발한다면 모든 예외를 강제 해야한다.)\n\n\n예외에 의미를 제공하라\nprintStackTrace정보를 던지는것 보다 타 개발자가 직관적으로 알수 있도록 의미있는 문구로 예외처리 하도록 하자.\n예외를 잡을때 로그랑 같이 잡아서 좀 더 디테일한 예외상황에 대해서 알면 더 좋을듯하다. \n\n호출자를 고려해 예외 클래스를 정의하라\n외부라이브러리의 API를 활용할때는 Wrapper클래스로 감싸서 모듈화 하는 방식 (Component로 빼는방식도 좋겠다.) 을 고려하자. \nWrapper클래스로 감싼 클래스를 가지고 그 라이브러리의 예외를 잡을 RuntimeException을 새로 정의해서 2-3 종류 이상 예외가 발생하는 라이브러리의 예외 의존도를 낮추도록 하게 하자.  \n\n정상 흐름을 정의하라\ntry-catch를 논리코드를 작성하는 부분은 하지 말자. 예외는 예외 답게 처리하자.(가끔 if-else문처럼 사용하는 경우가 있음.그건 하지 말자.) \n만약에 예외적인처리에서 뭔가 다른 액션을 처리해야한다면, 예외가 발생하는 로직을 분리해서 새로운 객체에 반환할 수 있도록 로직을 수정하는 사례가 있다. (특수사례 패턴 (Special Case Pattern) 참고 )\n\nnull을 반환하지 마라\n보통 개발하다보면, claimInfo != null 혹은 ObjectUtils.isEmpty(claimInfo) 처럼 null 객체를 체크하는 경우가 자주 있다. 사실 NullPointerException이 유발될까바 저렇게 체크하는건데, 호출하는 메서드에서 null자체를 반환하지 않도록 만들라고 추천한다. (예외적인 상황이 발생했을때 빈객체 혹은 Collections.emptyList같은 객체로 말이다.)\n\nnull을 전달하지 마라\n메서드에서 null을 반환하는것 보다 메서드로 Null을 전달하는건 더 나쁨.\n파라미터단에 null이 들어오는걸 방지하려면, 여러가지가 있지만 저자는 assert를 활용해서 체크하는 방식을 추천\nassert말고 Objects.requireNonNull로도 확인하기도함. 더러 Optional을 가지고 체크하기도하지만, 이부분은 비용이 많이 나가서 비추. \n대다수 프로그래밍 언어는 호출자가 실수로 넘기는 Null을 적절히 처리하는 방법이없다. 그렇다면 애초에 null을 넘기지 못하도록 금지하는 정책이 합리적이다. 즉, 인수로 null이 넘어온다는 자체가 문제라는 말이다. \n\n","dateCreated":"2021-02-09T10:24:13+00:00","dateModified":"2021-02-09T11:57:01+00:00","datePublished":"2021-02-09T10:24:13+00:00","description":"","headline":"clean-code-6","image":[],"mainEntityOfPage":{"@type":"WebPage","@id":"https://codexdawn.github.io/2021/02/09/clean-code-6/"},"publisher":{"@type":"Organization","name":"codexdawn","sameAs":["https://github.com/codexdawn","https://www.facebook.com/beherzt.dev","https://www.linkedin.com/in/sim-jisung-3048872a/","mailto:cloudkaiser@gmail.com"],"image":"https://www.gravatar.com/avatar/d97fd4b94c429915f1cb55eb27e7d4d9","logo":{"@type":"ImageObject","url":"https://www.gravatar.com/avatar/d97fd4b94c429915f1cb55eb27e7d4d9"}},"url":"https://codexdawn.github.io/2021/02/09/clean-code-6/","keywords":"refactoring,code,cleancode"}</script>
+    <meta name="description" content="오류처리뭔가 잘못될 가능성은 늘 존재한다. 뭔가 잘못되면 바로 잡을 책임은 바로 우리 프로그래머에 있다.    예외코드보다 예외를 사용하라 예외가 지원되지 않았을 시절에는 오류코드로 예외처리를 사용하였다.  근래 언어들이 예외처리가 지원되면서, 오류가 발생하면 예외로 던지는걸 추천하고있음.  함수 호출 즉시 오류를 확인해야하기 때문에 예외처리를 하는것을 권">
+<meta property="og:type" content="blog">
+<meta property="og:title" content="clean-code-6">
+<meta property="og:url" content="https://codexdawn.github.io/2021/02/09/clean-code-6/index.html">
+<meta property="og:site_name" content="codexdawn">
+<meta property="og:description" content="오류처리뭔가 잘못될 가능성은 늘 존재한다. 뭔가 잘못되면 바로 잡을 책임은 바로 우리 프로그래머에 있다.    예외코드보다 예외를 사용하라 예외가 지원되지 않았을 시절에는 오류코드로 예외처리를 사용하였다.  근래 언어들이 예외처리가 지원되면서, 오류가 발생하면 예외로 던지는걸 추천하고있음.  함수 호출 즉시 오류를 확인해야하기 때문에 예외처리를 하는것을 권">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2021-02-09T10:24:13.000Z">
+<meta property="article:modified_time" content="2021-02-09T11:57:01.918Z">
+<meta property="article:author" content="codexdawn">
+<meta property="article:tag" content="refactoring,code,cleancode">
+<meta name="twitter:card" content="summary">
+    
+    
+        
+    
+    
+    
+    
+    
+    <!--STYLES-->
+    
+<link rel="stylesheet" href="/assets/css/style-3sspfygaapf5d6tbrnqmyrhdcstv0iwwmi4wor2yeip9c44sowy9gbdzyyjm.min.css">
+
+    <!--STYLES END-->
+    
+
+    
+
+    
+        
+    
+</head>
+
+    <body>
+        <div id="blog">
+            <!-- Define author's picture -->
+
+
+    
+
+<header id="header" data-behavior="5">
+    <i id="btn-open-sidebar" class="fa fa-lg fa-bars"></i>
+    <div class="header-title">
+        <a
+            class="header-title-link"
+            href="/"
+            aria-label=""
+        >
+            codexdawn
+        </a>
+    </div>
+    
+        
+            <a
+                class="header-right-picture "
+                href="#about"
+                aria-label="Open the link: /#about"
+            >
+        
+        
+        </a>
+    
+</header>
+
+            <!-- Define author's picture -->
+
+
+<nav id="sidebar" data-behavior="5">
+    <div class="sidebar-container">
+        
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/"
+                            
+                            rel="noopener"
+                            title="Home"
+                        >
+                        <i class="sidebar-button-icon fa fa-home" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Home</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/all-categories"
+                            
+                            rel="noopener"
+                            title="Categories"
+                        >
+                        <i class="sidebar-button-icon fa fa-bookmark" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Categories</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/all-tags"
+                            
+                            rel="noopener"
+                            title="Tags"
+                        >
+                        <i class="sidebar-button-icon fa fa-tags" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Tags</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="#about"
+                            
+                            rel="noopener"
+                            title="About"
+                        >
+                        <i class="sidebar-button-icon fa fa-question" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">About</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="https://github.com/codexdawn"
+                            
+                                target="_blank"
+                            
+                            rel="noopener"
+                            title="GitHub"
+                        >
+                        <i class="sidebar-button-icon fab fa-github" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">GitHub</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="https://www.facebook.com/beherzt.dev"
+                            
+                                target="_blank"
+                            
+                            rel="noopener"
+                            title="Facebook"
+                        >
+                        <i class="sidebar-button-icon fab fa-facebook" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Facebook</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="https://www.linkedin.com/in/sim-jisung-3048872a/"
+                            
+                                target="_blank"
+                            
+                            rel="noopener"
+                            title="LinkedIn"
+                        >
+                        <i class="sidebar-button-icon fab fa-linkedin" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">LinkedIn</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="mailto:cloudkaiser@gmail.com"
+                            
+                                target="_blank"
+                            
+                            rel="noopener"
+                            title="Mail"
+                        >
+                        <i class="sidebar-button-icon fa fa-envelope" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Mail</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/atom.xml"
+                            
+                            rel="noopener"
+                            title="RSS"
+                        >
+                        <i class="sidebar-button-icon fa fa-rss" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">RSS</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+    </div>
+</nav>
+
+            
+            <div id="main" data-behavior="5"
+                 class="
+                        hasCoverMetaIn
+                        ">
+                
+<article class="post">
+    
+    
+        <div class="post-header main-content-wrap text-left">
+    
+        <h1 class="post-title">
+            clean-code-6
+        </h1>
+    
+    
+        <div class="post-meta">
+    <time datetime="2021-02-09T10:24:13+00:00">
+	
+		    Feb 09, 2021
+    	
+    </time>
+    
+        <span>in </span>
+        
+    <a class="category-link" href="/categories/Clean-Code/">Clean Code</a>, <a class="category-link" href="/categories/Study/">Study</a>, <a class="category-link" href="/categories/%EC%98%A4%EB%A5%98%EC%B2%98%EB%A6%AC/">오류처리</a>
+
+
+    
+</div>
+
+    
+</div>
+
+    
+    <div class="post-content markdown">
+        <div class="main-content-wrap">
+            <h1 id="오류처리"><a href="#오류처리" class="headerlink" title="오류처리"></a>오류처리</h1><blockquote><p>뭔가 잘못될 가능성은 늘 존재한다. 뭔가 잘못되면 바로 잡을 책임은 바로 우리 프로그래머에 있다. </p>
+</blockquote>
+
+<h2 id="예외코드보다-예외를-사용하라"><a href="#예외코드보다-예외를-사용하라" class="headerlink" title="예외코드보다 예외를 사용하라"></a>예외코드보다 예외를 사용하라</h2><ul>
+<li>예외가 지원되지 않았을 시절에는 오류코드로 예외처리를 사용하였다. </li>
+<li>근래 언어들이 예외처리가 지원되면서, 오류가 발생하면 예외로 던지는걸 추천하고있음. </li>
+<li>함수 호출 즉시 오류를 확인해야하기 때문에 예외처리를 하는것을 권장 </li>
+</ul>
+<h2 id="try-catch-finally"><a href="#try-catch-finally" class="headerlink" title="try-catch-finally"></a>try-catch-finally</h2><ul>
+<li>코드를 작성할때 시작을 강제로 예외를 일으키는 테스트 케이스를 작성후 테스트를 통과하게 코드를 작성하는 방법을 권장 그러면 자연스럽게 try 블록의 트랜잭션 뻠위부터 구현하게 되므로 범위 내에서 트랜잭션 본질을 유지하기 쉽다. </li>
+</ul>
+<h2 id="미확인-unchecked-예외를-사용하라"><a href="#미확인-unchecked-예외를-사용하라" class="headerlink" title="미확인(unchecked) 예외를 사용하라"></a>미확인(unchecked) 예외를 사용하라</h2><ul>
+<li><p>checked 예외는 OCP를 위반한다. 메서드에서 확인된 예외를 던졌는데 catch 블록이 세 단계 위에 있다면 그 사이 메서드 모두가 선언부에 해당 예외를 정의해야한다. 즉, 하위 단계에서 코드를 변경하면 상위 단계 메서드 선언부를 전부 고쳐야 한다는 말이다. 모듈과 관련된 코드가 전혀 바뀌지 않았더라도 (선언부가 바뀌었으므로) 모듈을 다시 빌드한 다음 배포해야 한다는 말이다. </p>
+</li>
+<li><p>checked 예외는 사용하는 모든 함수를 강제적으로 예외를 처리하게 하기때문에, 캡슐화가 깨진다. 그렇다고 checked예외가 무조건 나쁜건 아니다. (중요한 라이브러리를 개발한다면 모든 예외를 강제 해야한다.)</p>
+</li>
+</ul>
+<h2 id="예외에-의미를-제공하라"><a href="#예외에-의미를-제공하라" class="headerlink" title="예외에 의미를 제공하라"></a>예외에 의미를 제공하라</h2><ul>
+<li>printStackTrace정보를 던지는것 보다 타 개발자가 직관적으로 알수 있도록 의미있는 문구로 예외처리 하도록 하자.</li>
+<li>예외를 잡을때 로그랑 같이 잡아서 좀 더 디테일한 예외상황에 대해서 알면 더 좋을듯하다. </li>
+</ul>
+<h2 id="호출자를-고려해-예외-클래스를-정의하라"><a href="#호출자를-고려해-예외-클래스를-정의하라" class="headerlink" title="호출자를 고려해 예외 클래스를 정의하라"></a>호출자를 고려해 예외 클래스를 정의하라</h2><ul>
+<li>외부라이브러리의 API를 활용할때는 Wrapper클래스로 감싸서 모듈화 하는 방식 (Component로 빼는방식도 좋겠다.) 을 고려하자. </li>
+<li>Wrapper클래스로 감싼 클래스를 가지고 그 라이브러리의 예외를 잡을 RuntimeException을 새로 정의해서 2-3 종류 이상 예외가 발생하는 라이브러리의 예외 의존도를 낮추도록 하게 하자.  </li>
+</ul>
+<h2 id="정상-흐름을-정의하라"><a href="#정상-흐름을-정의하라" class="headerlink" title="정상 흐름을 정의하라"></a>정상 흐름을 정의하라</h2><ul>
+<li>try-catch를 논리코드를 작성하는 부분은 하지 말자. 예외는 예외 답게 처리하자.(가끔 if-else문처럼 사용하는 경우가 있음.그건 하지 말자.) </li>
+<li>만약에 예외적인처리에서 뭔가 다른 액션을 처리해야한다면, 예외가 발생하는 로직을 분리해서 새로운 객체에 반환할 수 있도록 로직을 수정하는 사례가 있다. (특수사례 패턴 (Special Case Pattern) 참고 )</li>
+</ul>
+<h2 id="null을-반환하지-마라"><a href="#null을-반환하지-마라" class="headerlink" title="null을 반환하지 마라"></a>null을 반환하지 마라</h2><ul>
+<li>보통 개발하다보면, claimInfo != null 혹은 ObjectUtils.isEmpty(claimInfo) 처럼 null 객체를 체크하는 경우가 자주 있다. 사실 NullPointerException이 유발될까바 저렇게 체크하는건데, 호출하는 메서드에서 null자체를 반환하지 않도록 만들라고 추천한다. (예외적인 상황이 발생했을때 빈객체 혹은 Collections.emptyList같은 객체로 말이다.)</li>
+</ul>
+<h2 id="null을-전달하지-마라"><a href="#null을-전달하지-마라" class="headerlink" title="null을 전달하지 마라"></a>null을 전달하지 마라</h2><ul>
+<li>메서드에서 null을 반환하는것 보다 메서드로 Null을 전달하는건 더 나쁨.</li>
+<li>파라미터단에 null이 들어오는걸 방지하려면, 여러가지가 있지만 저자는 assert를 활용해서 체크하는 방식을 추천</li>
+<li>assert말고 Objects.requireNonNull로도 확인하기도함. 더러 Optional을 가지고 체크하기도하지만, 이부분은 비용이 많이 나가서 비추. </li>
+<li>대다수 프로그래밍 언어는 호출자가 실수로 넘기는 Null을 적절히 처리하는 방법이없다. 그렇다면 애초에 null을 넘기지 못하도록 금지하는 정책이 합리적이다. 즉, 인수로 null이 넘어온다는 자체가 문제라는 말이다. </li>
+</ul>
+
+            
+
+
+        </div>
+    </div>
+    <div id="post-footer" class="post-footer main-content-wrap">
+        
+            <div class="post-footer-tags">
+                <span class="text-color-light text-small">TAGGED IN</span><br/>
+                
+    <a class="tag tag--primary tag--small t-none-link" href="/tags/refactoring-code-cleancode/" rel="tag">refactoring,code,cleancode</a>
+
+            </div>
+        
+        
+            <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    <a
+                        class="post-action-btn btn btn--disabled"
+                        aria-hidden="true"
+                    >
+                        
+                        <i class="fa fa-angle-left" aria-hidden="true"></i>
+                        <span class="hide-xs hide-sm text-small icon-ml">PREVIOUS</span>
+                    </a>
+            </li>
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/2021/02/08/clean-code-5/"
+                    data-tooltip="clean-code-5"
+                    aria-label="NEXT: clean-code-5"
+                >
+                    
+                        <span class="hide-xs hide-sm text-small icon-mr">NEXT</span>
+                        <i class="fa fa-angle-right" aria-hidden="true"></i>
+                    </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a
+                class="post-action-btn btn btn--default btn-open-shareoptions"
+                href="#btn-open-shareoptions"
+                aria-label="Share this post"
+            >
+                <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </a>
+        </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://codexdawn.github.io/2021/02/09/clean-code-6/"
+                    title="Share on Facebook"
+                    aria-label="Share on Facebook"
+                >
+                    <i class="fab fa-facebook" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://twitter.com/intent/tweet?text=https://codexdawn.github.io/2021/02/09/clean-code-6/"
+                    title="Share on Twitter"
+                    aria-label="Share on Twitter"
+                >
+                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://plus.google.com/share?url=https://codexdawn.github.io/2021/02/09/clean-code-6/"
+                    title="Share on Google+"
+                    aria-label="Share on Google+"
+                >
+                    <i class="fab fa-google-plus" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+        
+            
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#" aria-label="Back to top">
+            
+                <i class="fa fa-list" aria-hidden="true"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+        
+        
+            
+        
+    </div>
+</article>
+
+
+
+                <footer id="footer" class="main-content-wrap">
+    <span class="copyrights">
+        Copyrights &copy; 2021 codexdawn. All Rights Reserved.
+    </span>
+</footer>
+
+            </div>
+            
+                <div id="bottom-bar" class="post-bottom-bar" data-behavior="5">
+                    <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    <a
+                        class="post-action-btn btn btn--disabled"
+                        aria-hidden="true"
+                    >
+                        
+                        <i class="fa fa-angle-left" aria-hidden="true"></i>
+                        <span class="hide-xs hide-sm text-small icon-ml">PREVIOUS</span>
+                    </a>
+            </li>
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/2021/02/08/clean-code-5/"
+                    data-tooltip="clean-code-5"
+                    aria-label="NEXT: clean-code-5"
+                >
+                    
+                        <span class="hide-xs hide-sm text-small icon-mr">NEXT</span>
+                        <i class="fa fa-angle-right" aria-hidden="true"></i>
+                    </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a
+                class="post-action-btn btn btn--default btn-open-shareoptions"
+                href="#btn-open-shareoptions"
+                aria-label="Share this post"
+            >
+                <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </a>
+        </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://codexdawn.github.io/2021/02/09/clean-code-6/"
+                    title="Share on Facebook"
+                    aria-label="Share on Facebook"
+                >
+                    <i class="fab fa-facebook" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://twitter.com/intent/tweet?text=https://codexdawn.github.io/2021/02/09/clean-code-6/"
+                    title="Share on Twitter"
+                    aria-label="Share on Twitter"
+                >
+                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://plus.google.com/share?url=https://codexdawn.github.io/2021/02/09/clean-code-6/"
+                    title="Share on Google+"
+                    aria-label="Share on Google+"
+                >
+                    <i class="fab fa-google-plus" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+        
+            
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#" aria-label="Back to top">
+            
+                <i class="fa fa-list" aria-hidden="true"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+                </div>
+                
+    <div id="share-options-bar" class="share-options-bar" data-behavior="5">
+        <i id="btn-close-shareoptions" class="fa fa-times"></i>
+        <ul class="share-options">
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://www.facebook.com/sharer/sharer.php?u=https://codexdawn.github.io/2021/02/09/clean-code-6/"
+                        aria-label="Share on Facebook"
+                    >
+                        <i class="fab fa-facebook" aria-hidden="true"></i><span>Share on Facebook</span>
+                    </a>
+                </li>
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://twitter.com/intent/tweet?text=https://codexdawn.github.io/2021/02/09/clean-code-6/"
+                        aria-label="Share on Twitter"
+                    >
+                        <i class="fab fa-twitter" aria-hidden="true"></i><span>Share on Twitter</span>
+                    </a>
+                </li>
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://plus.google.com/share?url=https://codexdawn.github.io/2021/02/09/clean-code-6/"
+                        aria-label="Share on Google+"
+                    >
+                        <i class="fab fa-google-plus" aria-hidden="true"></i><span>Share on Google+</span>
+                    </a>
+                </li>
+            
+        </ul>
+    </div>
+
+
+            
+        </div>
+        
+
+
+<div id="about">
+    <div id="about-card">
+        <div id="about-btn-close">
+            <i class="fa fa-times"></i>
+        </div>
+        
+            <h4 id="about-card-name">codexdawn</h4>
+        
+            <div id="about-card-bio"><p>author.bio</p>
+</div>
+        
+        
+            <div id="about-card-job">
+                <i class="fa fa-briefcase"></i>
+                <br/>
+                <p>author.job</p>
+
+            </div>
+        
+        
+    </div>
+</div>
+
+        
+        
+<div id="cover" style="background-image:url('/assets/images/cover-v1.2.0.jpg');"></div>
+        <!--SCRIPTS-->
+
+<script src="/assets/js/script-ikbi0v8fyzuu91xv5rmpcrnwb4qinfgborzd5kejmj8wr6ibfra8oaxqshyg.min.js"></script>
+
+<!--SCRIPTS END-->
+
+
+    
+
+
+
+
+    </body>
+</html>
