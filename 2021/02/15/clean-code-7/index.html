@@ -1,0 +1,666 @@
+
+<!DOCTYPE html>
+<html lang="en">
+    
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="generator" content="codexdawn">
+    <title>clean-code-7 - codexdawn</title>
+    <meta name="author" content="codexdawn">
+    
+    
+    
+        
+            <link rel="alternate" type="application/atom+xml" title="RSS" href="/atom.xml">
+        
+    
+    <script type="application/ld+json">{"@context":"http://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"codexdawn","sameAs":["https://github.com/codexdawn","https://www.facebook.com/beherzt.dev","https://www.linkedin.com/in/sim-jisung-3048872a/","mailto:cloudkaiser@gmail.com"],"image":"https://www.gravatar.com/avatar/d97fd4b94c429915f1cb55eb27e7d4d9"},"articleBody":"경계외부 코드 사용하기\njava.util.Map이 제공하는 기능성과 유연성은 확실히 유용하지만, 그만큼 위험도 크다. (ex&gt; clear(), 제네릭스가 없는 Map객체 -&gt; 사용자가 맘만 먹으면 어떤 객체 유형도 추가 가능)\n\nMap사용 나쁜예112Map sensors = new HashMap();Sensor s = (Sensor) sensors.get(sensorId); \n\n\n위 코드는 Map이 반환하는 Object를 올바른 유형으로 변환할 책임은 Map을 사용하는 클라이언트에 있다. (get(sensorId)) \n위 코드는 동작은 하지만, 깨끗한 코드라고 보기 어렵고, 의도도 분명히 드러나지 않는다. \n\nMap사용 나쁜예212Map&lt;String,Sensor&gt; sensors = new HashMap&lt;Sensor&gt;();Sensor s = sensors.get(sensorId); \n\n\n위 코드는 ‘나쁜예1’ 코드의 제네릭스로 조금 개선하여 코드 가독성을 높였지만, “Map&lt;String,Sensor&gt; 가 사용자에게 필요하지 않은 기능까지 제공한다” 라는 부분은 해결하지 못했다. \n\nMap사용 개선예1234567public class Sensors &#123;\tprivate Map sensors = new HashMap(); \t\tpublic Sensor getById(String id) &#123;\t\treturn (Sensor) sensors.get(id); \t&#125;&#125;\n\n\n위 코드는 경계 인터페이스인 Map을 Sensors 안으로 숨겼다. (캡슐화) 따라서 Map 인터페이스가 변하더라도 나머지 프로그램에는 영향이 없음. \n제네릭스 사용하든 안하든 문제없음.\nSensors 클래스는 프로그램에 필요한 인터페이스만 제공 (코드는 이해도 증가, 오용하기 어려움)\nSensors 클래스는 설계 규칙과 비즈니스 규칙을 따르도록 강제할수있음.(인터페이스)\n저자는 Map과 같은 경계 인터페이스를 무조건 캡슐화 하라는것이 아니라, Map가지고 이용하는 클래스나 클래스 계열 밖으로 노출되지 않도록 주의해야함. \n\n경계 살피고 익히기\n외부에서 가져온 라이브러리 혹은 패키지를 사용하고 싶다면, 곧바로 우리쪽 코드를 작성해 외부 코드를 호출하는 대신 먼저 간단한 테스트 케이스를 작성해 외부코드를 익히면 그나마 수월하다고 함. (학습 테스트)\n\nlog4j 익히기\n‘경계 살피고 익히기’ 에서 소개한 ‘학습 테스트’를 log4j를 익히는 과정으로 ‘학습 테스트’를 설명하는 구간이다. \nlog.info를 띄우는 방법을 차근차근 단위 테스트를 하면서, 사용법을 익히고 어느정도 숙달이 되면, 캡슐화를 통해 log4j라는 경계 인터페이스를 몰라도 되도록 만들면, 학습 테스트를 통해 경계 인터페이스를 잘 사용할수 있음. \n\n학습 테스트는 공짜 이상이다\n학습 테스트는 비용이 없다. (API를 사용하려면 배워야하기 때문)\n투자하는 노력보다 얻는 성과가 크다. 패키지 새 버전이 나오면 학습 테스트를 돌려 차이가 있는지 확인 한다. \n학습테스트는 패키지가 예상대로 도는지 검증함. \n새 버전이 우리 코드와 호환되지않으면 학습 테스트가 이 사실을 곧바로 밝혀냄 \n학습테스트로 단위 테스트를 짤때, 실제 코드와 동일한 방식으로 인터페이스를 사용하는 테스트 케이스가 필요함. \n\n아직 존재하지 않는 코드를 사용하기\n경계와 관련해 또 다른 유형은 아는 코드와 모르는 코드를 분리하는 경계다. \n저자의 예제인 Transmitter는 Transmitter의 외부 라이브러리에 대한 지식이 전혀 없는 상태에서 차근차근 적용하는 과정을 설명한 부분이다. \n\n\n\n자체적인 인터페이스 정의인 Transmitter 인터페이스를 만들어서, 실제로 개발해야하는 transmit 메서드를 정의함. (transmit는 주파수와 스트림을 입력으로 받음) -&gt; 인터페이스를 구현하면 전적으로 개발자가 통제한다는 장점이 생김. (가독성 증가)\nCommunicationController를 통해 사용될 로직만 정의함. \n상대팀이 송신기 API를 정의한후에, TransmitterAdoptor를 구현해 사용할 API를 캡슐화하여 API가 바뀔때 수정할 코드를 한곳으로 몰아넣음.\nFakeTransmitter클래스를 사용하여 실제 데이터가 없이도 Mock데이터로 기능구현 가능하도록 하였음.\nTransmitter API 인터페이스가 나온다음 경계 테스트 케이스를 생성해 API를 올바로 사용하는지 테스트 할 수 있음. \n\n깨끗한 경계\n소프트웨어 설계가 우수하다면 변경하는데 많은 투자와 재작업이 필요없다. \n경계에 위치하는 코드는 깔끔히 분리한다. 또한 기대치를 정의하는 테스트 케이스도 작성한다. \n이쪽 코드에서 외부 패키지를 세세하게 알아야 할 필요없음. 통제가 불가능한 외부 패키지를 의존하지말고, 인터페이스로 분리해서 독자적인 패키지를 만들자.\n외부 패키지를 호출하는 코드를 가능한 줄여 경계를 관리하자. 예시로본 Map처럼 새로운 클래스로 경계를 감싸거나(캡슐화) Adaptor패턴을 이용해 우리가 원하는 인터페이스를 패키지가 제공하는 인터페이스로 변환하자. \n\nAdaptor패턴\nWrapper패턴으로 불리기도함. \n일반상품을 예쁜 포장지로 싸서 선물용 상품으로 만드는것 결국 무엇인가를 포장해 다른 용도로 사용할 수 있게 교환해 주는것이 wrapper이며 adaptor이다. \n\n\n상속 (inheritant)\n\n\nPrint &lt;– PrintBanner -&gt; Banner \n\n\n위임 (delegation)\n\n\nPrint &lt;- PrintBanner &lt;&gt;-&gt; Banner\ndelegation(위임)은 제어를 외부 컴포넌트를 통해 맡기는 부분. (DI와 유사함. IoC)\n\n","dateCreated":"2021-02-15T13:08:46+00:00","dateModified":"2021-02-15T15:45:32+00:00","datePublished":"2021-02-15T13:08:46+00:00","description":"","headline":"clean-code-7","image":[],"mainEntityOfPage":{"@type":"WebPage","@id":"https://codexdawn.github.io/2021/02/15/clean-code-7/"},"publisher":{"@type":"Organization","name":"codexdawn","sameAs":["https://github.com/codexdawn","https://www.facebook.com/beherzt.dev","https://www.linkedin.com/in/sim-jisung-3048872a/","mailto:cloudkaiser@gmail.com"],"image":"https://www.gravatar.com/avatar/d97fd4b94c429915f1cb55eb27e7d4d9","logo":{"@type":"ImageObject","url":"https://www.gravatar.com/avatar/d97fd4b94c429915f1cb55eb27e7d4d9"}},"url":"https://codexdawn.github.io/2021/02/15/clean-code-7/","keywords":"refactoring,code,cleancode"}</script>
+    <meta name="description" content="경계외부 코드 사용하기 java.util.Map이 제공하는 기능성과 유연성은 확실히 유용하지만, 그만큼 위험도 크다. (ex&gt; clear(), 제네릭스가 없는 Map객체 -&gt; 사용자가 맘만 먹으면 어떤 객체 유형도 추가 가능)  Map사용 나쁜예112Map sensors &#x3D; new HashMap();Sensor s &#x3D; (Sensor) sensor">
+<meta property="og:type" content="blog">
+<meta property="og:title" content="clean-code-7">
+<meta property="og:url" content="https://codexdawn.github.io/2021/02/15/clean-code-7/index.html">
+<meta property="og:site_name" content="codexdawn">
+<meta property="og:description" content="경계외부 코드 사용하기 java.util.Map이 제공하는 기능성과 유연성은 확실히 유용하지만, 그만큼 위험도 크다. (ex&gt; clear(), 제네릭스가 없는 Map객체 -&gt; 사용자가 맘만 먹으면 어떤 객체 유형도 추가 가능)  Map사용 나쁜예112Map sensors &#x3D; new HashMap();Sensor s &#x3D; (Sensor) sensor">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://nesoy.github.io/assets/posts/20180207/adapterPattern.png">
+<meta property="article:published_time" content="2021-02-15T13:08:46.000Z">
+<meta property="article:modified_time" content="2021-02-15T15:45:32.652Z">
+<meta property="article:author" content="codexdawn">
+<meta property="article:tag" content="refactoring,code,cleancode">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://nesoy.github.io/assets/posts/20180207/adapterPattern.png">
+    
+    
+        
+    
+    
+    
+    
+    
+    <!--STYLES-->
+    
+<link rel="stylesheet" href="/assets/css/style-3sspfygaapf5d6tbrnqmyrhdcstv0iwwmi4wor2yeip9c44sowy9gbdzyyjm.min.css">
+
+    <!--STYLES END-->
+    
+
+    
+
+    
+        
+    
+</head>
+
+    <body>
+        <div id="blog">
+            <!-- Define author's picture -->
+
+
+    
+
+<header id="header" data-behavior="5">
+    <i id="btn-open-sidebar" class="fa fa-lg fa-bars"></i>
+    <div class="header-title">
+        <a
+            class="header-title-link"
+            href="/"
+            aria-label=""
+        >
+            codexdawn
+        </a>
+    </div>
+    
+        
+            <a
+                class="header-right-picture "
+                href="#about"
+                aria-label="Open the link: /#about"
+            >
+        
+        
+        </a>
+    
+</header>
+
+            <!-- Define author's picture -->
+
+
+<nav id="sidebar" data-behavior="5">
+    <div class="sidebar-container">
+        
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/"
+                            
+                            rel="noopener"
+                            title="Home"
+                        >
+                        <i class="sidebar-button-icon fa fa-home" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Home</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/all-categories"
+                            
+                            rel="noopener"
+                            title="Categories"
+                        >
+                        <i class="sidebar-button-icon fa fa-bookmark" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Categories</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/all-tags"
+                            
+                            rel="noopener"
+                            title="Tags"
+                        >
+                        <i class="sidebar-button-icon fa fa-tags" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Tags</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="#about"
+                            
+                            rel="noopener"
+                            title="About"
+                        >
+                        <i class="sidebar-button-icon fa fa-question" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">About</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="https://github.com/codexdawn"
+                            
+                                target="_blank"
+                            
+                            rel="noopener"
+                            title="GitHub"
+                        >
+                        <i class="sidebar-button-icon fab fa-github" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">GitHub</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="https://www.facebook.com/beherzt.dev"
+                            
+                                target="_blank"
+                            
+                            rel="noopener"
+                            title="Facebook"
+                        >
+                        <i class="sidebar-button-icon fab fa-facebook" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Facebook</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="https://www.linkedin.com/in/sim-jisung-3048872a/"
+                            
+                                target="_blank"
+                            
+                            rel="noopener"
+                            title="LinkedIn"
+                        >
+                        <i class="sidebar-button-icon fab fa-linkedin" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">LinkedIn</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="mailto:cloudkaiser@gmail.com"
+                            
+                                target="_blank"
+                            
+                            rel="noopener"
+                            title="Mail"
+                        >
+                        <i class="sidebar-button-icon fa fa-envelope" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Mail</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/atom.xml"
+                            
+                            rel="noopener"
+                            title="RSS"
+                        >
+                        <i class="sidebar-button-icon fa fa-rss" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">RSS</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+    </div>
+</nav>
+
+            
+            <div id="main" data-behavior="5"
+                 class="
+                        hasCoverMetaIn
+                        ">
+                
+<article class="post">
+    
+    
+        <div class="post-header main-content-wrap text-left">
+    
+        <h1 class="post-title">
+            clean-code-7
+        </h1>
+    
+    
+        <div class="post-meta">
+    <time datetime="2021-02-15T13:08:46+00:00">
+	
+		    Feb 15, 2021
+    	
+    </time>
+    
+        <span>in </span>
+        
+    <a class="category-link" href="/categories/Clean-Code/">Clean Code</a>, <a class="category-link" href="/categories/Study/">Study</a>, <a class="category-link" href="/categories/%EA%B2%BD%EA%B3%84/">경계</a>
+
+
+    
+</div>
+
+    
+</div>
+
+    
+    <div class="post-content markdown">
+        <div class="main-content-wrap">
+            <h1 id="경계"><a href="#경계" class="headerlink" title="경계"></a>경계</h1><h2 id="외부-코드-사용하기"><a href="#외부-코드-사용하기" class="headerlink" title="외부 코드 사용하기"></a>외부 코드 사용하기</h2><ul>
+<li>java.util.Map이 제공하는 기능성과 유연성은 확실히 유용하지만, 그만큼 위험도 크다. (ex&gt; clear(), 제네릭스가 없는 Map객체 -&gt; 사용자가 맘만 먹으면 어떤 객체 유형도 추가 가능)</li>
+</ul>
+<figure class="highlight java"><figcaption><span>Map사용 나쁜예1</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Map sensors = <span class="keyword">new</span> HashMap();</span><br><span class="line">Sensor s = (Sensor) sensors.get(sensorId); </span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>위 코드는 Map이 반환하는 Object를 올바른 유형으로 변환할 책임은 Map을 사용하는 클라이언트에 있다. (get(sensorId)) </li>
+<li>위 코드는 동작은 하지만, 깨끗한 코드라고 보기 어렵고, 의도도 분명히 드러나지 않는다. </li>
+</ul>
+<figure class="highlight java"><figcaption><span>Map사용 나쁜예2</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Map&lt;String,Sensor&gt; sensors = <span class="keyword">new</span> HashMap&lt;Sensor&gt;();</span><br><span class="line">Sensor s = sensors.get(sensorId); </span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>위 코드는 ‘나쁜예1’ 코드의 제네릭스로 조금 개선하여 코드 가독성을 높였지만, “Map&lt;String,Sensor&gt; 가 사용자에게 필요하지 않은 기능까지 제공한다” 라는 부분은 해결하지 못했다. </li>
+</ul>
+<figure class="highlight java"><figcaption><span>Map사용 개선예</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Sensors</span> </span>&#123;</span><br><span class="line">	<span class="keyword">private</span> Map sensors = <span class="keyword">new</span> HashMap(); </span><br><span class="line">	</span><br><span class="line">	<span class="function"><span class="keyword">public</span> Sensor <span class="title">getById</span><span class="params">(String id)</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> (Sensor) sensors.get(id); </span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>위 코드는 경계 인터페이스인 Map을 Sensors 안으로 숨겼다. (캡슐화) 따라서 Map 인터페이스가 변하더라도 나머지 프로그램에는 영향이 없음. </li>
+<li>제네릭스 사용하든 안하든 문제없음.</li>
+<li>Sensors 클래스는 프로그램에 필요한 인터페이스만 제공 (코드는 이해도 증가, 오용하기 어려움)</li>
+<li>Sensors 클래스는 설계 규칙과 비즈니스 규칙을 따르도록 강제할수있음.(인터페이스)</li>
+<li>저자는 Map과 같은 경계 인터페이스를 무조건 캡슐화 하라는것이 아니라, Map가지고 이용하는 클래스나 클래스 계열 밖으로 노출되지 않도록 주의해야함. </li>
+</ul>
+<h2 id="경계-살피고-익히기"><a href="#경계-살피고-익히기" class="headerlink" title="경계 살피고 익히기"></a>경계 살피고 익히기</h2><ul>
+<li>외부에서 가져온 라이브러리 혹은 패키지를 사용하고 싶다면, 곧바로 우리쪽 코드를 작성해 외부 코드를 호출하는 대신 먼저 간단한 테스트 케이스를 작성해 외부코드를 익히면 그나마 수월하다고 함. (학습 테스트)</li>
+</ul>
+<h2 id="log4j-익히기"><a href="#log4j-익히기" class="headerlink" title="log4j 익히기"></a>log4j 익히기</h2><ul>
+<li>‘경계 살피고 익히기’ 에서 소개한 ‘학습 테스트’를 log4j를 익히는 과정으로 ‘학습 테스트’를 설명하는 구간이다. </li>
+<li>log.info를 띄우는 방법을 차근차근 단위 테스트를 하면서, 사용법을 익히고 어느정도 숙달이 되면, 캡슐화를 통해 log4j라는 경계 인터페이스를 몰라도 되도록 만들면, 학습 테스트를 통해 경계 인터페이스를 잘 사용할수 있음. </li>
+</ul>
+<h2 id="학습-테스트는-공짜-이상이다"><a href="#학습-테스트는-공짜-이상이다" class="headerlink" title="학습 테스트는 공짜 이상이다"></a>학습 테스트는 공짜 이상이다</h2><ul>
+<li>학습 테스트는 비용이 없다. (API를 사용하려면 배워야하기 때문)</li>
+<li>투자하는 노력보다 얻는 성과가 크다. 패키지 새 버전이 나오면 학습 테스트를 돌려 차이가 있는지 확인 한다. </li>
+<li>학습테스트는 패키지가 예상대로 도는지 검증함. </li>
+<li>새 버전이 우리 코드와 호환되지않으면 학습 테스트가 이 사실을 곧바로 밝혀냄 </li>
+<li>학습테스트로 단위 테스트를 짤때, 실제 코드와 동일한 방식으로 인터페이스를 사용하는 테스트 케이스가 필요함. </li>
+</ul>
+<h2 id="아직-존재하지-않는-코드를-사용하기"><a href="#아직-존재하지-않는-코드를-사용하기" class="headerlink" title="아직 존재하지 않는 코드를 사용하기"></a>아직 존재하지 않는 코드를 사용하기</h2><ul>
+<li>경계와 관련해 또 다른 유형은 아는 코드와 모르는 코드를 분리하는 경계다. </li>
+<li>저자의 예제인 Transmitter는 Transmitter의 외부 라이브러리에 대한 지식이 전혀 없는 상태에서 차근차근 적용하는 과정을 설명한 부분이다. </li>
+</ul>
+<p><img src="https://nesoy.github.io/assets/posts/20180207/adapterPattern.png" alt="송신기 예측하기"></p>
+<ol>
+<li>자체적인 인터페이스 정의인 Transmitter 인터페이스를 만들어서, 실제로 개발해야하는 transmit 메서드를 정의함. (transmit는 주파수와 스트림을 입력으로 받음) -&gt; 인터페이스를 구현하면 전적으로 개발자가 통제한다는 장점이 생김. (가독성 증가)</li>
+<li>CommunicationController를 통해 사용될 로직만 정의함. </li>
+<li>상대팀이 송신기 API를 정의한후에, TransmitterAdoptor를 구현해 사용할 API를 캡슐화하여 API가 바뀔때 수정할 코드를 한곳으로 몰아넣음.</li>
+<li>FakeTransmitter클래스를 사용하여 실제 데이터가 없이도 Mock데이터로 기능구현 가능하도록 하였음.</li>
+<li>Transmitter API 인터페이스가 나온다음 경계 테스트 케이스를 생성해 API를 올바로 사용하는지 테스트 할 수 있음. </li>
+</ol>
+<h2 id="깨끗한-경계"><a href="#깨끗한-경계" class="headerlink" title="깨끗한 경계"></a>깨끗한 경계</h2><ul>
+<li>소프트웨어 설계가 우수하다면 변경하는데 많은 투자와 재작업이 필요없다. </li>
+<li>경계에 위치하는 코드는 깔끔히 분리한다. 또한 기대치를 정의하는 테스트 케이스도 작성한다. </li>
+<li>이쪽 코드에서 외부 패키지를 세세하게 알아야 할 필요없음. 통제가 불가능한 외부 패키지를 의존하지말고, 인터페이스로 분리해서 독자적인 패키지를 만들자.</li>
+<li>외부 패키지를 호출하는 코드를 가능한 줄여 경계를 관리하자. 예시로본 Map처럼 새로운 클래스로 경계를 감싸거나(캡슐화) Adaptor패턴을 이용해 우리가 원하는 인터페이스를 패키지가 제공하는 인터페이스로 변환하자. </li>
+</ul>
+<h2 id="Adaptor패턴"><a href="#Adaptor패턴" class="headerlink" title="Adaptor패턴"></a>Adaptor패턴</h2><ul>
+<li>Wrapper패턴으로 불리기도함. </li>
+<li>일반상품을 예쁜 포장지로 싸서 선물용 상품으로 만드는것 결국 무엇인가를 포장해 다른 용도로 사용할 수 있게 교환해 주는것이 wrapper이며 adaptor이다. </li>
+</ul>
+<ol>
+<li>상속 (inheritant)</li>
+</ol>
+<ul>
+<li>Print &lt;– PrintBanner -&gt; Banner </li>
+</ul>
+<ol start="2">
+<li>위임 (delegation)</li>
+</ol>
+<ul>
+<li>Print &lt;- PrintBanner &lt;&gt;-&gt; Banner</li>
+<li>delegation(위임)은 제어를 외부 컴포넌트를 통해 맡기는 부분. (DI와 유사함. IoC)</li>
+</ul>
+
+            
+
+
+        </div>
+    </div>
+    <div id="post-footer" class="post-footer main-content-wrap">
+        
+            <div class="post-footer-tags">
+                <span class="text-color-light text-small">TAGGED IN</span><br/>
+                
+    <a class="tag tag--primary tag--small t-none-link" href="/tags/refactoring-code-cleancode/" rel="tag">refactoring,code,cleancode</a>
+
+            </div>
+        
+        
+            <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    <a
+                        class="post-action-btn btn btn--disabled"
+                        aria-hidden="true"
+                    >
+                        
+                        <i class="fa fa-angle-left" aria-hidden="true"></i>
+                        <span class="hide-xs hide-sm text-small icon-ml">PREVIOUS</span>
+                    </a>
+            </li>
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/2021/02/09/clean-code-6/"
+                    data-tooltip="clean-code-6"
+                    aria-label="NEXT: clean-code-6"
+                >
+                    
+                        <span class="hide-xs hide-sm text-small icon-mr">NEXT</span>
+                        <i class="fa fa-angle-right" aria-hidden="true"></i>
+                    </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a
+                class="post-action-btn btn btn--default btn-open-shareoptions"
+                href="#btn-open-shareoptions"
+                aria-label="Share this post"
+            >
+                <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </a>
+        </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://codexdawn.github.io/2021/02/15/clean-code-7/"
+                    title="Share on Facebook"
+                    aria-label="Share on Facebook"
+                >
+                    <i class="fab fa-facebook" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://twitter.com/intent/tweet?text=https://codexdawn.github.io/2021/02/15/clean-code-7/"
+                    title="Share on Twitter"
+                    aria-label="Share on Twitter"
+                >
+                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://plus.google.com/share?url=https://codexdawn.github.io/2021/02/15/clean-code-7/"
+                    title="Share on Google+"
+                    aria-label="Share on Google+"
+                >
+                    <i class="fab fa-google-plus" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+        
+            
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#" aria-label="Back to top">
+            
+                <i class="fa fa-list" aria-hidden="true"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+        
+        
+            
+        
+    </div>
+</article>
+
+
+
+                <footer id="footer" class="main-content-wrap">
+    <span class="copyrights">
+        Copyrights &copy; 2021 codexdawn. All Rights Reserved.
+    </span>
+</footer>
+
+            </div>
+            
+                <div id="bottom-bar" class="post-bottom-bar" data-behavior="5">
+                    <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    <a
+                        class="post-action-btn btn btn--disabled"
+                        aria-hidden="true"
+                    >
+                        
+                        <i class="fa fa-angle-left" aria-hidden="true"></i>
+                        <span class="hide-xs hide-sm text-small icon-ml">PREVIOUS</span>
+                    </a>
+            </li>
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/2021/02/09/clean-code-6/"
+                    data-tooltip="clean-code-6"
+                    aria-label="NEXT: clean-code-6"
+                >
+                    
+                        <span class="hide-xs hide-sm text-small icon-mr">NEXT</span>
+                        <i class="fa fa-angle-right" aria-hidden="true"></i>
+                    </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a
+                class="post-action-btn btn btn--default btn-open-shareoptions"
+                href="#btn-open-shareoptions"
+                aria-label="Share this post"
+            >
+                <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </a>
+        </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://codexdawn.github.io/2021/02/15/clean-code-7/"
+                    title="Share on Facebook"
+                    aria-label="Share on Facebook"
+                >
+                    <i class="fab fa-facebook" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://twitter.com/intent/tweet?text=https://codexdawn.github.io/2021/02/15/clean-code-7/"
+                    title="Share on Twitter"
+                    aria-label="Share on Twitter"
+                >
+                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://plus.google.com/share?url=https://codexdawn.github.io/2021/02/15/clean-code-7/"
+                    title="Share on Google+"
+                    aria-label="Share on Google+"
+                >
+                    <i class="fab fa-google-plus" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+        
+            
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#" aria-label="Back to top">
+            
+                <i class="fa fa-list" aria-hidden="true"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+                </div>
+                
+    <div id="share-options-bar" class="share-options-bar" data-behavior="5">
+        <i id="btn-close-shareoptions" class="fa fa-times"></i>
+        <ul class="share-options">
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://www.facebook.com/sharer/sharer.php?u=https://codexdawn.github.io/2021/02/15/clean-code-7/"
+                        aria-label="Share on Facebook"
+                    >
+                        <i class="fab fa-facebook" aria-hidden="true"></i><span>Share on Facebook</span>
+                    </a>
+                </li>
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://twitter.com/intent/tweet?text=https://codexdawn.github.io/2021/02/15/clean-code-7/"
+                        aria-label="Share on Twitter"
+                    >
+                        <i class="fab fa-twitter" aria-hidden="true"></i><span>Share on Twitter</span>
+                    </a>
+                </li>
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://plus.google.com/share?url=https://codexdawn.github.io/2021/02/15/clean-code-7/"
+                        aria-label="Share on Google+"
+                    >
+                        <i class="fab fa-google-plus" aria-hidden="true"></i><span>Share on Google+</span>
+                    </a>
+                </li>
+            
+        </ul>
+    </div>
+
+
+            
+        </div>
+        
+
+
+<div id="about">
+    <div id="about-card">
+        <div id="about-btn-close">
+            <i class="fa fa-times"></i>
+        </div>
+        
+            <h4 id="about-card-name">codexdawn</h4>
+        
+            <div id="about-card-bio"><p>author.bio</p>
+</div>
+        
+        
+            <div id="about-card-job">
+                <i class="fa fa-briefcase"></i>
+                <br/>
+                <p>author.job</p>
+
+            </div>
+        
+        
+    </div>
+</div>
+
+        
+        
+<div id="cover" style="background-image:url('/assets/images/cover-v1.2.0.jpg');"></div>
+        <!--SCRIPTS-->
+
+<script src="/assets/js/script-ikbi0v8fyzuu91xv5rmpcrnwb4qinfgborzd5kejmj8wr6ibfra8oaxqshyg.min.js"></script>
+
+<!--SCRIPTS END-->
+
+
+    
+
+
+
+
+    </body>
+</html>
