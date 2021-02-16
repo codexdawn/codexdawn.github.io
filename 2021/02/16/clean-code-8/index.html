@@ -1,0 +1,648 @@
+
+<!DOCTYPE html>
+<html lang="en">
+    
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="generator" content="codexdawn">
+    <title>clean-code-8 - codexdawn</title>
+    <meta name="author" content="codexdawn">
+    
+    
+    
+        
+            <link rel="alternate" type="application/atom+xml" title="RSS" href="/atom.xml">
+        
+    
+    <script type="application/ld+json">{"@context":"http://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"codexdawn","sameAs":["https://github.com/codexdawn","https://www.facebook.com/beherzt.dev","https://www.linkedin.com/in/sim-jisung-3048872a/","mailto:cloudkaiser@gmail.com"],"image":"https://www.gravatar.com/avatar/d97fd4b94c429915f1cb55eb27e7d4d9"},"articleBody":"단위 테스트TDD법칙 세 가지첫째 법칙 : 실패하는 단위 테스트를 작성할 때까지 실제 코드를 작성하지 않는다.둘째 법칙 : 컴파일은 실패하지 않으면서 실행이 실패하는 정도로만 단위 테스트를 작성한다.셋째 법칙 : 현재 실패하는 테스트를 통과할 정도로만 실제코드를 작성한다. \n\n\n\n위와 같이 일하면 매일 수 십개, 매달 수 백개, 매년 수천개에 달하는 테스트 케이스가 나온다. (결국 실제 코드를 모두 테스트하는 격이됨.)\n실제 코드와 맞먹을 정도로 방대한 테스트 코드는 심각한 관리 문제를 유발하기도 한다. (그래서 테스트 케이스도 리팩토링 한다는 소리가 여기서 나옴.)\n\n깨끗한 테스트 코드 유지하기\n실제 코드가 진화하면 테스트코드도 변경해줘야함.\n테스트코드가 지저분할수록 변경하기 어려움. (테스트케이스 추가하는 시간이 실제 코드 짜는 시간보다 더 오래걸림.)\n테스트코드도 실무코드 못지 않게 깨끗하게 잘 관리가 잘되어야함. (주기적인 리팩토링도 고려해야함.) \n\n테스트는 유연성, 유지보수성, 재사용성을 제공한다.\n코드에 유연성, 유지보수성, 재사용성을 제공하는 버팀목은 바로 __단위테스트__다. (테스트케이스가 없다면 잠정적 버그이기 때문.)\n\n깨끗한 테스트 코드\n깨끗한 테스트 코드를 만드려면 무조건 가독성 이다. \nBUILD-OPERATE-CHECK 테스트 구조에 적합함.(Build : 테스트 자료를 만들고 Operate : 테스트 자료를 조작하고 Check : 잘되는지 확인)\n\n도메인에 특화된 테스트 언어\n도메인에 특화된 언어 (DSL) 로 구현하여 테스트코드를 깔끔하게 유지하는게 중요. DSL?도메인 특화 언어는 관련 특정 분야에 최적화된 프로그래밍 언어입니다. DSL은 해당 분야 또는 도메인의 개념과 규칙을 사용합니다.(EX&gt; SQL)\n\nDSL로 구현함에 목적은 흔히 쓰는 시스템 조작 API (저자기준으로 assertEquals)를 사용하는 대신, 함수와 유틸리티를 구현한 후 그 함수와 유틸리티를 사용하므로 테스트 코드를 짜기도 읽기도 쉬워짐.(저자기준 assertResponseIsXML,assertResponseContains)\n\n이중 표준\n테스트 코드에 적용하는 표준은 실제 코드에 적용하는 표준과 확실히 다르다. \n단순하고 간결하고 표현력이 풍부해야 하지만, 실제 코드만큼 효율적인 필요는 없다. \n실제코드에 비즈니스로직을 제대로 검증하는 부분이라면, 테스트코드가 실제코드에 매핑할 필요까지는 없다는 이야기. \n\n테스트당 assert 하나\nJUnit 으로 테스트 코드를 짤 때는 함수마다 assert문을 단 하나만 사용해야함. (결론이 하나 이기 때문) \n\nTDD에서 given-when-then(mockito,BDD) 법칙을 활용하는게 좋다. (테스트 코드가 일관성 있게 유지됨)\n\ngiven-when-then으로 테스트코드를 짜다보면 중복코드가 많아짐.\nQ&gt; given-when-then의 중복코드 해결방법? \n\nTemplate Method 패턴(given/when부분을 부모클래스,then을 자식클래스) \n@Before 함수에 given/when의 공통로직을 넣고, @Test함수에 then을 넣는방식 \n\n\n\n무조건 1함수-1assert를 지킬 의무는 없지만, 가급적 지켜달라는 소리다. 필요할때는 과감하게 여러 assert도 활용할수도 있어야함. \n\n\n테스트당 개념 하나\n테스트 함수마다 한 개념만 테스트 하라. \n3장 함수에서 설명했듯, 함수내에 가급적 하나의 기능만 넣도록 가이드한다. 테스트 함수도 마찬가지다! (결국 여러개의 개념이 들어갔다는건 함수가 여러 기능을 한다는 증거)\n\nF.I.R.S.T\nFast : 테스트는 빨라야 한다. (테스트 로직이 느려지지 않도록 성능이슈를 늘 고민해야함.)\nIndependent : 각 테스트는 서로 의존하면 안됨. (각 테스트는 독립적으로 그리고 어떤 순서로 실행해도 괜찮아야함.)\nRepeatable : 테스트는 어떤 환경에서도 반복 가능해야함. (지속적으로 테스트가 클래스 내에 전체테스트가 돌수 있어야함.)\nSelf-Validating : 테스트는 Bool값으로 결과를 내야함. (성공이냐 실패냐로 판가름)\nTimely : 테스트는 적시에 작성해야함. (단위 테스트는 테스트하려는 실제 코드를 구현하기 직전에 구현 해아함.)\n\n","dateCreated":"2021-02-16T05:56:17+00:00","dateModified":"2021-02-16T08:12:27+00:00","datePublished":"2021-02-16T05:56:17+00:00","description":"","headline":"clean-code-8","image":[],"mainEntityOfPage":{"@type":"WebPage","@id":"https://codexdawn.github.io/2021/02/16/clean-code-8/"},"publisher":{"@type":"Organization","name":"codexdawn","sameAs":["https://github.com/codexdawn","https://www.facebook.com/beherzt.dev","https://www.linkedin.com/in/sim-jisung-3048872a/","mailto:cloudkaiser@gmail.com"],"image":"https://www.gravatar.com/avatar/d97fd4b94c429915f1cb55eb27e7d4d9","logo":{"@type":"ImageObject","url":"https://www.gravatar.com/avatar/d97fd4b94c429915f1cb55eb27e7d4d9"}},"url":"https://codexdawn.github.io/2021/02/16/clean-code-8/","keywords":"refactoring,code,cleancode"}</script>
+    <meta name="description" content="단위 테스트TDD법칙 세 가지첫째 법칙 : 실패하는 단위 테스트를 작성할 때까지 실제 코드를 작성하지 않는다.둘째 법칙 : 컴파일은 실패하지 않으면서 실행이 실패하는 정도로만 단위 테스트를 작성한다.셋째 법칙 : 현재 실패하는 테스트를 통과할 정도로만 실제코드를 작성한다.     위와 같이 일하면 매일 수 십개, 매달 수 백개, 매년 수천개에 달하는 테스트">
+<meta property="og:type" content="blog">
+<meta property="og:title" content="clean-code-8">
+<meta property="og:url" content="https://codexdawn.github.io/2021/02/16/clean-code-8/index.html">
+<meta property="og:site_name" content="codexdawn">
+<meta property="og:description" content="단위 테스트TDD법칙 세 가지첫째 법칙 : 실패하는 단위 테스트를 작성할 때까지 실제 코드를 작성하지 않는다.둘째 법칙 : 컴파일은 실패하지 않으면서 실행이 실패하는 정도로만 단위 테스트를 작성한다.셋째 법칙 : 현재 실패하는 테스트를 통과할 정도로만 실제코드를 작성한다.     위와 같이 일하면 매일 수 십개, 매달 수 백개, 매년 수천개에 달하는 테스트">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2021-02-16T05:56:17.000Z">
+<meta property="article:modified_time" content="2021-02-16T08:12:27.350Z">
+<meta property="article:author" content="codexdawn">
+<meta property="article:tag" content="refactoring,code,cleancode">
+<meta name="twitter:card" content="summary">
+    
+    
+        
+    
+    
+    
+    
+    
+    <!--STYLES-->
+    
+<link rel="stylesheet" href="/assets/css/style-3sspfygaapf5d6tbrnqmyrhdcstv0iwwmi4wor2yeip9c44sowy9gbdzyyjm.min.css">
+
+    <!--STYLES END-->
+    
+
+    
+
+    
+        
+    
+</head>
+
+    <body>
+        <div id="blog">
+            <!-- Define author's picture -->
+
+
+    
+
+<header id="header" data-behavior="5">
+    <i id="btn-open-sidebar" class="fa fa-lg fa-bars"></i>
+    <div class="header-title">
+        <a
+            class="header-title-link"
+            href="/"
+            aria-label=""
+        >
+            codexdawn
+        </a>
+    </div>
+    
+        
+            <a
+                class="header-right-picture "
+                href="#about"
+                aria-label="Open the link: /#about"
+            >
+        
+        
+        </a>
+    
+</header>
+
+            <!-- Define author's picture -->
+
+
+<nav id="sidebar" data-behavior="5">
+    <div class="sidebar-container">
+        
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/"
+                            
+                            rel="noopener"
+                            title="Home"
+                        >
+                        <i class="sidebar-button-icon fa fa-home" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Home</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/all-categories"
+                            
+                            rel="noopener"
+                            title="Categories"
+                        >
+                        <i class="sidebar-button-icon fa fa-bookmark" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Categories</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/all-tags"
+                            
+                            rel="noopener"
+                            title="Tags"
+                        >
+                        <i class="sidebar-button-icon fa fa-tags" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Tags</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="#about"
+                            
+                            rel="noopener"
+                            title="About"
+                        >
+                        <i class="sidebar-button-icon fa fa-question" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">About</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="https://github.com/codexdawn"
+                            
+                                target="_blank"
+                            
+                            rel="noopener"
+                            title="GitHub"
+                        >
+                        <i class="sidebar-button-icon fab fa-github" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">GitHub</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="https://www.facebook.com/beherzt.dev"
+                            
+                                target="_blank"
+                            
+                            rel="noopener"
+                            title="Facebook"
+                        >
+                        <i class="sidebar-button-icon fab fa-facebook" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Facebook</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="https://www.linkedin.com/in/sim-jisung-3048872a/"
+                            
+                                target="_blank"
+                            
+                            rel="noopener"
+                            title="LinkedIn"
+                        >
+                        <i class="sidebar-button-icon fab fa-linkedin" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">LinkedIn</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="mailto:cloudkaiser@gmail.com"
+                            
+                                target="_blank"
+                            
+                            rel="noopener"
+                            title="Mail"
+                        >
+                        <i class="sidebar-button-icon fa fa-envelope" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Mail</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/atom.xml"
+                            
+                            rel="noopener"
+                            title="RSS"
+                        >
+                        <i class="sidebar-button-icon fa fa-rss" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">RSS</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+    </div>
+</nav>
+
+            
+            <div id="main" data-behavior="5"
+                 class="
+                        hasCoverMetaIn
+                        ">
+                
+<article class="post">
+    
+    
+        <div class="post-header main-content-wrap text-left">
+    
+        <h1 class="post-title">
+            clean-code-8
+        </h1>
+    
+    
+        <div class="post-meta">
+    <time datetime="2021-02-16T05:56:17+00:00">
+	
+		    Feb 16, 2021
+    	
+    </time>
+    
+        <span>in </span>
+        
+    <a class="category-link" href="/categories/Clean-Code/">Clean Code</a>, <a class="category-link" href="/categories/Study/">Study</a>, <a class="category-link" href="/categories/%EB%8B%A8%EC%9C%84-%ED%85%8C%EC%8A%A4%ED%8A%B8/">단위 테스트</a>
+
+
+    
+</div>
+
+    
+</div>
+
+    
+    <div class="post-content markdown">
+        <div class="main-content-wrap">
+            <h1 id="단위-테스트"><a href="#단위-테스트" class="headerlink" title="단위 테스트"></a>단위 테스트</h1><h2 id="TDD법칙-세-가지"><a href="#TDD법칙-세-가지" class="headerlink" title="TDD법칙 세 가지"></a>TDD법칙 세 가지</h2><blockquote><p><strong>첫째 법칙</strong> : 실패하는 단위 테스트를 작성할 때까지 실제 코드를 작성하지 않는다.<br><strong>둘째 법칙</strong> : 컴파일은 실패하지 않으면서 실행이 실패하는 정도로만 단위 테스트를 작성한다.<br><strong>셋째 법칙</strong> : 현재 실패하는 테스트를 통과할 정도로만 실제코드를 작성한다. </p>
+</blockquote>
+
+<ul>
+<li>위와 같이 일하면 매일 수 십개, 매달 수 백개, 매년 수천개에 달하는 테스트 케이스가 나온다. (결국 실제 코드를 모두 테스트하는 격이됨.)</li>
+<li>실제 코드와 맞먹을 정도로 방대한 테스트 코드는 심각한 관리 문제를 유발하기도 한다. (그래서 테스트 케이스도 리팩토링 한다는 소리가 여기서 나옴.)</li>
+</ul>
+<h2 id="깨끗한-테스트-코드-유지하기"><a href="#깨끗한-테스트-코드-유지하기" class="headerlink" title="깨끗한 테스트 코드 유지하기"></a>깨끗한 테스트 코드 유지하기</h2><ul>
+<li>실제 코드가 진화하면 테스트코드도 변경해줘야함.</li>
+<li>테스트코드가 지저분할수록 변경하기 어려움. (테스트케이스 추가하는 시간이 실제 코드 짜는 시간보다 더 오래걸림.)</li>
+<li>테스트코드도 실무코드 못지 않게 깨끗하게 잘 관리가 잘되어야함. (주기적인 리팩토링도 고려해야함.) </li>
+</ul>
+<h3 id="테스트는-유연성-유지보수성-재사용성을-제공한다"><a href="#테스트는-유연성-유지보수성-재사용성을-제공한다" class="headerlink" title="테스트는 유연성, 유지보수성, 재사용성을 제공한다."></a>테스트는 유연성, 유지보수성, 재사용성을 제공한다.</h3><ul>
+<li>코드에 유연성, 유지보수성, 재사용성을 제공하는 버팀목은 바로 __단위테스트__다. (테스트케이스가 없다면 잠정적 버그이기 때문.)</li>
+</ul>
+<h2 id="깨끗한-테스트-코드"><a href="#깨끗한-테스트-코드" class="headerlink" title="깨끗한 테스트 코드"></a>깨끗한 테스트 코드</h2><ul>
+<li>깨끗한 테스트 코드를 만드려면 무조건 <strong>가독성</strong> 이다. </li>
+<li><a target="_blank" rel="noopener" href="http://fitnesse.org/FitNesse.FullReferenceGuide.UserGuide.WritingAcceptanceTests.AcceptanceTestPatterns.BuildOperateCheck">BUILD-OPERATE-CHECK</a> 테스트 구조에 적합함.(Build : 테스트 자료를 만들고 Operate : 테스트 자료를 조작하고 Check : 잘되는지 확인)</li>
+</ul>
+<h3 id="도메인에-특화된-테스트-언어"><a href="#도메인에-특화된-테스트-언어" class="headerlink" title="도메인에 특화된 테스트 언어"></a>도메인에 특화된 테스트 언어</h3><ul>
+<li>도메인에 특화된 언어 (DSL) 로 구현하여 테스트코드를 깔끔하게 유지하는게 중요. <blockquote><p><a target="_blank" rel="noopener" href="https://www.jetbrains.com/ko-kr/mps/concepts/domain-specific-languages/">DSL</a>?<br>도메인 특화 언어는 관련 특정 분야에 최적화된 프로그래밍 언어입니다. DSL은 해당 분야 또는 도메인의 개념과 규칙을 사용합니다.<br>(EX&gt; SQL)</p>
+</blockquote></li>
+<li>DSL로 구현함에 목적은 흔히 쓰는 시스템 조작 API (저자기준으로 assertEquals)를 사용하는 대신, 함수와 유틸리티를 구현한 후 그 함수와 유틸리티를 사용하므로 테스트 코드를 짜기도 읽기도 쉬워짐.(저자기준 assertResponseIsXML,assertResponseContains)</li>
+</ul>
+<h3 id="이중-표준"><a href="#이중-표준" class="headerlink" title="이중 표준"></a>이중 표준</h3><ul>
+<li>테스트 코드에 적용하는 표준은 실제 코드에 적용하는 표준과 확실히 다르다. </li>
+<li>단순하고 간결하고 표현력이 풍부해야 하지만, 실제 코드만큼 효율적인 필요는 없다. </li>
+<li>실제코드에 비즈니스로직을 제대로 검증하는 부분이라면, 테스트코드가 실제코드에 매핑할 필요까지는 없다는 이야기. </li>
+</ul>
+<h2 id="테스트당-assert-하나"><a href="#테스트당-assert-하나" class="headerlink" title="테스트당 assert 하나"></a>테스트당 assert 하나</h2><ul>
+<li><p>JUnit 으로 테스트 코드를 짤 때는 함수마다 assert문을 단 하나만 사용해야함. (결론이 하나 이기 때문) </p>
+</li>
+<li><p>TDD에서 given-when-then(mockito,BDD) 법칙을 활용하는게 좋다. (테스트 코드가 일관성 있게 유지됨)</p>
+</li>
+<li><p>given-when-then으로 테스트코드를 짜다보면 중복코드가 많아짐.</p>
+<blockquote><p>Q&gt; given-when-then의 중복코드 해결방법? </p>
+<ol>
+<li>Template Method 패턴(given/when부분을 부모클래스,then을 자식클래스) </li>
+<li>@Before 함수에 given/when의 공통로직을 넣고, @Test함수에 then을 넣는방식 </li>
+</ol>
+</blockquote>
+</li>
+<li><p>무조건 1함수-1assert를 지킬 의무는 없지만, 가급적 지켜달라는 소리다. 필요할때는 과감하게 여러 assert도 활용할수도 있어야함. </p>
+</li>
+</ul>
+<h3 id="테스트당-개념-하나"><a href="#테스트당-개념-하나" class="headerlink" title="테스트당 개념 하나"></a>테스트당 개념 하나</h3><ul>
+<li>테스트 함수마다 한 개념만 테스트 하라. </li>
+<li>3장 함수에서 설명했듯, 함수내에 가급적 하나의 기능만 넣도록 가이드한다. 테스트 함수도 마찬가지다! (결국 여러개의 개념이 들어갔다는건 함수가 여러 기능을 한다는 증거)</li>
+</ul>
+<h2 id="F-I-R-S-T"><a href="#F-I-R-S-T" class="headerlink" title="F.I.R.S.T"></a>F.I.R.S.T</h2><ul>
+<li>Fast : 테스트는 빨라야 한다. (테스트 로직이 느려지지 않도록 성능이슈를 늘 고민해야함.)</li>
+<li>Independent : 각 테스트는 서로 의존하면 안됨. (각 테스트는 독립적으로 그리고 어떤 순서로 실행해도 괜찮아야함.)</li>
+<li>Repeatable : 테스트는 어떤 환경에서도 반복 가능해야함. (지속적으로 테스트가 클래스 내에 전체테스트가 돌수 있어야함.)</li>
+<li>Self-Validating : 테스트는 Bool값으로 결과를 내야함. (성공이냐 실패냐로 판가름)</li>
+<li>Timely : 테스트는 적시에 작성해야함. (단위 테스트는 테스트하려는 실제 코드를 구현하기 직전에 구현 해아함.)</li>
+</ul>
+
+            
+
+
+        </div>
+    </div>
+    <div id="post-footer" class="post-footer main-content-wrap">
+        
+            <div class="post-footer-tags">
+                <span class="text-color-light text-small">TAGGED IN</span><br/>
+                
+    <a class="tag tag--primary tag--small t-none-link" href="/tags/refactoring-code-cleancode/" rel="tag">refactoring,code,cleancode</a>
+
+            </div>
+        
+        
+            <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    <a
+                        class="post-action-btn btn btn--disabled"
+                        aria-hidden="true"
+                    >
+                        
+                        <i class="fa fa-angle-left" aria-hidden="true"></i>
+                        <span class="hide-xs hide-sm text-small icon-ml">PREVIOUS</span>
+                    </a>
+            </li>
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/2021/02/15/clean-code-7/"
+                    data-tooltip="clean-code-7"
+                    aria-label="NEXT: clean-code-7"
+                >
+                    
+                        <span class="hide-xs hide-sm text-small icon-mr">NEXT</span>
+                        <i class="fa fa-angle-right" aria-hidden="true"></i>
+                    </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a
+                class="post-action-btn btn btn--default btn-open-shareoptions"
+                href="#btn-open-shareoptions"
+                aria-label="Share this post"
+            >
+                <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </a>
+        </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://codexdawn.github.io/2021/02/16/clean-code-8/"
+                    title="Share on Facebook"
+                    aria-label="Share on Facebook"
+                >
+                    <i class="fab fa-facebook" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://twitter.com/intent/tweet?text=https://codexdawn.github.io/2021/02/16/clean-code-8/"
+                    title="Share on Twitter"
+                    aria-label="Share on Twitter"
+                >
+                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://plus.google.com/share?url=https://codexdawn.github.io/2021/02/16/clean-code-8/"
+                    title="Share on Google+"
+                    aria-label="Share on Google+"
+                >
+                    <i class="fab fa-google-plus" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+        
+            
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#" aria-label="Back to top">
+            
+                <i class="fa fa-list" aria-hidden="true"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+        
+        
+            
+        
+    </div>
+</article>
+
+
+
+                <footer id="footer" class="main-content-wrap">
+    <span class="copyrights">
+        Copyrights &copy; 2021 codexdawn. All Rights Reserved.
+    </span>
+</footer>
+
+            </div>
+            
+                <div id="bottom-bar" class="post-bottom-bar" data-behavior="5">
+                    <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    <a
+                        class="post-action-btn btn btn--disabled"
+                        aria-hidden="true"
+                    >
+                        
+                        <i class="fa fa-angle-left" aria-hidden="true"></i>
+                        <span class="hide-xs hide-sm text-small icon-ml">PREVIOUS</span>
+                    </a>
+            </li>
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/2021/02/15/clean-code-7/"
+                    data-tooltip="clean-code-7"
+                    aria-label="NEXT: clean-code-7"
+                >
+                    
+                        <span class="hide-xs hide-sm text-small icon-mr">NEXT</span>
+                        <i class="fa fa-angle-right" aria-hidden="true"></i>
+                    </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a
+                class="post-action-btn btn btn--default btn-open-shareoptions"
+                href="#btn-open-shareoptions"
+                aria-label="Share this post"
+            >
+                <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </a>
+        </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://codexdawn.github.io/2021/02/16/clean-code-8/"
+                    title="Share on Facebook"
+                    aria-label="Share on Facebook"
+                >
+                    <i class="fab fa-facebook" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://twitter.com/intent/tweet?text=https://codexdawn.github.io/2021/02/16/clean-code-8/"
+                    title="Share on Twitter"
+                    aria-label="Share on Twitter"
+                >
+                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://plus.google.com/share?url=https://codexdawn.github.io/2021/02/16/clean-code-8/"
+                    title="Share on Google+"
+                    aria-label="Share on Google+"
+                >
+                    <i class="fab fa-google-plus" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+        
+            
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#" aria-label="Back to top">
+            
+                <i class="fa fa-list" aria-hidden="true"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+                </div>
+                
+    <div id="share-options-bar" class="share-options-bar" data-behavior="5">
+        <i id="btn-close-shareoptions" class="fa fa-times"></i>
+        <ul class="share-options">
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://www.facebook.com/sharer/sharer.php?u=https://codexdawn.github.io/2021/02/16/clean-code-8/"
+                        aria-label="Share on Facebook"
+                    >
+                        <i class="fab fa-facebook" aria-hidden="true"></i><span>Share on Facebook</span>
+                    </a>
+                </li>
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://twitter.com/intent/tweet?text=https://codexdawn.github.io/2021/02/16/clean-code-8/"
+                        aria-label="Share on Twitter"
+                    >
+                        <i class="fab fa-twitter" aria-hidden="true"></i><span>Share on Twitter</span>
+                    </a>
+                </li>
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://plus.google.com/share?url=https://codexdawn.github.io/2021/02/16/clean-code-8/"
+                        aria-label="Share on Google+"
+                    >
+                        <i class="fab fa-google-plus" aria-hidden="true"></i><span>Share on Google+</span>
+                    </a>
+                </li>
+            
+        </ul>
+    </div>
+
+
+            
+        </div>
+        
+
+
+<div id="about">
+    <div id="about-card">
+        <div id="about-btn-close">
+            <i class="fa fa-times"></i>
+        </div>
+        
+            <h4 id="about-card-name">codexdawn</h4>
+        
+            <div id="about-card-bio"><p>author.bio</p>
+</div>
+        
+        
+            <div id="about-card-job">
+                <i class="fa fa-briefcase"></i>
+                <br/>
+                <p>author.job</p>
+
+            </div>
+        
+        
+    </div>
+</div>
+
+        
+        
+<div id="cover" style="background-image:url('/assets/images/cover-v1.2.0.jpg');"></div>
+        <!--SCRIPTS-->
+
+<script src="/assets/js/script-ikbi0v8fyzuu91xv5rmpcrnwb4qinfgborzd5kejmj8wr6ibfra8oaxqshyg.min.js"></script>
+
+<!--SCRIPTS END-->
+
+
+    
+
+
+
+
+    </body>
+</html>
