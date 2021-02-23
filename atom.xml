@@ -6,7 +6,7 @@
   <link href="https://codexdawn.github.io/atom.xml" rel="self"/>
   
   <link href="https://codexdawn.github.io/"/>
-  <updated>2021-02-23T03:32:53.847Z</updated>
+  <updated>2021-02-23T07:41:01.048Z</updated>
   <id>https://codexdawn.github.io/</id>
   
   <author>
@@ -15,6 +15,34 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>java-effective-7</title>
+    <link href="https://codexdawn.github.io/2021/02/23/java-effective-7/"/>
+    <id>https://codexdawn.github.io/2021/02/23/java-effective-7/</id>
+    <published>2021-02-23T05:16:40.000Z</published>
+    <updated>2021-02-23T07:41:01.048Z</updated>
+    
+    <content type="html"><![CDATA[<h2 id="다-쓴-객체는-참조를-해제하라"><a href="#다-쓴-객체는-참조를-해제하라" class="headerlink" title="다 쓴 객체는 참조를 해제하라"></a>다 쓴 객체는 참조를 해제하라</h2><figure class="highlight java"><figcaption><span>메모리누수가 일어는 위치는 어디인가?</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Stack</span> </span>&#123;</span><br><span class="line"><span class="keyword">private</span> Object[] elements; </span><br><span class="line"><span class="keyword">private</span> <span class="keyword">int</span> size = <span class="number">0</span>; </span><br><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> DEFAULT_INITIAL_CAPACITY = <span class="number">16</span>; </span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">Stack</span><span class="params">()</span> </span>&#123;</span><br><span class="line">elements = <span class="keyword">new</span> Object[DEFAULT_INITIAL_CAPACITY];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">push</span><span class="params">(Object e)</span> </span>&#123;</span><br><span class="line">ensureCapacity();</span><br><span class="line">elements[size++] = e; </span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> Object <span class="title">pop</span><span class="params">()</span> </span>&#123;</span><br><span class="line"><span class="keyword">if</span>(size == <span class="number">0</span>) &#123;</span><br><span class="line"><span class="keyword">throw</span> <span class="keyword">new</span> EmptyStackException(); </span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">return</span> elements[--size]; </span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//배열의 크기는 2배씩 증가 , 원소를 위한 공간을 적어도 하나 이상 확보 </span></span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">ensureCapacity</span><span class="params">()</span> </span>&#123;</span><br><span class="line"><span class="keyword">if</span>(elements.length == size) &#123;</span><br><span class="line">elements = Arrays.copyOf(elements,<span class="number">2</span> * size + <span class="number">1</span>); </span><br><span class="line">&#125;</span><br><span class="line">&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><blockquote><p>Q&gt; 위 코드에서 메모리 누수는 어디서 발생할까?</p><ul><li>스택이 커졌다 줄어둘때 스택에서 꺼내진 객체들을 GC가 회수 하지 않는다. 프로그램에서 더이상 사용하지 않더라도 말이다. (pop 메서드) </li></ul></blockquote><ul><li>위 코드의 메모리누수는 어떻게 해결해야하는가? 아래 코드를 확인해보자. </li></ul><figure class="highlight java"><figcaption><span>제대로 구현 pop메서드</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> Object <span class="title">pop</span><span class="params">()</span> </span>&#123;</span><br><span class="line"><span class="keyword">if</span>(size == <span class="number">0</span>) &#123;</span><br><span class="line"><span class="keyword">throw</span> <span class="keyword">new</span> EmptyStackException(); </span><br><span class="line">&#125;</span><br><span class="line">Object result = elements[--size]; </span><br><span class="line">elements[size] = <span class="keyword">null</span>; <span class="comment">//다 쓴 참조 해제  </span></span><br><span class="line"><span class="keyword">return</span> result; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><ul><li>위와 같이 null처리하면 실수로 사용하려하면, NullPointerException을 던지며 종료되어 조기에 발견 가능 </li></ul><blockquote><p>Q&gt; null처리는 언제 해야할까? (Stack 클래스 메모리 누수 이유)</p><ul><li>스택이 자기 메모리를 직접 관리하기 때문 (Heap에서 참조로 스택과 연결되어있어서 GC가 해제를 못함)</li></ul><p>개발자들은 자기 메모리를 직접 관리하는 클래스라면 프로그래머는 항시 메모리 누수에 주의 해야한다. </p></blockquote><ul><li><p>캐시 역시 메모리 누수의 주범이다. 객체 참조를 캐시에 넣고 이 사실을 까맣게 잊은채 그 객체를 다 쓴뒤로도 한참 놔두는일.이부분을 해소하려면, WeakHashMap을 사용해 캐시를 만들자. 그럼 다쓴 엔트리는 그 즉시 제거됨.  </p></li><li><p>리스너 혹은 콜백이라 불리는 것도 메모리누수의 주범이다. 클라이언트가 콜백을 등록하고 명확히 해지하지 않을때 발생한다. 이럴때는 콜백을 약한 참조로 저장하면 GC가 즉시 수거해감. (ex&gt; WeakHashMap에 키로 저장하면 됨.)</p></li></ul>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;h2 id=&quot;다-쓴-객체는-참조를-해제하라&quot;&gt;&lt;a href=&quot;#다-쓴-객체는-참조를-해제하라&quot; class=&quot;headerlink&quot; title=&quot;다 쓴 객체는 참조를 해제하라&quot;&gt;&lt;/a&gt;다 쓴 객체는 참조를 해제하라&lt;/h2&gt;&lt;figure class=&quot;hi</summary>
+      
+    
+    
+    
+    <category term="Study" scheme="https://codexdawn.github.io/categories/Study/"/>
+    
+    <category term="Effective Java" scheme="https://codexdawn.github.io/categories/Effective-Java/"/>
+    
+    <category term="객체 생성과 파괴" scheme="https://codexdawn.github.io/categories/%EA%B0%9D%EC%B2%B4-%EC%83%9D%EC%84%B1%EA%B3%BC-%ED%8C%8C%EA%B4%B4/"/>
+    
+    
+    <category term="Java,EffectiveJava" scheme="https://codexdawn.github.io/tags/Java-EffectiveJava/"/>
+    
+  </entry>
   
   <entry>
     <title>java-effective-6</title>
