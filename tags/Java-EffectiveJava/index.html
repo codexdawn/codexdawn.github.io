@@ -247,6 +247,151 @@
                     
                         <a
                             class="link-unstyled"
+                            href="/2021/02/23/java-effective-9/"
+                            aria-label=": java-effective-9"
+                        >
+                            java-effective-9
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2021-02-23T08:26:08+00:00">
+	
+		    Feb 23, 2021
+    	
+    </time>
+    
+        <span>in </span>
+        
+    <a class="category-link" href="/categories/Effective-Java/">Effective Java</a>, <a class="category-link" href="/categories/Study/">Study</a>, <a class="category-link" href="/categories/%EA%B0%9D%EC%B2%B4-%EC%83%9D%EC%84%B1%EA%B3%BC-%ED%8C%8C%EA%B4%B4/">객체 생성과 파괴</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <p>f</p>
+<h2 id="try-finally-보다는-try-with-resources를-사용하라"><a href="#try-finally-보다는-try-with-resources를-사용하라" class="headerlink" title="try-finally 보다는 try-with-resources를 사용하라"></a>try-finally 보다는 try-with-resources를 사용하라</h2><ul>
+<li>자바 라이브러리에는 close메서드를 호출해 직접 닫아줘야하는 자원이 꽤 있음. (InputStream,OutputStream,java.sql.Connection등)</li>
+<li>JAVA7이 들어서면서 try-with-resources가 제공됨. 이 구조를 사용하려면 AutoClosable이 구현되어있어야함. </li>
+</ul>
+<figure class="highlight java"><figcaption><span>try-with-resources 사용법1</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">static</span> String <span class="title">firstLineOfFile</span><span class="params">(String path)</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">	<span class="keyword">try</span>(BufferedReader br = <span class="keyword">new</span> BufferedReader(<span class="keyword">new</span> FileReader(path))) &#123;</span><br><span class="line">		<span class="keyword">return</span> br.readLine(); </span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><figcaption><span>try-with-resources 사용법2</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">copy</span><span class="params">(String src, String dst)</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">	<span class="keyword">try</span>(InputStream in = <span class="keyword">new</span> FileInputStream(src); </span><br><span class="line">		OutputStream out = <span class="keyword">new</span> FileOutputStream(dst)) &#123;</span><br><span class="line">		<span class="keyword">byte</span>[] buf = <span class="keyword">new</span> <span class="keyword">byte</span>[BUFFER_SIZE]; </span><br><span class="line">		<span class="keyword">int</span> n; </span><br><span class="line">		<span class="keyword">while</span>((n = in.read(buf)) &gt;= <span class="number">0</span>)</span><br><span class="line">			out.write(buf,<span class="number">0</span>,n); </span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><figcaption><span>try-with-resources 사용법3</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">static</span> String <span class="title">firstLineOfFile</span><span class="params">(String path, String defaultVal)</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">	<span class="keyword">try</span>(BufferedReader br = <span class="keyword">new</span> BufferedReader(<span class="keyword">new</span> FileReader(path))) &#123;</span><br><span class="line">		<span class="keyword">return</span> br.readLine(); </span><br><span class="line">	&#125; <span class="keyword">catch</span>(IOException e) &#123;</span><br><span class="line">		<span class="keyword">return</span> defaultVal; </span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/2021/02/23/java-effective-9/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                Comment and share
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
+                            href="/2021/02/23/java-effective-8/"
+                            aria-label=": java-effective-8"
+                        >
+                            java-effective-8
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2021-02-23T07:43:45+00:00">
+	
+		    Feb 23, 2021
+    	
+    </time>
+    
+        <span>in </span>
+        
+    <a class="category-link" href="/categories/Effective-Java/">Effective Java</a>, <a class="category-link" href="/categories/Study/">Study</a>, <a class="category-link" href="/categories/%EA%B0%9D%EC%B2%B4-%EC%83%9D%EC%84%B1%EA%B3%BC-%ED%8C%8C%EA%B4%B4/">객체 생성과 파괴</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <h2 id="finalizer-와-cleaner-사용을-피하라"><a href="#finalizer-와-cleaner-사용을-피하라" class="headerlink" title="finalizer 와 cleaner 사용을 피하라"></a>finalizer 와 cleaner 사용을 피하라</h2><ul>
+<li>자바는 두가지 객체 소멸자가 있는데, finalizer 와 cleaner이다. </li>
+<li>finalizer는 예측할수 없고, 상황에 따라 위험할수 있어 일반적으로 불필요함. </li>
+<li>cleaner는 finalizer보다는 덜 위험하지만, 여전히 예측할수 없고, 느리고, 일반적으로 불필요함. (GC에서 소멸하는 역할을 담당하기때문)</li>
+<li>finalizer와 cleaner로는 제때 실행되어야하는 (realtime환경) 작업은 절대 할 수 없음. (application이 제때 종료되어야하는데, 게으른 finalizer/ cleaner로 인해 종료가 안되어있는 상태로 유지될 수있다.)</li>
+<li>상태를 영구적으로 수정하는 작업에서는 절대로! finalizer나 cleaner에 의존해서는 안됨! </li>
+<li>System.gc / System.runFinaliztion 메서드에 현혹되지 말자. GC 처리의 우선순위를 높여줄지언정 제때 처리된다는 보장이 없음 </li>
+<li>finalizer/cleaner는 심각한 성능 문제도 동반한다. (AutoClosable처리에 비해 50배의 성능차 발생 )</li>
+<li>finalizer/cleaner를 대신할 묘안은? AutoClosable을 구현해주고, 클라이언트에서 인스턴스를 다사용하면 close 메서드를 호출하면 됨. (일반적으로 예외가 발생해도 제대로 종료되도록 try-with-resources를 사용해야함.)</li>
+</ul>
+<blockquote><p>finalizer 와 cleaner는 그럼 언제 사용해야 잘사용했다고 칭찬받을까? </p>
+<ol>
+<li>자원의 소유자가 close메서드를 호출하지 못할걸 대비한 안전망이다.</li>
+<li>Native-Peer와 연결된 객체 (JVM 메모리 구조중 - Native Method Area 영역을 말함 (JNI))에서 close하고 싶을때 호출한다. Native Method Area영역은 자바 객체가 아니기때문에 GC에서 관리하지 못한다. </li>
+</ol>
+</blockquote>
+
+<ul>
+<li>결론은 finalizer/cleaner활용보다는 AutoClosable로 객체life를 관리하고, try-with-resources로 객체를 호출해 관리하는것이 베스트이다. </li>
+</ul>
+
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/2021/02/23/java-effective-8/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                Comment and share
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
                             href="/2021/02/23/java-effective-7/"
                             aria-label=": java-effective-7"
                         >
