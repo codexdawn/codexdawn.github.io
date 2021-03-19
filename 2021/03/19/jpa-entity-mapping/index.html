@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="generator" content="codexdawn">
-    <title>Archives: 2021/3 - codexdawn</title>
+    <title>jpa-entity-mapping - codexdawn</title>
     <meta name="author" content="codexdawn">
     
     
@@ -15,13 +15,18 @@
             <link rel="alternate" type="application/atom+xml" title="RSS" href="/atom.xml">
         
     
-    <script type="application/ld+json">{}</script>
-    <meta property="og:type" content="blog">
-<meta property="og:title" content="codexdawn">
-<meta property="og:url" content="https://codexdawn.github.io/archives/2021/03/index.html">
+    <script type="application/ld+json">{"@context":"http://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"codexdawn","sameAs":["https://github.com/codexdawn","https://www.facebook.com/beherzt.dev","https://www.linkedin.com/in/sim-jisung-3048872a/","mailto:cloudkaiser@gmail.com"],"image":"https://www.gravatar.com/avatar/d97fd4b94c429915f1cb55eb27e7d4d9"},"articleBody":"엔티티 매핑 (Entity Mapping)@Entity@Entity가 붙은 클래스는 JPA가 관리하는것 \n@Entity적용시 주의 사항 \n\n기본생성자는 필수 (public 또는 protected 생성자)\nfinal 클래스, enum,interface,inner클래스에 사용불가 \n저장할 필드에 final 사용불가 \n\n@Table@Table은 Entity와 매핑할 테이블 지정함. 생략하면 Entity 이름을 테이블이름으로 사용 \n다양한 매핑 사용회원 엔티티123456789101112131415161718192021222324252627282930@Entity @Table(name=&quot;MEMBER&quot;)public class Member &#123;\t\t@Id \t@Column(name = &quot;ID&quot;)\tprivate String id;\t\t@Column(name = &quot;NAME&quot;, nullable = false, length = 10) \tprivate String username;\t\tprivate Integer age; \t\t@Enumerated(EnumType.STRING)\tprivate RoleType roleType; \t\tprivate LocalDateTime createdDate; \t\tprivate LocalDateTime lastModifiedDate; \t\t@Lob \tprivate String description; \t\t//Getter, Setter 세팅&#125;public enum RoleType &#123;\tADMIN, USER &#125;\n\n\nRoleType의 @Enumerated설정은 특별한 이유없음 EnumType.STRING 으로 설정하자 (기본값이 ORDINAL 인데 이걸 사용하면 0,1,2..로 지정됨.)\nDate타입은 요즘 사용하는 jpa버전에서는 @Temporal생략하고 LocalDateTime 혹은 LocalDate만 적어도 됨. \ndescription 필드는 회원을 설명하는 필드인데, 길이제한이 없다. 따라서 DB에 varchar타입대신 CLOB으로 저장됨. @Lob을 사용하면 CLOB,BLOB 매핑가능 \n\n데이터베이스 스키마 자동생성persistence.xml에서 스키마 자동생성 기능을 설정할수있음.\n스키자 자동생성 방법1&lt;property name=&quot;hibernate.hbm2ddl.auto&quot; value=&quot;create&quot;/&gt;\n\nhibernate.hbm2ddl.auto 속성 정리\ncreate : 기존 테이블 삭제 하고 새로 생성 (DROP + CREATE) \ncreate-drop : create 기능에서 앱 종료시 다시 DROP 시킴\nupdate : db테이블과 entity매핑 정보 비교해서 변경사항만 수정 \nvalidate : db테이블과 entity매핑 정보 비교해서 차이가 있으면 경고를 남기고 앱 실행 안함. (DDL수행안함)\nnone : 이 기능 사용안하려면 적고, 아니면 property자체를 제거하면 기능 사용 안함. \n\nhibernate.hbm2ddl.auto 사용시 주의사항은 가급적 자동 DDL은 local환경에서 테스트 개발할때 사용하는것 아니면 사용하지말고, 굳이 써야한다면 dev환경에서 validate정도만 쓰는데, 이것도 가급적 사용하지 말자. 그냥 local에서만 잠깐 쓰자. \nDDL 생성 기능엔티티 설정할때 각 필드에 아래와 같이 설정이 가능함 \n@Column(name = “NAME”, nullable = false, length = 10) \n위 기능의 nullable,length를 통해 DDL을 생성할때 위 제약조건을 자동으로 테이블설정에 추가할수있음.이밖에 @Table에 유니크 제약조건도 걸수있음. (uniqueConstraints 참고)\n결론은 위 기능은 hbm2ddl기능을 활성화 했을때만 적용되는 기술이다. 하지만 표기성으로 타 개발자가 제약조건에 대한 설명을 알게 할수있는 기능이 있어서, 추가해주면 나쁘지 않을듯 하다. (굳이 테이블 까서 볼 필요없이 엔티티통해서 한눈에 확인가능)\n기본키 매핑JPA가 제공하는 DB기본키 생성전략 2가지 \n\n직접 할당 : 기본 키를 애플리케이션에서 직접 할당 (@Id 만 사용)\n자동 생성 : 대리키 사용방식 \n\n\nIDENTITY : 기본키 생성을 DB에 위임.  \nSEQUENCE : DB 시퀀스를 사용해서 기본 키를 할당한다. \nTABLE : 키 생성 테이블을 사용. \n\n기본키 직접 할당 전략@Id적용 가능 자바 타입 \n\n자바 기본형 \n자바 래퍼형(warpper)\nString \njava.util.Date\njava.sql.Date\njava.math.BigDecimal\njava.math.BigInteger\n\nIdentity 전략Identity 전략은 기본 키 생성을 DB에 위임하는 전략. 주로 MySql/PostgreSql/SqlServer/DB2에서 사용함.Identity 전략은 AUTO_INCREMENT처럼 DB에 값을 저장하고 나서야 기본 키 값을 구할수 있음 \nentity가 영속상태가 되려면 (persistence context에 저장되려면) 반드시 식별자가 있어야함. 근데 Identity 식별자 생성 전략은 엔티티를 DB에 저장해야 식별자를 구할수있음. 따라서 em.persist()를 호출하는 즉시 insert sql문이 db에 전달됨 (auto flush). 따라서 이 전략은 트랜잭션을 지원하는 쓰기 지연이 동작하지 않는다. \n결론은 Identity전략은 persist를 하는순간 바로 flush가 되기때문에 쓰기지연SQL저장소에는 저장이 안됨. \n\n\nSequence 전략Sequence전략은 유일한 값을 순서대로 생성하는 특별한 DB오브젝트다. 이 전략은 시퀀스를 지원하는 오라클, PostgreSql, DB2, H2에서 사용가능함.시퀀스를 사용하기위해서는 시퀀스 생성 해야함.(CREATE SEQUENCE BOARD_SEQ START WITH 1 INCREAMENT BY 1)\n시퀀스사용방법1234567@Entity @SequenceGenerator(name = &quot;BOARD_SEQ_GENERATOR&quot;, sequnceName = &quot;BOARD_SEQ&quot;, initialValue=1, allocationSize=1)public class Board &#123;\t@Id \t@GenerateValue(strategy= GenerateValue.SEQUENCE, genertor = &quot;BOARD_SEQ_GENERATOR&quot;)\tprivate Long id; &#125;\n\n위 코드의 sequnceName 은 앞서 미리 디비에서 생성한 시퀀스 이름이다. 그리고 allocationSize를 통해서 시퀀스 한번 호출에 증가하는 수를 가져올수있는데,매번 시퀀스 테이블을 조회하는것도 성능상 저하를 일으킬수도 있기때문에 시퀀스를 1개씩만 가져오는것보다 한번에 여러개를 가져와서 쓰고 다쓰면 다시 가져오는 형태로 쓸때 유용하고 성능상 이점을 가져올수있음. 하지만 주의점은 allocationSize는 DDL매핑할때 increment by {allocatiuonSize}인데 1로 설정했으면, 반드시 1로 값을 할당해야함. 기본값은 50이기때문에 반드시 확인해야한다! \n시퀀스 전략은 Identity전략과 내부동작방식이 다르다. 시퀀스 전략은 em.persist()를 호출할때 DB시퀀스테이블을 먼저 식별자값을 조회하고, 조회한 식별자를 엔티티에 할당한 후 엔티티를 Persistence Context에 저장한다. 이후 트랜잭션을 커밋해서 플러스가 일어나면 엔티티를 DB에 저장한다. \nTABLE 전략TABLE전략은 키 생성 전용 테이블을 하나 만들고 여기에 이름과 값으로 사용할 컬럼을 만들어 데이터베이스 시퀀스를 흉내내는 전략이다. 이 전략은 테이블을 사용하므로 모든 DB에 적용가능하다.TABLE전략은 기본적으로 Sequence전략과 유사함. 그리고 @TableGenerator로 시퀀스 생성하듯 유사하게 생성하면됨. (키 전용 테이블 생성해야함.)TABLE전략은 값을 조회하면서 SELECT쿼리를 사용하고 다음 값으로 증가시키기 위해 UPDATE쿼리를 사용한다. 이 전략은 SEQUENCE전략과 비교해서 DB와 한번 더 통신하는 단점이 있다. TABLE전략을 최적화 하려면 시퀀스와 유사하게 @TableGenerator.allocationSize를 사용하면됨. \nAUTO전략AUTO전략은 다양한 DB종류의 맞춰서 IDENTITY,SQUENCE,TABLE전략중 하나를 자동으로 선택해서 사용함. (EX&gt; 오라클=SEQUENCE, MYSQL=IDENTITY)AUTO전략은 DB를 변경해도 코드를 수정할 필요없으며, 특히 키 생성 전략이 아직 확정되지 않은 개발 초기단계나 프로토타입 개발시 편리하게 사용가능하다.AUTO전략을 사용할때 SEQUENCE나 TABLE 전략이 선택되면 시퀀스나 키생성용 테이블을 미리 만들어둬야하는데, 만약 DDL자동생성기능을 사용하면 하이버네이트가 기본값을 사용해서 적절한 시퀀스나 키생성 테이블을 만들어줌. \n@ACCESSJPA가 Entity 데이터에 접근하는 방식을 지정할수있음. \n\n필드 접근: AccessType.FILED로 지정한다. 필드에 직접 접근한다. 필드 접근 권한이 private이어도 접근할수있다. \n프로퍼티 접근: AccessType.PROPERTY로 지정한다. 접근자 Getter를 사용한다. \n\n@Access(AccessType.PROPERTY)는 getter위에 선언하면 entity를통해 받아온 데이터를 getter에 저장한다. \n프로퍼티접근12345678910111213141516@Entitypublic class Member &#123;\t@Id \tprivate Long id; \t\t@Transient \tprivate String firstName; \t\t@Transient \tprivate String lastName; \t\t@Access(AccessType.PROPERTY)\tpublic String getFullName() &#123;\t\treturn firstName + lastName; \t&#125;&#125;\n\n실전 예제Member1234567891011121314151617181920212223242526272829303132333435363738394041424344454647484950515253545556575859@Entitypublic class Member &#123;\t@Id    @GeneratedValue    @Column(name = &quot;MEMBER_ID&quot;)    private Long id;    private String name;    private String city; \tprivate String street; \tprivate String zipcode;     // 사실상 양방향으로 매핑할일은 거의 없음.    // 이부분은 학습상 넣어둔 부분임. (실제 설계할때는 반드시 빼야함)    @OneToMany(mappedBy = &quot;member&quot;)    private List&lt;Order&gt; orders = new ArrayList&lt;&gt;();    public Long getId() &#123;        return id;    &#125;    public void setId(Long id) &#123;        this.id = id;    &#125;    public String getName() &#123;        return name;    &#125;    public void setName(String name) &#123;        this.name = name;    &#125;    public List&lt;Order&gt; getOrders() &#123;        return orders;    &#125;    public void setOrders(List&lt;Order&gt; orders) &#123;        this.orders = orders;    &#125;    public String getCity() &#123;\t\treturn city; \t&#125;\t\tpublic void setCity(String city) &#123;\t\tthis.city = city; \t&#125;\t\tpublic String getStreet() &#123;\t\treturn street; \t&#125;\t\tpublic void setStreet(String street) &#123;\t\tthis.street = street; \t&#125;&#125;\n\nOrders123456789101112131415161718192021222324252627282930313233343536373839404142434445464748495051525354555657585960616263@Entity@Table(name = &quot;ORDERS&quot;)public class Order &#123;    @Id    @GeneratedValue    @Column(name = &quot;ORDER_ID&quot;)    private Long id;    @ManyToOne(fetch = FetchType.LAZY)    @JoinColumn(name = &quot;MEMBER_ID&quot;)    private Member member;    private LocalDateTime orderDate;    @Enumerated(EnumType.STRING)    private OrderStatus orderStatus;    @OneToMany(mappedBy = &quot;order&quot;, cascade = CascadeType.ALL)    private List&lt;OrderItem&gt; orderItems = new ArrayList&lt;&gt;();    public List&lt;OrderItem&gt; getOrderItems() &#123;        return orderItems;    &#125;    //연관 관계 편의 메서드 (getter/setter관례와 다르게 네이밍하자)    public void addOrderItem(OrderItem orderItem) &#123;        orderItems.add(orderItem);        orderItem.setOrder(this);    &#125;    public Long getId() &#123;        return id;    &#125;    public void setId(Long id) &#123;        this.id = id;    &#125;    public Member getMember() &#123;        return member;    &#125;    public void setMember(Member member) &#123;        this.member = member;    &#125;    public LocalDateTime getOrderDate() &#123;        return orderDate;    &#125;    public void setOrderDate(LocalDateTime orderDate) &#123;        this.orderDate = orderDate;    &#125;    public OrderStatus getOrderStatus() &#123;        return orderStatus;    &#125;    public void setOrderStatus(OrderStatus orderStatus) &#123;        this.orderStatus = orderStatus;    &#125;&#125;\n\nOrderItem123456789101112131415161718192021222324252627282930313233343536373839404142434445464748495051525354555657    @Id    @GeneratedValue    @Column(name = &quot;ORDER_ITEM_ID&quot;)    private Long id;    @ManyToOne(fetch = FetchType.LAZY)    @JoinColumn(name = &quot;ORDER_ID&quot;)    private Order order;    @ManyToOne(fetch = FetchType.LAZY)    @JoinColumn(name = &quot;ITEM_ID&quot;)    private Item item;    private int orderPrice;    private int count;    public Long getId() &#123;        return id;    &#125;    public void setId(Long id) &#123;        this.id = id;    &#125;    public Order getOrder() &#123;        return order;    &#125;    public void setOrder(Order order) &#123;        this.order = order;    &#125;    public Item getItem() &#123;        return item;    &#125;    public void setItem(Item item) &#123;        this.item = item;    &#125;    public int getOrderPrice() &#123;        return orderPrice;    &#125;    public void setOrderPrice(int orderPrice) &#123;        this.orderPrice = orderPrice;    &#125;    public int getCount() &#123;        return count;    &#125;    public void setCount(int count) &#123;        this.count = count;    &#125;&#125;\n\nItem1234567891011121314151617181920212223242526272829303132333435@Id@GeneratedValue@Column(name = &quot;ITEM_ID&quot;)private Long id;private String name;private int price;private int stockQuantity;public void setId(Long id) &#123;    this.id = id;&#125;public String getName() &#123;    return name;&#125;public void setName(String name) &#123;    this.name = name;&#125;public int getPrice() &#123;    return price;&#125;public void setPrice(int price) &#123;    this.price = price;&#125;public int getStockQuantity() &#123;    return stockQuantity;&#125;public void setStockQuantity(int stockQuantity) &#123;    this.stockQuantity = stockQuantity;&#125;","dateCreated":"2021-03-19T08:26:18+00:00","dateModified":"2021-03-19T14:06:19+00:00","datePublished":"2021-03-19T08:26:18+00:00","description":"","headline":"jpa-entity-mapping","image":[],"mainEntityOfPage":{"@type":"WebPage","@id":"https://codexdawn.github.io/2021/03/19/jpa-entity-mapping/"},"publisher":{"@type":"Organization","name":"codexdawn","sameAs":["https://github.com/codexdawn","https://www.facebook.com/beherzt.dev","https://www.linkedin.com/in/sim-jisung-3048872a/","mailto:cloudkaiser@gmail.com"],"image":"https://www.gravatar.com/avatar/d97fd4b94c429915f1cb55eb27e7d4d9","logo":{"@type":"ImageObject","url":"https://www.gravatar.com/avatar/d97fd4b94c429915f1cb55eb27e7d4d9"}},"url":"https://codexdawn.github.io/2021/03/19/jpa-entity-mapping/","keywords":"Java,JPA"}</script>
+    <meta name="description" content="엔티티 매핑 (Entity Mapping)@Entity@Entity가 붙은 클래스는 JPA가 관리하는것  @Entity적용시 주의 사항   기본생성자는 필수 (public 또는 protected 생성자) final 클래스, enum,interface,inner클래스에 사용불가  저장할 필드에 final 사용불가   @Table@Table은 Entity와 매">
+<meta property="og:type" content="blog">
+<meta property="og:title" content="jpa-entity-mapping">
+<meta property="og:url" content="https://codexdawn.github.io/2021/03/19/jpa-entity-mapping/index.html">
 <meta property="og:site_name" content="codexdawn">
+<meta property="og:description" content="엔티티 매핑 (Entity Mapping)@Entity@Entity가 붙은 클래스는 JPA가 관리하는것  @Entity적용시 주의 사항   기본생성자는 필수 (public 또는 protected 생성자) final 클래스, enum,interface,inner클래스에 사용불가  저장할 필드에 final 사용불가   @Table@Table은 Entity와 매">
 <meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2021-03-19T08:26:18.000Z">
+<meta property="article:modified_time" content="2021-03-19T14:06:19.031Z">
 <meta property="article:author" content="codexdawn">
+<meta property="article:tag" content="Java,JPA">
 <meta name="twitter:card" content="summary">
     
     
@@ -41,6 +46,8 @@
     
 
     
+        
+    
 </head>
 
     <body>
@@ -50,7 +57,7 @@
 
     
 
-<header id="header" data-behavior="2">
+<header id="header" data-behavior="5">
     <i id="btn-open-sidebar" class="fa fa-lg fa-bars"></i>
     <div class="header-title">
         <a
@@ -77,7 +84,7 @@
             <!-- Define author's picture -->
 
 
-<nav id="sidebar" data-behavior="2">
+<nav id="sidebar" data-behavior="5">
     <div class="sidebar-container">
         
         
@@ -231,30 +238,22 @@
 </nav>
 
             
-            <div id="main" data-behavior="2"
+            <div id="main" data-behavior="5"
                  class="
                         hasCoverMetaIn
                         ">
                 
-    <section class="postShorten-group main-content-wrap">
+<article class="post">
     
     
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/2021/03/19/jpa-entity-mapping/"
-                            aria-label=": jpa-entity-mapping"
-                        >
-                            jpa-entity-mapping
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
+        <div class="post-header main-content-wrap text-left">
+    
+        <h1 class="post-title">
+            jpa-entity-mapping
+        </h1>
+    
+    
+        <div class="post-meta">
     <time datetime="2021-03-19T08:26:18+00:00">
 	
 		    Mar 19, 2021
@@ -269,10 +268,13 @@
     
 </div>
 
-            </div>
-            
-                <div class="postShorten-content">
-                    <h1 id="엔티티-매핑-Entity-Mapping"><a href="#엔티티-매핑-Entity-Mapping" class="headerlink" title="엔티티 매핑 (Entity Mapping)"></a>엔티티 매핑 (Entity Mapping)</h1><h2 id="Entity"><a href="#Entity" class="headerlink" title="@Entity"></a>@Entity</h2><p>@Entity가 붙은 클래스는 JPA가 관리하는것 </p>
+    
+</div>
+
+    
+    <div class="post-content markdown">
+        <div class="main-content-wrap">
+            <h1 id="엔티티-매핑-Entity-Mapping"><a href="#엔티티-매핑-Entity-Mapping" class="headerlink" title="엔티티 매핑 (Entity Mapping)"></a>엔티티 매핑 (Entity Mapping)</h1><h2 id="Entity"><a href="#Entity" class="headerlink" title="@Entity"></a>@Entity</h2><p>@Entity가 붙은 클래스는 JPA가 관리하는것 </p>
 <p>@Entity적용시 주의 사항 </p>
 <ul>
 <li>기본생성자는 필수 (public 또는 protected 생성자)</li>
@@ -349,279 +351,121 @@
 <figure class="highlight java"><figcaption><span>OrderItem</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br></pre></td><td class="code"><pre><span class="line">    <span class="meta">@Id</span></span><br><span class="line">    <span class="meta">@GeneratedValue</span></span><br><span class="line">    <span class="meta">@Column(name = &quot;ORDER_ITEM_ID&quot;)</span></span><br><span class="line">    <span class="keyword">private</span> Long id;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@ManyToOne(fetch = FetchType.LAZY)</span></span><br><span class="line">    <span class="meta">@JoinColumn(name = &quot;ORDER_ID&quot;)</span></span><br><span class="line">    <span class="keyword">private</span> Order order;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@ManyToOne(fetch = FetchType.LAZY)</span></span><br><span class="line">    <span class="meta">@JoinColumn(name = &quot;ITEM_ID&quot;)</span></span><br><span class="line">    <span class="keyword">private</span> Item item;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">int</span> orderPrice;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">int</span> count;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Long <span class="title">getId</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> id;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setId</span><span class="params">(Long id)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.id = id;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Order <span class="title">getOrder</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> order;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setOrder</span><span class="params">(Order order)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.order = order;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Item <span class="title">getItem</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> item;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setItem</span><span class="params">(Item item)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.item = item;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">getOrderPrice</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> orderPrice;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setOrderPrice</span><span class="params">(<span class="keyword">int</span> orderPrice)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.orderPrice = orderPrice;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">getCount</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> count;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setCount</span><span class="params">(<span class="keyword">int</span> count)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.count = count;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <figure class="highlight java"><figcaption><span>Item</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Id</span></span><br><span class="line"><span class="meta">@GeneratedValue</span></span><br><span class="line"><span class="meta">@Column(name = &quot;ITEM_ID&quot;)</span></span><br><span class="line"><span class="keyword">private</span> Long id;</span><br><span class="line"><span class="keyword">private</span> String name;</span><br><span class="line"><span class="keyword">private</span> <span class="keyword">int</span> price;</span><br><span class="line"><span class="keyword">private</span> <span class="keyword">int</span> stockQuantity;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setId</span><span class="params">(Long id)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">this</span>.id = id;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> String <span class="title">getName</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> name;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setName</span><span class="params">(String name)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">this</span>.name = name;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">getPrice</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> price;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setPrice</span><span class="params">(<span class="keyword">int</span> price)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">this</span>.price = price;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">getStockQuantity</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> stockQuantity;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setStockQuantity</span><span class="params">(<span class="keyword">int</span> stockQuantity)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">this</span>.stockQuantity = stockQuantity;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-                    
-                        
-
-
-                    
-                    
-                        <p>
-                            <a
-                                href="/2021/03/19/jpa-entity-mapping/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                Comment and share
-                            </a>
-                        </p>
-                    
-                </div>
             
+
+
         </div>
+    </div>
+    <div id="post-footer" class="post-footer main-content-wrap">
         
-    </article>
-    
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/2021/03/18/jpa-persistence/"
-                            aria-label=": jpa-persistence"
-                        >
-                            jpa-persistence
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time datetime="2021-03-18T02:11:16+00:00">
-	
-		    Mar 18, 2021
-    	
-    </time>
-    
-        <span>in </span>
-        
-    <a class="category-link" href="/categories/Study/">Study</a>, <a class="category-link" href="/categories/%EC%98%81%EC%86%8D%EC%84%B1-%EA%B4%80%EB%A6%AC/">영속성 관리</a>, <a class="category-link" href="/categories/%EC%9E%90%EB%B0%94ORM%ED%91%9C%EC%A4%80JPA%ED%94%84%EB%A1%9C%EA%B7%B8%EB%9E%98%EB%B0%8D/">자바ORM표준JPA프로그래밍</a>
-
-
-    
-</div>
+            <div class="post-footer-tags">
+                <span class="text-color-light text-small">TAGGED IN</span><br/>
+                
+    <a class="tag tag--primary tag--small t-none-link" href="/tags/Java-JPA/" rel="tag">Java,JPA</a>
 
             </div>
-            
-                <div class="postShorten-content">
-                    <h1 id="영속성-관리"><a href="#영속성-관리" class="headerlink" title="영속성 관리"></a>영속성 관리</h1><h2 id="EntityManagerFactory-와-EntityManager"><a href="#EntityManagerFactory-와-EntityManager" class="headerlink" title="EntityManagerFactory 와 EntityManager"></a>EntityManagerFactory 와 EntityManager</h2><figure class="highlight java"><figcaption><span>EntityManagerFactory와EntityManager사용법</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">final</span> EntityManagerFactory entityManagerFactory = Persistence.createEntityManagerFactory(<span class="string">&quot;jpa&quot;</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">final</span> EntityManager entityManager = entityManagerFactory.createEntityManager();</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight xml"><figcaption><span>persistence.xml</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; ?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">persistence</span> <span class="attr">xmlns</span>=<span class="string">&quot;http://xmlns.jcp.org/xml/ns/persistence&quot;</span> <span class="attr">version</span>=<span class="string">&quot;2.2&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">persistence-unit</span> <span class="attr">name</span>=<span class="string">&quot;jpa&quot;</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">class</span>&gt;</span>entity.Member<span class="tag">&lt;/<span class="name">class</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">class</span>&gt;</span>entity.Team<span class="tag">&lt;/<span class="name">class</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">class</span>&gt;</span>entity.Order<span class="tag">&lt;/<span class="name">class</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">class</span>&gt;</span>entity.Product<span class="tag">&lt;/<span class="name">class</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">class</span>&gt;</span>entity.Address<span class="tag">&lt;/<span class="name">class</span>&gt;</span></span><br><span class="line"></span><br><span class="line">        <span class="tag">&lt;<span class="name">properties</span>&gt;</span></span><br><span class="line"></span><br><span class="line">            <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">&quot;javax.persistence.jdbc.driver&quot;</span> <span class="attr">value</span>=<span class="string">&quot;org.h2.Driver&quot;</span>/&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">&quot;javax.persistence.jdbc.user&quot;</span> <span class="attr">value</span>=<span class="string">&quot;sa&quot;</span> /&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">&quot;javax.persistence.jdbc.password&quot;</span> <span class="attr">value</span>=<span class="string">&quot;&quot;</span> /&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">&quot;javax.persistence.jdbc.url&quot;</span> <span class="attr">value</span>=<span class="string">&quot;jdbc:h2:tcp://localhost/~/jpqlshop&quot;</span>/&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">&quot;hibernate.dialect&quot;</span> <span class="attr">value</span>=<span class="string">&quot;org.hibernate.dialect.H2Dialect&quot;</span>/&gt;</span></span><br><span class="line"></span><br><span class="line">            <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">&quot;hibernate.show_sql&quot;</span> <span class="attr">value</span>=<span class="string">&quot;true&quot;</span>/&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">&quot;hibernate.format_sql&quot;</span> <span class="attr">value</span>=<span class="string">&quot;true&quot;</span>/&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">&quot;hibernate.use_sql_comments&quot;</span> <span class="attr">value</span>=<span class="string">&quot;true&quot;</span>/&gt;</span></span><br><span class="line"></span><br><span class="line">            <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">&quot;hibernate.hbm2ddl.auto&quot;</span> <span class="attr">value</span>=<span class="string">&quot;create&quot;</span>/&gt;</span></span><br><span class="line"></span><br><span class="line">        <span class="tag">&lt;/<span class="name">properties</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;/<span class="name">persistence-unit</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">persistence</span>&gt;</span></span><br></pre></td></tr></table></figure>
-
-<ul>
-<li><p><strong>Persistence.createEntityManagerFactory(“jpa”)</strong> 를 호출하면 META_INF/persistence.xml 에 있는 정보를 바탕으로 EntityManagerFactory를 생성한다. </p>
-</li>
-<li><p>EntityManagerFactory는 멀티스레드로 동시에 접근해도 안전하여, 서로 다른 스레드간에 공유가능하지만, EntityManager는 멀티스레드로 동시 접근하면, 동시성 문제로 스레드간 절대 공유하면 안됨. </p>
-</li>
-</ul>
-<h2 id="Persistence-Context-영속성-컨텍스트"><a href="#Persistence-Context-영속성-컨텍스트" class="headerlink" title="Persistence Context (영속성 컨텍스트)"></a>Persistence Context (영속성 컨텍스트)</h2><ul>
-<li>Persistence Context : Entity를 영구 저장하는 환경 </li>
-<li>em.persist(member)는 단순 저장을 넘어서, entityManager를 사용해서 Persistence Context에 저장한다. </li>
-<li>EntityManager로 저장 혹은 조회 명령을 하면 EntityManager가 Persistence Context에 해당 Entity를 보관함. </li>
-</ul>
-<h2 id="Entity-LifeCycle-엔티티-생명주기"><a href="#Entity-LifeCycle-엔티티-생명주기" class="headerlink" title="Entity LifeCycle(엔티티 생명주기)"></a>Entity LifeCycle(엔티티 생명주기)</h2><p><img src="https://thorben-janssen.com/wp-content/uploads/2020/07/Lifecycle-Model-1024x576.png" alt="Entity LifeCycle"><br>[참고: thorben-janssen.com]</p>
-<blockquote><p>Entity 4가지 상태 </p>
-<ul>
-<li>비영속 (new/transient) : Persistence Context와 전혀 관계 없는 상태   </li>
-<li>영속 (Managed) : Persistence Context 저장된 상태 </li>
-<li>준영속 (detached) : Persistence Context 저장되었다가 분리된 상태 </li>
-<li>삭제 (removed) : 삭제된 상태 </li>
-</ul>
-</blockquote>
-
-<h3 id="비영속"><a href="#비영속" class="headerlink" title="비영속"></a>비영속</h3><ul>
-<li>Entity객체를 단순 생성한 상태 (em.persist 호출 전 상태)</li>
-</ul>
-<h3 id="영속"><a href="#영속" class="headerlink" title="영속"></a>영속</h3><ul>
-<li>Persistence Context가 관리하는 Entity를 영속 상태라함. </li>
-<li>em.find() / JPQL을 사용해서 조회한 Entity도 Persistence Context가 관리하게됨. </li>
-</ul>
-<h3 id="준영속"><a href="#준영속" class="headerlink" title="준영속"></a>준영속</h3><ul>
-<li>em.detach 호출 (ex&gt; em.detach(member))</li>
-<li>em.close로 Persistence Context를 닫은 상태 </li>
-<li>em.clear로 Persistence Context를 초기화한 상태 </li>
-</ul>
-<h2 id="Persistence-Context-특징"><a href="#Persistence-Context-특징" class="headerlink" title="Persistence Context 특징"></a>Persistence Context 특징</h2><ol>
-<li>Persistence Context와 식별자 값 </li>
-</ol>
-<ul>
-<li>Persistence Context는 식별자 값(@Id로 테이블 기본키와 매핑한 값)으로 구분 </li>
-<li>영속상태는 식별자 값이 반드시 있어야함. 없으면 예외 발생 </li>
-</ul>
-<ol start="2">
-<li>Persistence Context와 데이터베이스 저장 </li>
-</ol>
-<ul>
-<li>JPA는 보통 트랜잭션을 커밋하는 순간 Persistence Context에 새로 저장된 Entity를 DB에 반영 (flush)</li>
-</ul>
-<ol start="3">
-<li>Persistence Context가 Entity를 관리하면 아래와 같은 장점이 있음. </li>
-</ol>
-<ul>
-<li><p>1차 캐시 </p>
-</li>
-<li><p>동일성 보장 </p>
-</li>
-<li><p>트랜잭션을 지원하는 쓰기 지연 </p>
-</li>
-<li><p>변경 감지 </p>
-</li>
-<li><p>지연 로딩 </p>
-<h3 id="Entity-조회"><a href="#Entity-조회" class="headerlink" title="Entity 조회"></a>Entity 조회</h3></li>
-</ul>
-<ul>
-<li>Persistence Context는 내부에 캐시를 가지고있음 이것이 1차 캐시임 </li>
-</ul>
-<figure class="highlight java"><figcaption><span>entity조회 예제</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line">Team team = <span class="keyword">new</span> Team();</span><br><span class="line">team.setName(<span class="string">&quot;Team1&quot;</span>);</span><br><span class="line">entityManager.persist(team);</span><br><span class="line"></span><br><span class="line">Team team2 = <span class="keyword">new</span> Team();</span><br><span class="line">team2.setName(<span class="string">&quot;Team2&quot;</span>);</span><br><span class="line">entityManager.persist(team2);</span><br><span class="line"></span><br><span class="line">Member member = <span class="keyword">new</span> Member();</span><br><span class="line">member.setUserName(<span class="string">&quot;m1&quot;</span>);</span><br><span class="line">member.setAge(<span class="number">36</span>);</span><br><span class="line">member.setTeam(team);</span><br><span class="line"></span><br><span class="line">entityManager.persist(member);</span><br><span class="line"></span><br><span class="line">Member member2 = <span class="keyword">new</span> Member();</span><br><span class="line">member2.setUserName(<span class="string">&quot;m2&quot;</span>);</span><br><span class="line">member2.setAge(<span class="number">30</span>);</span><br><span class="line">member2.setTeam(team);</span><br><span class="line"></span><br><span class="line">entityManager.persist(member2);</span><br><span class="line"></span><br><span class="line">Member member3 = <span class="keyword">new</span> Member();</span><br><span class="line">member3.setUserName(<span class="string">&quot;m3&quot;</span>);</span><br><span class="line">member3.setAge(<span class="number">20</span>);</span><br><span class="line">member3.setTeam(team2);</span><br><span class="line"></span><br><span class="line">entityManager.persist(member3);</span><br><span class="line"><span class="comment">// -- 여기까지는 1차캐시랑 쿼리저장소에 저장되어있음, 아직 flush를 안했음. 디비에 없는 상태</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//member1은 1차캐시에서 바로 가져옴 (디비에서가져온게 아님!)</span></span><br><span class="line">Member member1 = entityManager.find(Member.class, member.getId());</span><br><span class="line">System.out.println(member1);</span><br><span class="line"></span><br><span class="line"><span class="comment">//jpql로 호출하면 강제 flush되고, 영속상태로 바뀌고, 캐시에 저장된 값을 반환 (get으로 호출하는 시점에 디비에서 꺼내온다.)</span></span><br><span class="line">Member member1_1 = entityManager.createQuery(<span class="string">&quot;select m from Member m where  m.id = :member1&quot;</span>, Member.class)</span><br><span class="line">                .setParameter(<span class="string">&quot;member1&quot;</span>, member1.getId())</span><br><span class="line">                .getSingleResult();</span><br><span class="line"></span><br><span class="line"><span class="comment">//위 두개는 무조건 true 왜냐 1차캐시에서 같은 주소값으로 가져오기때문 </span></span><br><span class="line">System.out.println(<span class="string">&quot;member1_1 = member1 ==&gt; &quot;</span> + (member1_1 == member1));</span><br><span class="line"></span><br><span class="line">transaction.commit();</span><br></pre></td></tr></table></figure>
-
-<ul>
-<li>em.find을 호출하면 1차캐시부터 호출해서 봄 (insert쿼리 커밋되기전이라도 1차캐시에 존재하면 바로 가져옴)</li>
-<li>jpql을 사용하면 insert쿼리가 flush되고 조회 쿼리가 나감 (디비에 조회 값이 없기때문에 쓰기지연 쿼리저장소에 저장되어있던 쿼리를 다 부어버리고, 디비조회해버림)</li>
-<li>member1을 여러번 호출해도 같은 주소값을 가져옴 (member1 == member1 =&gt; true) 즉, Persistence Context에서 가져온 값은 동일성이 보장됨. </li>
-</ul>
-<h3 id="Entity-등록"><a href="#Entity-등록" class="headerlink" title="Entity 등록"></a>Entity 등록</h3><ul>
-<li>commit을 한 순간 Persistence Context를 flush하고 디비 commit 진행<ul>
-<li>em.persist를 하고 flush를 한다고 디비에 반영되는것이 아니라, commit 명령어가 나갔을때 비로소 insert쿼리가 반영됨 </li>
-<li>flush는 Persistence Context의 변경 내용을 DB에 전달하는 역할이다. <blockquote><p>트랜잭션을 지원하는 쓰기지연이 가능한 이유 </p>
-<p>begin(); //트랜잭션 시작</p>
-<p>save(A);<br>save(B);<br>save(C);</p>
-<p>commit(); // 트랜잭션 커밋 </p>
-<ol>
-<li><p>데이터를 저장하는 즉시 등록쿼리를 데이터베이스에 보낸다. 예제에서 save() 메소드를 호출할때마다 즉시 DB에 등록쿼리를 보낸다. 그리고 마지막에 트랜잭션을 커밋한다.</p>
-</li>
-<li><p>데이터를 저장하면 등록쿼리를 DB에 보내지않고 메모리에 모아둔다. 그리고 트랜잭션을 커밋할때 모아둔 등록쿼리를 DB에 보낸후 커밋한다. </p>
-</li>
-</ol>
-<p>결론은 어떻게든 커밋직전에 DB에 SQL을 전달하면 됨. 그래서 쓰기지연이 가능하다. </p>
-</blockquote>
-
-</li>
-</ul>
-</li>
-</ul>
-<h3 id="Entity-수정"><a href="#Entity-수정" class="headerlink" title="Entity 수정"></a>Entity 수정</h3><blockquote><p>기존 SQL 업데이트 쿼리의 문제점</p>
-<ul>
-<li>수정 쿼리가 많아지는 것 </li>
-<li>비즈니스로직을 분석하기 위해 SQL문을 지속적으로 확인해야함 </li>
-<li>결국 직.간접적으로 비즈니스로직이 SQL에 의존하게 됨</li>
-</ul>
-</blockquote>
-
-<h4 id="변경감지-Dirty-Check"><a href="#변경감지-Dirty-Check" class="headerlink" title="변경감지 (Dirty Check)"></a>변경감지 (Dirty Check)</h4><p>JPA의 업데이트를 확인해보자 </p>
-<figure class="highlight java"><figcaption><span>entity업데이트 예제</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">Member member = <span class="keyword">new</span> Member();</span><br><span class="line">member.setUserName(<span class="string">&quot;m1&quot;</span>);</span><br><span class="line">member.setAge(<span class="number">36</span>);</span><br><span class="line">member.setTeam(team);</span><br><span class="line"></span><br><span class="line">entityManager.persist(member);</span><br><span class="line"></span><br><span class="line"><span class="comment">//JPA UPDATE방법</span></span><br><span class="line">member.setAge(<span class="number">35</span>);</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<ul>
-<li>JPA는 변경감지(Dirty Check)를 통해서 update문을 생성한다. </li>
-</ul>
-<blockquote><p>변경감지 수행 순서 </p>
-<ol>
-<li>트랜잭션을 커밋하면 EntityManager 내부에서 먼저 flush를 호출됨. </li>
-<li>Entity와 Snapshot을 비교해 변경된 Entity를 찾는다. </li>
-<li>변경된 Entity가 있으면 수정쿼리를 생성해서 쓰기 지연 SQL 저장소에 보낸다. </li>
-<li>쓰기 지연 저장소의 SQL을 DB에 보냄</li>
-<li>DB 트랜잭션을 커밋함. </li>
-</ol>
-</blockquote>
-
-<ul>
-<li>변경감지는 Persistence Context가 관리하는 영속상태 Entity에만 적용됨. </li>
-</ul>
-<p>JPA의 update기본전략은 Entity의 모든 필드를 업데이트 한다. </p>
-<blockquote><p>모든 필드를 업데이트 하면 좋은점 </p>
-<ol>
-<li>수정쿼리가 항상 같다 </li>
-<li>DB에 동일한 쿼리를 보내면 DB는 이전에 한번 파싱된 쿼리를 재사용 가능</li>
-</ol>
-<p>참고&gt; 부분업데이트를 해야한다면, @DynamicUpdate를 사용한다. (필드가 30개 이상이라면 추천)</p>
-</blockquote>
-
-<h3 id="Entity-삭제"><a href="#Entity-삭제" class="headerlink" title="Entity 삭제"></a>Entity 삭제</h3><figure class="highlight java"><figcaption><span>entity업데이트 예제</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Member member = em.find(Member.class, <span class="string">&quot;memberA&quot;</span>); </span><br><span class="line"></span><br><span class="line">entityManager.remove(member);</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<ul>
-<li>remove메서드를 호출하는 순간 Persistence Context에서도 제거됨 </li>
-</ul>
-<h2 id="Flush"><a href="#Flush" class="headerlink" title="Flush"></a>Flush</h2><p>Flush는 Persistence Context의 변경내용을 DB에 반영해줌. (반영만 하고 실제로는 Commit시 적용됨.)</p>
-<blockquote><p>Flush를 수행하면 벌어지는 일?</p>
-<ol>
-<li>Dirty Check 가 동작함. 스냅샷과 비교해서 수정된 entity를 찾아서 수정쿼리를 만들어 쓰기지연 SQL저장소에 등록함 </li>
-<li>쓰기지연 SQL저장소의 쿼리를 DB에 전송 (등록,수정,삭제)</li>
-</ol>
-</blockquote>
-
-<p>Persistence Context를 flush하는 방법 3가지 </p>
-<ol>
-<li>em.flush를 호출 </li>
-<li>트랜잭션 커밋시 자동 호출 </li>
-<li>JPQL 쿼리 실행시 자동 호출 </li>
-</ol>
-<h3 id="flush모드-옵션"><a href="#flush모드-옵션" class="headerlink" title="flush모드 옵션"></a>flush모드 옵션</h3><ul>
-<li>FlushModeType.AUTO : 커밋이나 쿼리를 실행할 때 플러시 (기본값)</li>
-<li>FlushModeType.COMMIT : 커밋할때만 플러시 </li>
-</ul>
-<h2 id="준영속-1"><a href="#준영속-1" class="headerlink" title="준영속"></a>준영속</h2><p>Persistence Context가 관리하는 영속상태의 Entity가 Persistence Context에서 분리된 것을 준영속 상태한다.<br>따라서, 준영속 상태에서는 Persistence Context가 제공하는 기능을 사용할수 없다! </p>
-<blockquote><p>준영속 상태를 만드는 방법 3가지 </p>
-<ol>
-<li>em.detach(entity) : 특정 Entity만 준영속 상태로 전환 </li>
-<li>em.clear() : Persistence Context를 완전히 초기화 </li>
-<li>em.close() : Persistence Context를 종료 </li>
-</ol>
-</blockquote>
-
-<h3 id="Entity를-준영속-상태로-전환-detach"><a href="#Entity를-준영속-상태로-전환-detach" class="headerlink" title="Entity를 준영속 상태로 전환 : detach"></a>Entity를 준영속 상태로 전환 : detach</h3><figure class="highlight java"><figcaption><span>준영속사용방법</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">Member member = <span class="keyword">new</span> Member();</span><br><span class="line">member.setUserName(<span class="string">&quot;m1&quot;</span>);</span><br><span class="line">member.setAge(<span class="number">36</span>);</span><br><span class="line"></span><br><span class="line">entityManager.persist(member);</span><br><span class="line"></span><br><span class="line"><span class="comment">//JPA에서 update문</span></span><br><span class="line">member.setAge(<span class="number">35</span>);</span><br><span class="line"></span><br><span class="line">entityManager.detach(member);</span><br><span class="line"></span><br><span class="line">Member mb = entityManager.find(Member.class, member.getId());</span><br><span class="line">System.out.println(<span class="string">&quot;detach obj: &quot;</span>+mb); <span class="comment">//null로 출력됨 왜냐면 영속성 관리에서 제거되었기 때문에</span></span><br><span class="line">transaction.commit();</span><br></pre></td></tr></table></figure>
-
-<ul>
-<li>준영속 상태가 되면 Persistence Context의 관리에서 벗어나게 되므로, 선택된 해당 Entity의 기존 쓰기 지연 SQL저장소에 저장되어 있던 부분도 제거됨. 따라서 등록,업데이트 등의 쿼리는 미수행됨. </li>
-</ul>
-<h4 id="Persistence-Context-초기화-clear"><a href="#Persistence-Context-초기화-clear" class="headerlink" title="Persistence Context 초기화 : clear"></a>Persistence Context 초기화 : clear</h4><ul>
-<li>Persistence Context가 초기화 되었기때문에 detach 같이 특정 Entity가 제거되는것이 아닌, 모든 Persistence Context에 등록된 캐시, 쓰기 지연 SQL 저장소에 저장된 모든것들이 초기화됨. </li>
-</ul>
-<h4 id="Persistence-Context-종료-close"><a href="#Persistence-Context-종료-close" class="headerlink" title="Persistence Context 종료 : close"></a>Persistence Context 종료 : close</h4><ul>
-<li>Persistence Context가 종료되었기때문에 더이상 Persistence Context관리가 되지 않는다. </li>
-</ul>
-<h4 id="준영속-상태의-특징"><a href="#준영속-상태의-특징" class="headerlink" title="준영속 상태의 특징"></a>준영속 상태의 특징</h4><ul>
-<li>거의 비영속에 가깝다</li>
-<li>식별자 값을 가지고있다. (이미 한번 Persistence Context관리가 되었기때문에)</li>
-<li>지연 로딩을 할 수 없다. </li>
-</ul>
-<ul>
-<li>지연로딩은 실제 객체 대신 프록시 객체를 로딩해두고 해당 객체를 실제 사용할때 Persistence Context 통해 데이터를 불러오는 방법. </li>
-</ul>
-<h3 id="병합-merge"><a href="#병합-merge" class="headerlink" title="병합: merge"></a>병합: merge</h3><p>준영속 상태에서 영속상태로 전환하려면 em.merge(entity) 사용하면 된다.<br>비영속 상태에서도 merge를 사용하면 영속상태로 전환 가능하다. (merge는 saveOrUpdate 기능을 수행)</p>
-<p>merge는 새로운 entity로 생성되기때문에, 기존에 준영속 시킨 객체와 다른 인스턴스를 가진다. 따라서 기존에 참조하던 준영속 entity 변수에 새롭게 merge한entity를 참조하도록 코드를 변경하는것이 안전함 </p>
-<p>ex&gt;<br>//Member mergeMember = em2.merge(member); //아래 코드로 변경<br>member = em2.merge(member); //기존 준영속상태로 참조하던 인스턴스로 할당해주는것이 안전함! </p>
-
-                    
+        
+        
+            <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    <a
+                        class="post-action-btn btn btn--disabled"
+                        aria-hidden="true"
+                    >
                         
-
-
+                        <i class="fa fa-angle-left" aria-hidden="true"></i>
+                        <span class="hide-xs hide-sm text-small icon-ml">PREVIOUS</span>
+                    </a>
+            </li>
+            <li class="post-action">
+                
                     
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/2021/03/18/jpa-persistence/"
+                    data-tooltip="jpa-persistence"
+                    aria-label="NEXT: jpa-persistence"
+                >
                     
-                        <p>
-                            <a
-                                href="/2021/03/18/jpa-persistence/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                Comment and share
-                            </a>
-                        </p>
-                    
-                </div>
+                        <span class="hide-xs hide-sm text-small icon-mr">NEXT</span>
+                        <i class="fa fa-angle-right" aria-hidden="true"></i>
+                    </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a
+                class="post-action-btn btn btn--default btn-open-shareoptions"
+                href="#btn-open-shareoptions"
+                aria-label="Share this post"
+            >
+                <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </a>
+        </li>
+        
             
-        </div>
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://codexdawn.github.io/2021/03/19/jpa-entity-mapping/"
+                    title="Share on Facebook"
+                    aria-label="Share on Facebook"
+                >
+                    <i class="fab fa-facebook" aria-hidden="true"></i>
+                </a>
+            </li>
         
-    </article>
-    
-    <div class="pagination-bar">
-    <ul class="pagination">
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://twitter.com/intent/tweet?text=https://codexdawn.github.io/2021/03/19/jpa-entity-mapping/"
+                    title="Share on Twitter"
+                    aria-label="Share on Twitter"
+                >
+                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://plus.google.com/share?url=https://codexdawn.github.io/2021/03/19/jpa-entity-mapping/"
+                    title="Share on Google+"
+                    aria-label="Share on Google+"
+                >
+                    <i class="fab fa-google-plus" aria-hidden="true"></i>
+                </a>
+            </li>
         
         
-        <li class="pagination-number">page 1 of 1</li>
+            
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#" aria-label="Back to top">
+            
+                <i class="fa fa-list" aria-hidden="true"></i>
+            </a>
+        </li>
     </ul>
 </div>
 
-</section>
+
+        
+        
+            
+        
+    </div>
+</article>
 
 
 
@@ -632,6 +476,151 @@
 </footer>
 
             </div>
+            
+                <div id="bottom-bar" class="post-bottom-bar" data-behavior="5">
+                    <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    <a
+                        class="post-action-btn btn btn--disabled"
+                        aria-hidden="true"
+                    >
+                        
+                        <i class="fa fa-angle-left" aria-hidden="true"></i>
+                        <span class="hide-xs hide-sm text-small icon-ml">PREVIOUS</span>
+                    </a>
+            </li>
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/2021/03/18/jpa-persistence/"
+                    data-tooltip="jpa-persistence"
+                    aria-label="NEXT: jpa-persistence"
+                >
+                    
+                        <span class="hide-xs hide-sm text-small icon-mr">NEXT</span>
+                        <i class="fa fa-angle-right" aria-hidden="true"></i>
+                    </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a
+                class="post-action-btn btn btn--default btn-open-shareoptions"
+                href="#btn-open-shareoptions"
+                aria-label="Share this post"
+            >
+                <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </a>
+        </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://codexdawn.github.io/2021/03/19/jpa-entity-mapping/"
+                    title="Share on Facebook"
+                    aria-label="Share on Facebook"
+                >
+                    <i class="fab fa-facebook" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://twitter.com/intent/tweet?text=https://codexdawn.github.io/2021/03/19/jpa-entity-mapping/"
+                    title="Share on Twitter"
+                    aria-label="Share on Twitter"
+                >
+                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://plus.google.com/share?url=https://codexdawn.github.io/2021/03/19/jpa-entity-mapping/"
+                    title="Share on Google+"
+                    aria-label="Share on Google+"
+                >
+                    <i class="fab fa-google-plus" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+        
+            
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#" aria-label="Back to top">
+            
+                <i class="fa fa-list" aria-hidden="true"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+                </div>
+                
+    <div id="share-options-bar" class="share-options-bar" data-behavior="5">
+        <i id="btn-close-shareoptions" class="fa fa-times"></i>
+        <ul class="share-options">
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://www.facebook.com/sharer/sharer.php?u=https://codexdawn.github.io/2021/03/19/jpa-entity-mapping/"
+                        aria-label="Share on Facebook"
+                    >
+                        <i class="fab fa-facebook" aria-hidden="true"></i><span>Share on Facebook</span>
+                    </a>
+                </li>
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://twitter.com/intent/tweet?text=https://codexdawn.github.io/2021/03/19/jpa-entity-mapping/"
+                        aria-label="Share on Twitter"
+                    >
+                        <i class="fab fa-twitter" aria-hidden="true"></i><span>Share on Twitter</span>
+                    </a>
+                </li>
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://plus.google.com/share?url=https://codexdawn.github.io/2021/03/19/jpa-entity-mapping/"
+                        aria-label="Share on Google+"
+                    >
+                        <i class="fab fa-google-plus" aria-hidden="true"></i><span>Share on Google+</span>
+                    </a>
+                </li>
+            
+        </ul>
+    </div>
+
+
             
         </div>
         
@@ -669,6 +658,8 @@
 
 <!--SCRIPTS END-->
 
+
+    
 
 
 
