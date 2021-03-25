@@ -1,0 +1,428 @@
+
+<!DOCTYPE html>
+<html lang="en">
+    
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="generator" content="codexdawn">
+    <title>Category: 연관관계 매핑 기초 - codexdawn</title>
+    <meta name="author" content="codexdawn">
+    
+    
+    
+        
+            <link rel="alternate" type="application/atom+xml" title="RSS" href="/atom.xml">
+        
+    
+    <script type="application/ld+json">{}</script>
+    <meta property="og:type" content="blog">
+<meta property="og:title" content="codexdawn">
+<meta property="og:url" content="https://codexdawn.github.io/categories/%EC%97%B0%EA%B4%80%EA%B4%80%EA%B3%84-%EB%A7%A4%ED%95%91-%EA%B8%B0%EC%B4%88/index.html">
+<meta property="og:site_name" content="codexdawn">
+<meta property="og:locale" content="en_US">
+<meta property="article:author" content="codexdawn">
+<meta name="twitter:card" content="summary">
+    
+    
+        
+    
+    
+    
+    
+    
+    <!--STYLES-->
+    
+<link rel="stylesheet" href="/assets/css/style-3sspfygaapf5d6tbrnqmyrhdcstv0iwwmi4wor2yeip9c44sowy9gbdzyyjm.min.css">
+
+    <!--STYLES END-->
+    
+
+    
+
+    
+</head>
+
+    <body>
+        <div id="blog">
+            <!-- Define author's picture -->
+
+
+    
+
+<header id="header" data-behavior="2">
+    <i id="btn-open-sidebar" class="fa fa-lg fa-bars"></i>
+    <div class="header-title">
+        <a
+            class="header-title-link"
+            href="/"
+            aria-label=""
+        >
+            codexdawn
+        </a>
+    </div>
+    
+        
+            <a
+                class="header-right-picture "
+                href="#about"
+                aria-label="Open the link: /#about"
+            >
+        
+        
+        </a>
+    
+</header>
+
+            <!-- Define author's picture -->
+
+
+<nav id="sidebar" data-behavior="2">
+    <div class="sidebar-container">
+        
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/"
+                            
+                            rel="noopener"
+                            title="Home"
+                        >
+                        <i class="sidebar-button-icon fa fa-home" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Home</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/all-categories"
+                            
+                            rel="noopener"
+                            title="Categories"
+                        >
+                        <i class="sidebar-button-icon fa fa-bookmark" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Categories</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/all-tags"
+                            
+                            rel="noopener"
+                            title="Tags"
+                        >
+                        <i class="sidebar-button-icon fa fa-tags" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Tags</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="#about"
+                            
+                            rel="noopener"
+                            title="About"
+                        >
+                        <i class="sidebar-button-icon fa fa-question" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">About</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="https://github.com/codexdawn"
+                            
+                                target="_blank"
+                            
+                            rel="noopener"
+                            title="GitHub"
+                        >
+                        <i class="sidebar-button-icon fab fa-github" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">GitHub</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="https://www.facebook.com/beherzt.dev"
+                            
+                                target="_blank"
+                            
+                            rel="noopener"
+                            title="Facebook"
+                        >
+                        <i class="sidebar-button-icon fab fa-facebook" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Facebook</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="https://www.linkedin.com/in/sim-jisung-3048872a/"
+                            
+                                target="_blank"
+                            
+                            rel="noopener"
+                            title="LinkedIn"
+                        >
+                        <i class="sidebar-button-icon fab fa-linkedin" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">LinkedIn</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="mailto:cloudkaiser@gmail.com"
+                            
+                                target="_blank"
+                            
+                            rel="noopener"
+                            title="Mail"
+                        >
+                        <i class="sidebar-button-icon fa fa-envelope" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Mail</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/atom.xml"
+                            
+                            rel="noopener"
+                            title="RSS"
+                        >
+                        <i class="sidebar-button-icon fa fa-rss" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">RSS</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+    </div>
+</nav>
+
+            
+            <div id="main" data-behavior="2"
+                 class="
+                        hasCoverMetaIn
+                        ">
+                
+    <section class="postShorten-group main-content-wrap">
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
+                            href="/2021/03/24/relation-mapping-basic/"
+                            aria-label=": relation-mapping-basic"
+                        >
+                            relation-mapping-basic
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2021-03-24T10:39:36+00:00">
+	
+		    Mar 24, 2021
+    	
+    </time>
+    
+        <span>in </span>
+        
+    <a class="category-link" href="/categories/Study/">Study</a>, <a class="category-link" href="/categories/%EC%97%B0%EA%B4%80%EA%B4%80%EA%B3%84-%EB%A7%A4%ED%95%91-%EA%B8%B0%EC%B4%88/">연관관계 매핑 기초</a>, <a class="category-link" href="/categories/%EC%9E%90%EB%B0%94ORM%ED%91%9C%EC%A4%80JPA%ED%94%84%EB%A1%9C%EA%B7%B8%EB%9E%98%EB%B0%8D/">자바ORM표준JPA프로그래밍</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <h1 id="연관관계-매핑-기초"><a href="#연관관계-매핑-기초" class="headerlink" title="연관관계 매핑 기초"></a>연관관계 매핑 기초</h1><blockquote><p>연관관계 매핑을 이해하기 위한 핵심 키워드 </p>
+<ul>
+<li>방향 (Direction) : [단방향,양방향]이 있다. 예를들어 회원-&gt;팀 또는 팀 -&gt; 회원 둘 중 한쪽만 참조하는 것을 단방향이라하며, 회원 -&gt; 팀 과 팀 -&gt; 회원 양쪽모두 참조하는것을 양방향 관계라고 한다. 방향은 객체관계에서만 존재하고 테이블 관계는 무조건 <strong>양방향</strong> 이다.</li>
+<li>다중성(Multiplicity) : [N:1,1:N,1:1,M:N] 다중성이 있다. 예를들어 회원과 팀이 관계가 있을때 여러 회원은 한 팀에 속하므로, N:1관계며, 반대로 한 팀에 여러 회원이 소속될수 있으므로 팀과 회원은 1:N관계다. </li>
+<li>연관관계 주인 (Owner) : 객체를 양방향 연관관계로 만들면 연관관계의 주인을 정해야함. (주로 외래키를 관리하는 N쪽이 주인이됨.)</li>
+</ul>
+</blockquote>
+
+<h2 id="단방향-연관관계"><a href="#단방향-연관관계" class="headerlink" title="단방향 연관관계"></a>단방향 연관관계</h2><figure class="highlight java"><figcaption><span>단방향연관관계1</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Entity</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Member</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Id</span></span><br><span class="line">    <span class="meta">@GeneratedValue</span></span><br><span class="line">    <span class="keyword">private</span> Long id;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Column(name = &quot;username&quot;)</span></span><br><span class="line">    <span class="keyword">private</span> String name;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Column(updatable = false)</span></span><br><span class="line">    <span class="keyword">private</span> LocalDateTime regDate;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> LocalDateTime uptDate;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Enumerated(EnumType.STRING)</span></span><br><span class="line">    <span class="keyword">private</span> MemberType memberType;</span><br><span class="line">	</span><br><span class="line">	<span class="comment">// 회원은 N , 팀은 1이기때문에 N:1로 ManyToOne으로 설정</span></span><br><span class="line">	<span class="comment">// @JoinColumn은 생략가능(생략하게되면 필드명 + _ + id로 자동으로 탐색해줌)</span></span><br><span class="line">    <span class="meta">@ManyToOne(fetch = FetchType.LAZY)</span></span><br><span class="line">    <span class="meta">@JoinColumn(name = &quot;team_id&quot;)</span></span><br><span class="line">    <span class="keyword">private</span> Team team;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Entity</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Team</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Id</span></span><br><span class="line">    <span class="meta">@GeneratedValue</span></span><br><span class="line">    <span class="keyword">private</span> Long id;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> String name;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="연관관계-사용"><a href="#연관관계-사용" class="headerlink" title="연관관계 사용"></a>연관관계 사용</h2><h3 id="저장"><a href="#저장" class="headerlink" title="저장"></a>저장</h3><figure class="highlight java"><figcaption><span>persist</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"> </span><br><span class="line"><span class="comment">//entityManager 및 commmit부분 표기상 생략 </span></span><br><span class="line"><span class="keyword">final</span> Team team1 = Team.builder().name(<span class="string">&quot;Team1&quot;</span>).build();</span><br><span class="line">entityManager.persist(team1);</span><br><span class="line"><span class="keyword">final</span> Member member1 = Member.builder().name(<span class="string">&quot;hellojpa&quot;</span>).memberType(MemberType.ADMIN).team(team1).build();</span><br><span class="line">entityManager.persist(member1);</span><br></pre></td></tr></table></figure>
+
+<h3 id="조회"><a href="#조회" class="headerlink" title="조회"></a>조회</h3><p>연관관계가 있는 엔티티를 조회하는 방법은 크게 2가지다. </p>
+<ol>
+<li>객체그래프 탐색 (객체 연관관계를 사용한 조회)</li>
+<li>객체지향 쿼리 사용 JPQL </li>
+</ol>
+<figure class="highlight java"><figcaption><span>select방법들</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"> </span><br><span class="line"><span class="comment">//객체그래프활용</span></span><br><span class="line"><span class="keyword">final</span> Member gmember2 = entityManager.find(Member.class, member2.getId());</span><br><span class="line">Team team = gmember2.getTeam(); </span><br><span class="line">System.out.println(team.getName());</span><br><span class="line"></span><br><span class="line"><span class="comment">//객체지향 쿼리 사용 (JPQL)</span></span><br><span class="line">List&lt;Member&gt; members = entityManager.createQuery(<span class="string">&quot;select m from Member m&quot;</span>, Member.class)</span><br><span class="line">                .getResultList();</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span>(Member m : members) &#123;</span><br><span class="line">    System.out.println(<span class="string">&quot;m = &quot;</span> + m.getUserName());</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">List&lt;Member&gt; paramResult = entityManager.createQuery(<span class="string">&quot;select m from Member m where m.userName = :userName&quot;</span>,Member.class).setParameter(<span class="string">&quot;userName&quot;</span>,<span class="string">&quot;m2&quot;</span>).getResultList();</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span>(Member m2 : paramResult) &#123;</span><br><span class="line">	System.out.println(<span class="string">&quot;m2 = &quot;</span> + m2.getUserName());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="수정"><a href="#수정" class="headerlink" title="수정"></a>수정</h3><figure class="highlight java"><figcaption><span>select방법들</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"> </span><br><span class="line"><span class="comment">//entityManager 및 commmit부분 표기상 생략 </span></span><br><span class="line"><span class="keyword">final</span> Team team2 = Team.builder().name(<span class="string">&quot;Team2&quot;</span>).build();</span><br><span class="line">entityManager.persist(team2);</span><br><span class="line"></span><br><span class="line">Member member1 = entityManager.find(Member.class, <span class="string">&quot;member1&quot;</span>);</span><br><span class="line"><span class="comment">//update쿼리가 자동으로 날아감. (정확하게 쓰기지연SQL저장소에 저장되었다가, commit시점에 쿼리가 반영될것임)</span></span><br><span class="line">member1.setTeam(team2); </span><br></pre></td></tr></table></figure>
+
+<h3 id="연관관계-제거"><a href="#연관관계-제거" class="headerlink" title="연관관계 제거"></a>연관관계 제거</h3><figure class="highlight java"><figcaption><span>select방법들</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"> </span><br><span class="line">Member member1 = entityManager.find(Member.class, <span class="string">&quot;member1&quot;</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">//update쿼리로 team_id = null로 세팅되서 날라감. </span></span><br><span class="line">member1.setTeam(<span class="keyword">null</span>); </span><br></pre></td></tr></table></figure>
+
+<h3 id="연관된-엔티티-삭제"><a href="#연관된-엔티티-삭제" class="headerlink" title="연관된 엔티티 삭제"></a>연관된 엔티티 삭제</h3><p>연관된 엔티티를 삭제하려면 기존에 있던 연관관계를 먼저 제거하고 삭제해야한다. 그렇지 않으면 외래 키 제약조건으로 인해, DB에서 오류가 발생됨. </p>
+<figure class="highlight java"><figcaption><span>select방법들</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"> </span><br><span class="line">Member member1 = entityManager.find(Member.class, <span class="string">&quot;member1&quot;</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">//update쿼리로 team_id = null로 세팅되서 날라감. </span></span><br><span class="line">member1.setTeam(<span class="keyword">null</span>); </span><br><span class="line">entityManager.remove(team1);</span><br></pre></td></tr></table></figure>
+
+<h2 id="양방향-연관관계"><a href="#양방향-연관관계" class="headerlink" title="양방향 연관관계"></a>양방향 연관관계</h2><h3 id="양방향-연관관계-매핑-방법"><a href="#양방향-연관관계-매핑-방법" class="headerlink" title="양방향 연관관계 매핑 방법"></a>양방향 연관관계 매핑 방법</h3><figure class="highlight java"><figcaption><span>단방향연관관계1</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Entity</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Member</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Id</span></span><br><span class="line">    <span class="meta">@GeneratedValue</span></span><br><span class="line">    <span class="keyword">private</span> Long id;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Column(name = &quot;username&quot;)</span></span><br><span class="line">    <span class="keyword">private</span> String name;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Column(updatable = false)</span></span><br><span class="line">    <span class="keyword">private</span> LocalDateTime regDate;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> LocalDateTime uptDate;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Enumerated(EnumType.STRING)</span></span><br><span class="line">    <span class="keyword">private</span> MemberType memberType;</span><br><span class="line">	</span><br><span class="line">	<span class="comment">// 회원은 N , 팀은 1이기때문에 N:1로 ManyToOne으로 설정</span></span><br><span class="line">	<span class="comment">// @JoinColumn은 생략가능(생략하게되면 필드명 + _ + id로 자동으로 탐색해줌)</span></span><br><span class="line">    <span class="meta">@ManyToOne(fetch = FetchType.LAZY)</span></span><br><span class="line">    <span class="meta">@JoinColumn(name = &quot;team_id&quot;)</span></span><br><span class="line">    <span class="keyword">private</span> Team team;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Entity</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Team</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Id</span></span><br><span class="line">    <span class="meta">@GeneratedValue</span></span><br><span class="line">    <span class="keyword">private</span> Long id;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> String name;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@OneToMany(mappedBy = &quot;team&quot;)</span></span><br><span class="line">    <span class="keyword">private</span> List&lt;Member&gt; members = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="1-N-컬렉션-조회"><a href="#1-N-컬렉션-조회" class="headerlink" title="1:N 컬렉션 조회"></a>1:N 컬렉션 조회</h3><figure class="highlight java"><figcaption><span>select방법들</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"> </span><br><span class="line"><span class="comment">//entityManager 및 commmit부분 표기상 생략 </span></span><br><span class="line">Team team = entityManaber.find(Team.class,<span class="string">&quot;team1&quot;</span>);</span><br><span class="line">List&lt;Member&gt; members = team.getMembers();</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> (Member m : members) &#123;</span><br><span class="line">	<span class="comment">//...출력.. </span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="연관관계의-주인"><a href="#연관관계의-주인" class="headerlink" title="연관관계의 주인"></a>연관관계의 주인</h2><h3 id="양방향-매핑의-규칙-연관관계의-주인"><a href="#양방향-매핑의-규칙-연관관계의-주인" class="headerlink" title="양방향 매핑의 규칙 : 연관관계의 주인"></a>양방향 매핑의 규칙 : 연관관계의 주인</h3><p>양방향 연관관계 매핑시 지켜야할 규칙이 있는데 두 연관관계 중 하나를 연관관계 주인으로 정해야한다. 연관관계의 주인만이 DB연관관계와 매핑되고 외래 키를 관리(등록,수정,삭제) 할 수 있다. 반만에 주인이 아닌쪽은 읽기만 할 수 있다.<br>어떤 연관관계를 주인으로 정할지는 mappedBy속성을 사용하면된다. </p>
+<ul>
+<li>주인은 mappedBy를 사용하지 않는다.</li>
+<li>주인이 아니면 mappedBy속성을 사용해서 속성의 값으로 연관관계의 주인을 지정해야 한다. </li>
+</ul>
+<p>연관관계의 주인을 정한다는것은 사실 외래키 관리자를 선택하는 것이다.<br>그래서 중요한건 엔티티 설계시 외래키가 존재하는 곳이 연관관계의 주인이 되야함. 그러니까 N:1에서 N이 결국 외래키를 관리하는 주인이라는 말이다. </p>
+<h2 id="양방향-연관관계-저장"><a href="#양방향-연관관계-저장" class="headerlink" title="양방향 연관관계 저장"></a>양방향 연관관계 저장</h2><p>양방향 연관관계를 맺고나서, 저장할때 주의점은 한쪽 객체에만 저장하면 안된다는것이다.<br>그렇게되면 제대로 저장이 안된다. 그럼 어떻게 해야할까?<br>결론은 그냥 양쪽 다 저장하면 된다. 이부분의 실수를 줄이기 위해서 <strong>연관관계 편의성 메소드</strong> 를 만들어서 사용하는것을 저자는 추천하고있다. </p>
+<figure class="highlight java"><figcaption><span>양방향 연관관계 매핑 저장1</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line">Team team = <span class="keyword">new</span> Team();</span><br><span class="line">team.setName(<span class="string">&quot;Team1&quot;</span>);</span><br><span class="line">entityManager.persist(team);</span><br><span class="line"></span><br><span class="line">Team team2 = <span class="keyword">new</span> Team();</span><br><span class="line">team2.setName(<span class="string">&quot;Team2&quot;</span>);</span><br><span class="line">entityManager.persist(team2);</span><br><span class="line"></span><br><span class="line">Member member = <span class="keyword">new</span> Member();</span><br><span class="line">member.setUserName(<span class="string">&quot;m1&quot;</span>);</span><br><span class="line">member.setAge(<span class="number">36</span>);</span><br><span class="line">member.setTeam(team);</span><br><span class="line">entityManager.persist(member);</span><br><span class="line"></span><br><span class="line">Member member2 = <span class="keyword">new</span> Member();</span><br><span class="line">member2.setUserName(<span class="string">&quot;m2&quot;</span>);</span><br><span class="line">member2.setAge(<span class="number">30</span>);</span><br><span class="line">member2.setTeam(team2);</span><br><span class="line"></span><br><span class="line">entityManager.persist(member2);</span><br><span class="line"></span><br><span class="line"><span class="comment">//위와 같이 저장하면 문제는 없다 왜냐.. 연관관계주인으로 저장했기때문에..</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//아래와 같이 주인관계로 저장하지 않으면 어떻게 될까? member.team_id = null로 들어감. </span></span><br><span class="line"></span><br><span class="line">Member member3 = <span class="keyword">new</span> Member();</span><br><span class="line">member3.setUserName(<span class="string">&quot;m3&quot;</span>);</span><br><span class="line">member3.setAge(<span class="number">22</span>);</span><br><span class="line"><span class="comment">//member3.setTeam(team3);</span></span><br><span class="line"></span><br><span class="line">entityManager.persist(member3);</span><br><span class="line"></span><br><span class="line">Team team3 = <span class="keyword">new</span> Team();</span><br><span class="line">team3.setName(<span class="string">&quot;t3&quot;</span>);</span><br><span class="line">team3.getMembers().add(member3);</span><br><span class="line">entityManager.persist(team3);</span><br></pre></td></tr></table></figure>
+
+<p>위 소스코드와 같이 단반향만 저장을 하면 문제가 발생하게된다. 물론 member1,member2는 member.team_id를 각각 잘 저장했을것이다. 그리고 memeber3는 연관관계 주인의 객체로 저장하지않았기때문에 저장이안됫다. 그럼 member1,2는 문제가 없는걸까? 결론은 문제가 있다. 왜냐하면 단방향으로만 저장을 했기때문이다.<br>물론 member1,2는 저장하는데는 큰 이슈가 없다. 하지만 객체지향관점에서 봤을때는 문제가 있는 코드다. 아래 코드를 확인해보자. </p>
+<figure class="highlight java"><figcaption><span>양방향 연관관계 매핑 저장2</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">long</span> count = team.getMembers().stream().count();</span><br><span class="line">System.out.println(<span class="string">&quot;count = &quot;</span> + count); <span class="comment">// 0개</span></span><br></pre></td></tr></table></figure>
+
+<p>객체지향적으로만 봤을때는 양방향으로 저장이 안되었기때문에 반대방향으로 조회했을때는 0개가 나오게되는것이다.<br>그래서 양방향 연관관계 매핑으로 저장할때는 양방향으로 저장을 필수적으로 해야한다.<br>하지만 단순히 양방향으로만 저장한다고 되는일이 아니다. 추가적으로 해야하는 작업이 있는데 그것은 무엇일까?</p>
+<figure class="highlight java"><figcaption><span>양방향 연관관계 매핑 저장3</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"> </span><br><span class="line"><span class="comment">//1. 편의성 메소드 버그 기본 세팅 </span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setTeam</span><span class="params">(Team team)</span> </span>&#123;</span><br><span class="line">	member.setTeam(team);</span><br><span class="line">	team.setMembers().add(<span class="keyword">this</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//2. 버그를 잡는 편의성 메소드 </span></span><br><span class="line"><span class="comment">//Why? </span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setTeam</span><span class="params">(Team team)</span> </span>&#123;</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">if</span>(<span class="keyword">this</span>.team != <span class="keyword">null</span>) &#123;</span><br><span class="line">		<span class="keyword">this</span>.team.getMembers().remove(<span class="keyword">this</span>); </span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	member.setTeam(team);</span><br><span class="line">	team.setMembers().add(<span class="keyword">this</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>1번 코드는 기본적인 편의성메소드인데, 무엇이 문제일까?<br>만약에 아래 코드처럼 추가하면 어떻게 될까? </p>
+<figure class="highlight java"><figcaption><span>편의 메소드 주의점</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"> </span><br><span class="line">Member member3 = <span class="keyword">new</span> Member();</span><br><span class="line">member3.setUserName(<span class="string">&quot;m3&quot;</span>);</span><br><span class="line">member3.setAge(<span class="number">22</span>);</span><br><span class="line">member3.setTeam(team3);</span><br><span class="line">member3.setTeam(team);</span><br><span class="line"></span><br><span class="line"><span class="comment">//결과는? member = Member[id=null, userName=&#x27;m3&#x27;, age=22] 나오지 말아야 하는데..? </span></span><br><span class="line">team3.getMembers().stream().forEach(v -&gt; System.out.println(<span class="string">&quot;member = &quot;</span> + v));</span><br></pre></td></tr></table></figure>
+
+<p>위와 같이 setTeam을 두번하여, Team3 -&gt; Team으로 변경하였는데, member3는 더이상 team3를 참조하지 않는데 id는 null로빠졌지만 나머지값이 나왔다.<br>결국 삭제되지 않는 관계가 남아서 team3에 member3의 흔적이 남게된것이다. 따라서 2번 코드처럼 remove를 시켜주면 해당 부분이 깔끔하게 정리 될수있음.<br>어쨋든 team3(Team 엔티티)는 외래키의 주인이 아니기때문에 DB에 영향을 주지는 않지만, 나중에 대형시스템에서 영속성컨텍스트가 살아있는 상태에서 복잡한 비즈니스 코드를 처리하다보면, 잔재된 데이터로인해 버그를 유발시킬수도 있다. 따라서 항상 2번과 같은 방어코드를 신경써야하며, 늘 양방향관계에 있을때는 양쪽 객체를 항상 신경써야한다는것을 잊지 말자. </p>
+<blockquote><p>연관관계 매핑 정리 </p>
+<ul>
+<li>단방향 매핑만으로 테이블과 객체의 연관관계 매핑은 이미 완료 되었다. (꼭 양방향만 고집할 필요는 없다. )</li>
+<li>단방향을 양방향으로 만들면 반대방향으로 객체 그래프 탐색 기능이 추가된다. </li>
+<li>양방향 연관관계를 매핑하려면 객체에서 양쪽 방향을 모두 관리해야한다. </li>
+</ul>
+</blockquote>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/2021/03/24/relation-mapping-basic/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                Comment and share
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    <div class="pagination-bar">
+    <ul class="pagination">
+        
+        
+        <li class="pagination-number">page 1 of 1</li>
+    </ul>
+</div>
+
+</section>
+
+
+
+                <footer id="footer" class="main-content-wrap">
+    <span class="copyrights">
+        Copyrights &copy; 2021 codexdawn. All Rights Reserved.
+    </span>
+</footer>
+
+            </div>
+            
+        </div>
+        
+
+
+<div id="about">
+    <div id="about-card">
+        <div id="about-btn-close">
+            <i class="fa fa-times"></i>
+        </div>
+        
+            <h4 id="about-card-name">codexdawn</h4>
+        
+            <div id="about-card-bio"><p>author.bio</p>
+</div>
+        
+        
+            <div id="about-card-job">
+                <i class="fa fa-briefcase"></i>
+                <br/>
+                <p>author.job</p>
+
+            </div>
+        
+        
+    </div>
+</div>
+
+        
+        
+<div id="cover" style="background-image:url('/assets/images/cover-v1.2.0.jpg');"></div>
+        <!--SCRIPTS-->
+
+<script src="/assets/js/script-ikbi0v8fyzuu91xv5rmpcrnwb4qinfgborzd5kejmj8wr6ibfra8oaxqshyg.min.js"></script>
+
+<!--SCRIPTS END-->
+
+
+
+
+
+    </body>
+</html>

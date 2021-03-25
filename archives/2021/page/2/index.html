@@ -247,6 +247,156 @@
                     
                         <a
                             class="link-unstyled"
+                            href="/2021/02/20/clean-code-10/"
+                            aria-label=": clean-code-10"
+                        >
+                            clean-code-10
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2021-02-20T06:20:33+00:00">
+	
+		    Feb 20, 2021
+    	
+    </time>
+    
+        <span>in </span>
+        
+    <a class="category-link" href="/categories/Clean-Code/">Clean Code</a>, <a class="category-link" href="/categories/Study/">Study</a>, <a class="category-link" href="/categories/%EC%8B%9C%EC%8A%A4%ED%85%9C/">시스템</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <h1 id="시스템"><a href="#시스템" class="headerlink" title="시스템"></a>시스템</h1><blockquote><p>복잡성은 죽음이다. 개발자에게서 생기를 앗아가며, 제품을 계획하고 제작하고 테스트하기 어렵게 만든다. </p>
+</blockquote>
+
+<h2 id="도시를-세운다면"><a href="#도시를-세운다면" class="headerlink" title="도시를 세운다면 ?"></a>도시를 세운다면 ?</h2><ul>
+<li>도시는 한사람의 힘으로 운영하기 힘들다. 수도관리팀, 전력관리팀 등 각분야를 관리하는 크고 작은 조직들이 존재한다. 이렇게 도시가 잘 운영되는 비결은 적절한 <strong>추상화</strong> 와 <strong>모듈화</strong> 때문이다. 그래서 큰 그림을 이해하지 못할지라도 개인과 개인이 관리하는 ‘구성요소’는 효율적으로 돌아간다. </li>
+<li>흔히 소프트웨어 팀도 도시처럼 구성한다. </li>
+</ul>
+<h2 id="시스템-제작과-시스템-사용을-분리하라"><a href="#시스템-제작과-시스템-사용을-분리하라" class="headerlink" title="시스템 제작과 시스템 사용을 분리하라."></a>시스템 제작과 시스템 사용을 분리하라.</h2><ul>
+<li>제작(construction)은 사용과 아주 다르다. </li>
+</ul>
+<blockquote><p>소프트웨어 시스템은 (어플리케이션 객체를 제작하고 <strong>의존성</strong> 을 서로 ‘연결’하는) 준비과정(준비과정 이후에 이어지는) 런타임 로직을 분리해야 한다.  </p>
+</blockquote> 
+
+<ul>
+<li>소프트웨어 설계의 시작단계는 ‘관심사’다. 곧 <a target="_blank" rel="noopener" href="https://ko.wikipedia.org/wiki/%EA%B4%80%EC%8B%AC%EC%82%AC_%EB%B6%84%EB%A6%AC#:~:text=%EC%BB%B4%ED%93%A8%ED%84%B0%20%EA%B3%BC%ED%95%99%EC%97%90%EC%84%9C%20%EA%B4%80%EC%8B%AC%EC%82%AC%20%EB%B6%84%EB%A6%AC,%EC%9D%98%20%EA%B4%80%EC%8B%AC%EC%82%AC%EB%A5%BC%20%ED%95%B4%EA%B2%B0%ED%95%9C%EB%8B%A4.&text=%EA%B4%80%EC%8B%AC%EC%82%AC%20%EB%B6%84%EB%A6%AC%EB%A5%BC%20%EC%9D%B4%EC%9A%A9%ED%95%98%EB%A9%B4,%EC%A0%95%EB%8F%84%EC%9D%98%20%EC%9E%90%EC%9C%A0%EA%B0%80%20%EC%83%9D%EA%B8%B4%EB%8B%A4.">‘관심사 분리’</a>를 의미한다. </li>
+</ul>
+<figure class="highlight java"><figcaption><span>lazy evaluation</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> Service <span class="title">getService</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	<span class="keyword">if</span>(service == <span class="keyword">null</span>) &#123;</span><br><span class="line">		service = <span class="keyword">new</span> MyServiceImpl(...); <span class="comment">//모든상황에 기본값일까? </span></span><br><span class="line">		<span class="keyword">return</span> service; </span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<blockquote><p>Q&gt; lazy evaluation(계산지연)의 장점</p>
+<ol>
+<li>실제 필요할때까지 객체를 생성 안함.</li>
+<li>NullPointerException이 발생 안함. </li>
+</ol>
+</blockquote>
+
+<h4 id="위-코드는-lazy-evaluation의-장점을-갖지만-단점은-무엇일까"><a href="#위-코드는-lazy-evaluation의-장점을-갖지만-단점은-무엇일까" class="headerlink" title="위 코드는 lazy evaluation의 장점을 갖지만 단점은 무엇일까?"></a>위 코드는 lazy evaluation의 장점을 갖지만 단점은 무엇일까?</h4><ul>
+<li>MyServiceImpl에서 생략한 생성자 인수에 명시적으로 의존한다. 런타임 로직에서 의존성을 해결하지 않으면 컴파일이 안됨</li>
+<li>테스트 문제 MyServiceImpl객체가 무거운 객체라면 즉, 의존하는 객체가 많다면, 의존하는 테스트 전용 객체(Mock Object)를 service필드에 할당을 해야한다. </li>
+<li>일반 런타임 로직에다 객체 생성 로직을 섞어 놓은 탓에 service가 null인 경로 null이 아닌경로 등의 모든 실행경로를 테스트해야함. </li>
+<li>책임이 둘이라는 말은 메서드가 작업을 두가지 이상 수행한다는 의미로 SRP를 위반함. </li>
+<li>가장 큰 문제는 주석 처럼 모든상황에 적합할지 여부이다. </li>
+</ul>
+<h4 id="체계적이고-탄탄한-시스템을-만들고-싶다면"><a href="#체계적이고-탄탄한-시스템을-만들고-싶다면" class="headerlink" title="체계적이고 탄탄한 시스템을 만들고 싶다면?"></a>체계적이고 탄탄한 시스템을 만들고 싶다면?</h4><ul>
+<li>lazy evaluation 같이 손쉬운 기법으로 모듈성을 깨서는 절대로 안됨. (객체를 생성하거나 의존성을 연결할때도 마찬가지) </li>
+<li>설정 논리는 일반 실행 논리와 분리해야 모듈성이 높아진다. </li>
+<li>주요 의존성을 해소하기 위한 방식은, 즉 전반적이며 일관적인 방식도 필요하다. </li>
+</ul>
+<h3 id="Main분리"><a href="#Main분리" class="headerlink" title="Main분리"></a>Main분리</h3><ul>
+<li>Main분리는 시스템 생성과 시스템 사용을 분리하는 방법으로, 생성과 관련된 코드는 main 이나 main이 호출하는 모듈로 옮기고, 나머지 시슽메은 모든 객체가 생성되었고 모든 의존성이 연결되었다고 가정한다. </li>
+</ul>
+<h3 id="팩토리"><a href="#팩토리" class="headerlink" title="팩토리"></a>팩토리</h3><ul>
+<li>객체가 생성되는 시점을 애플리케이션이 결정할 필요도 생기는데, 이때는 추상 팩토리 패턴(Abstract Factory)을 사용한다. </li>
+</ul>
+<h3 id="의존성-주입-Dependency-Injection"><a href="#의존성-주입-Dependency-Injection" class="headerlink" title="의존성 주입 (Dependency Injection)"></a>의존성 주입 (Dependency Injection)</h3><ul>
+<li>사용과 제작을 분리하는 강력한 메커니즘 하나가 <a target="_blank" rel="noopener" href="https://ko.wikipedia.org/wiki/%EC%9D%98%EC%A1%B4%EC%84%B1_%EC%A3%BC%EC%9E%85">의존성 주입</a> 이다.</li>
+<li>의존성 주입은 제어 역전(IoC) 기법을 의존성 관리에 적용한 메커니즘이다. 제어역전은 한 객체가 맡은 보조 책임을 새로운 객체에게 전적으로 떠넘김. </li>
+<li><strong>새로운 객체는 넘겨받은 책임만 맡으므로 SRP를 지키게됨.</strong> 의존성 관리 맥락에서는 객체는 의존성 자체를 인스턴스로 만드는 책임은 지지 않는다. 대신에 이런 책임을 다른 전담 메커니즘에 넘겨야만 한다. 그렇게 함으로써 제어를 역전한다. 전담 메커니즘으로는 main루틴이나 특수 컨테이너 대표적으로 spring framework같은게 있겠다. </li>
+</ul>
+<h2 id="확장"><a href="#확장" class="headerlink" title="확장"></a>확장</h2><blockquote><p>소프트웨어 시스템은 물리적인 시스템과 다르다. 관심사를 적절히 분리해 관리한다면 소프트웨어 아키텍처는 점진적으로 발전 할수 있다.    </p>
+</blockquote>
+
+<h3 id="횡단-관심사-cross-cutting"><a href="#횡단-관심사-cross-cutting" class="headerlink" title="횡단 관심사 (cross-cutting)"></a>횡단 관심사 (cross-cutting)</h3><ul>
+<li>영속성과 같은 관심사는 애플리케이션의 자연스러운 객체 경계를 넘나드는 경향이 있다. </li>
+<li>대표적인 횡단 관심사를 사용하는 개념이 <a target="_blank" rel="noopener" href="https://ko.wikipedia.org/wiki/%EA%B4%80%EC%A0%90_%EC%A7%80%ED%96%A5_%ED%94%84%EB%A1%9C%EA%B7%B8%EB%9E%98%EB%B0%8D#:~:text=%EC%BB%B4%ED%93%A8%ED%8C%85%EC%97%90%EC%84%9C%20%EA%B4%80%EC%A0%90%20%EC%A7%80%ED%96%A5%20%ED%94%84%EB%A1%9C%EA%B7%B8%EB%9E%98%EB%B0%8D,%EA%B2%83%EC%9D%B4%20%EB%AA%A9%EC%A0%81%EC%9D%B8%20%ED%94%84%EB%A1%9C%EA%B7%B8%EB%9E%98%EB%B0%8D%20%ED%8C%A8%EB%9F%AC%EB%8B%A4%EC%9E%84%EC%9D%B4%EB%8B%A4.">AOP</a> 이다. </li>
+</ul>
+<h2 id="자바-프록시"><a href="#자바-프록시" class="headerlink" title="자바 프록시"></a>자바 프록시</h2><ul>
+<li>자바 프록시는 단순한 상황에 적합하다. 개별객체나 클래스에서 메서드 호출을 감싸는 경우가 좋은 예다. 하지만 JDK에서 제공하는 동적 프록시는 인터페이스만 지원한다. 클래스 프록시를 사용하려면 CGLIB,ASM,Javassist 등과 같은 바이트 코드 처리 라이브러리가 필요함. </li>
+<li>코드 양과 크기는 프록시의 두가지 단점이다. 결국 프록시로는 깨끗한 코드를 작성하기 어려움 또한 프록시는 시스템 단위로 실행 ‘지점’을 명시하는 메커니즘도 제공하지 않는다. </li>
+</ul>
+<h2 id="순수-자바-AOP-프레임워크"><a href="#순수-자바-AOP-프레임워크" class="headerlink" title="순수 자바 AOP 프레임워크"></a>순수 자바 AOP 프레임워크</h2><ul>
+<li>다행스럽게 대부분의 프록시 코드는 판박이라 도구로 자동화 할수 있다. 순수 자바 관점을 구현하는 스프링 AOP, JBoss AOP 등과 같은 여러 자바 프레임워크는 내부적으로 프록시를 사용한다. </li>
+</ul>
+<h2 id="AspectJ-관점"><a href="#AspectJ-관점" class="headerlink" title="AspectJ 관점"></a>AspectJ 관점</h2><ul>
+<li><a target="_blank" rel="noopener" href="https://ko.wikipedia.org/wiki/AspectJ">AspectJ</a>는 관점을 분리하는 강력하고 풍부한 도구 집합을 제공하지만, 새 도구를 활용하고 새 언어 문법과 사용법을 익혀야 한다는 단점이 있음. </li>
+</ul>
+<h2 id="테스트-주도-시스템-아키텍처-구축"><a href="#테스트-주도-시스템-아키텍처-구축" class="headerlink" title="테스트 주도 시스템 아키텍처 구축"></a>테스트 주도 시스템 아키텍처 구축</h2><blockquote><p>최선의 시스템 구조는 각기 POJO(또는 다른) 객체로 구현되는 모듈화된 관심사 영역(도메인)으로 구성된다. 이렇게 서로 다른 영역은 해당 영역 코드에 최소한의 영향을 미치는 관점이나 유사한 도구를 사용해 통합한다. 이런 구조 역시 코드와 마찬가지로 테스트 주도 기법을 적용할수 있다. </p>
+</blockquote>
+
+<ul>
+<li>건축은 BDUF(Big Design Up Front) 방식을 취한다. 즉, 구현을 시작하기 전에 앞으로 벌어질 모든 사항을 설계하는 기법인데, 소프트웨어 개발은 BDUF방식이 매우 해롭다 (EJB가 왜 망했는지, Spring Framework가 왜 흥할수밖에 없었는지 생각해보면 알듯하다.)</li>
+</ul>
+<h2 id="의사-결정을-최적화-하라"><a href="#의사-결정을-최적화-하라" class="headerlink" title="의사 결정을 최적화 하라"></a>의사 결정을 최적화 하라</h2><blockquote><p>관심사를 모듈로 분리한 POJO시스템은 기민함(게으른)을 제공한다. 이런 기만함 덕택에 최신 정보에 기반해 최선의 시점에 최적의 결정을 내리기가 쉬워진다. 또한 결정의 복잡성도 줄어든다.  </p>
+</blockquote>
+
+<h2 id="명백한-가치가-있을때-표준을-현명하게-사용하라"><a href="#명백한-가치가-있을때-표준을-현명하게-사용하라" class="headerlink" title="명백한 가치가 있을때 표준을 현명하게 사용하라"></a>명백한 가치가 있을때 표준을 현명하게 사용하라</h2><blockquote><p>표준을 사용하면 아이디어와 컴포넌트를 재사용하기 쉽고, 적절한 경험을 가진 사람을 구하기 쉬우며, 좋은 아이디어를 캡슐화하기 쉽고, 컴포넌트를 엮기 쉽다. 하지만 때로는 표준을 만드는 시간이 너무 오래 걸려 업계가 기다리지 못한다. 어떤 표준은 원래 표준을 제정한 목적을 잊어버리기도 한다.</p>
+</blockquote>
+
+<ul>
+<li>EJB2는 단지 표준이라는 이유만으로 아주 많은 팀이 사용했음. 심지어 가벼운 프로젝트도 EJB2를 채택함. 하지만 EJB2의 무거운 시스템 과 오버엔지니어링된 시스템을 아주 과장되게 포장된 표준에 집착하는 바람에 고객 가치가 뒷전으로 밀려난 사례가 많았음.</li>
+</ul>
+<h2 id="시스템은-도메인-특화-언어가-필요하다-DSL"><a href="#시스템은-도메인-특화-언어가-필요하다-DSL" class="headerlink" title="시스템은 도메인 특화 언어가 필요하다. (DSL)"></a>시스템은 도메인 특화 언어가 필요하다. (DSL)</h2><ul>
+<li>DSL은 간단한 스크립트 언어나 표준 언어로 구현한 API를 가리킨다. DSL코드로 짠 코드는 도메인 전문가가 작성한 구조적인 산문처럼 읽힌다. </li>
+<li>좋은 DSL은 도메인 개념과 그 개념을 구현한 코드사이에 존재하는 의사소통 간극을 줄여준다. (애자일 기법이 팀과 프로젝트 이해관계자 사이에 의사소통 간극을 줄여줌.)</li>
+<li>효과적으로 DSL을 활용하면 추상화 수준을 코드 관용구나 디자인 패턴 이상으로 끌어올릴수있음. 그래서 개발자가 적절한 추상화 수준에서 코드 의도를 표현 가능함. </li>
+</ul>
+<blockquote><p>DSL을 사용하면 고차원 정책에서 저차원 세부사항까지 모든 추상화 수준과 모든 도메인을 POJO로 표현가능함. </p>
+</blockquote>
+
+<h2 id="결론"><a href="#결론" class="headerlink" title="결론"></a>결론</h2><ul>
+<li>깨끗하지 못한 아키텍처는 도메인 논리를 흐리며 기민성을 떨어뜨린다. (제품품질 저하, 버그유발상승)</li>
+<li>모든 추상화 단계에서 의도는 명확히 표현해야함. 그러려면 POJO를 작성하고 관점 혹은 관점과 유사한 매커니즘을 사용해 각 구현 관심사를 분리해야함.(AOP)</li>
+<li>시스템을 설계하든 개별 모듈을 설계하든, 실제로 돌아가는 가장 단순한 수단을 사용해야 한다는 사실을 명심. (EJB -&gt; Spring framework, JPA)</li>
+</ul>
+
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/2021/02/20/clean-code-10/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                Comment and share
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
                             href="/2021/02/16/clean-code-9/"
                             aria-label=": clean-code-9"
                         >
@@ -1353,109 +1503,6 @@
                         <p>
                             <a
                                 href="/2021/01/21/clean-code-2/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                Comment and share
-                            </a>
-                        </p>
-                    
-                </div>
-            
-        </div>
-        
-    </article>
-    
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/2021/01/20/clean-code-1/"
-                            aria-label=": clean_code_1"
-                        >
-                            clean_code_1
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time datetime="2021-01-20T11:22:29+00:00">
-	
-		    Jan 20, 2021
-    	
-    </time>
-    
-        <span>in </span>
-        
-    <a class="category-link" href="/categories/Clean-Code/">Clean Code</a>, <a class="category-link" href="/categories/Study/">Study</a>, <a class="category-link" href="/categories/%EC%9D%98%EB%AF%B8-%EC%9E%88%EB%8A%94-%EC%9D%B4%EB%A6%84/">의미 있는 이름</a>
-
-
-    
-</div>
-
-            </div>
-            
-                <div class="postShorten-content">
-                    <h1 id="의미-있는-이름"><a href="#의미-있는-이름" class="headerlink" title="의미 있는 이름"></a>의미 있는 이름</h1><h2 id="1-의도를-분명히-밝혀라"><a href="#1-의도를-분명히-밝혀라" class="headerlink" title="1. 의도를 분명히 밝혀라"></a>1. 의도를 분명히 밝혀라</h2><blockquote><p><strong>변수나 함수 그리고 클래스 이름은 다음과 같은 굵직한 질문에 모두 답해야한다.</strong> </p>
-<ul>
-<li>변수(혹은 함수나 클래스)의 존재 이유는? </li>
-<li>수행 기능은? </li>
-<li>사용 방법은? </li>
-<li>따로 주석이 필요하다면 의도를 분명히 드러내지 못했다는 말이다.  </li>
-</ul>
-</blockquote>
-
-<p>의도가 드러나는 이름을 사용하면 코드 이해와 변경이 쉬워진다. 다음 코드는 무엇을 할까?</p>
-<figure class="highlight java"><figcaption><span>의미가불명확한코드</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> List&lt;<span class="keyword">int</span>[]&gt; getThen() &#123;</span><br><span class="line">	<span class="keyword">public</span> List&lt;<span class="keyword">int</span>[]&gt; list1 = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">for</span> (<span class="keyword">int</span>[] x : theList) &#123;</span><br><span class="line">		<span class="keyword">if</span>(x[<span class="number">0</span>] == <span class="number">4</span>)</span><br><span class="line">			list1.add(x)</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">return</span> list1;</span><br><span class="line">&#125;</span><br><span class="line"> </span><br></pre></td></tr></table></figure>
-
-<figure class="highlight java"><figcaption><span>의미가부여된코드1</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> List&lt;<span class="keyword">int</span>[]&gt; getFlaggedCells() &#123;</span><br><span class="line">	List&lt;<span class="keyword">int</span>[]&gt; flaggedCells = ArrayList&lt;&gt;();</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">for</span>(<span class="keyword">int</span>[] cell: gameBoard) &#123;</span><br><span class="line">		<span class="keyword">if</span>(cell[STATUS_VALUE] == FLAGGED) &#123;</span><br><span class="line">			flaggedCells.add(cell); </span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">return</span> flaggedCells; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-<figure class="highlight java"><figcaption><span>의미가부여된코드2</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> List&lt;Cell&gt; <span class="title">getFlaggedCells</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	List&lt;Cell&gt; flaggedCells = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">for</span>(Cell cell : gameBoard) &#123;</span><br><span class="line">		<span class="keyword">if</span>(cell.isFlagged()) &#123;</span><br><span class="line">			flaggedCells.add(cell);</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">return</span> flaggedCells; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>1,2,3번 코드가 발전된 부분을 비교해보자. 우선 1번에서 2번코드는 의미를 부여해서 코드가 어떤 동작을 목적으로 개발되었는지 알수있도록 의미를 부여하였으며, 2번에서 3번코드는 <code>Cell</code>이라는 객체를 만들어 해당 객체의 명확한 의도를 정의 했고,<br><code>cell.isFlagged()</code> 메서드를 작성해서 FLAGGED라는 상수를 감춰서 좀 더 이해하기 쉽고 이쁘게 코드를 구성했다는 걸 알수있다. 이 처럼 모든 코드에는 명확한 의도가 네이밍을 통해 알수 있어야한다. </p>
-<h2 id="2-그릇된-정보를-피하라"><a href="#2-그릇된-정보를-피하라" class="headerlink" title="2. 그릇된 정보를 피하라"></a>2. 그릇된 정보를 피하라</h2><p>프로그래머는 코드에 그릇된 단서를 남겨서는 안된다. </p>
-<h3 id="그릇된-단서는-코드-의미를-흐린다"><a href="#그릇된-단서는-코드-의미를-흐린다" class="headerlink" title="그릇된 단서는 코드 의미를 흐린다."></a>그릇된 단서는 코드 의미를 흐린다.</h3><p>예를들어, 여러 계정을 그룹으로 묶을 때, 실제 List가 아니라면, aacountList라 명명하지 않는다. 프로그래머에게 List라는 단어는 특수한 의미다.<br>계정을 담는 컨테이너가 실제 List가 아니라면 프로그래머에게 그릇된 정보를 제공하는 셈이다. 그러므로 accountGroup, bunchOfAccounts 아니면, Accounts라 명명한다. </p>
-<h3 id="서로-흡사한-이름을-사용하지-않는다"><a href="#서로-흡사한-이름을-사용하지-않는다" class="headerlink" title="서로 흡사한 이름을 사용하지 않는다."></a>서로 흡사한 이름을 사용하지 않는다.</h3><p>한 모듈에서 XYZControllerForEfficientHandlingOfStrings 라는 이름을 사용하고, 조금 떨어진 모듈에서 XYZContllerForEfficientStorageOfStrings라는 이름을 사용한다면? 두 단어는 겁나게 비슷하다. </p>
-<h3 id="유사한-개념은-유사한-표기법을-사용한다"><a href="#유사한-개념은-유사한-표기법을-사용한다" class="headerlink" title="유사한 개념은 유사한 표기법을 사용한다."></a>유사한 개념은 유사한 표기법을 사용한다.</h3><p>이것도 <strong>정보</strong> 다. 일관성이 떨어지는 표기법은 <strong>그릇된 정보</strong> 다. 요즘 IDE는 몇자만 입력하면 후보목록에 유사한 개념이 알파멧 순으로 나온다면 그리고 각 개념의 차이가 명백히 드러난다면 코드 자동 완성 기능은 굉장히 유용해진다.<br>십중팔구 개발자들은 네이밍만 보고 객체를 선택한다(상세 주석이나 메서드 목록 잘 안보고 네이밍만으로 판단하는 경우 많음)</p>
-<h2 id="3-의미-있게-구분하라"><a href="#3-의미-있게-구분하라" class="headerlink" title="3. 의미 있게 구분하라"></a>3. 의미 있게 구분하라</h2><h3 id="컴파일러를-통과할지라도-연속된-숫자를-덧붙이거나-불용어-noise-word-를-추가하는-방식은-비추천"><a href="#컴파일러를-통과할지라도-연속된-숫자를-덧붙이거나-불용어-noise-word-를-추가하는-방식은-비추천" class="headerlink" title="컴파일러를 통과할지라도 연속된 숫자를 덧붙이거나 불용어 (noise word) 를 추가하는 방식은 비추천"></a>컴파일러를 통과할지라도 연속된 숫자를 덧붙이거나 불용어 (noise word) 를 추가하는 방식은 비추천</h3><p>이름이 달라야한다면 의미도 달라져야함. (a1,a2….) </p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">copyChars</span><span class="params">(<span class="keyword">char</span> a1[] , <span class="keyword">char</span> a2[])</span> </span>&#123;</span><br><span class="line">	<span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; a1.length; i++) &#123;</span><br><span class="line">		a2[i]  = a1[i]; </span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>위 코드에서 함수의 인수명을 source 와 destination 으로 사용했으면 가독성이 훨씬 좋았을것이다. </p>
-<h3 id="불용어를-추가한-이름-역시-아무런-정보를-제공하지-못함"><a href="#불용어를-추가한-이름-역시-아무런-정보를-제공하지-못함" class="headerlink" title="불용어를 추가한 이름 역시 아무런 정보를 제공하지 못함."></a>불용어를 추가한 이름 역시 아무런 정보를 제공하지 못함.</h3><p><code>Product</code>라는 클래스가 있다고 가정하면, 다른 클래스를 <code>ProductInfo</code>, <code>ProductData</code> 라 부른다면 개념을 구분하지 않은 채 이름만 달리는 경우다. Info 와 Data는 의미가 불명확하기 때문에 그 클래스나 메소드등의 기능에 따라 분명한 네이밍을 정하는것이 중요하다. </p>
-<h2 id="4-발음하기-쉬운-이름을-사용하라"><a href="#4-발음하기-쉬운-이름을-사용하라" class="headerlink" title="4. 발음하기 쉬운 이름을 사용하라."></a>4. 발음하기 쉬운 이름을 사용하라.</h2><p>저자가 아는 분이 <code>genymdhms</code>(generate date, year, month,day,hour,minute,second)라는 네이밍을 사용했다고 한다. 저거 어떻게 발음해야함? 부르기도 힘들다. 저딴식으로 네이밍 적지말자. 부르기 쉬운 명칭이 이해도 빠르다. </p>
-<h2 id="5-검색하기-쉬운-이름을-사용하라"><a href="#5-검색하기-쉬운-이름을-사용하라" class="headerlink" title="5. 검색하기 쉬운 이름을 사용하라."></a>5. 검색하기 쉬운 이름을 사용하라.</h2><p>보통 변수나 상수명을 정의할때 대충 정의하면 무슨 의미인지도 모르고, 공통적으로 사용되는 단어나 알파벳등이 들어갔을때 검색하기 힘든 경우가 있다. 어떤 변수,상수,클래스,메서드든 간에 의미를 확인해서 검색하기 쉬운 단어로 사용하도록 하자.</p>
-<h2 id="6-인코딩을-피하라"><a href="#6-인코딩을-피하라" class="headerlink" title="6. 인코딩을 피하라."></a>6. 인코딩을 피하라.</h2><p>대표적으로 헝거리식 표기법 예전 C혹은 WinAPI시대에서나 볼수있는 부분으로, 변수명 앞에 멤버변수라는 의미를 담아 m_name 혹은 인터페이스 클래스라는 의미를 담아 IShape이런식으로 명칭을 정해서 사용을 자주했는데, 이제는 이런식으로 굳이 안해도 컴파일이나 개발하는데 큰 이슈를 주지않음<br>(예전에는 메서드 길이제한 문자제한등으로 헝거리식표기법을 사용했었음. 하지만 이제는 시대가 발전하면서 큰의미가 없어졌음. 메서드에 수십자적어도 심지어 한글을 적어도 이슈없음.)</p>
-<h2 id="7-자신의-기억력을-자랑하지-마라"><a href="#7-자신의-기억력을-자랑하지-마라" class="headerlink" title="7. 자신의 기억력을 자랑하지 마라."></a>7. 자신의 기억력을 자랑하지 마라.</h2><p>변수명 개같이 짓지 말자. for문을 예를들면 비교적 로직이 짧은 for문을 사용하면, i,x등의 변수명을 사용해도 괜찮지만, 로직이 복잡하고 내용이 긴 for문은 명확한 변수명으로 타 개발자가 혼돈하지 않고 명시하도록 하자. </p>
-<h2 id="8-클래스-이름"><a href="#8-클래스-이름" class="headerlink" title="8. 클래스 이름"></a>8. 클래스 이름</h2><p>클래스 이름 과 객체 이름은 명사나 명사구가 적합함. (Customer, WikiPAge..)</p>
-<h2 id="9-메서드-이름"><a href="#9-메서드-이름" class="headerlink" title="9. 메서드 이름"></a>9. 메서드 이름</h2><p>메서드 이름은 동사나 동사구가 적합함. (postPayment, deletePage, save …) 그리고 접근자,변경자,조건자는 자바빈 표준에 따라 get,set,is를 붙히도록 하자.<br>덧붙여서 생성자를 중복정의 할때 (다중 생성자) 정적 팩터리 메서드를 사용하도록 하자.(effective java item1 참고)</p>
-<h2 id="10-기발한-이름은-피하라"><a href="#10-기발한-이름은-피하라" class="headerlink" title="10. 기발한 이름은 피하라"></a>10. 기발한 이름은 피하라</h2><p>나만의 독창적인 이름으로 주변 개발자들이 못알아보게 만드는 이슈를 만들게 하지말자. 가급적 팀내 정한 네이밍 룰이 있으면 그 형식을 따르도록 하자. </p>
-<h2 id="11-한-개념에-한-단어를-사용하라"><a href="#11-한-개념에-한-단어를-사용하라" class="headerlink" title="11. 한 개념에 한 단어를 사용하라."></a>11. 한 개념에 한 단어를 사용하라.</h2><p>추상적인 개념 하나에 단어 하나를 선택해 이를 고수하도록 하자. 예를들어, 똑같은 메서드를 클래스마다 fetch, retrieve, get 으로 제각각 부르면 혼란스럽다. 통일해서 사용하도록 하자. </p>
-<h2 id="12-말장난을-하지-마라"><a href="#12-말장난을-하지-마라" class="headerlink" title="12. 말장난을 하지 마라."></a>12. 말장난을 하지 마라.</h2><p>11장 처럼 한개념에 한 단어를 사용하라고 해서 모든 <code>add</code>메서드를 1+1 처럼 더하는 값의 결과물을 내는 메서드를 사용했는데, 다른 add메서드에서는 집합체 안에 새로운 값 하나를 추가하는 메서드를 add로 사용하는건 곤란하다.<br>새로운 값이 추가되었을때는 append 혹은 insert로 네이밍하여 add와 혼용하지 않도록 조심하자.</p>
-<h2 id="13-해법-영역에서-가져온-이름을-사용하라"><a href="#13-해법-영역에서-가져온-이름을-사용하라" class="headerlink" title="13. 해법 영역에서 가져온 이름을 사용하라."></a>13. 해법 영역에서 가져온 이름을 사용하라.</h2><p>코드를 읽는 사람도 프로그래머라는 사실을 명심하자. 그러므로 전산용어, 알고리즘, 패턴, 수학용어등을 사용해도됨. </p>
-<h2 id="14-문제-영역에서-가져온-이름을-사용하라"><a href="#14-문제-영역에서-가져온-이름을-사용하라" class="headerlink" title="14. 문제 영역에서 가져온 이름을 사용하라."></a>14. 문제 영역에서 가져온 이름을 사용하라.</h2><p>적절한 프로그래머 용어가 없다면 문제 영역에서 이름을 가져온다. 그럼 코드를 보수하는 프로그래머가 분야 전문가에게 의미를 물어 파악 할수 있다. </p>
-<h2 id="15-의미있는-맥락을-추가하라"><a href="#15-의미있는-맥락을-추가하라" class="headerlink" title="15. 의미있는 맥락을 추가하라."></a>15. 의미있는 맥락을 추가하라.</h2><p>아래 코드 2개를 비교해보자. </p>
-<figure class="highlight java"><figcaption><span>맥락이 불분명한 함수</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">printGuessStatistics</span><span class="params">(<span class="keyword">char</span> candidate, <span class="keyword">int</span> count)</span> </span>&#123;</span><br><span class="line">	String number; </span><br><span class="line">	String verb; </span><br><span class="line">	String pluralModifier; </span><br><span class="line">	</span><br><span class="line">	<span class="keyword">if</span>(count == <span class="number">0</span>) &#123;</span><br><span class="line">		number = <span class="string">&quot;no&quot;</span>;</span><br><span class="line">		verb = <span class="string">&quot;are&quot;</span>;</span><br><span class="line">		pluralModifier = <span class="string">&quot;s&quot;</span>;</span><br><span class="line">		</span><br><span class="line">	&#125; <span class="keyword">else</span> <span class="keyword">if</span> (count == <span class="number">1</span>) &#123;</span><br><span class="line">		number = <span class="string">&quot;1&quot;</span>; </span><br><span class="line">		verb = <span class="string">&quot;is&quot;</span>; </span><br><span class="line">		pluralModifier = <span class="string">&quot;&quot;</span>; </span><br><span class="line">	&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">		number = Integer.toString(count);</span><br><span class="line">		verb = <span class="string">&quot;are&quot;</span>;</span><br><span class="line">		pluralModifier = <span class="string">&quot;s&quot;</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	String guessMessage = String.format(<span class="string">&quot;There %s %s %s%s&quot;</span>, verb, number, candidate, pluraModifier);</span><br><span class="line">	print(guessMessage);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-<figure class="highlight java"><figcaption><span>맥락이 분명한 함수</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">GuessStatisticsMessage</span> </span>&#123;</span><br><span class="line">	<span class="keyword">private</span> String number; </span><br><span class="line">	<span class="keyword">private</span> String verb; </span><br><span class="line">	<span class="keyword">private</span> String pluralModifier; </span><br><span class="line">	</span><br><span class="line">	<span class="function"><span class="keyword">public</span> String <span class="title">make</span><span class="params">(<span class="keyword">char</span> candidate, <span class="keyword">int</span> count)</span> </span>&#123;</span><br><span class="line">		createPluralDependentMessageParts(count);</span><br><span class="line">		<span class="keyword">return</span> String.format(<span class="string">&quot;There %s %s %s%s&quot;</span>, verb, number, candidate, pluraModifier);</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">createPluralDependentMessageParts</span><span class="params">(<span class="keyword">int</span> count)</span> </span>&#123;</span><br><span class="line">		<span class="keyword">if</span> (count == <span class="number">0</span>) &#123;</span><br><span class="line">			thereAreNoLetters();</span><br><span class="line">		&#125; <span class="keyword">else</span> <span class="keyword">if</span> (count == <span class="number">1</span>) &#123;</span><br><span class="line">			thereIsOneLetter();</span><br><span class="line">		&#125; <span class="keyword">else</span> &#123; </span><br><span class="line">			thereAreManyLetters(count); </span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">thereAreManyLetters</span><span class="params">(<span class="keyword">int</span> count )</span> </span>&#123;</span><br><span class="line">		number = Integer.toString(count);</span><br><span class="line">		verb = <span class="string">&quot;are&quot;</span>;</span><br><span class="line">		pluralModifier = <span class="string">&quot;s&quot;</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">thereIsOneLetter</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		number = <span class="string">&quot;1&quot;</span>; </span><br><span class="line">		verb = <span class="string">&quot;is&quot;</span>; </span><br><span class="line">		pluralModifier = <span class="string">&quot;&quot;</span>; </span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">thereAreNoLetters</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		number = <span class="string">&quot;no&quot;</span>;</span><br><span class="line">		verb = <span class="string">&quot;are&quot;</span>;</span><br><span class="line">		pluralModifier = <span class="string">&quot;s&quot;</span>;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>1번코드를 보면서 어떤 부분이 느껴지는가? 변수만 보고서 의미가 파악되는가? 함수 이름으로는 대강 어떤 동작을 하겠거니 유추는 가능하지만, 알고리즘에서 나머지 맥락을 제공하는걸 알수있다. (결국 로직을 다봐야 알수있다는 말.)<br>결국 메서드만 봐서는 세 변수의 의미가 불분명하다. 그럼 개선된 코드에서는 어떻게 명확한 코드로 만들었을까? 우선 코드1번은 함수가 길다. 그리고 세변수를 함수 전반에서 사용한다. 그래서 함수를 작은 조각으로 쪼개고자 GuessStatisticsMessage라는 클래스는 만든뒤,<br>세 변수를 클래스에 멤버변수로 넣었다. 그러면 세 변수는 맥락이 분명해 진다. 즉, 세 변수는 확실하게 GuessStatisticsMessage 에 속한다. 이렇게 맥락을 개선하면 함수를 쪼개기가 쉬워지므로 알고리즘도 좀 더 명확해진다.<br>개인적으로 이번장에서 가장 감명깊게 본 파트이다. 개인적으로 개발하면서 이 부분에서 늘 신경을 못써서, 항상 코드가 복잡해지고 난잡해지는 이슈가 있었는데, 담번에는 좀 규모있고 복잡한 로직이 들어갈때, 맥락을 정확하게 하기 위해서 클래스로 쪼개는 연습을 해보도록 하자. </p>
-<h2 id="16-불필요한-맥락을-없애라"><a href="#16-불필요한-맥락을-없애라" class="headerlink" title="16. 불필요한 맥락을 없애라."></a>16. 불필요한 맥락을 없애라.</h2><p>이부분은 개인적으로 예를 들면 Gsfresh라는 프로젝트를 하고있다고 가정하자. Gsfresh가 메인이라고 하지만, 적용하는 로직이 광범위하고 클래스도 많고 변수도 많고, 메서드도 많다면 무조건 네이밍앞에 GSFCheckClaim 이런식으로 GSF를 서두에 다 붙일 필요는 없다는 의미다.<br>왜냐면 모든 관련 파일이나 변수나 메서드에 GSF~ 이런식으로 붙여버리면 검색할때도 힘들고 찾기도 힘들어 지기 때문이다. </p>
-
-                    
-                        
-
-
-                    
-                    
-                        <p>
-                            <a
-                                href="/2021/01/20/clean-code-1/#post-footer"
                                 class="postShorten-excerpt_link link"
                                 aria-label=""
                             >
