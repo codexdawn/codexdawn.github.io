@@ -247,6 +247,129 @@
                     
                         <a
                             class="link-unstyled"
+                            href="/2021/04/28/value-type/"
+                            aria-label=": value-type"
+                        >
+                            value-type
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2021-04-28T13:53:22+00:00">
+	
+		    Apr 28, 2021
+    	
+    </time>
+    
+        <span>in </span>
+        
+    <a class="category-link" href="/categories/Study/">Study</a>, <a class="category-link" href="/categories/%EA%B0%92%ED%83%80%EC%9E%85/">값타입</a>, <a class="category-link" href="/categories/%EC%9E%90%EB%B0%94ORM%ED%91%9C%EC%A4%80JPA%ED%94%84%EB%A1%9C%EA%B7%B8%EB%9E%98%EB%B0%8D/">자바ORM표준JPA프로그래밍</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <h1 id="값-타입"><a href="#값-타입" class="headerlink" title="값 타입"></a>값 타입</h1><blockquote><p>JPA 데이터 분류 2가지</p>
+<ol>
+<li>엔티티 타입</li>
+</ol>
+<ul>
+<li>@Entity로 정의하는 객체 </li>
+<li>데이터가 변해도 식별자로 지속해서 추적 가능 </li>
+</ul>
+<ol start="2">
+<li>값 타입 </li>
+</ol>
+<ul>
+<li>int,long,String같은 단순히 값으로 사용하는 자바 기본 타입이나 객체 </li>
+<li>식별자가 없으므로 추적 불가능 (숫자 100을 200으로 변경하면 완전히 다른 값으로 대체됨.)</li>
+</ul>
+<p>기본값 타입 3가지 </p>
+<ul>
+<li>기본값 타입 (자바 기본타입(int,double), 래퍼 클래스(Integer,Long), String)</li>
+<li>임베디드 타입 (복합 값 타입)</li>
+<li>컬렉션 값 타입 </li>
+</ul>
+</blockquote>
+
+<h2 id="1-기본값-타입"><a href="#1-기본값-타입" class="headerlink" title="1. 기본값 타입"></a>1. 기본값 타입</h2><p><img src="/images/jpa/value-1.png" alt="기본값 타입"></p>
+<h2 id="2-임베디드-타입-복합값-타입"><a href="#2-임베디드-타입-복합값-타입" class="headerlink" title="2. 임베디드 타입(복합값 타입)"></a>2. 임베디드 타입(복합값 타입)</h2><figure class="highlight java"><figcaption><span>임베디드타입 예제</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Entity</span></span><br><span class="line"><span class="meta">@Table(name = &quot;Orders&quot;)</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Order</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Id</span> <span class="meta">@GeneratedValue</span></span><br><span class="line">    <span class="meta">@Column(name = &quot;order_id&quot;)</span></span><br><span class="line">    <span class="keyword">private</span> Long id;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">int</span> orderAmount;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@ManyToOne(fetch = FetchType.LAZY)</span></span><br><span class="line">    <span class="meta">@JoinColumn(name = &quot;member_id&quot;)</span></span><br><span class="line">    <span class="keyword">private</span> Member member;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Embedded</span></span><br><span class="line">    <span class="keyword">private</span> Address address;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@ManyToOne(fetch = FetchType.LAZY)</span></span><br><span class="line">    <span class="meta">@JoinColumn(name = &quot;product_id&quot;)</span></span><br><span class="line">    <span class="keyword">private</span> Product product;</span><br><span class="line">	</span><br><span class="line">	<span class="comment">//getter,setter 생략</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Embeddable</span></span><br><span class="line"><span class="meta">@Getter</span></span><br><span class="line"><span class="meta">@AllArgConstructor</span> </span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Address</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> String city;</span><br><span class="line">    <span class="keyword">private</span> String street;</span><br><span class="line">    <span class="keyword">private</span> String zipcode;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="임베디드-타입-특징"><a href="#임베디드-타입-특징" class="headerlink" title="임베디드 타입 특징"></a>임베디드 타입 특징</h3><ul>
+<li>int,String과 같은 값 타입 </li>
+<li>주로 기본값 타입을 모아서 만들어서 복합 값 타입이라 부름 </li>
+<li>새로운 값 타입을 직접 정의 가능 (응집도 높아짐에 따라 재사용성 증가)</li>
+<li>Period.isWork 처럼 해당 값 타입만 사용하는 의미있는 메소드 만들수있음. </li>
+<li>임베디드 타입을 포함한 모든 값 타입은 , 값 타입을 소유한 엔티티에 생명주기를 의존함. </li>
+</ul>
+<h3 id="임베디드-타입과-연관관계"><a href="#임베디드-타입과-연관관계" class="headerlink" title="임베디드 타입과 연관관계"></a>임베디드 타입과 연관관계</h3><p><img src="/images/jpa/value-2.png" alt="임베디드 타입과 연관관계"></p>
+<ul>
+<li>위 그림 처럼 entity는 여러 임베디드 타입을 가질수있으며, 임베디드타입은 다른 엔티티를 가질수 있음. </li>
+</ul>
+<h3 id="AttributeOverride-속성-재정의"><a href="#AttributeOverride-속성-재정의" class="headerlink" title="@AttributeOverride: 속성 재정의"></a>@AttributeOverride: 속성 재정의</h3><ul>
+<li>한 엔티티에 같은 임베디드 타입을 사용하면? 컬럼명이 중복되서 에러남. </li>
+<li>@AttributeOverrides, @AttributeOverride를 사용해서 컬러 명 속성을 재정의 (homeAddress,workAddress)</li>
+</ul>
+<h3 id="임베디드-타입과-null"><a href="#임베디드-타입과-null" class="headerlink" title="임베디드 타입과 null"></a>임베디드 타입과 null</h3><ul>
+<li>임베디드 타입의 값이 null이면 매핑한 컬럼 모두 null로 세팅됨 (member.setAddress(null))</li>
+</ul>
+<h2 id="3-값-타입과-불변-객체"><a href="#3-값-타입과-불변-객체" class="headerlink" title="3. 값 타입과 불변 객체"></a>3. 값 타입과 불변 객체</h2><blockquote><p>값 타입은 복잡한 객체 세상을 조금이라도 단순화하려고 만든 개념이다. 따라서 값 타입은 단순하고 안전하게 다 룰 수 있어야 한다.</p>
+</blockquote>
+
+<h3 id="값-타입-복사"><a href="#값-타입-복사" class="headerlink" title="값 타입 복사"></a>값 타입 복사</h3><p><img src="/images/jpa/value-3.png" alt="값 타입 공유 참조"><br><img src="/images/jpa/value-4.png" alt="값 타입 복사"></p>
+<h3 id="객체-타입-한계"><a href="#객체-타입-한계" class="headerlink" title="객체 타입 한계"></a>객체 타입 한계</h3><p><img src="/images/jpa/value-5.png" alt="객체 타입 한계"><br><img src="/images/jpa/value-6.png" alt="객체 타입 한계 예시"></p>
+<h3 id="불변객체"><a href="#불변객체" class="headerlink" title="불변객체"></a>불변객체</h3><p><img src="/images/jpa/value-7.png" alt="불변객체"></p>
+<h2 id="4-값-타입-비교"><a href="#4-값-타입-비교" class="headerlink" title="4. 값 타입 비교"></a>4. 값 타입 비교</h2><p><img src="/images/jpa/value-8.png" alt="값 타입 비교"></p>
+<h2 id="5-값-타입-컬렉션"><a href="#5-값-타입-컬렉션" class="headerlink" title="5. 값 타입 컬렉션"></a>5. 값 타입 컬렉션</h2><ul>
+<li>결론부터 이야기하면 <strong>값 타입 컬렉션은 가급적 피하는것이 좋다.</strong>  </li>
+<li>값타입 특성상 엔티티 처럼 추적이 불가능하기때문에, 일부 row를 수정하려고 하면, 해당 키값의 포함된 모든 데이터를 지우고 다시 생성한다. </li>
+<li>값 타입 컬렉션 대신 값타입을 엔티티로 승격시키고, <strong>cacade + 고아객체(orhanremoval)</strong> 로 주 엔티티에서 관리하도록 만들어서 관리해야함.</li>
+<li>값 타입 컬렉션은 정말 단순한 데이터를 저장할때 쓴다. (예를들면 멀티셀렉트박스로 선택한 값들을 단순 저장할때.)</li>
+</ul>
+<h3 id="값-타입-사용시-주의사항"><a href="#값-타입-사용시-주의사항" class="headerlink" title="값 타입 사용시 주의사항"></a>값 타입 사용시 주의사항</h3><ul>
+<li>값 타입은 정말 값 타입이라 판단될 때만 사용</li>
+<li>엔티티와 값 타입을 혼동해서 엔티티를 값 타입으로 만들면 안됨</li>
+<li>식별자가 필요하고, 지속해서 값을 추적, 변경해야 한다면 그것 은 값 타입이 아닌 엔티티</li>
+</ul>
+<h3 id="값-타입-컬렉션-소개"><a href="#값-타입-컬렉션-소개" class="headerlink" title="값 타입 컬렉션 소개"></a>값 타입 컬렉션 소개</h3><p><img src="/images/jpa/collection-value-1.png" alt="값 타입 컬렉션 소개1"><br><img src="/images/jpa/collection-value-2.png" alt="값 타입 컬렉션 소개2"></p>
+<h3 id="값-타입-컬렉션의-제약사항"><a href="#값-타입-컬렉션의-제약사항" class="headerlink" title="값 타입 컬렉션의 제약사항"></a>값 타입 컬렉션의 제약사항</h3><p><img src="/images/jpa/collection-value-3.png" alt="값 타입 컬렉션의 제약사항"></p>
+<h3 id="값-타입-컬렉션의-대안"><a href="#값-타입-컬렉션의-대안" class="headerlink" title="값 타입 컬렉션의 대안"></a>값 타입 컬렉션의 대안</h3><p><img src="/images/jpa/collection-value-4.png" alt="값 타입 컬렉션 대안"></p>
+<h3 id="값-타입-정리"><a href="#값-타입-정리" class="headerlink" title="값 타입 정리"></a>값 타입 정리</h3><p><img src="/images/jpa/collection-value-5.png" alt="값 타입 정리"></p>
+
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/2021/04/28/value-type/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                Comment and share
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
                             href="/2021/04/21/proxy-relational/"
                             aria-label=": proxy-relational"
                         >
