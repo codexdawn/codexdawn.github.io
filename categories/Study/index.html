@@ -247,6 +247,148 @@
                     
                         <a
                             class="link-unstyled"
+                            href="/2021/05/07/jpa-obj-query-1/"
+                            aria-label=": jpa-obj-query-1"
+                        >
+                            jpa-obj-query-1
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2021-05-07T11:42:32+00:00">
+	
+		    May 07, 2021
+    	
+    </time>
+    
+        <span>in </span>
+        
+    <a class="category-link" href="/categories/Study/">Study</a>, <a class="category-link" href="/categories/%EA%B0%9D%EC%B2%B4%EC%A7%80%ED%96%A5%EC%BF%BC%EB%A6%AC%EC%96%B8%EC%96%B4/">객체지향쿼리언어</a>, <a class="category-link" href="/categories/%EC%9E%90%EB%B0%94ORM%ED%91%9C%EC%A4%80JPA%ED%94%84%EB%A1%9C%EA%B7%B8%EB%9E%98%EB%B0%8D/">자바ORM표준JPA프로그래밍</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <h1 id="객체지향-쿼리-언어"><a href="#객체지향-쿼리-언어" class="headerlink" title="객체지향 쿼리 언어"></a>객체지향 쿼리 언어</h1><p>JPA는 다양한 쿼리 방법을 지원한다. JPQL,JPA Criteria, QueryDSL, 네이티브 SQL, JDBC API/MyBatis등과 같은 외부라이브러리 사용등<br>하지만 결론적으로 실무에서 자주 사용할것은, JPQL/QueryDSL 일것이다. 따라서 JPQL/QueryDSL 위주로 정리하도록 한다. </p>
+<h2 id="1-JPQL"><a href="#1-JPQL" class="headerlink" title="1. JPQL"></a>1. JPQL</h2><h3 id="1-1-JPQL-특징"><a href="#1-1-JPQL-특징" class="headerlink" title="1-1. JPQL 특징"></a>1-1. JPQL 특징</h3><ul>
+<li>JPQL은 객체지향 쿼리 언어이다. 따라서 테이블을 대상으로 쿼리하는것이 아니라, <strong>엔티티 객체를 대상</strong> 으로 쿼리한다.</li>
+<li>JPQL은 SQL을 추상화해서 특정 데이터베이스 SQL에 의존하지 않는다. (여러 DB방언 지원 및 ANSI표준까지 지원)</li>
+<li>JPQL의 종착지는 SQL이다. SQL로 결국 변환됨.</li>
+</ul>
+<p><img src="/images/jpa/jpql-1.png" alt="실습 샘플 모델"></p>
+<h3 id="1-2-JPQL-기본-문법"><a href="#1-2-JPQL-기본-문법" class="headerlink" title="1-2. JPQL 기본 문법"></a>1-2. JPQL 기본 문법</h3><p><img src="/images/jpa/jpql-2.png" alt="JPQL기본문법 구조1"></p>
+<ul>
+<li>엔티티와 속성은 대소문자 구분함. </li>
+<li>jpql 키워드는 대소문자 구분안함.</li>
+<li>반드시 엔티티 이름으로 사용해야함. (테이블이름 안됨)</li>
+<li>별칭은 필수! </li>
+</ul>
+<p><img src="/images/jpa/jpql-3.png" alt="JPQL기본문법 구조2"><br><img src="/images/jpa/jpql-4.png" alt="JPQL기본문법 구조3"></p>
+<figure class="highlight java"><figcaption><span>jpql-basic-1</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">List&lt;Member&gt; members = entityManager.createQuery(<span class="string">&quot;select m from Member m&quot;</span>, Member.class)</span><br><span class="line">               .getResultList();</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><figcaption><span>jpql-basic-2</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">List&lt;Member&gt; paramResult = entityManager.createQuery(<span class="string">&quot;select m from Member m where m.userName = :userName&quot;</span>, Member.class)</span><br><span class="line">               .setParameter(<span class="string">&quot;userName&quot;</span>,<span class="string">&quot;m2&quot;</span>)</span><br><span class="line">               .getResultList();</span><br></pre></td></tr></table></figure>
+
+<p>[주의] 아래와 같이 쿼리 짜지 말자! </p>
+<figure class="highlight java"><figcaption><span>jpql-basic-3</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//이런식으로 쿼리짜지말자. join걸어서 가져오는걸로 (가독성이 떨어짐 비추 무조건 명시적조인을 하자)</span></span><br><span class="line"><span class="comment">//그리고 JPQL에서는 fetch상태 자체가 무시됨.(LAZY로 걸어도 그냥 조인됨)</span></span><br><span class="line">List&lt;Team&gt; teams = entityManager.createQuery(<span class="string">&quot;select m.team from Member m&quot;</span>, Team.class)</span><br><span class="line">               				.getResultList();</span><br></pre></td></tr></table></figure>
+
+<h3 id="1-3-프로젝션"><a href="#1-3-프로젝션" class="headerlink" title="1-3. 프로젝션"></a>1-3. 프로젝션</h3><p><img src="/images/jpa/jpql-5.png" alt="JPQL프로젝션"><br><img src="/images/jpa/jpql-6.png" alt="JPQL프로젝션-여러값조회"></p>
+<p>[참고]</p>
+<ul>
+<li>엔티티프로젝션은 Persistance Context에 관리된다.</li>
+<li>임베디드타입은 엔티티 타입이 아닌 값타입이다. 따라서 직접 조회한 값타입인 임베디드타입은 Persistance Context에 관리되지않는다.</li>
+</ul>
+<figure class="highlight java"><figcaption><span>jpql-projection</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">List&lt;MemberInfo&gt; memberInfos = entityManager</span><br><span class="line">                .createQuery(<span class="string">&quot;select new entity.MemberInfo(m.userName,m.age) from Member m&quot;</span>, MemberInfo.class)</span><br><span class="line">                .getResultList();</span><br></pre></td></tr></table></figure>
+
+<h3 id="1-4-페이징-API"><a href="#1-4-페이징-API" class="headerlink" title="1-4. 페이징 API"></a>1-4. 페이징 API</h3><p>JPA의 페이징은 여러 DB방언의 페이징처리를 추상화 되어있다.</p>
+<ul>
+<li>setFirstResult(int startPosition) : 조회 시작 위치 (0부터시작)</li>
+<li>setMaxResults(int maxResult) : 조회할 데이터수 </li>
+</ul>
+<figure class="highlight java"><figcaption><span>jpql-paging</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">List&lt;Member&gt; memberList = entityManager.createQuery(<span class="string">&quot;select m from Member m join fetch m.team t order by m.age desc&quot;</span>, Member.class)</span><br><span class="line">                .setFirstResult(<span class="number">0</span>)</span><br><span class="line">                .setMaxResults(<span class="number">20</span>)</span><br><span class="line">                .getResultList();</span><br></pre></td></tr></table></figure>
+
+<h3 id="1-5-조인"><a href="#1-5-조인" class="headerlink" title="1-5. 조인"></a>1-5. 조인</h3><p>기본적인 inner join / left (outer) join / cross join (세타조인) 이 지원된다. 기본적인 ANSI표준 join이 그대로 지원된다고 생각하면됨.</p>
+<h4 id="조인-ON절"><a href="#조인-ON절" class="headerlink" title="조인 - ON절"></a>조인 - ON절</h4><ol>
+<li>조인 대상 필터링</li>
+</ol>
+<ul>
+<li>SELECT m, t FROM Member m LEFT JOIN m.team t on t.name = ‘A’</li>
+<li>위 쿼리처럼 ON 절 뒤에 join하면서 필터작업을 미리 할수있는 기능  </li>
+</ul>
+<ol start="2">
+<li>연관관계 없는 엔티티 외부 조인 (하이버네이트 5.1부터가능)</li>
+</ol>
+<ul>
+<li>보통 키값으로 조인을 하지만 전혀 관계없는 부분도 조인조건에 넣을수있음.</li>
+<li>SELECT m, t FROM Member m LEFT JOIN Team t on m.username = t.name</li>
+</ul>
+<h3 id="1-6-서브쿼리"><a href="#1-6-서브쿼리" class="headerlink" title="1-6. 서브쿼리"></a>1-6. 서브쿼리</h3><p><img src="/images/jpa/jpql-7.png" alt="JPQL서브쿼리"></p>
+<figure class="highlight sql"><figcaption><span>서브쿼리-1</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">#나이가 평균보다 많은 회원 </span><br><span class="line"><span class="keyword">select</span> m <span class="keyword">from</span> <span class="keyword">Member</span> m </span><br><span class="line"><span class="keyword">where</span> m.age <span class="operator">&gt;</span> (<span class="keyword">select</span> <span class="built_in">avg</span>(m2.age) <span class="keyword">from</span> <span class="keyword">Member</span> m2) </span><br><span class="line"></span><br><span class="line">#한건이라도주문한고객</span><br><span class="line"><span class="keyword">select</span> m <span class="keyword">from</span> <span class="keyword">Member</span> m</span><br><span class="line"><span class="keyword">where</span> (<span class="keyword">select</span> <span class="built_in">count</span>(o) <span class="keyword">from</span> <span class="keyword">Order</span> o <span class="keyword">where</span> m <span class="operator">=</span> o.member) <span class="operator">&gt;</span> <span class="number">0</span></span><br><span class="line"></span><br><span class="line">#팀A 소속인 회원</span><br><span class="line"><span class="keyword">select</span> m <span class="keyword">from</span> <span class="keyword">Member</span> m</span><br><span class="line"><span class="keyword">where</span> <span class="keyword">exists</span> (<span class="keyword">select</span> t <span class="keyword">from</span> m.team t <span class="keyword">where</span> t.name <span class="operator">=</span> ‘팀A<span class="string">&#x27;)</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">#전체 상품 각각의 재고보다 주문량이 많은 주문들</span></span><br><span class="line"><span class="string">select o from Order o </span></span><br><span class="line"><span class="string">where o.orderAmount &gt; ALL (select p.stockAmount from Product p)</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">#어떤 팀이든 팀에 소속된 회원</span></span><br><span class="line"><span class="string">select m from Member m </span></span><br><span class="line"><span class="string">where m.team = ANY (select t from Team t)</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="JPA-서브쿼리-한계"><a href="#JPA-서브쿼리-한계" class="headerlink" title="JPA 서브쿼리 한계"></a>JPA 서브쿼리 한계</h4><ul>
+<li>JPA는 WHERE/HAVING절만 서브쿼리 사용가능 </li>
+<li>하이버네이트에서는 SELECT절에서 서브쿼리 사용가능</li>
+<li>FROM 절 서브쿼리는 현재 JPQL에서는 불가능 </li>
+</ul>
+<ul>
+<li>조인으로 풀수있으면 해결하고 그래도 안되면 쿼리를 쪼개서 처리하거나 그래도 안되면 native쿼리로 처리 해야함. </li>
+</ul>
+<h3 id="1-7-JPQL-타입표현"><a href="#1-7-JPQL-타입표현" class="headerlink" title="1-7. JPQL 타입표현"></a>1-7. JPQL 타입표현</h3><h4 id="JPQL-타입-표현"><a href="#JPQL-타입-표현" class="headerlink" title="JPQL 타입 표현"></a>JPQL 타입 표현</h4><ul>
+<li>문자: ‘HELLO’, ‘She’’s’ Boolean: TRUE, FALSE</li>
+<li>숫자: 10L(Long), 10D(Double), 10F(Float)</li>
+<li>ENUM: jpabook.MemberType.Admin (패키지명 포함) </li>
+<li>엔티티 타입: TYPE(m) = Member (상속 관계에서 사용)</li>
+</ul>
+<h4 id="JPQL-논리연산-및-비교연산"><a href="#JPQL-논리연산-및-비교연산" class="headerlink" title="JPQL 논리연산 및 비교연산"></a>JPQL 논리연산 및 비교연산</h4><ul>
+<li>EXISTS, IN</li>
+<li>AND, OR, NOT</li>
+<li>=, &gt;, &gt;=, &lt;, &lt;=, &lt;&gt; BETWEEN, LIKE, IS NULL</li>
+</ul>
+<h4 id="JPQL-연산자-우선순위"><a href="#JPQL-연산자-우선순위" class="headerlink" title="JPQL 연산자 우선순위"></a>JPQL 연산자 우선순위</h4><ol>
+<li>경로탐색연산(.)</li>
+<li>수학연산 : 단항연산자(+,-),*,/,+,-</li>
+<li>비교연산 : =,&gt;,&gt;=,&lt;,&lt;=,&lt;&gt;(다름),BETWEEN,LIKE,IN,IS NULL,IS EMPTY,EXIST </li>
+<li>논리연산 : AND,OR,NOT</li>
+</ol>
+<h3 id="1-8-CASE-식"><a href="#1-8-CASE-식" class="headerlink" title="1-8. CASE 식"></a>1-8. CASE 식</h3><p><img src="/images/jpa/jpql-8.png" alt="CASE1"><br><img src="/images/jpa/jpql-9.png" alt="COALESCE/NULLIF"></p>
+<h3 id="1-9-기본함수"><a href="#1-9-기본함수" class="headerlink" title="1-9. 기본함수"></a>1-9. 기본함수</h3><ul>
+<li>concat, substring, trim, lower/upper, length, locate, abs, sqrt, mod, size, index(jpq전용)</li>
+</ul>
+<h4 id="사용자-정의-함수"><a href="#사용자-정의-함수" class="headerlink" title="사용자 정의 함수"></a>사용자 정의 함수</h4><p><img src="/images/jpa/jpql-10.png" alt="사용자정의함수"></p>
+
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/2021/05/07/jpa-obj-query-1/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                Comment and share
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
                             href="/2021/04/28/value-type/"
                             aria-label=": value-type"
                         >
@@ -1443,273 +1585,6 @@
         
     </article>
     
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/2021/02/23/clean-code-12/"
-                            aria-label=": clean-code-12"
-                        >
-                            clean-code-12
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time datetime="2021-02-23T09:15:13+00:00">
-	
-		    Feb 23, 2021
-    	
-    </time>
-    
-        <span>in </span>
-        
-    <a class="category-link" href="/categories/Clean-Code/">Clean Code</a>, <a class="category-link" href="/categories/Study/">Study</a>, <a class="category-link" href="/categories/%EB%8F%99%EC%8B%9C%EC%84%B1/">동시성</a>
-
-
-    
-</div>
-
-            </div>
-            
-                <div class="postShorten-content">
-                    <h1 id="동시성"><a href="#동시성" class="headerlink" title="동시성"></a>동시성</h1><h2 id="동시성이-필요한-이유"><a href="#동시성이-필요한-이유" class="headerlink" title="동시성이 필요한 이유?"></a>동시성이 필요한 이유?</h2><ul>
-<li>동시성은 결합(coupling)을 없애는 전략이다. 즉, 무엇과 언제를 분리하는 전략이다. </li>
-<li>스레드가 하나인 프로그램은 무엇과 언제가 서로 밀접하다. 그래서 호출 스택을 살펴보면 프로그램 상태가 곧바로 드러남. </li>
-<li>단일스레드로 프로그램을 실행하면 안정적으로 수행은 가능하지만, 처리량에따라 처리수행속도가 느리다. 하지만 다중스레드를 활용하면, 상황에 따라서 안정적이지는 않으나, 처리수행속도는 스레드 갯수가 증가하면 할수록 빨라지게된다. </li>
-</ul>
-<h3 id="미신과-오해"><a href="#미신과-오해" class="headerlink" title="미신과 오해"></a>미신과 오해</h3><ul>
-<li>동시성은 항상 성능을 높여준다 : 동시성은 때로 성능을 높여준다. 대기 시간이 아주 길어 여러 스레드가 프로세서를 공유 할 수 있거나, 여러 프로세서가 동시에 처리할 독립적인 계산이 충분히 많은 경우에만 성능이 높아진다. 어느쪽도 일상적으로 발생하는 상황은 아니다. </li>
-<li>동시성을 구현해도 설계는 변하지 않는다 : 단일 스레드 시스템과 다중 스레드 시슽메은 설계가 판이하게 다르다. 일반적으로 무엇 과 언제를 분리하면 시스템 구조가 크게 달라진다. </li>
-<li>웹 또는 EJB컨테이너를 사용하면 동시성을 이해할 필요가 없다 : 실제로는 컨테이너가 어떻게 동작하는지, 어떻게 동시 수정, 데드락 등과 같은 문제를 피할수 있는지를 알아야만한다. </li>
-</ul>
-<p>다음은 동시성과 관련된 타당한 생각 몇가지다. </p>
-<ul>
-<li>동시성은 다소 부하를 유발한다. : 성능 측면에서부하가 걸리며, 코드도 더 짜야한다.</li>
-<li>동시성은 복잡하다 : 간단한 문제라도 동시성은 복잡하다. </li>
-<li>일반적으로 동시성 버그는 재현하기 어렵다. : 그래서 진짜 결함으로 간주되지않고 일회성 문제로 여겨 무시하기 쉽다. </li>
-<li>동시성을 구현하려면 흔히 근본적인 설계 전략을 재고 해야한다. </li>
-</ul>
-<h2 id="난관"><a href="#난관" class="headerlink" title="난관"></a>난관</h2><ul>
-<li>동시성을 구현하기 어려운 이유는? 아래 코드를 확인해보자. </li>
-</ul>
-<figure class="highlight java"><figcaption><span>일반적인 코드</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">X</span> </span>&#123; </span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">int</span> lastIdUsed; </span><br><span class="line">	</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">getNextId</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> ++lastIdUsed; </span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<ul>
-<li>인스턴스 X를 생성후, lastIdUsed에 42로 설정하고, 2개의 스레드가 해당 인스턴스를 공유한다고 가정하자. 그럼 결과는 3가지중 하나가 발생한다.</li>
-</ul>
-<blockquote><p>위 코드가 2개의 스레드를 활용할 경우 발생되는 케이스 3가지</p>
-<ul>
-<li>A스레드가 43받고, B스레드는 44를 받는다. lastIdUsed는 44가 된다.</li>
-<li>A스레드가 44받고, B스레드는 43을 받는다. lastIdUsed는 44가 된다. </li>
-<li>A스레드와 B스레드가 43을 받는다. lastIdUsed는 43이 된다. </li>
-</ul>
-</blockquote>
-
-<ul>
-<li>대부분 정상적인 케이스로 로직이 흘러가지만, 간혹가다가 세번째와 같이 예측하지 못한 경우가 발생하기도 한다. 이 경우가 발생하는 이유는 두 스레드가 getNextId를 수행하는 잠재적인 경로는 최대 12,870개에 달하고, int를 long으로 변경하면 조합가능 경로수는 2,704,156개로 증가한다. </li>
-</ul>
-<h2 id="동시성-방어원칙"><a href="#동시성-방어원칙" class="headerlink" title="동시성 방어원칙"></a>동시성 방어원칙</h2><h3 id="SRP"><a href="#SRP" class="headerlink" title="SRP"></a>SRP</h3><ul>
-<li>SRP는 주어진 메서드/클래스/컴포넌트를 변경할 이유가 하나여야 한다는 원칙이다. 동시성은 복잡성 하나만으로도 따로 분리해야할 이유로 충분함. </li>
-</ul>
-<blockquote><p>동시성을 구현할때 고려해야할 부분 </p>
-<ul>
-<li>동시성 코드는 독자적인 개발, 변경, 조율 주기가 있다.</li>
-<li>동시성 코드에는 독자적인 난관이 있다. 다른 코드에서 겪는 난관과 다르며 훨씬 어렵다.</li>
-<li>잘못 구현한 동시성 코드는 별의별 방식으로 실패한다. 주변에 있는 다른 코드가 발목을 잡지 않더라도 동시성 하나만으로도 충분히 어렵다. </li>
-</ul>
-</blockquote>
-
-<p><strong>권장사항</strong> : 동시성 코드는 다른코드와 분리하라. (SRP 원칙을 철저하게 지켜라.)</p>
-<h3 id="자료-범위를-제한하라"><a href="#자료-범위를-제한하라" class="headerlink" title="자료 범위를 제한하라"></a>자료 범위를 제한하라</h3><ul>
-<li>앞서 봤듯, 두 스레드가 서로 간섭하므로 예상치 못한 결과를 내놓는데, 이런 문제를 해결하는 방안으로 공유 객체를 사용하는 코드 내 <strong>임계영역(critical sction)</strong> 을 <strong>sychronized</strong> 키워드로 보호하라고 권장.  </li>
-</ul>
-<blockquote><p>공유 자료를 수정하는 위치가 많을수록 다음 가능성도 커진다. </p>
-<ul>
-<li>보호할 임계영역을 빼먹는다. 그래서 공유자료를 수정하는 모든 코드를 망가뜨림. </li>
-<li>모든 임계영역을 올바로 보호했는지 (DRY위반) 확인하느라 똑같은 노력과 수고를 반복함. </li>
-<li>그렇지 않아도 찾아내기 어려운 버그가 더욱 찾기 어려워 진다. </li>
-</ul>
-</blockquote>
-
-
-<p><strong>권장사항</strong> : 자료를 캡슐화 하라. 공유자료를 최대한 줄여라. </p>
-<h3 id="자료-사본을-사용하라"><a href="#자료-사본을-사용하라" class="headerlink" title="자료 사본을 사용하라"></a>자료 사본을 사용하라</h3><ul>
-<li>공유 자료를 줄이려면 처음부터 공유하지 않는 방법이 제일 최선임. 하지만 굳이 공유자료를 사용하려면 차라리 각 스레드가 객체를 복사해 사용한 후 한 스레드가 해당 사본에서 결과를 가져오는 방법도 가능하다. </li>
-</ul>
-<h3 id="스레드는-가능한-독립적으로-구현하라"><a href="#스레드는-가능한-독립적으로-구현하라" class="headerlink" title="스레드는 가능한 독립적으로 구현하라"></a>스레드는 가능한 독립적으로 구현하라</h3><ul>
-<li>자신만의 세상에 존재하는 스레드를 구현한다. 즉, 다른 스레드와 자료를 공유하지 않는다. 각 스레드는 클라이언트 요청 하나를 처리한다. 모든 정보는 비공유 출처에서 가져오며 로컬 변수에 저장한다. 그러면 각 스레드는 세상에 자신만 있는듯이 돌아갈수 있다. 다른 스레드와 동기화할 필요가 없으므로 </li>
-</ul>
-<p><strong>권장사항</strong> : 독자적인 스레드로, 가능하다면 다른 프로세서에서, 돌려도 괜찮도록 자료를 독립적인 단위로 분할하라. </p>
-<h2 id="라이브러리를-이해하라"><a href="#라이브러리를-이해하라" class="headerlink" title="라이브러리를 이해하라"></a>라이브러리를 이해하라</h2><blockquote><p>자바 5부터는 동시성 측면에서 이전 버전보다 많이 개선되었음. 자바5로 스레드 코드를 구현한다면 다음을 고려하라. </p>
-<ul>
-<li>스레드 환경에 안전한 컬렉션을 사용한다. 자바5부터 제공</li>
-<li>서로 무관한 작업을 수행할때는 executor프레임워크로 사용한다. </li>
-<li>가능하다면 스레드가 차단(blocking)되지 안흔 방법을 사용한다. (non-blocking IO)</li>
-<li>일부 클래스 라이브러리는 스레드에 안전하지 못하다.</li>
-</ul>
-</blockquote>
-
-<h3 id="스레드-환경에-안전한-컬렉션"><a href="#스레드-환경에-안전한-컬렉션" class="headerlink" title="스레드 환경에 안전한 컬렉션"></a>스레드 환경에 안전한 컬렉션</h3><ul>
-<li>java.util.concurrent.ConcurrentHashMap은 거의 모든 상황에서 HashMap보다 빠르다. </li>
-<li>좀 더 복잡한 동시성 설계를 지원하고자 자바5에서는 다른 클래스도 추가되었다. 아래를 참고하자.<blockquote><p>자바5에 추가된 동시성 설계에 도움줄 클래스 목록 </p>
-<ul>
-<li>ReentrantLock : 한 메서드에서 잠그고 다른 메서드에서 푸는 lock이다. </li>
-<li>Semaphore : 전형적인 세마포어다. count가 있는 락이다.</li>
-<li>CountDownLatch : 지정한 수만큼 이벤트가 발생하고 나서야 대기중인 스레드를 모두 해제하는 락이다. 모든 스레드에게 동시에 공평하게 시작할 기회를 준다. </li>
-</ul>
-</blockquote>
-
-</li>
-</ul>
-<p><strong>권장사항</strong> : 언어가 제공하는 클래스를 검토하라. 자바에서는 java.util.concurrent, java.util.concurrent.atomic, java.util.concurrent.locks를 익혀라. </p>
-<h2 id="실행모델을-이해하라"><a href="#실행모델을-이해하라" class="headerlink" title="실행모델을 이해하라"></a>실행모델을 이해하라</h2><blockquote><p>다중스레드 관련 용어 정리 </p>
-<ul>
-<li>한정된 자원(Bound Resource) : 다중 스레드 환경에서 사용하는 자원으로, 크기나 숫자가 제한적이다. 데이터베이스 연결, 길이가 일정한 읽기/쓰기 버퍼등이 예다. </li>
-<li>상호 배제(Mutual Exclusion) : 한번에 한 스레드만 공유 자료나 공유 자원을 사용 할수 있는 경우를 가리킨다.</li>
-<li>기아(Starvation) : 한 스레드나 여러 스레드가 굉장히 오랫동안 혹은 영원 자원을 기다린다. 예를들어, 항상 짧은 스레드에게 우선순위를 준다면, 짧은 스레드가 지속적으로 이어질 경우, 긴 스레드가 기아상태에 빠짐 </li>
-<li>데드락(Deadlock) : 여러 스레드가 서로가 끝나기를 기다린다. 모든 스레드가 각기 필요한 자원을 다른 스레드가 점유하는 발마에 어느쪽도 더 이상 진행하지 못한다. </li>
-<li>라이브락(Livelock) : lock을 거는 단계에서 각 스레드가 서로를 방해한다. 스레드는 계속해서 진행하려 하지만, 공명(resonance)로 인해, 굉장히 오랫동안 혹은 영원히 진행하지 못한다. </li>
-</ul>
-</blockquote>
-
-<h3 id="다중-스레드-프로그래밍에서-사용하는-실행-모델"><a href="#다중-스레드-프로그래밍에서-사용하는-실행-모델" class="headerlink" title="다중 스레드 프로그래밍에서 사용하는 실행 모델"></a>다중 스레드 프로그래밍에서 사용하는 실행 모델</h3><h4 id="생산자-소비자-Producer-Consumer"><a href="#생산자-소비자-Producer-Consumer" class="headerlink" title="생산자-소비자 (Producer - Consumer)"></a>생산자-소비자 (Producer - Consumer)</h4><ul>
-<li>하나 이상 생산자 스레드가 정보를 생성해 버퍼나 대기열(큐)에 넣는다. 하나 이상 소비자 스레드가 대기열에서 정보를 가져와 사용한다.</li>
-<li>생산자 스레드와 소비자 스레드가 사용하는 대기열은 한정된 자원이다. </li>
-<li>생산자 스레드는 대기열에 빈공간이 있어야 정보를 채운다.  즉, 빈공간이 생길때까지 기다린다. </li>
-<li>대기열을 올바로 사용하고자 생산자 스레드와 소비스 스레드는 서로에게 시그널을 보낸다. </li>
-<li>하지만 생산자 스레드 와 소비자 스레드가 동시에 시그널을 날리면? 무한으로 시그널을 기다릴 가능성이 존재한다. </li>
-<li><a target="_blank" rel="noopener" href="https://ko.wikipedia.org/wiki/%EC%83%9D%EC%82%B0%EC%9E%90-%EC%86%8C%EB%B9%84%EC%9E%90_%EB%AC%B8%EC%A0%9C">생산자-소비자</a> 참고 </li>
-</ul>
-<h4 id="읽기-쓰기-Readers-Writers"><a href="#읽기-쓰기-Readers-Writers" class="headerlink" title="읽기-쓰기 (Readers - Writers)"></a>읽기-쓰기 (Readers - Writers)</h4><ul>
-<li>읽기 스레드를 위한 주된 정보원으로 공유 자원을 사용하지만, 쓰기 스레드가 이 공유 자원을 이따금 갱신한다고 하자. 이런 경우 처리율이 문제의 핵심이다.</li>
-<li>처리율을 강조하면 기아 현상이 생기거나 오래된 정보가 쌓인다. </li>
-<li>갱신을 허용하면 처리율에 영향을 미친다. </li>
-<li>읽기 스레드와 쓰기 쓰레드간 균형을 잡지 않으면, 읽기 스레드를 강조하면 기아현상, 쓰기 스레드를 강조하면 처리율에 영향을 미치게 되므로 양쪽 균현을 잡으면서 동시 갱신 문제를 피하는 해법이 필요함. </li>
-<li><a target="_blank" rel="noopener" href="https://ko.wikipedia.org/wiki/%EB%8F%85%EC%9E%90-%EC%A0%80%EC%9E%90_%EB%AC%B8%EC%A0%9C">읽기-쓰기</a> 참고 </li>
-</ul>
-<h4 id="식사하는-철학자들-Dining-Philosopers"><a href="#식사하는-철학자들-Dining-Philosopers" class="headerlink" title="식사하는 철학자들(Dining Philosopers)"></a>식사하는 철학자들(Dining Philosopers)</h4><ul>
-<li><a target="_blank" rel="noopener" href="https://ko.wikipedia.org/wiki/%EC%8B%9D%EC%82%AC%ED%95%98%EB%8A%94_%EC%B2%A0%ED%95%99%EC%9E%90%EB%93%A4_%EB%AC%B8%EC%A0%9C">식사하는 철학자</a> 참고</li>
-</ul>
-<p><strong>권장사항</strong> : 위에서 설명한 기본 알고리즘과 각 해법을 이해하라 </p>
-<h2 id="동기화하는-메서드-사이에-존재하는-의존성을-이해하라"><a href="#동기화하는-메서드-사이에-존재하는-의존성을-이해하라" class="headerlink" title="동기화하는 메서드 사이에 존재하는 의존성을 이해하라"></a>동기화하는 메서드 사이에 존재하는 의존성을 이해하라</h2><ul>
-<li>동기화는 메서드 사이에서 의존성이 존재하면 동시성 코드에 찾아내기 어려운 버그가 생김 </li>
-<li>자바에서는 <strong>sychronized</strong> 라는 개념이 존재함. </li>
-<li>공유 클래스 하나에 동기화된 메서드가 여럿이라면 구현이 올바른지 다시 한번 확인해야함. </li>
-</ul>
-<blockquote><p>공유 객체 하나에 여러 메서드가 필요한 상황도 생긴다. 그럴때는 아래 3가지를 고려하라.</p>
-<ul>
-<li>client에서 잠금 : client에서 첫번째 메서드를 호출하기전 서버를 잠금. 마지막 메서드를 호출 할때까지 잠금을 유지. </li>
-<li>server에서 잠금 : server에다 서버를 잠그고 모든 메서드를 호출한 후 잠금을 해제하는 메서드를 구현. client는 이 메서드를 호출 </li>
-<li>연결서버(Adapted) : 잠금을 수행하는 중간 단계를 생성. 서버에서 잠금 방식과 유사하지만 원래서버는 변경안함. </li>
-</ul>
-</blockquote>
-
-<h2 id="동기화하는-부분을-작게-만들어라"><a href="#동기화하는-부분을-작게-만들어라" class="headerlink" title="동기화하는 부분을 작게 만들어라"></a>동기화하는 부분을 작게 만들어라</h2><ul>
-<li>동기화처리한다고 여기저기 <strong>sychronized</strong> 를 남발하면 곤란한다. </li>
-<li>하지만 임계영역(critical section)은 반드시 보호해야 하기때문에, 코드를 짤 때는 임계영역의 수를 최대한 줄여야한다. </li>
-<li>임계영역을 줄인답시고 거대한 임계영역 하나로 구현하는 순진한 프로그래머도 있는데.. 필요이상으로 임계영역 크기를 키우면 스레드간에 경쟁이 늘어나고 프로그램 성능이 저하됨. </li>
-</ul>
-<p><strong>권장사항</strong> : 동기화 하는 부분은 최대한 작게!! </p>
-<h2 id="올바른-종료-코드는-구현하기-어렵다"><a href="#올바른-종료-코드는-구현하기-어렵다" class="headerlink" title="올바른 종료 코드는 구현하기 어렵다"></a>올바른 종료 코드는 구현하기 어렵다</h2><ul>
-<li>깔끔하게 종료하는 코드는 올바로 구현하기 어렵다. 가장 흔히 발생하는 문제가 데드락이다. 즉, 스레드가 절대 오지않을 시그널을 기다린다. </li>
-</ul>
-<p><strong>권장사항</strong> : 종료 코드를 개발 초기부터 고민하고 동작하게 초기부터 구현하라. 생각보다 오래걸린다. 생각보다 어려우므로 이미 나온 알고리즘을 검토하라. </p>
-<h2 id="스레드-코드-테스트하기"><a href="#스레드-코드-테스트하기" class="headerlink" title="스레드 코드 테스트하기"></a>스레드 코드 테스트하기</h2><p><strong>권장사항</strong> : 문제를 노출하는 테스트 케이스를 작성하라. 프로그램 설정과 시스템 설정과 부하를 바꿔가며 자주 돌려라. 테스트가 실패하면 원인을 추적하라. 다시 돌렸더니 통과하더라도 그냥 넘어가면 안되고 다시 재검증하여 해결하도록 노력해야한다. </p>
-<blockquote><p>스레드 코드 테스트하는 지침서 </p>
-<ul>
-<li>말이 안되는 실패는 잠정적인 스레드 문제로 취급하라.</li>
-<li>다중 스레드를 고려하지 않은 순차 코드부터 제대로 돌게 만들자.</li>
-<li>다중 스레드를 쓰는 코드 부분을 다양한 환경에 쉽게 끼워 넣을 수 있도록 스레드 코드를 구현하라.</li>
-<li>다중 스레드를 쓰는 코드 부분을 상황에 맞춰 조정 할 수 있게 작성하라.</li>
-<li>프로세서 수보다 많은 스레드를 돌려보라.</li>
-<li>다른 플랫폼에서 돌려보라.</li>
-<li>코드에 보조코드를 넣어 돌려라. 강제로 실패를 일으키게 해보라. </li>
-</ul>
-</blockquote>
-
-<h3 id="말이-안되는-실패는-잠정적인-스레드-문제로-취급하라"><a href="#말이-안되는-실패는-잠정적인-스레드-문제로-취급하라" class="headerlink" title="말이 안되는 실패는 잠정적인 스레드 문제로 취급하라."></a>말이 안되는 실패는 잠정적인 스레드 문제로 취급하라.</h3><ul>
-<li>다중 스레드는 때떄로 ‘말이 안되는’ 오류를 일으킨다.</li>
-<li>스레드 코드에 잠입한 버그는 수천 수백만번에 한번씩 드러나기도하기때문에, 실패를 재현하기 아주 어려움. </li>
-<li>많은 개발자들은 이런 재현하기 어려운 실패를 ‘일회성’ 문제로 여기고 그냥 넘기는 부분이 많다.<br><strong>권장사항</strong> : 시스템 실패를 ‘일회성’이라 치부하지 마라. </li>
-</ul>
-<h3 id="다중-스레드를-고려하지-않은-순차코드부터-제대로-도게-만들자"><a href="#다중-스레드를-고려하지-않은-순차코드부터-제대로-도게-만들자" class="headerlink" title="다중 스레드를 고려하지 않은 순차코드부터 제대로 도게 만들자."></a>다중 스레드를 고려하지 않은 순차코드부터 제대로 도게 만들자.</h3><ul>
-<li>스레드 환경 밖에서 코드가 제대로 동작하는지 확인하자.</li>
-<li>일반적인 방법으로 스레드가 호출하는 POJO를 생성한다. POJO는 스레드를 모른다. 따라서 스레드 환경 밖에서 테스트가 가능</li>
-<li>POJO에넣는 코드는 많을수록 좋다.<br><strong>권장사항</strong> : 스레드 환경 밖에서 생기는 버그와 스레드 환경에서 생기는 버그를 동시에 디버깅 하지 마라. 먼저 스레드 환경 밖에서 코드를 올바로 돌려라. </li>
-</ul>
-<h3 id="다중-스레드를-쓰는-코드-부분을-다양한-환경에-쉽게-끼워-넣을-수-있도록-스레드-코드를-구현하라"><a href="#다중-스레드를-쓰는-코드-부분을-다양한-환경에-쉽게-끼워-넣을-수-있도록-스레드-코드를-구현하라" class="headerlink" title="다중 스레드를 쓰는 코드 부분을 다양한 환경에 쉽게 끼워 넣을 수 있도록 스레드 코드를 구현하라."></a>다중 스레드를 쓰는 코드 부분을 다양한 환경에 쉽게 끼워 넣을 수 있도록 스레드 코드를 구현하라.</h3><p>다중 스레드를 쓰는 코드를 다양한 설정으로 실행하기 쉽게 구현하라</p>
-<ul>
-<li>한 스레드로 실행하거나, 여러 스레드로 실행하거나, 실행 중 스레드 수를 바꿔본다.</li>
-<li>스레드 코드를 실제 환경이나 테스트 환경에서 돌려본다.</li>
-<li>테스트 코드를 빨리, 천천히 다양한 속도로 돌려본다.</li>
-<li>반복 테스트가 가능하도록 테스트 케이스를 작성한다.<br><strong>권장사항</strong> : 다양한 설정에서 실행할 목적으로 다른 환경에 쉽게 끼워 넣을수 있게 코드를 구현하라. </li>
-</ul>
-<h3 id="다중-스레드를-쓰는-코드-부분을-상황에-맞춰-조정-할-수-있게-작성하라"><a href="#다중-스레드를-쓰는-코드-부분을-상황에-맞춰-조정-할-수-있게-작성하라" class="headerlink" title="다중 스레드를 쓰는 코드 부분을 상황에 맞춰 조정 할 수 있게 작성하라."></a>다중 스레드를 쓰는 코드 부분을 상황에 맞춰 조정 할 수 있게 작성하라.</h3><ul>
-<li>적절한 스레드 개수를 파악하려면 상당한 시행착오가 필요함. </li>
-<li>스레드 개수를 조율하기 쉽게 코드를 구현하는 부분 필요. </li>
-<li>프로그램이 돌아가는 도중에 스레드 개수를 변경하는 방법도 고려.</li>
-<li>프로그램 처리율과 효율에 따라 스스로 스레드 개수를 조율하는 코드도 고민.</li>
-</ul>
-<h3 id="프로세서-수보다-많은-스레드를-돌려보라"><a href="#프로세서-수보다-많은-스레드를-돌려보라" class="headerlink" title="프로세서 수보다 많은 스레드를 돌려보라."></a>프로세서 수보다 많은 스레드를 돌려보라.</h3><ul>
-<li>시스템이 스레드를 스와핑 할때도 문제가 발생한다. 스와핑을 일으키려면 프로세스 수보다 많은 스레드를 돌린다. 스와핑이 잦을 수록 임계영역을 빼먹은 코드나 데드락을 일으키는 코드를 찾기 쉬워진다. </li>
-</ul>
-<h3 id="다른-플랫폼에서-돌려보라"><a href="#다른-플랫폼에서-돌려보라" class="headerlink" title="다른 플랫폼에서 돌려보라."></a>다른 플랫폼에서 돌려보라.</h3><ul>
-<li>다중 스레드 코드는 플랫폼에 따라 다르게 돌아감<br><strong>권장사항</strong> : 처음부터 그리고 자주 모든 목표 플랫폼에서 코드를 돌려라. </li>
-</ul>
-<h3 id="코드에-보조코드를-넣어-돌려라-강제로-실패를-일으키게-해보라"><a href="#코드에-보조코드를-넣어-돌려라-강제로-실패를-일으키게-해보라" class="headerlink" title="코드에 보조코드를 넣어 돌려라. 강제로 실패를 일으키게 해보라."></a>코드에 보조코드를 넣어 돌려라. 강제로 실패를 일으키게 해보라.</h3><ul>
-<li>스레드 버그를 예방하려면 강제로 실패를 일켜야하는데, 방법은 보조 코드를 방법은 두가지가 존재한다. </li>
-</ul>
-<blockquote><p>보조코드 추가 방법 </p>
-<ul>
-<li>직접 구현하기</li>
-<li>자동화 </li>
-</ul>
-</blockquote>
-
-<h4 id="직접-구현하기"><a href="#직접-구현하기" class="headerlink" title="직접 구현하기"></a>직접 구현하기</h4><ul>
-<li>코드에 직접 wait(), sleep(), yield(), priority() 함수를 추가 </li>
-</ul>
-<blockquote><p>직접 구현하면 발생되는 문제</p>
-<ul>
-<li>보조 코드를 삽입할 적정 위치를 찾아야함.</li>
-<li>어떤 함수를 어디서 호출해야 적당한지 어떻게 아냐?</li>
-<li>배포환경에 보조 코드를 그대로 남겨두면 프로그램 성능이 떨어짐.</li>
-<li>무작위적이다. 오류가 드러날지도 모르고 드러나지 않을지도 모른다. 사실상 드러나지 않을 확률이 더 높다. </li>
-</ul>
-</blockquote>
-
-<h4 id="자동화"><a href="#자동화" class="headerlink" title="자동화"></a>자동화</h4><ul>
-<li>보조 코드를 자동으로 추가하려면,AOF(Aspect-Oriented Framework), CGLIB, ASM등과 같은 도구를 사용한다. (AOP 활용)</li>
-</ul>
-<p><strong>권장사항</strong> : 흔들기 기법을 사용해 오류를 찾아내라 (강제로 오류를 발생하게 해야함)</p>
-
-                    
-                        
-
-
-                    
-                    
-                        <p>
-                            <a
-                                href="/2021/02/23/clean-code-12/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                Comment and share
-                            </a>
-                        </p>
-                    
-                </div>
-            
-        </div>
-        
-    </article>
-    
     <div class="pagination-bar">
     <ul class="pagination">
         
@@ -1725,7 +1600,7 @@
             </a>
           </li>
         
-        <li class="pagination-number">page 1 of 3</li>
+        <li class="pagination-number">page 1 of 4</li>
     </ul>
 </div>
 
