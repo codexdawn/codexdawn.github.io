@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="generator" content="codexdawn">
-    <title>Category: 객체지향쿼리언어 - codexdawn</title>
+    <title>jpa-obj-query-2 - codexdawn</title>
     <meta name="author" content="codexdawn">
     
     
@@ -15,14 +15,33 @@
             <link rel="alternate" type="application/atom+xml" title="RSS" href="/atom.xml">
         
     
-    <script type="application/ld+json">{}</script>
-    <meta property="og:type" content="blog">
-<meta property="og:title" content="codexdawn">
-<meta property="og:url" content="https://codexdawn.github.io/categories/%EA%B0%9D%EC%B2%B4%EC%A7%80%ED%96%A5%EC%BF%BC%EB%A6%AC%EC%96%B8%EC%96%B4/index.html">
+    <script type="application/ld+json">{"@context":"http://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"codexdawn","sameAs":["https://github.com/codexdawn","https://www.facebook.com/beherzt.dev","https://www.linkedin.com/in/sim-jisung-3048872a/","mailto:cloudkaiser@gmail.com"],"image":"https://www.gravatar.com/avatar/d97fd4b94c429915f1cb55eb27e7d4d9"},"articleBody":"객체지향 쿼리 언어21. 경로표현식1-1. 경로표현식이란?\n. 찍어서 객체그래프를 탐색하는 것 \n\n1-2. 경로표현식 특징\n상태 필드(state field): 경로 탐색의 끝, 탐색X\n단일 값 연관 경로: 묵시적 내부 조인(inner join) 발생, 탐색O\n@ManyToOne, @OneToOne, 대상이 엔티티(ex: m.team)\n\n\n컬렉션 값 연관 경로: 묵시적 내부 조인 발생, 탐색X\nFROM 절에서 명시적 조인을 통해 별칭을 얻으면 별칭을 통 해 탐색 가능\n@OneToMany, @ManyToMany, 대상이 컬렉션(ex: m.orders)\n\n\n\n1-3. 경로탐색을 사용한 묵시적 조인 시 주의사항\n항상 내부조인 걸림 \n걸렉션은 경로 탐색이 안된다. (사이즈만 받을수있음) 따라서 컬렉션은 반드시 명시적 조인으로 별칭을 얻어서 경로탐색하도록 해야함\nselect m.username from Team t join t.members m\n\n\n경로탐색은 주로 SELECT/WHERE 절에서만 하는데, 묵시적조인을 사용하면 SQL에서 FROM(JOIN) 절에 영향을 줌 \n\n1-4. 실무자의 조언\n가급적 묵시적 조인 하지말고 명시적 조인만 사용하도록 하자 (쿼리 튜닝 및 알아보기 힘듦)\n조인은 sql튜닝에 가장 중요한 포인트(기승전 SQL)\n묵시적 조인은 조인이 일어나는 상황을 한눈에 파악하기 어려움 \n\n2. 페치 조인 (fetch join)2-1. 페치 조인의 특징\nSQL join종류 아님 (sql 명령어 아님)\nJPQL 성능 최적화를 위해 제공하는 기능 \n연관된 엔티티나 컬렉션을 SQL 한번에 함께 조회 가능 (한방쿼리)\njoin fetch 명령어 사용 \n페치 조인 ::= [ LEFT [OUTER] | INNER ] JOIN FETCH 조인경로\n\n2-2. 엔티티 페치 조인\nManyToOne, OneToOne 관계에서 조회할때 이슈라고 생각해도됨. \n회원-팀 예시 기준으로 회원을 조회하면서 연관된 팀도 함께 조회 (SQL 한방 쿼리)\nSQL을 보면 회원 뿐만 아니라 팀(T.*)도 함께 SELECT\n[JPQL]\nselect m from Member m join fetch m.team\n\n\n[SQL]\nSELECT M., T. FROM MEMBER M INNER JOIN TEAM T ON M.TEAM_ID=T.ID\n\n\n\n\n[Q1] 그냥 Member 엔티티를 쿼리를 날리고, 비즈니스코드에서 Team정보를 조회하면?\n엔티티조회12345List&lt;Member&gt; members =entityManager.createQuery(&quot;select m from Member m&quot;, Member.class).getResultList();for (Member member1 : members2) &#123;    System.out.println(&quot;member1.getUserName() = &quot; + member1.getUserName() \t\t\t\t+ &quot;/ teamName : &quot; + member1.getTeam().getName());&#125;\n\n–&gt; 위 처럼 비즈니스로직에서 Team정보를 호출하면 proxy상태이기때문에, 초기화처리로 각 멤버당 팀 정보를 디비를 통해 조회 해오게된다. 하지만 1차캐시에 등록된 그니까 영속성 관리가 되면 1차캐시 정보로 가져오게됨. \n엔티티조회결과123456789101112131415161718192021222324252627282930Hibernate:     &#x2F;* select        m     from        Member m *&#x2F; select            member0_.member_id as member_i1_0_,            member0_.age as age2_0_,            member0_.team_id as team_id4_0_,            member0_.userName as userName3_0_         from            Member member0_Hibernate:     select        team0_.team_id as team_id1_3_0_,        team0_.name as name2_3_0_     from        Team team0_     where        team0_.team_id&#x3D;?member1.getUserName() &#x3D; m1&#x2F; teamName : Team1member1.getUserName() &#x3D; m2&#x2F; teamName : Team1 &#x2F;&#x2F;여기서는 1차캐시로 조회된 정보 가져옴 Hibernate:     select        team0_.team_id as team_id1_3_0_,        team0_.name as name2_3_0_     from        Team team0_     where        team0_.team_id&#x3D;?member1.getUserName() &#x3D; m3&#x2F; teamName : Team2\n\n[Q2] 위 쿼리에서 Team엔티티를 조인해서 조회하면 어떻게 될까? \n단순 조인시12345List&lt;Member&gt; members =entityManager.createQuery(&quot;select m from Member m join m.team&quot;, Member.class).getResultList();for (Member member1 : members2) &#123;    System.out.println(&quot;member1.getUserName() = &quot; + member1.getUserName() \t\t\t\t+ &quot;/ teamName : &quot; + member1.getTeam().getName());&#125;\n\n–&gt; 단순 조인만 했지만 프로젝션 상에서 팀정보가 없다.어쨋든 위 상황에서는 프로젝션상에서 Team엔티티 정보가 없기때문에 Q1 상황과 동일한 결과로 나오게됨.(참고) 글로벌 페치 전략을 아무리 EAGER로 강제해도 동일한 결과 나올수밖에 없음. 프록시 이슈는 동일하게 나올수밖에없더라.(추론) 만약에 저기서 조회를 가능하게 하려면 프로젝션상에서 t를 받고, 프로젝션에 맞는 신규DTO를 만들어서 객체로 반환하면 해결되지않을까 싶음. \n단순 조인시 결과1234567891011121314151617181920212223242526272829303132333435Hibernate:     &#x2F;* select        m     from        Member m     join        m.team *&#x2F; select            member0_.member_id as member_i1_0_,            member0_.age as age2_0_,            member0_.team_id as team_id4_0_,            member0_.userName as userName3_0_         from            Member member0_         inner join &#x2F;&#x2F;조인만 됫지 프로젝션상에서는 Team정보가 없다..-_-;             Team team1_                 on member0_.team_id&#x3D;team1_.team_idHibernate:     select        team0_.team_id as team_id1_3_0_,        team0_.name as name2_3_0_     from        Team team0_     where        team0_.team_id&#x3D;?member1.getUserName() &#x3D; m1&#x2F; teamName : Team1member1.getUserName() &#x3D; m2&#x2F; teamName : Team1Hibernate:     select        team0_.team_id as team_id1_3_0_,        team0_.name as name2_3_0_     from        Team team0_     where        team0_.team_id&#x3D;?member1.getUserName() &#x3D; m3&#x2F; teamName : Team2\n\n[Q3] 그럼 저렇게 N+1이 나면 어떻게 해결해야함?–&gt; fetch join 하면 됨. \n조인페치시12345List&lt;Member&gt; members =entityManager.createQuery(&quot;select m from Member m join fetch m.team&quot;, Member.class).getResultList();for (Member member1 : members2) &#123;    System.out.println(&quot;member1.getUserName() = &quot; + member1.getUserName() \t\t\t\t+ &quot;/ teamName : &quot; + member1.getTeam().getName());&#125;\n\n단순 조인시 결과123456789101112131415161718192021Hibernate:     &#x2F;* select        m     from        Member m     join        fetch m.team *&#x2F; select            member0_.member_id as member_i1_0_0_,            team1_.team_id as team_id1_3_1_,            member0_.age as age2_0_0_,            member0_.team_id as team_id4_0_0_,            member0_.userName as userName3_0_0_,            team1_.name as name2_3_1_         from            Member member0_         inner join            Team team1_                 on member0_.team_id&#x3D;team1_.team_idmember1.getUserName() &#x3D; m1&#x2F; teamName : Team1member1.getUserName() &#x3D; m2&#x2F; teamName : Team1member1.getUserName() &#x3D; m3&#x2F; teamName : Team2\n\n2-3. 컬렉션 페치 조인\n일대다,다대다 관계, 컬렉션 페치 조인 \n[JPQL]\nselect t from Team t join fetch t.members where t.name = ‘팀A’\n\n\n[SQL]\nSELECT T., M. FROM TEAM T INNER JOIN MEMBER M ON T.ID=M.TEAM_ID WHERE T.NAME = ‘팀A’\n\n\n\n\n컬렉션 페치 조인 혹은 그냥 조인을 걸었는데 중복 발생?OneToMany특성상 쿼리 뻥튀기가 되었기때문에 중복 row발생된것임. 이걸 해결할라면 jpql의 distinct를 걸어주면 해결됨. \nJPQL에서의 distinct\nSQL의 distinct 처리를 명령함  \nJPQL에서는 distinct 2가지 기능 제공 \nSQL distinct 를 추가시킴. \n애플리케이션에서 엔티티 중복을 제거시킴. \n\n\n\n[Q1] Member 컬렉션을 조인하면 어떻게 될까?\n컬렉션조인시123456789List&lt;Team&gt; teams2 = entityManager.createQuery(&quot;select t from Team t join t.members&quot;, Team.class)                .getResultList();for (Team team1 : teams2) &#123;    System.out.println(&quot;team1.getName() = &quot; + team1.getName() + &quot;/ members : &quot;+ team1.getMembers().size());    for (Member member1 : team1.getMembers()) &#123;        System.out.println(&quot;--&gt; member1.getUserName()  = &quot; + member1.getUserName());    &#125;&#125;\n\n컬렉션조인결과12345678910111213141516171819202122232425262728293031323334353637383940414243444546Hibernate:     &#x2F;* select        t     from        Team t     join        t.members *&#x2F; select            team0_.team_id as team_id1_3_,            team0_.name as name2_3_         from            Team team0_         inner join            Member members1_                 on team0_.team_id&#x3D;members1_.team_idHibernate:     select        members0_.team_id as team_id4_0_0_,        members0_.member_id as member_i1_0_0_,        members0_.member_id as member_i1_0_1_,        members0_.age as age2_0_1_,        members0_.team_id as team_id4_0_1_,        members0_.userName as userName3_0_1_     from        Member members0_     where        members0_.team_id&#x3D;?team1.getName() &#x3D; Team1&#x2F; members : 2--&gt; member1.getUserName()  &#x3D; m1--&gt; member1.getUserName()  &#x3D; m2team1.getName() &#x3D; Team1&#x2F; members : 2 &#x2F;&#x2F;컬렉션 조인시 요렇게 중복된 결과가 나오는걸 확인할수있음. 이럴때는 distinct를 걸어서 중복제거해야함. --&gt; member1.getUserName()  &#x3D; m1--&gt; member1.getUserName()  &#x3D; m2Hibernate:     select        members0_.team_id as team_id4_0_0_,        members0_.member_id as member_i1_0_0_,        members0_.member_id as member_i1_0_1_,        members0_.age as age2_0_1_,        members0_.team_id as team_id4_0_1_,        members0_.userName as userName3_0_1_     from        Member members0_     where        members0_.team_id&#x3D;?team1.getName() &#x3D; Team2&#x2F; members : 1--&gt; member1.getUserName()  &#x3D; m3\n\n[Q2] 컬렉션 조인을 페치하면 어떻게 될까?–&gt; 쿼리는 fetch가 되서 한방쿼리가 되었지만, distinct처리 안해서 중복 엔티티 row발생함. \n컬렉션조인시123456789List&lt;Team&gt; teams2 = entityManager.createQuery(&quot;select t from Team t join fetch t.members&quot;, Team.class)                .getResultList();for (Team team1 : teams2) &#123;    System.out.println(&quot;team1.getName() = &quot; + team1.getName() + &quot;/ members : &quot;+ team1.getMembers().size());    for (Member member1 : team1.getMembers()) &#123;        System.out.println(&quot;--&gt; member1.getUserName()  = &quot; + member1.getUserName());    &#125;&#125;\n\n컬렉션조인결과12345678910111213141516171819202122232425262728Hibernate:     &#x2F;* select        t     from        Team t     join        fetch t.members *&#x2F; select            team0_.team_id as team_id1_3_0_,            members1_.member_id as member_i1_0_1_,            team0_.name as name2_3_0_,            members1_.age as age2_0_1_,            members1_.team_id as team_id4_0_1_,            members1_.userName as userName3_0_1_,            members1_.team_id as team_id4_0_0__,            members1_.member_id as member_i1_0_0__         from            Team team0_         inner join            Member members1_                 on team0_.team_id&#x3D;members1_.team_idteam1.getName() &#x3D; Team1&#x2F; members : 2--&gt; member1.getUserName()  &#x3D; m1--&gt; member1.getUserName()  &#x3D; m2team1.getName() &#x3D; Team1&#x2F; members : 2 &#x2F;&#x2F;fetch를하면 쿼리는 줄지만 distinct를 처리하지 않았기때문에 여전히 중복 발생 --&gt; member1.getUserName()  &#x3D; m1--&gt; member1.getUserName()  &#x3D; m2team1.getName() &#x3D; Team2&#x2F; members : 1--&gt; member1.getUserName()  &#x3D; m3\n\n[Q3] 위 쿼리에서 distinct를 걸면 해결되나?–&gt; 해결됨\n컬렉션페치조인 distinct처리123456789List&lt;Team&gt; teams2 = entityManager.createQuery(&quot;select distinct t from Team t join fetch t.members&quot;, Team.class)                .getResultList();for (Team team1 : teams2) &#123;    System.out.println(&quot;team1.getName() = &quot; + team1.getName() + &quot;/ members : &quot;+ team1.getMembers().size());    for (Member member1 : team1.getMembers()) &#123;        System.out.println(&quot;--&gt; member1.getUserName()  = &quot; + member1.getUserName());    &#125;&#125;\n\n컬렉션페치조인 distinct처리결과12345678910111213141516171819202122232425Hibernate:     &#x2F;* select        distinct t     from        Team t     join        fetch t.members *&#x2F; select            distinct team0_.team_id as team_id1_3_0_,            members1_.member_id as member_i1_0_1_,            team0_.name as name2_3_0_,            members1_.age as age2_0_1_,            members1_.team_id as team_id4_0_1_,            members1_.userName as userName3_0_1_,            members1_.team_id as team_id4_0_0__,            members1_.member_id as member_i1_0_0__         from            Team team0_         inner join            Member members1_                 on team0_.team_id&#x3D;members1_.team_idteam1.getName() &#x3D; Team1&#x2F; members : 2--&gt; member1.getUserName()  &#x3D; m1--&gt; member1.getUserName()  &#x3D; m2team1.getName() &#x3D; Team2&#x2F; members : 1--&gt; member1.getUserName()  &#x3D; m3\n\n[Q4] 컬렉션 페치 조인해서 페이징 적용하면 어떻게되나?–&gt; 페이징 로직이 미적용되고, 메모리에 해당 엔티티들의 모든 row가 다 적재됨. (메모리 부하 발생 성능 다운됨.)\n컬렉션페치조인 페이징처리시도1234567891011List&lt;Team&gt; teams2 = entityManager.createQuery(&quot;select distinct t from Team t join fetch t.members&quot;, Team.class)                .setFirstResult(0)                .setMaxResults(2)                .getResultList();for (Team team1 : teams2) &#123;    System.out.println(&quot;team1.getName() = &quot; + team1.getName() + &quot;/ members : &quot;+ team1.getMembers().size());    for (Member member1 : team1.getMembers()) &#123;        System.out.println(&quot;--&gt; member1.getUserName()  = &quot; + member1.getUserName());    &#125;&#125;\n\n컬렉션페치조인 페이징적용결과12345678910111213141516171819202122232425262728293031Hibernate:     &#x2F;* select        distinct t     from        Team t     join        fetch t.members *&#x2F; select            distinct team0_.team_id as team_id1_3_0_,            members1_.member_id as member_i1_0_1_,            team0_.name as name2_3_0_,            members1_.age as age2_0_1_,            members1_.team_id as team_id4_0_1_,            members1_.userName as userName3_0_1_,            members1_.team_id as team_id4_0_0__,            members1_.member_id as member_i1_0_0__         from            Team team0_         inner join            Member members1_                 on team0_.team_id&#x3D;members1_.team_id &#x2F;&#x2F;페이징 처리 로직 미적용됨. team1.getName() &#x3D; Team1&#x2F; members : 2--&gt; member1.getUserName()  &#x3D; m1--&gt; member1.getUserName()  &#x3D; m2team1.getName() &#x3D; Team2&#x2F; members : 1--&gt; member1.getUserName()  &#x3D; m3&#x2F;&#x2F;메모리 다 적재됫다고 경고떳음5월 08, 2021 3:11:40 오후 org.hibernate.hql.internal.ast.QueryTranslatorImpl listWARN: HHH000104: firstResult&#x2F;maxResults specified with collection fetch; applying in memory!5월 08, 2021 3:11:40 오후 org.hibernate.engine.jdbc.connections.internal.DriverManagerConnectionProviderImpl$PoolState stopINFO: HHH10001008: Cleaning up connection pool [jdbc:h2:tcp:&#x2F;&#x2F;localhost&#x2F;~&#x2F;jpqlshop]\n\n–&gt; 페이징을 강제로 해결하려면 페치조인 걸었던것 제거하고 Team.members에 @BatchSize를 걸던지, 혹은 글로벌 설정에서 persistence.xml혹은 application.yml등에서 batchsize를 설정해야함. 보통 글로벌 설정으로 설정하고 시작한다고함. \n컬렉션페치조인 페이징처리 batchsize적용상태12345678910111213141516171819/////// Team.java /////////@BatchSize(size = 100)@OneToMany(mappedBy = &quot;team&quot;)private List&lt;Member&gt; members = new ArrayList&lt;&gt;();///////// 구분 /////////////List&lt;Team&gt; teams2 = entityManager.createQuery(&quot;select distinct t from Team t&quot;, Team.class)                .setFirstResult(0)                .setMaxResults(2)                .getResultList();for (Team team1 : teams2) &#123;    System.out.println(&quot;team1.getName() = &quot; + team1.getName() + &quot;/ members : &quot;+ team1.getMembers().size());    for (Member member1 : team1.getMembers()) &#123;        System.out.println(&quot;--&gt; member1.getUserName()  = &quot; + member1.getUserName());    &#125;&#125;\n\n컬렉션페치조인 페이징적용결과-batchsize적용했을때12345678910111213141516171819202122232425262728Hibernate:     &#x2F;* select        distinct t     from        Team t *&#x2F; select            distinct team0_.team_id as team_id1_3_,            team0_.name as name2_3_         from            Team team0_ limit ?Hibernate:     &#x2F;* load one-to-many entity.Team.members *&#x2F; select        members0_.team_id as team_id4_0_1_,        members0_.member_id as member_i1_0_1_,        members0_.member_id as member_i1_0_0_,        members0_.age as age2_0_0_,        members0_.team_id as team_id4_0_0_,        members0_.userName as userName3_0_0_     from        Member members0_     where        members0_.team_id in (            ?, ?        )team1.getName() &#x3D; Team1&#x2F; members : 2--&gt; member1.getUserName()  &#x3D; m1--&gt; member1.getUserName()  &#x3D; m2team1.getName() &#x3D; Team2&#x2F; members : 1--&gt; member1.getUserName()  &#x3D; m3\n\n2-4. 페치조인과 일반조인의 차이일반 조인\n일반조인 실행시 연관된 엔티티를 함께 조회 안함 \n[JPQL]\nselect t from Team t join t.members m where t.name = ‘팀A’\n\n\n[SQL]\nSELECT T.* FROM TEAM T INNER JOIN MEMBER M ON T.ID=M.TEAM_ID  WHERE T.NAME = ‘팀A’\n\n\nJPQL은 결과를 반환할때 연관관계 고려안함\n단지 select절에 지정한 엔티티만 조회한다.\n따라서 Team엔티티만 조회할뿐, Member정보는 조회 안함\n\n페치 조인\n페치 조인을 사용할때만 연관된 엔티티도 함께 조회 (즉시로딩됨)\n페치 조인은 객체 그래프를 SQL한번에 조회하는 개념 \n페치 조인은 연관된 엔티티를 함께 조회함\n[JPQL]\nselect t from Team t join fetch t.members where t.name = ‘팀A’\n\n\n[SQL]\nSELECT T., M. FROM TEAM T INNER JOIN MEMBER M ON T.ID=M.TEAM_ID WHERE T.NAME = ‘팀A’\n\n\n\n2-5. 페치 조인의 특징 과 한계\n페치 조인 대상에서는 별칭을 줄수없다. (하이버네이트는 가능하지만 가급적 사용하지 말자)\n둘 이상의 컬렉션은 페치 조인 할수 없다. (1:N:M의 관계로 가져오기때문에 관련된 모든 정보를 끌고오기때문에)\n컬렉션을 페치조인하면 페이징 API를 사용할수 없다. \n1:1, N:1 같은 단일 값 연관 필드들은 페치 조인해도 페이징 가능 \n1:N, N:M 같은 컬렉션은 강제로 페이징처리를 하면 페이징로직이 무시되고 해당 엔티티에 있는 모든 정보를 다 끌고옴. (하이버네이트에서 경고 로그 남기고 모든 row를 메모리에 올리는 불상사가 벌어짐.)\n컬렉션은 그럼 페이징을 못하는가? 컬렉션 상태에서는 아니고 fetch join한 부분을 지우고 @BatchSize혹은 글로벌설정에서 batchsize를 설정하고 조회하면 페이징 처리는 가능 하지만 N+1을 완벽하게 해소되지 않은 상태지만 성능에는 큰 도움이됨. \n\n\n연관된 엔티티들을 SQL한번으로 조회 -&gt; 성능 최적화 \n엔티티에 직접 적용하는 글로벌 로딩 전략보다 우선함 \n실무에서는 글로벌 로딩전략은 모두 지연로딩으로 걸어두자\n최적화 필요한곳만 페치 조인 적용 \n페치조인을 사용해서 연관된 엔티티를 쿼리시점에 조회해서 지연로딩이 발생하지 않는데, 이때 준영속상태에서도 객체그래프를 탐색할수있다. 왜냐 1차캐시에 올라갔기때문에 \n\n2-6. 페치조인 정리\n모든것을 페치 조인으로 해결이 안될때가 있음. \n페치 조인은 객체 그래프를 유지할때 사용하면 효과적 \n여러 테이블을 조인해서 엔티티가 가진 모양이 아닌 전혀 다른 결과를 내야하면, 페치조인보다 일반 조인을 사용하고 필요한 데이터들만 프로젝션해서 DTO로 반환하는 것이 효과적\n\n3. 다형성 쿼리3-1. TYPE\n조회 대상을 특정 자식으로 한정 \n예) 위 예제중 Item중에 Book, Movie를 조회해라\n[JPQL]\nselect i from Item i where type(i) IN (Book, Movie)\n\n\n[SQL]\nselect i from i where i.DTYPE in (‘B’, ‘M’)\n\n\n\n3-2. TREAT (JPA 2.1)\n자바의 타입 캐스팅과 유사\n상속 구조에서 부모타입을 특정 자식 타입으로 다룰때 사용 \nFROM, WHERE, SELECT(하이버네이트 지원) 사용\n예) 부모인 Item과 자식 Book이 있다.\n[JPQL]\nselect i from Item i where treat(i as Book).auther = ‘kim’\n\n\n[SQL]\nselect i.* from Item i where i.DTYPE = ‘B’ and i.auther = ‘kim’\n\n\n\n4. 엔티티 직접 사용\n\nJPQL에서 엔티티를 직접 사용하면 SQL에서 해당 엔티티의 기 본 키 값을 사용\n[JPQL]\nselect count(m.id) from Member m //엔티티의 아이디를 사용\nselect count(m) from Member m //엔티티를 직접 사용\n\n\n[SQL] (JPQL 둘다 같은 다음 SQL 실행)\nselect count(m.id) as cnt from Member m\n\n\n\n\n5. Named 쿼리5-1. Named쿼리 - 정적 쿼리\n미리 정의해서 이름을 부여해두고 사용하는 JPQL\n정적 쿼리\n어노테이션, XML지원\n애플리케이션 로딩 시점에 초기화 후 재사용 \n애플리케이션 로딩 시점에 쿼리를 검증해줌 \n\n5-2. Named쿼리 - 어노테이션 사용 방법\n5-3. Named쿼리 - XML 사용방법\n5-4. Named쿼리 환경에 따른 설정\nXML이 항상 우선권을 가짐 \n애플리케이션 운영 환경에 따라 다른 XML을 배포할수있다. \n\n6. JPQL - 벌크연산\n6-1. 벌크연산시 주의\n벌크 연산은 영속성 컨텍스트를 무시하고 DB에 직접 쿼리 (JPQL로 사용하니 당연한 부분)\n벌크 연산을 먼저 실행 \n벌크 연산 수행 후 영속성 컨텍스트 초기화 \n\n\n\n","dateCreated":"2021-05-08T02:54:28+00:00","dateModified":"2021-05-08T07:20:25+00:00","datePublished":"2021-05-08T02:54:28+00:00","description":"","headline":"jpa-obj-query-2","image":[],"mainEntityOfPage":{"@type":"WebPage","@id":"https://codexdawn.github.io/2021/05/08/jpa-obj-query-2/"},"publisher":{"@type":"Organization","name":"codexdawn","sameAs":["https://github.com/codexdawn","https://www.facebook.com/beherzt.dev","https://www.linkedin.com/in/sim-jisung-3048872a/","mailto:cloudkaiser@gmail.com"],"image":"https://www.gravatar.com/avatar/d97fd4b94c429915f1cb55eb27e7d4d9","logo":{"@type":"ImageObject","url":"https://www.gravatar.com/avatar/d97fd4b94c429915f1cb55eb27e7d4d9"}},"url":"https://codexdawn.github.io/2021/05/08/jpa-obj-query-2/","keywords":"Java,JPA, QueryDSL, 객체지향쿼리언어2"}</script>
+    <meta name="description" content="객체지향 쿼리 언어21. 경로표현식1-1. 경로표현식이란? . 찍어서 객체그래프를 탐색하는 것   1-2. 경로표현식 특징 상태 필드(state field): 경로 탐색의 끝, 탐색X 단일 값 연관 경로: 묵시적 내부 조인(inner join) 발생, 탐색O @ManyToOne, @OneToOne, 대상이 엔티티(ex: m.team)   컬렉션 값 연관 경">
+<meta property="og:type" content="blog">
+<meta property="og:title" content="jpa-obj-query-2">
+<meta property="og:url" content="https://codexdawn.github.io/2021/05/08/jpa-obj-query-2/index.html">
 <meta property="og:site_name" content="codexdawn">
+<meta property="og:description" content="객체지향 쿼리 언어21. 경로표현식1-1. 경로표현식이란? . 찍어서 객체그래프를 탐색하는 것   1-2. 경로표현식 특징 상태 필드(state field): 경로 탐색의 끝, 탐색X 단일 값 연관 경로: 묵시적 내부 조인(inner join) 발생, 탐색O @ManyToOne, @OneToOne, 대상이 엔티티(ex: m.team)   컬렉션 값 연관 경">
 <meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://codexdawn.github.io/images/jpa/jpql-11.png">
+<meta property="og:image" content="https://codexdawn.github.io/images/jpa/jpql-12.png">
+<meta property="og:image" content="https://codexdawn.github.io/images/jpa/jpql-13.png">
+<meta property="og:image" content="https://codexdawn.github.io/images/jpa/jpql-14.png">
+<meta property="og:image" content="https://codexdawn.github.io/images/jpa/jpql-15.png">
+<meta property="og:image" content="https://codexdawn.github.io/images/jpa/jpql-16.png">
+<meta property="og:image" content="https://codexdawn.github.io/images/jpa/jpql-17.png">
+<meta property="og:image" content="https://codexdawn.github.io/images/jpa/jpql-18.png">
+<meta property="og:image" content="https://codexdawn.github.io/images/jpa/jpql-19.png">
+<meta property="og:image" content="https://codexdawn.github.io/images/jpa/jpql-20.png">
+<meta property="og:image" content="https://codexdawn.github.io/images/jpa/jpql-21.png">
+<meta property="article:published_time" content="2021-05-08T02:54:28.000Z">
+<meta property="article:modified_time" content="2021-05-08T07:20:25.692Z">
 <meta property="article:author" content="codexdawn">
+<meta property="article:tag" content="Java,JPA">
+<meta property="article:tag" content="QueryDSL">
+<meta property="article:tag" content="객체지향쿼리언어2">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://codexdawn.github.io/images/jpa/jpql-11.png">
     
     
         
@@ -41,6 +60,8 @@
     
 
     
+        
+    
 </head>
 
     <body>
@@ -50,7 +71,7 @@
 
     
 
-<header id="header" data-behavior="2">
+<header id="header" data-behavior="5">
     <i id="btn-open-sidebar" class="fa fa-lg fa-bars"></i>
     <div class="header-title">
         <a
@@ -77,7 +98,7 @@
             <!-- Define author's picture -->
 
 
-<nav id="sidebar" data-behavior="2">
+<nav id="sidebar" data-behavior="5">
     <div class="sidebar-container">
         
         
@@ -231,30 +252,22 @@
 </nav>
 
             
-            <div id="main" data-behavior="2"
+            <div id="main" data-behavior="5"
                  class="
                         hasCoverMetaIn
                         ">
                 
-    <section class="postShorten-group main-content-wrap">
+<article class="post">
     
     
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/2021/05/08/jpa-obj-query-2/"
-                            aria-label=": jpa-obj-query-2"
-                        >
-                            jpa-obj-query-2
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
+        <div class="post-header main-content-wrap text-left">
+    
+        <h1 class="post-title">
+            jpa-obj-query-2
+        </h1>
+    
+    
+        <div class="post-meta">
     <time datetime="2021-05-08T02:54:28+00:00">
 	
 		    May 08, 2021
@@ -269,10 +282,13 @@
     
 </div>
 
-            </div>
-            
-                <div class="postShorten-content">
-                    <h1 id="객체지향-쿼리-언어2"><a href="#객체지향-쿼리-언어2" class="headerlink" title="객체지향 쿼리 언어2"></a>객체지향 쿼리 언어2</h1><h2 id="1-경로표현식"><a href="#1-경로표현식" class="headerlink" title="1. 경로표현식"></a>1. 경로표현식</h2><h3 id="1-1-경로표현식이란"><a href="#1-1-경로표현식이란" class="headerlink" title="1-1. 경로표현식이란?"></a>1-1. 경로표현식이란?</h3><ul>
+    
+</div>
+
+    
+    <div class="post-content markdown">
+        <div class="main-content-wrap">
+            <h1 id="객체지향-쿼리-언어2"><a href="#객체지향-쿼리-언어2" class="headerlink" title="객체지향 쿼리 언어2"></a>객체지향 쿼리 언어2</h1><h2 id="1-경로표현식"><a href="#1-경로표현식" class="headerlink" title="1. 경로표현식"></a>1. 경로표현식</h2><h3 id="1-1-경로표현식이란"><a href="#1-1-경로표현식이란" class="headerlink" title="1-1. 경로표현식이란?"></a>1-1. 경로표현식이란?</h3><ul>
 <li>. 찍어서 객체그래프를 탐색하는 것 </li>
 </ul>
 <h3 id="1-2-경로표현식-특징"><a href="#1-2-경로표현식-특징" class="headerlink" title="1-2. 경로표현식 특징"></a>1-2. 경로표현식 특징</h3><ul>
@@ -493,178 +509,121 @@
 </li>
 </ul>
 
-                    
-                        
-
-
-                    
-                    
-                        <p>
-                            <a
-                                href="/2021/05/08/jpa-obj-query-2/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                Comment and share
-                            </a>
-                        </p>
-                    
-                </div>
             
+
+
         </div>
+    </div>
+    <div id="post-footer" class="post-footer main-content-wrap">
         
-    </article>
-    
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/2021/05/07/jpa-obj-query-1/"
-                            aria-label=": jpa-obj-query-1"
-                        >
-                            jpa-obj-query-1
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time datetime="2021-05-07T11:42:32+00:00">
-	
-		    May 07, 2021
-    	
-    </time>
-    
-        <span>in </span>
-        
-    <a class="category-link" href="/categories/Study/">Study</a>, <a class="category-link" href="/categories/%EA%B0%9D%EC%B2%B4%EC%A7%80%ED%96%A5%EC%BF%BC%EB%A6%AC%EC%96%B8%EC%96%B4/">객체지향쿼리언어</a>, <a class="category-link" href="/categories/%EC%9E%90%EB%B0%94ORM%ED%91%9C%EC%A4%80JPA%ED%94%84%EB%A1%9C%EA%B7%B8%EB%9E%98%EB%B0%8D/">자바ORM표준JPA프로그래밍</a>
-
-
-    
-</div>
+            <div class="post-footer-tags">
+                <span class="text-color-light text-small">TAGGED IN</span><br/>
+                
+    <a class="tag tag--primary tag--small t-none-link" href="/tags/Java-JPA/" rel="tag">Java,JPA</a> <a class="tag tag--primary tag--small t-none-link" href="/tags/QueryDSL/" rel="tag">QueryDSL</a> <a class="tag tag--primary tag--small t-none-link" href="/tags/%EA%B0%9D%EC%B2%B4%EC%A7%80%ED%96%A5%EC%BF%BC%EB%A6%AC%EC%96%B8%EC%96%B42/" rel="tag">객체지향쿼리언어2</a>
 
             </div>
-            
-                <div class="postShorten-content">
-                    <h1 id="객체지향-쿼리-언어"><a href="#객체지향-쿼리-언어" class="headerlink" title="객체지향 쿼리 언어"></a>객체지향 쿼리 언어</h1><p>JPA는 다양한 쿼리 방법을 지원한다. JPQL,JPA Criteria, QueryDSL, 네이티브 SQL, JDBC API/MyBatis등과 같은 외부라이브러리 사용등<br>하지만 결론적으로 실무에서 자주 사용할것은, JPQL/QueryDSL 일것이다. 따라서 JPQL/QueryDSL 위주로 정리하도록 한다. </p>
-<h2 id="1-JPQL"><a href="#1-JPQL" class="headerlink" title="1. JPQL"></a>1. JPQL</h2><h3 id="1-1-JPQL-특징"><a href="#1-1-JPQL-특징" class="headerlink" title="1-1. JPQL 특징"></a>1-1. JPQL 특징</h3><ul>
-<li>JPQL은 객체지향 쿼리 언어이다. 따라서 테이블을 대상으로 쿼리하는것이 아니라, <strong>엔티티 객체를 대상</strong> 으로 쿼리한다.</li>
-<li>JPQL은 SQL을 추상화해서 특정 데이터베이스 SQL에 의존하지 않는다. (여러 DB방언 지원 및 ANSI표준까지 지원)</li>
-<li>JPQL의 종착지는 SQL이다. SQL로 결국 변환됨.</li>
-</ul>
-<p><img src="/images/jpa/jpql-1.png" alt="실습 샘플 모델"></p>
-<h3 id="1-2-JPQL-기본-문법"><a href="#1-2-JPQL-기본-문법" class="headerlink" title="1-2. JPQL 기본 문법"></a>1-2. JPQL 기본 문법</h3><p><img src="/images/jpa/jpql-2.png" alt="JPQL기본문법 구조1"></p>
-<ul>
-<li>엔티티와 속성은 대소문자 구분함. </li>
-<li>jpql 키워드는 대소문자 구분안함.</li>
-<li>반드시 엔티티 이름으로 사용해야함. (테이블이름 안됨)</li>
-<li>별칭은 필수! </li>
-</ul>
-<p><img src="/images/jpa/jpql-3.png" alt="JPQL기본문법 구조2"><br><img src="/images/jpa/jpql-4.png" alt="JPQL기본문법 구조3"></p>
-<figure class="highlight java"><figcaption><span>jpql-basic-1</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">List&lt;Member&gt; members = entityManager.createQuery(<span class="string">&quot;select m from Member m&quot;</span>, Member.class)</span><br><span class="line">               .getResultList();</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight java"><figcaption><span>jpql-basic-2</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">List&lt;Member&gt; paramResult = entityManager.createQuery(<span class="string">&quot;select m from Member m where m.userName = :userName&quot;</span>, Member.class)</span><br><span class="line">               .setParameter(<span class="string">&quot;userName&quot;</span>,<span class="string">&quot;m2&quot;</span>)</span><br><span class="line">               .getResultList();</span><br></pre></td></tr></table></figure>
-
-<p>[주의] 아래와 같이 쿼리 짜지 말자! </p>
-<figure class="highlight java"><figcaption><span>jpql-basic-3</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//이런식으로 쿼리짜지말자. join걸어서 가져오는걸로 (가독성이 떨어짐 비추 무조건 명시적조인을 하자)</span></span><br><span class="line"><span class="comment">//그리고 JPQL에서는 fetch상태 자체가 무시됨.(LAZY로 걸어도 그냥 조인됨)</span></span><br><span class="line">List&lt;Team&gt; teams = entityManager.createQuery(<span class="string">&quot;select m.team from Member m&quot;</span>, Team.class)</span><br><span class="line">               				.getResultList();</span><br></pre></td></tr></table></figure>
-
-<h3 id="1-3-프로젝션"><a href="#1-3-프로젝션" class="headerlink" title="1-3. 프로젝션"></a>1-3. 프로젝션</h3><p><img src="/images/jpa/jpql-5.png" alt="JPQL프로젝션"><br><img src="/images/jpa/jpql-6.png" alt="JPQL프로젝션-여러값조회"></p>
-<p>[참고]</p>
-<ul>
-<li>엔티티프로젝션은 Persistance Context에 관리된다.</li>
-<li>임베디드타입은 엔티티 타입이 아닌 값타입이다. 따라서 직접 조회한 값타입인 임베디드타입은 Persistance Context에 관리되지않는다.</li>
-</ul>
-<figure class="highlight java"><figcaption><span>jpql-projection</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">List&lt;MemberInfo&gt; memberInfos = entityManager</span><br><span class="line">                .createQuery(<span class="string">&quot;select new entity.MemberInfo(m.userName,m.age) from Member m&quot;</span>, MemberInfo.class)</span><br><span class="line">                .getResultList();</span><br></pre></td></tr></table></figure>
-
-<h3 id="1-4-페이징-API"><a href="#1-4-페이징-API" class="headerlink" title="1-4. 페이징 API"></a>1-4. 페이징 API</h3><p>JPA의 페이징은 여러 DB방언의 페이징처리를 추상화 되어있다.</p>
-<ul>
-<li>setFirstResult(int startPosition) : 조회 시작 위치 (0부터시작)</li>
-<li>setMaxResults(int maxResult) : 조회할 데이터수 </li>
-</ul>
-<figure class="highlight java"><figcaption><span>jpql-paging</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">List&lt;Member&gt; memberList = entityManager.createQuery(<span class="string">&quot;select m from Member m join fetch m.team t order by m.age desc&quot;</span>, Member.class)</span><br><span class="line">                .setFirstResult(<span class="number">0</span>)</span><br><span class="line">                .setMaxResults(<span class="number">20</span>)</span><br><span class="line">                .getResultList();</span><br></pre></td></tr></table></figure>
-
-<h3 id="1-5-조인"><a href="#1-5-조인" class="headerlink" title="1-5. 조인"></a>1-5. 조인</h3><p>기본적인 inner join / left (outer) join / cross join (세타조인) 이 지원된다. 기본적인 ANSI표준 join이 그대로 지원된다고 생각하면됨.</p>
-<h4 id="조인-ON절"><a href="#조인-ON절" class="headerlink" title="조인 - ON절"></a>조인 - ON절</h4><ol>
-<li>조인 대상 필터링<ul>
-<li>SELECT m, t FROM Member m LEFT JOIN m.team t on t.name = ‘A’</li>
-<li>위 쿼리처럼 ON 절 뒤에 join하면서 필터작업을 미리 할수있는 기능  </li>
-</ul>
-</li>
-<li>연관관계 없는 엔티티 외부 조인 (하이버네이트 5.1부터가능)<ul>
-<li>보통 키값으로 조인을 하지만 전혀 관계없는 부분도 조인조건에 넣을수있음.</li>
-<li>SELECT m, t FROM Member m LEFT JOIN Team t on m.username = t.name</li>
-</ul>
-</li>
-</ol>
-<h3 id="1-6-서브쿼리"><a href="#1-6-서브쿼리" class="headerlink" title="1-6. 서브쿼리"></a>1-6. 서브쿼리</h3><p><img src="/images/jpa/jpql-7.png" alt="JPQL서브쿼리"></p>
-<figure class="highlight sql"><figcaption><span>서브쿼리-1</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">#나이가 평균보다 많은 회원 </span><br><span class="line"><span class="keyword">select</span> m <span class="keyword">from</span> <span class="keyword">Member</span> m </span><br><span class="line"><span class="keyword">where</span> m.age <span class="operator">&gt;</span> (<span class="keyword">select</span> <span class="built_in">avg</span>(m2.age) <span class="keyword">from</span> <span class="keyword">Member</span> m2) </span><br><span class="line"></span><br><span class="line">#한건이라도주문한고객</span><br><span class="line"><span class="keyword">select</span> m <span class="keyword">from</span> <span class="keyword">Member</span> m</span><br><span class="line"><span class="keyword">where</span> (<span class="keyword">select</span> <span class="built_in">count</span>(o) <span class="keyword">from</span> <span class="keyword">Order</span> o <span class="keyword">where</span> m <span class="operator">=</span> o.member) <span class="operator">&gt;</span> <span class="number">0</span></span><br><span class="line"></span><br><span class="line">#팀A 소속인 회원</span><br><span class="line"><span class="keyword">select</span> m <span class="keyword">from</span> <span class="keyword">Member</span> m</span><br><span class="line"><span class="keyword">where</span> <span class="keyword">exists</span> (<span class="keyword">select</span> t <span class="keyword">from</span> m.team t <span class="keyword">where</span> t.name <span class="operator">=</span> ‘팀A<span class="string">&#x27;)</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">#전체 상품 각각의 재고보다 주문량이 많은 주문들</span></span><br><span class="line"><span class="string">select o from Order o </span></span><br><span class="line"><span class="string">where o.orderAmount &gt; ALL (select p.stockAmount from Product p)</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">#어떤 팀이든 팀에 소속된 회원</span></span><br><span class="line"><span class="string">select m from Member m </span></span><br><span class="line"><span class="string">where m.team = ANY (select t from Team t)</span></span><br></pre></td></tr></table></figure>
-
-<h4 id="JPA-서브쿼리-한계"><a href="#JPA-서브쿼리-한계" class="headerlink" title="JPA 서브쿼리 한계"></a>JPA 서브쿼리 한계</h4><ul>
-<li>JPA는 WHERE/HAVING절만 서브쿼리 사용가능 </li>
-<li>하이버네이트에서는 SELECT절에서 서브쿼리 사용가능</li>
-<li>FROM 절 서브쿼리는 현재 JPQL에서는 불가능 <ul>
-<li>조인으로 풀수있으면 해결하고 그래도 안되면 쿼리를 쪼개서 처리하거나 그래도 안되면 native쿼리로 처리 해야함. </li>
-</ul>
-</li>
-</ul>
-<h3 id="1-7-JPQL-타입표현"><a href="#1-7-JPQL-타입표현" class="headerlink" title="1-7. JPQL 타입표현"></a>1-7. JPQL 타입표현</h3><h4 id="JPQL-타입-표현"><a href="#JPQL-타입-표현" class="headerlink" title="JPQL 타입 표현"></a>JPQL 타입 표현</h4><ul>
-<li>문자: ‘HELLO’, ‘She’’s’ </li>
-<li>Boolean: TRUE, FALSE</li>
-<li>숫자: 10L(Long), 10D(Double), 10F(Float)</li>
-<li>ENUM: jpabook.MemberType.Admin (패키지명 포함) </li>
-<li>엔티티 타입: TYPE(m) = Member (상속 관계에서 사용)</li>
-</ul>
-<h4 id="JPQL-논리연산-및-비교연산"><a href="#JPQL-논리연산-및-비교연산" class="headerlink" title="JPQL 논리연산 및 비교연산"></a>JPQL 논리연산 및 비교연산</h4><ul>
-<li>EXISTS, IN</li>
-<li>AND, OR, NOT</li>
-<li>=, &gt;, &gt;=, &lt;, &lt;=, &lt;&gt; BETWEEN, LIKE, IS NULL</li>
-</ul>
-<h4 id="JPQL-연산자-우선순위"><a href="#JPQL-연산자-우선순위" class="headerlink" title="JPQL 연산자 우선순위"></a>JPQL 연산자 우선순위</h4><ol>
-<li>경로탐색연산(.)</li>
-<li>수학연산 : 단항연산자(+,-),*,/,+,-</li>
-<li>비교연산 : =,&gt;,&gt;=,&lt;,&lt;=,&lt;&gt;(다름),BETWEEN,LIKE,IN,IS NULL,IS EMPTY,EXIST </li>
-<li>논리연산 : AND,OR,NOT</li>
-</ol>
-<h3 id="1-8-CASE-식"><a href="#1-8-CASE-식" class="headerlink" title="1-8. CASE 식"></a>1-8. CASE 식</h3><p><img src="/images/jpa/jpql-8.png" alt="CASE1"><br><img src="/images/jpa/jpql-9.png" alt="COALESCE/NULLIF"></p>
-<h3 id="1-9-기본함수"><a href="#1-9-기본함수" class="headerlink" title="1-9. 기본함수"></a>1-9. 기본함수</h3><ul>
-<li>concat, substring, trim, lower/upper, length, locate, abs, sqrt, mod, size, index(jpq전용)</li>
-</ul>
-<h4 id="사용자-정의-함수"><a href="#사용자-정의-함수" class="headerlink" title="사용자 정의 함수"></a>사용자 정의 함수</h4><p><img src="/images/jpa/jpql-10.png" alt="사용자정의함수"></p>
-
-                    
+        
+        
+            <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    <a
+                        class="post-action-btn btn btn--disabled"
+                        aria-hidden="true"
+                    >
                         
-
-
+                        <i class="fa fa-angle-left" aria-hidden="true"></i>
+                        <span class="hide-xs hide-sm text-small icon-ml">PREVIOUS</span>
+                    </a>
+            </li>
+            <li class="post-action">
+                
                     
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/2021/05/07/jpa-obj-query-1/"
+                    data-tooltip="jpa-obj-query-1"
+                    aria-label="NEXT: jpa-obj-query-1"
+                >
                     
-                        <p>
-                            <a
-                                href="/2021/05/07/jpa-obj-query-1/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                Comment and share
-                            </a>
-                        </p>
-                    
-                </div>
+                        <span class="hide-xs hide-sm text-small icon-mr">NEXT</span>
+                        <i class="fa fa-angle-right" aria-hidden="true"></i>
+                    </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a
+                class="post-action-btn btn btn--default btn-open-shareoptions"
+                href="#btn-open-shareoptions"
+                aria-label="Share this post"
+            >
+                <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </a>
+        </li>
+        
             
-        </div>
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://codexdawn.github.io/2021/05/08/jpa-obj-query-2/"
+                    title="Share on Facebook"
+                    aria-label="Share on Facebook"
+                >
+                    <i class="fab fa-facebook" aria-hidden="true"></i>
+                </a>
+            </li>
         
-    </article>
-    
-    <div class="pagination-bar">
-    <ul class="pagination">
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://twitter.com/intent/tweet?text=https://codexdawn.github.io/2021/05/08/jpa-obj-query-2/"
+                    title="Share on Twitter"
+                    aria-label="Share on Twitter"
+                >
+                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://plus.google.com/share?url=https://codexdawn.github.io/2021/05/08/jpa-obj-query-2/"
+                    title="Share on Google+"
+                    aria-label="Share on Google+"
+                >
+                    <i class="fab fa-google-plus" aria-hidden="true"></i>
+                </a>
+            </li>
         
         
-        <li class="pagination-number">page 1 of 1</li>
+            
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#" aria-label="Back to top">
+            
+                <i class="fa fa-list" aria-hidden="true"></i>
+            </a>
+        </li>
     </ul>
 </div>
 
-</section>
+
+        
+        
+            
+        
+    </div>
+</article>
 
 
 
@@ -675,6 +634,151 @@
 </footer>
 
             </div>
+            
+                <div id="bottom-bar" class="post-bottom-bar" data-behavior="5">
+                    <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    <a
+                        class="post-action-btn btn btn--disabled"
+                        aria-hidden="true"
+                    >
+                        
+                        <i class="fa fa-angle-left" aria-hidden="true"></i>
+                        <span class="hide-xs hide-sm text-small icon-ml">PREVIOUS</span>
+                    </a>
+            </li>
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/2021/05/07/jpa-obj-query-1/"
+                    data-tooltip="jpa-obj-query-1"
+                    aria-label="NEXT: jpa-obj-query-1"
+                >
+                    
+                        <span class="hide-xs hide-sm text-small icon-mr">NEXT</span>
+                        <i class="fa fa-angle-right" aria-hidden="true"></i>
+                    </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a
+                class="post-action-btn btn btn--default btn-open-shareoptions"
+                href="#btn-open-shareoptions"
+                aria-label="Share this post"
+            >
+                <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </a>
+        </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://codexdawn.github.io/2021/05/08/jpa-obj-query-2/"
+                    title="Share on Facebook"
+                    aria-label="Share on Facebook"
+                >
+                    <i class="fab fa-facebook" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://twitter.com/intent/tweet?text=https://codexdawn.github.io/2021/05/08/jpa-obj-query-2/"
+                    title="Share on Twitter"
+                    aria-label="Share on Twitter"
+                >
+                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://plus.google.com/share?url=https://codexdawn.github.io/2021/05/08/jpa-obj-query-2/"
+                    title="Share on Google+"
+                    aria-label="Share on Google+"
+                >
+                    <i class="fab fa-google-plus" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+        
+            
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#" aria-label="Back to top">
+            
+                <i class="fa fa-list" aria-hidden="true"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+                </div>
+                
+    <div id="share-options-bar" class="share-options-bar" data-behavior="5">
+        <i id="btn-close-shareoptions" class="fa fa-times"></i>
+        <ul class="share-options">
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://www.facebook.com/sharer/sharer.php?u=https://codexdawn.github.io/2021/05/08/jpa-obj-query-2/"
+                        aria-label="Share on Facebook"
+                    >
+                        <i class="fab fa-facebook" aria-hidden="true"></i><span>Share on Facebook</span>
+                    </a>
+                </li>
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://twitter.com/intent/tweet?text=https://codexdawn.github.io/2021/05/08/jpa-obj-query-2/"
+                        aria-label="Share on Twitter"
+                    >
+                        <i class="fab fa-twitter" aria-hidden="true"></i><span>Share on Twitter</span>
+                    </a>
+                </li>
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://plus.google.com/share?url=https://codexdawn.github.io/2021/05/08/jpa-obj-query-2/"
+                        aria-label="Share on Google+"
+                    >
+                        <i class="fab fa-google-plus" aria-hidden="true"></i><span>Share on Google+</span>
+                    </a>
+                </li>
+            
+        </ul>
+    </div>
+
+
             
         </div>
         
@@ -712,6 +816,8 @@
 
 <!--SCRIPTS END-->
 
+
+    
 
 
 

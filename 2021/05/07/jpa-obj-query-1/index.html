@@ -15,7 +15,7 @@
             <link rel="alternate" type="application/atom+xml" title="RSS" href="/atom.xml">
         
     
-    <script type="application/ld+json">{"@context":"http://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"codexdawn","sameAs":["https://github.com/codexdawn","https://www.facebook.com/beherzt.dev","https://www.linkedin.com/in/sim-jisung-3048872a/","mailto:cloudkaiser@gmail.com"],"image":"https://www.gravatar.com/avatar/d97fd4b94c429915f1cb55eb27e7d4d9"},"articleBody":"객체지향 쿼리 언어JPA는 다양한 쿼리 방법을 지원한다. JPQL,JPA Criteria, QueryDSL, 네이티브 SQL, JDBC API/MyBatis등과 같은 외부라이브러리 사용등하지만 결론적으로 실무에서 자주 사용할것은, JPQL/QueryDSL 일것이다. 따라서 JPQL/QueryDSL 위주로 정리하도록 한다. \n1. JPQL1-1. JPQL 특징\nJPQL은 객체지향 쿼리 언어이다. 따라서 테이블을 대상으로 쿼리하는것이 아니라, 엔티티 객체를 대상 으로 쿼리한다.\nJPQL은 SQL을 추상화해서 특정 데이터베이스 SQL에 의존하지 않는다. (여러 DB방언 지원 및 ANSI표준까지 지원)\nJPQL의 종착지는 SQL이다. SQL로 결국 변환됨.\n\n\n1-2. JPQL 기본 문법\n\n엔티티와 속성은 대소문자 구분함. \njpql 키워드는 대소문자 구분안함.\n반드시 엔티티 이름으로 사용해야함. (테이블이름 안됨)\n별칭은 필수! \n\n\njpql-basic-112List&lt;Member&gt; members = entityManager.createQuery(&quot;select m from Member m&quot;, Member.class)               .getResultList();\n\njpql-basic-2123List&lt;Member&gt; paramResult = entityManager.createQuery(&quot;select m from Member m where m.userName = :userName&quot;, Member.class)               .setParameter(&quot;userName&quot;,&quot;m2&quot;)               .getResultList();\n\n[주의] 아래와 같이 쿼리 짜지 말자! \njpql-basic-31234//이런식으로 쿼리짜지말자. join걸어서 가져오는걸로 (가독성이 떨어짐 비추 무조건 명시적조인을 하자)//그리고 JPQL에서는 fetch상태 자체가 무시됨.(LAZY로 걸어도 그냥 조인됨)List&lt;Team&gt; teams = entityManager.createQuery(&quot;select m.team from Member m&quot;, Team.class)               \t\t\t\t.getResultList();\n\n1-3. 프로젝션\n[참고]\n\n엔티티프로젝션은 Persistance Context에 관리된다.\n임베디드타입은 엔티티 타입이 아닌 값타입이다. 따라서 직접 조회한 값타입인 임베디드타입은 Persistance Context에 관리되지않는다.\n\njpql-projection123List&lt;MemberInfo&gt; memberInfos = entityManager                .createQuery(&quot;select new entity.MemberInfo(m.userName,m.age) from Member m&quot;, MemberInfo.class)                .getResultList();\n\n1-4. 페이징 APIJPA의 페이징은 여러 DB방언의 페이징처리를 추상화 되어있다.\n\nsetFirstResult(int startPosition) : 조회 시작 위치 (0부터시작)\nsetMaxResults(int maxResult) : 조회할 데이터수 \n\njpql-paging1234List&lt;Member&gt; memberList = entityManager.createQuery(&quot;select m from Member m join fetch m.team t order by m.age desc&quot;, Member.class)                .setFirstResult(0)                .setMaxResults(20)                .getResultList();\n\n1-5. 조인기본적인 inner join / left (outer) join / cross join (세타조인) 이 지원된다. 기본적인 ANSI표준 join이 그대로 지원된다고 생각하면됨.\n조인 - ON절\n조인 대상 필터링\n\n\nSELECT m, t FROM Member m LEFT JOIN m.team t on t.name = ‘A’\n위 쿼리처럼 ON 절 뒤에 join하면서 필터작업을 미리 할수있는 기능  \n\n\n연관관계 없는 엔티티 외부 조인 (하이버네이트 5.1부터가능)\n\n\n보통 키값으로 조인을 하지만 전혀 관계없는 부분도 조인조건에 넣을수있음.\nSELECT m, t FROM Member m LEFT JOIN Team t on m.username = t.name\n\n1-6. 서브쿼리\n서브쿼리-112345678910111213141516171819#나이가 평균보다 많은 회원 select m from Member m where m.age &gt; (select avg(m2.age) from Member m2) #한건이라도주문한고객select m from Member mwhere (select count(o) from Order o where m = o.member) &gt; 0#팀A 소속인 회원select m from Member mwhere exists (select t from m.team t where t.name = ‘팀A&#x27;)#전체 상품 각각의 재고보다 주문량이 많은 주문들select o from Order o where o.orderAmount &gt; ALL (select p.stockAmount from Product p)#어떤 팀이든 팀에 소속된 회원select m from Member m where m.team = ANY (select t from Team t)\n\nJPA 서브쿼리 한계\nJPA는 WHERE/HAVING절만 서브쿼리 사용가능 \n하이버네이트에서는 SELECT절에서 서브쿼리 사용가능\nFROM 절 서브쿼리는 현재 JPQL에서는 불가능 \n\n\n조인으로 풀수있으면 해결하고 그래도 안되면 쿼리를 쪼개서 처리하거나 그래도 안되면 native쿼리로 처리 해야함. \n\n1-7. JPQL 타입표현JPQL 타입 표현\n문자: ‘HELLO’, ‘She’’s’ Boolean: TRUE, FALSE\n숫자: 10L(Long), 10D(Double), 10F(Float)\nENUM: jpabook.MemberType.Admin (패키지명 포함) \n엔티티 타입: TYPE(m) = Member (상속 관계에서 사용)\n\nJPQL 논리연산 및 비교연산\nEXISTS, IN\nAND, OR, NOT\n=, &gt;, &gt;=, &lt;, &lt;=, &lt;&gt; BETWEEN, LIKE, IS NULL\n\nJPQL 연산자 우선순위\n경로탐색연산(.)\n수학연산 : 단항연산자(+,-),*,/,+,-\n비교연산 : =,&gt;,&gt;=,&lt;,&lt;=,&lt;&gt;(다름),BETWEEN,LIKE,IN,IS NULL,IS EMPTY,EXIST \n논리연산 : AND,OR,NOT\n\n1-8. CASE 식\n1-9. 기본함수\nconcat, substring, trim, lower/upper, length, locate, abs, sqrt, mod, size, index(jpq전용)\n\n사용자 정의 함수\n","dateCreated":"2021-05-07T11:42:32+00:00","dateModified":"2021-05-07T16:43:58+00:00","datePublished":"2021-05-07T11:42:32+00:00","description":"","headline":"jpa-obj-query-1","image":[],"mainEntityOfPage":{"@type":"WebPage","@id":"https://codexdawn.github.io/2021/05/07/jpa-obj-query-1/"},"publisher":{"@type":"Organization","name":"codexdawn","sameAs":["https://github.com/codexdawn","https://www.facebook.com/beherzt.dev","https://www.linkedin.com/in/sim-jisung-3048872a/","mailto:cloudkaiser@gmail.com"],"image":"https://www.gravatar.com/avatar/d97fd4b94c429915f1cb55eb27e7d4d9","logo":{"@type":"ImageObject","url":"https://www.gravatar.com/avatar/d97fd4b94c429915f1cb55eb27e7d4d9"}},"url":"https://codexdawn.github.io/2021/05/07/jpa-obj-query-1/","keywords":"Java,JPA, QueryDSL, 객체지향쿼리언어"}</script>
+    <script type="application/ld+json">{"@context":"http://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"codexdawn","sameAs":["https://github.com/codexdawn","https://www.facebook.com/beherzt.dev","https://www.linkedin.com/in/sim-jisung-3048872a/","mailto:cloudkaiser@gmail.com"],"image":"https://www.gravatar.com/avatar/d97fd4b94c429915f1cb55eb27e7d4d9"},"articleBody":"객체지향 쿼리 언어JPA는 다양한 쿼리 방법을 지원한다. JPQL,JPA Criteria, QueryDSL, 네이티브 SQL, JDBC API/MyBatis등과 같은 외부라이브러리 사용등하지만 결론적으로 실무에서 자주 사용할것은, JPQL/QueryDSL 일것이다. 따라서 JPQL/QueryDSL 위주로 정리하도록 한다. \n1. JPQL1-1. JPQL 특징\nJPQL은 객체지향 쿼리 언어이다. 따라서 테이블을 대상으로 쿼리하는것이 아니라, 엔티티 객체를 대상 으로 쿼리한다.\nJPQL은 SQL을 추상화해서 특정 데이터베이스 SQL에 의존하지 않는다. (여러 DB방언 지원 및 ANSI표준까지 지원)\nJPQL의 종착지는 SQL이다. SQL로 결국 변환됨.\n\n\n1-2. JPQL 기본 문법\n\n엔티티와 속성은 대소문자 구분함. \njpql 키워드는 대소문자 구분안함.\n반드시 엔티티 이름으로 사용해야함. (테이블이름 안됨)\n별칭은 필수! \n\n\njpql-basic-112List&lt;Member&gt; members = entityManager.createQuery(&quot;select m from Member m&quot;, Member.class)               .getResultList();\n\njpql-basic-2123List&lt;Member&gt; paramResult = entityManager.createQuery(&quot;select m from Member m where m.userName = :userName&quot;, Member.class)               .setParameter(&quot;userName&quot;,&quot;m2&quot;)               .getResultList();\n\n[주의] 아래와 같이 쿼리 짜지 말자! \njpql-basic-31234//이런식으로 쿼리짜지말자. join걸어서 가져오는걸로 (가독성이 떨어짐 비추 무조건 명시적조인을 하자)//그리고 JPQL에서는 fetch상태 자체가 무시됨.(LAZY로 걸어도 그냥 조인됨)List&lt;Team&gt; teams = entityManager.createQuery(&quot;select m.team from Member m&quot;, Team.class)               \t\t\t\t.getResultList();\n\n1-3. 프로젝션\n[참고]\n\n엔티티프로젝션은 Persistance Context에 관리된다.\n임베디드타입은 엔티티 타입이 아닌 값타입이다. 따라서 직접 조회한 값타입인 임베디드타입은 Persistance Context에 관리되지않는다.\n\njpql-projection123List&lt;MemberInfo&gt; memberInfos = entityManager                .createQuery(&quot;select new entity.MemberInfo(m.userName,m.age) from Member m&quot;, MemberInfo.class)                .getResultList();\n\n1-4. 페이징 APIJPA의 페이징은 여러 DB방언의 페이징처리를 추상화 되어있다.\n\nsetFirstResult(int startPosition) : 조회 시작 위치 (0부터시작)\nsetMaxResults(int maxResult) : 조회할 데이터수 \n\njpql-paging1234List&lt;Member&gt; memberList = entityManager.createQuery(&quot;select m from Member m join fetch m.team t order by m.age desc&quot;, Member.class)                .setFirstResult(0)                .setMaxResults(20)                .getResultList();\n\n1-5. 조인기본적인 inner join / left (outer) join / cross join (세타조인) 이 지원된다. 기본적인 ANSI표준 join이 그대로 지원된다고 생각하면됨.\n조인 - ON절\n조인 대상 필터링\nSELECT m, t FROM Member m LEFT JOIN m.team t on t.name = ‘A’\n위 쿼리처럼 ON 절 뒤에 join하면서 필터작업을 미리 할수있는 기능  \n\n\n연관관계 없는 엔티티 외부 조인 (하이버네이트 5.1부터가능)\n보통 키값으로 조인을 하지만 전혀 관계없는 부분도 조인조건에 넣을수있음.\nSELECT m, t FROM Member m LEFT JOIN Team t on m.username = t.name\n\n\n\n1-6. 서브쿼리\n서브쿼리-112345678910111213141516171819#나이가 평균보다 많은 회원 select m from Member m where m.age &gt; (select avg(m2.age) from Member m2) #한건이라도주문한고객select m from Member mwhere (select count(o) from Order o where m = o.member) &gt; 0#팀A 소속인 회원select m from Member mwhere exists (select t from m.team t where t.name = ‘팀A&#x27;)#전체 상품 각각의 재고보다 주문량이 많은 주문들select o from Order o where o.orderAmount &gt; ALL (select p.stockAmount from Product p)#어떤 팀이든 팀에 소속된 회원select m from Member m where m.team = ANY (select t from Team t)\n\nJPA 서브쿼리 한계\nJPA는 WHERE/HAVING절만 서브쿼리 사용가능 \n하이버네이트에서는 SELECT절에서 서브쿼리 사용가능\nFROM 절 서브쿼리는 현재 JPQL에서는 불가능 \n조인으로 풀수있으면 해결하고 그래도 안되면 쿼리를 쪼개서 처리하거나 그래도 안되면 native쿼리로 처리 해야함. \n\n\n\n1-7. JPQL 타입표현JPQL 타입 표현\n문자: ‘HELLO’, ‘She’’s’ \nBoolean: TRUE, FALSE\n숫자: 10L(Long), 10D(Double), 10F(Float)\nENUM: jpabook.MemberType.Admin (패키지명 포함) \n엔티티 타입: TYPE(m) = Member (상속 관계에서 사용)\n\nJPQL 논리연산 및 비교연산\nEXISTS, IN\nAND, OR, NOT\n=, &gt;, &gt;=, &lt;, &lt;=, &lt;&gt; BETWEEN, LIKE, IS NULL\n\nJPQL 연산자 우선순위\n경로탐색연산(.)\n수학연산 : 단항연산자(+,-),*,/,+,-\n비교연산 : =,&gt;,&gt;=,&lt;,&lt;=,&lt;&gt;(다름),BETWEEN,LIKE,IN,IS NULL,IS EMPTY,EXIST \n논리연산 : AND,OR,NOT\n\n1-8. CASE 식\n1-9. 기본함수\nconcat, substring, trim, lower/upper, length, locate, abs, sqrt, mod, size, index(jpq전용)\n\n사용자 정의 함수\n","dateCreated":"2021-05-07T11:42:32+00:00","dateModified":"2021-05-08T03:24:28+00:00","datePublished":"2021-05-07T11:42:32+00:00","description":"","headline":"jpa-obj-query-1","image":[],"mainEntityOfPage":{"@type":"WebPage","@id":"https://codexdawn.github.io/2021/05/07/jpa-obj-query-1/"},"publisher":{"@type":"Organization","name":"codexdawn","sameAs":["https://github.com/codexdawn","https://www.facebook.com/beherzt.dev","https://www.linkedin.com/in/sim-jisung-3048872a/","mailto:cloudkaiser@gmail.com"],"image":"https://www.gravatar.com/avatar/d97fd4b94c429915f1cb55eb27e7d4d9","logo":{"@type":"ImageObject","url":"https://www.gravatar.com/avatar/d97fd4b94c429915f1cb55eb27e7d4d9"}},"url":"https://codexdawn.github.io/2021/05/07/jpa-obj-query-1/","keywords":"Java,JPA, QueryDSL, 객체지향쿼리언어"}</script>
     <meta name="description" content="객체지향 쿼리 언어JPA는 다양한 쿼리 방법을 지원한다. JPQL,JPA Criteria, QueryDSL, 네이티브 SQL, JDBC API&#x2F;MyBatis등과 같은 외부라이브러리 사용등하지만 결론적으로 실무에서 자주 사용할것은, JPQL&#x2F;QueryDSL 일것이다. 따라서 JPQL&#x2F;QueryDSL 위주로 정리하도록 한다.  1. JPQL1-1. JPQL 특">
 <meta property="og:type" content="blog">
 <meta property="og:title" content="jpa-obj-query-1">
@@ -34,7 +34,7 @@
 <meta property="og:image" content="https://codexdawn.github.io/images/jpa/jpql-9.png">
 <meta property="og:image" content="https://codexdawn.github.io/images/jpa/jpql-10.png">
 <meta property="article:published_time" content="2021-05-07T11:42:32.000Z">
-<meta property="article:modified_time" content="2021-05-07T16:43:58.280Z">
+<meta property="article:modified_time" content="2021-05-08T03:24:28.414Z">
 <meta property="article:author" content="codexdawn">
 <meta property="article:tag" content="Java,JPA">
 <meta property="article:tag" content="QueryDSL">
@@ -326,32 +326,31 @@
 
 <h3 id="1-5-조인"><a href="#1-5-조인" class="headerlink" title="1-5. 조인"></a>1-5. 조인</h3><p>기본적인 inner join / left (outer) join / cross join (세타조인) 이 지원된다. 기본적인 ANSI표준 join이 그대로 지원된다고 생각하면됨.</p>
 <h4 id="조인-ON절"><a href="#조인-ON절" class="headerlink" title="조인 - ON절"></a>조인 - ON절</h4><ol>
-<li>조인 대상 필터링</li>
-</ol>
-<ul>
+<li>조인 대상 필터링<ul>
 <li>SELECT m, t FROM Member m LEFT JOIN m.team t on t.name = ‘A’</li>
 <li>위 쿼리처럼 ON 절 뒤에 join하면서 필터작업을 미리 할수있는 기능  </li>
 </ul>
-<ol start="2">
-<li>연관관계 없는 엔티티 외부 조인 (하이버네이트 5.1부터가능)</li>
-</ol>
-<ul>
+</li>
+<li>연관관계 없는 엔티티 외부 조인 (하이버네이트 5.1부터가능)<ul>
 <li>보통 키값으로 조인을 하지만 전혀 관계없는 부분도 조인조건에 넣을수있음.</li>
 <li>SELECT m, t FROM Member m LEFT JOIN Team t on m.username = t.name</li>
 </ul>
+</li>
+</ol>
 <h3 id="1-6-서브쿼리"><a href="#1-6-서브쿼리" class="headerlink" title="1-6. 서브쿼리"></a>1-6. 서브쿼리</h3><p><img src="/images/jpa/jpql-7.png" alt="JPQL서브쿼리"></p>
 <figure class="highlight sql"><figcaption><span>서브쿼리-1</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">#나이가 평균보다 많은 회원 </span><br><span class="line"><span class="keyword">select</span> m <span class="keyword">from</span> <span class="keyword">Member</span> m </span><br><span class="line"><span class="keyword">where</span> m.age <span class="operator">&gt;</span> (<span class="keyword">select</span> <span class="built_in">avg</span>(m2.age) <span class="keyword">from</span> <span class="keyword">Member</span> m2) </span><br><span class="line"></span><br><span class="line">#한건이라도주문한고객</span><br><span class="line"><span class="keyword">select</span> m <span class="keyword">from</span> <span class="keyword">Member</span> m</span><br><span class="line"><span class="keyword">where</span> (<span class="keyword">select</span> <span class="built_in">count</span>(o) <span class="keyword">from</span> <span class="keyword">Order</span> o <span class="keyword">where</span> m <span class="operator">=</span> o.member) <span class="operator">&gt;</span> <span class="number">0</span></span><br><span class="line"></span><br><span class="line">#팀A 소속인 회원</span><br><span class="line"><span class="keyword">select</span> m <span class="keyword">from</span> <span class="keyword">Member</span> m</span><br><span class="line"><span class="keyword">where</span> <span class="keyword">exists</span> (<span class="keyword">select</span> t <span class="keyword">from</span> m.team t <span class="keyword">where</span> t.name <span class="operator">=</span> ‘팀A<span class="string">&#x27;)</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">#전체 상품 각각의 재고보다 주문량이 많은 주문들</span></span><br><span class="line"><span class="string">select o from Order o </span></span><br><span class="line"><span class="string">where o.orderAmount &gt; ALL (select p.stockAmount from Product p)</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">#어떤 팀이든 팀에 소속된 회원</span></span><br><span class="line"><span class="string">select m from Member m </span></span><br><span class="line"><span class="string">where m.team = ANY (select t from Team t)</span></span><br></pre></td></tr></table></figure>
 
 <h4 id="JPA-서브쿼리-한계"><a href="#JPA-서브쿼리-한계" class="headerlink" title="JPA 서브쿼리 한계"></a>JPA 서브쿼리 한계</h4><ul>
 <li>JPA는 WHERE/HAVING절만 서브쿼리 사용가능 </li>
 <li>하이버네이트에서는 SELECT절에서 서브쿼리 사용가능</li>
-<li>FROM 절 서브쿼리는 현재 JPQL에서는 불가능 </li>
-</ul>
-<ul>
+<li>FROM 절 서브쿼리는 현재 JPQL에서는 불가능 <ul>
 <li>조인으로 풀수있으면 해결하고 그래도 안되면 쿼리를 쪼개서 처리하거나 그래도 안되면 native쿼리로 처리 해야함. </li>
 </ul>
+</li>
+</ul>
 <h3 id="1-7-JPQL-타입표현"><a href="#1-7-JPQL-타입표현" class="headerlink" title="1-7. JPQL 타입표현"></a>1-7. JPQL 타입표현</h3><h4 id="JPQL-타입-표현"><a href="#JPQL-타입-표현" class="headerlink" title="JPQL 타입 표현"></a>JPQL 타입 표현</h4><ul>
-<li>문자: ‘HELLO’, ‘She’’s’ Boolean: TRUE, FALSE</li>
+<li>문자: ‘HELLO’, ‘She’’s’ </li>
+<li>Boolean: TRUE, FALSE</li>
 <li>숫자: 10L(Long), 10D(Double), 10F(Float)</li>
 <li>ENUM: jpabook.MemberType.Admin (패키지명 포함) </li>
 <li>엔티티 타입: TYPE(m) = Member (상속 관계에서 사용)</li>
@@ -393,11 +392,14 @@
         <ul class="post-actions post-action-nav">
             <li class="post-action">
                 
-                    <a
-                        class="post-action-btn btn btn--disabled"
-                        aria-hidden="true"
-                    >
-                        
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/2021/05/08/jpa-obj-query-2/"
+                    data-tooltip="jpa-obj-query-2"
+                    aria-label="PREVIOUS: jpa-obj-query-2"
+                >
+                    
                         <i class="fa fa-angle-left" aria-hidden="true"></i>
                         <span class="hide-xs hide-sm text-small icon-ml">PREVIOUS</span>
                     </a>
@@ -505,11 +507,14 @@
         <ul class="post-actions post-action-nav">
             <li class="post-action">
                 
-                    <a
-                        class="post-action-btn btn btn--disabled"
-                        aria-hidden="true"
-                    >
-                        
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/2021/05/08/jpa-obj-query-2/"
+                    data-tooltip="jpa-obj-query-2"
+                    aria-label="PREVIOUS: jpa-obj-query-2"
+                >
+                    
                         <i class="fa fa-angle-left" aria-hidden="true"></i>
                         <span class="hide-xs hide-sm text-small icon-ml">PREVIOUS</span>
                     </a>

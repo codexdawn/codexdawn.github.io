@@ -247,6 +247,283 @@
                     
                         <a
                             class="link-unstyled"
+                            href="/2021/05/08/jpa-obj-query-2/"
+                            aria-label=": jpa-obj-query-2"
+                        >
+                            jpa-obj-query-2
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2021-05-08T02:54:28+00:00">
+	
+		    May 08, 2021
+    	
+    </time>
+    
+        <span>in </span>
+        
+    <a class="category-link" href="/categories/Study/">Study</a>, <a class="category-link" href="/categories/%EA%B0%9D%EC%B2%B4%EC%A7%80%ED%96%A5%EC%BF%BC%EB%A6%AC%EC%96%B8%EC%96%B4/">객체지향쿼리언어</a>, <a class="category-link" href="/categories/%EC%9E%90%EB%B0%94ORM%ED%91%9C%EC%A4%80JPA%ED%94%84%EB%A1%9C%EA%B7%B8%EB%9E%98%EB%B0%8D/">자바ORM표준JPA프로그래밍</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <h1 id="객체지향-쿼리-언어2"><a href="#객체지향-쿼리-언어2" class="headerlink" title="객체지향 쿼리 언어2"></a>객체지향 쿼리 언어2</h1><h2 id="1-경로표현식"><a href="#1-경로표현식" class="headerlink" title="1. 경로표현식"></a>1. 경로표현식</h2><h3 id="1-1-경로표현식이란"><a href="#1-1-경로표현식이란" class="headerlink" title="1-1. 경로표현식이란?"></a>1-1. 경로표현식이란?</h3><ul>
+<li>. 찍어서 객체그래프를 탐색하는 것 </li>
+</ul>
+<h3 id="1-2-경로표현식-특징"><a href="#1-2-경로표현식-특징" class="headerlink" title="1-2. 경로표현식 특징"></a>1-2. 경로표현식 특징</h3><ul>
+<li>상태 필드(state field): 경로 탐색의 끝, 탐색X</li>
+<li>단일 값 연관 경로: 묵시적 내부 조인(inner join) 발생, 탐색O<ul>
+<li>@ManyToOne, @OneToOne, 대상이 엔티티(ex: m.team)</li>
+</ul>
+</li>
+<li>컬렉션 값 연관 경로: 묵시적 내부 조인 발생, 탐색X<ul>
+<li>FROM 절에서 명시적 조인을 통해 별칭을 얻으면 별칭을 통 해 탐색 가능</li>
+<li>@OneToMany, @ManyToMany, 대상이 컬렉션(ex: m.orders)</li>
+</ul>
+</li>
+</ul>
+<h3 id="1-3-경로탐색을-사용한-묵시적-조인-시-주의사항"><a href="#1-3-경로탐색을-사용한-묵시적-조인-시-주의사항" class="headerlink" title="1-3. 경로탐색을 사용한 묵시적 조인 시 주의사항"></a>1-3. 경로탐색을 사용한 묵시적 조인 시 주의사항</h3><ul>
+<li>항상 내부조인 걸림 </li>
+<li>걸렉션은 경로 탐색이 안된다. (사이즈만 받을수있음) 따라서 컬렉션은 반드시 명시적 조인으로 별칭을 얻어서 경로탐색하도록 해야함<ul>
+<li>select m.username from Team t join t.members m</li>
+</ul>
+</li>
+<li>경로탐색은 주로 SELECT/WHERE 절에서만 하는데, 묵시적조인을 사용하면 SQL에서 FROM(JOIN) 절에 영향을 줌 </li>
+</ul>
+<h3 id="1-4-실무자의-조언"><a href="#1-4-실무자의-조언" class="headerlink" title="1-4. 실무자의 조언"></a>1-4. 실무자의 조언</h3><ul>
+<li>가급적 묵시적 조인 하지말고 명시적 조인만 사용하도록 하자 (쿼리 튜닝 및 알아보기 힘듦)</li>
+<li>조인은 sql튜닝에 가장 중요한 포인트(기승전 SQL)</li>
+<li>묵시적 조인은 조인이 일어나는 상황을 한눈에 파악하기 어려움 </li>
+</ul>
+<h2 id="2-페치-조인-fetch-join"><a href="#2-페치-조인-fetch-join" class="headerlink" title="2. 페치 조인 (fetch join)"></a>2. 페치 조인 (fetch join)</h2><h3 id="2-1-페치-조인의-특징"><a href="#2-1-페치-조인의-특징" class="headerlink" title="2-1. 페치 조인의 특징"></a>2-1. 페치 조인의 특징</h3><ul>
+<li>SQL join종류 아님 (sql 명령어 아님)</li>
+<li>JPQL 성능 최적화를 위해 제공하는 기능 </li>
+<li>연관된 엔티티나 컬렉션을 SQL 한번에 함께 조회 가능 (한방쿼리)</li>
+<li>join fetch 명령어 사용 </li>
+<li>페치 조인 ::= [ LEFT [OUTER] | INNER ] JOIN FETCH 조인경로</li>
+</ul>
+<h3 id="2-2-엔티티-페치-조인"><a href="#2-2-엔티티-페치-조인" class="headerlink" title="2-2. 엔티티 페치 조인"></a>2-2. 엔티티 페치 조인</h3><ul>
+<li>ManyToOne, OneToOne 관계에서 조회할때 이슈라고 생각해도됨. </li>
+<li>회원-팀 예시 기준으로 회원을 조회하면서 연관된 팀도 함께 조회 (SQL 한방 쿼리)</li>
+<li>SQL을 보면 회원 뿐만 아니라 팀(T.*)도 함께 SELECT</li>
+<li>[JPQL]<ul>
+<li>select m from Member m join fetch m.team</li>
+</ul>
+</li>
+<li>[SQL]<ul>
+<li>SELECT M.<em>, T.</em> FROM MEMBER M INNER JOIN TEAM T ON M.TEAM_ID=T.ID</li>
+</ul>
+</li>
+</ul>
+<p><img src="/images/jpa/jpql-11.png" alt="엔티티페치조인 예시"><br><img src="/images/jpa/jpql-12.png" alt="엔티티페치코드 예시"></p>
+<p>[Q1] 그냥 Member 엔티티를 쿼리를 날리고, 비즈니스코드에서 Team정보를 조회하면?</p>
+<figure class="highlight java"><figcaption><span>엔티티조회</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">List&lt;Member&gt; members =entityManager.createQuery(<span class="string">&quot;select m from Member m&quot;</span>, Member.class).getResultList();</span><br><span class="line"><span class="keyword">for</span> (Member member1 : members2) &#123;</span><br><span class="line">    System.out.println(<span class="string">&quot;member1.getUserName() = &quot;</span> + member1.getUserName() </span><br><span class="line">				+ <span class="string">&quot;/ teamName : &quot;</span> + member1.getTeam().getName());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>–&gt; 위 처럼 비즈니스로직에서 Team정보를 호출하면 proxy상태이기때문에, 초기화처리로 각 멤버당 팀 정보를 디비를 통해 조회 해오게된다. 하지만 1차캐시에 등록된 그니까 영속성 관리가 되면 1차캐시 정보로 가져오게됨. </p>
+<figure class="highlight plain"><figcaption><span>엔티티조회결과</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">Hibernate: </span><br><span class="line">    &#x2F;* select</span><br><span class="line">        m </span><br><span class="line">    from</span><br><span class="line">        Member m *&#x2F; select</span><br><span class="line">            member0_.member_id as member_i1_0_,</span><br><span class="line">            member0_.age as age2_0_,</span><br><span class="line">            member0_.team_id as team_id4_0_,</span><br><span class="line">            member0_.userName as userName3_0_ </span><br><span class="line">        from</span><br><span class="line">            Member member0_</span><br><span class="line">Hibernate: </span><br><span class="line">    select</span><br><span class="line">        team0_.team_id as team_id1_3_0_,</span><br><span class="line">        team0_.name as name2_3_0_ </span><br><span class="line">    from</span><br><span class="line">        Team team0_ </span><br><span class="line">    where</span><br><span class="line">        team0_.team_id&#x3D;?</span><br><span class="line">member1.getUserName() &#x3D; m1&#x2F; teamName : Team1</span><br><span class="line">member1.getUserName() &#x3D; m2&#x2F; teamName : Team1 &#x2F;&#x2F;여기서는 1차캐시로 조회된 정보 가져옴 </span><br><span class="line">Hibernate: </span><br><span class="line">    select</span><br><span class="line">        team0_.team_id as team_id1_3_0_,</span><br><span class="line">        team0_.name as name2_3_0_ </span><br><span class="line">    from</span><br><span class="line">        Team team0_ </span><br><span class="line">    where</span><br><span class="line">        team0_.team_id&#x3D;?</span><br><span class="line">member1.getUserName() &#x3D; m3&#x2F; teamName : Team2</span><br></pre></td></tr></table></figure>
+
+<p>[Q2] 위 쿼리에서 Team엔티티를 조인해서 조회하면 어떻게 될까? </p>
+<figure class="highlight java"><figcaption><span>단순 조인시</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">List&lt;Member&gt; members =entityManager.createQuery(<span class="string">&quot;select m from Member m join m.team&quot;</span>, Member.class).getResultList();</span><br><span class="line"><span class="keyword">for</span> (Member member1 : members2) &#123;</span><br><span class="line">    System.out.println(<span class="string">&quot;member1.getUserName() = &quot;</span> + member1.getUserName() </span><br><span class="line">				+ <span class="string">&quot;/ teamName : &quot;</span> + member1.getTeam().getName());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>–&gt; 단순 조인만 했지만 프로젝션 상에서 팀정보가 없다.<br>어쨋든 위 상황에서는 프로젝션상에서 Team엔티티 정보가 없기때문에 Q1 상황과 동일한 결과로 나오게됨.<br>(참고) 글로벌 페치 전략을 아무리 EAGER로 강제해도 동일한 결과 나올수밖에 없음. 프록시 이슈는 동일하게 나올수밖에없더라.<br>(추론) 만약에 저기서 조회를 가능하게 하려면 프로젝션상에서 t를 받고, 프로젝션에 맞는 신규DTO를 만들어서 객체로 반환하면 해결되지않을까 싶음. </p>
+<figure class="highlight plain"><figcaption><span>단순 조인시 결과</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line">Hibernate: </span><br><span class="line">    &#x2F;* select</span><br><span class="line">        m </span><br><span class="line">    from</span><br><span class="line">        Member m </span><br><span class="line">    join</span><br><span class="line">        m.team *&#x2F; select</span><br><span class="line">            member0_.member_id as member_i1_0_,</span><br><span class="line">            member0_.age as age2_0_,</span><br><span class="line">            member0_.team_id as team_id4_0_,</span><br><span class="line">            member0_.userName as userName3_0_ </span><br><span class="line">        from</span><br><span class="line">            Member member0_ </span><br><span class="line">        inner join &#x2F;&#x2F;조인만 됫지 프로젝션상에서는 Team정보가 없다..-_-; </span><br><span class="line">            Team team1_ </span><br><span class="line">                on member0_.team_id&#x3D;team1_.team_id</span><br><span class="line">Hibernate: </span><br><span class="line">    select</span><br><span class="line">        team0_.team_id as team_id1_3_0_,</span><br><span class="line">        team0_.name as name2_3_0_ </span><br><span class="line">    from</span><br><span class="line">        Team team0_ </span><br><span class="line">    where</span><br><span class="line">        team0_.team_id&#x3D;?</span><br><span class="line">member1.getUserName() &#x3D; m1&#x2F; teamName : Team1</span><br><span class="line">member1.getUserName() &#x3D; m2&#x2F; teamName : Team1</span><br><span class="line">Hibernate: </span><br><span class="line">    select</span><br><span class="line">        team0_.team_id as team_id1_3_0_,</span><br><span class="line">        team0_.name as name2_3_0_ </span><br><span class="line">    from</span><br><span class="line">        Team team0_ </span><br><span class="line">    where</span><br><span class="line">        team0_.team_id&#x3D;?</span><br><span class="line">member1.getUserName() &#x3D; m3&#x2F; teamName : Team2</span><br></pre></td></tr></table></figure>
+
+<p>[Q3] 그럼 저렇게 N+1이 나면 어떻게 해결해야함?<br>–&gt; fetch join 하면 됨. </p>
+<figure class="highlight java"><figcaption><span>조인페치시</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">List&lt;Member&gt; members =entityManager.createQuery(<span class="string">&quot;select m from Member m join fetch m.team&quot;</span>, Member.class).getResultList();</span><br><span class="line"><span class="keyword">for</span> (Member member1 : members2) &#123;</span><br><span class="line">    System.out.println(<span class="string">&quot;member1.getUserName() = &quot;</span> + member1.getUserName() </span><br><span class="line">				+ <span class="string">&quot;/ teamName : &quot;</span> + member1.getTeam().getName());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plain"><figcaption><span>단순 조인시 결과</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">Hibernate: </span><br><span class="line">    &#x2F;* select</span><br><span class="line">        m </span><br><span class="line">    from</span><br><span class="line">        Member m </span><br><span class="line">    join</span><br><span class="line">        fetch m.team *&#x2F; select</span><br><span class="line">            member0_.member_id as member_i1_0_0_,</span><br><span class="line">            team1_.team_id as team_id1_3_1_,</span><br><span class="line">            member0_.age as age2_0_0_,</span><br><span class="line">            member0_.team_id as team_id4_0_0_,</span><br><span class="line">            member0_.userName as userName3_0_0_,</span><br><span class="line">            team1_.name as name2_3_1_ </span><br><span class="line">        from</span><br><span class="line">            Member member0_ </span><br><span class="line">        inner join</span><br><span class="line">            Team team1_ </span><br><span class="line">                on member0_.team_id&#x3D;team1_.team_id</span><br><span class="line">member1.getUserName() &#x3D; m1&#x2F; teamName : Team1</span><br><span class="line">member1.getUserName() &#x3D; m2&#x2F; teamName : Team1</span><br><span class="line">member1.getUserName() &#x3D; m3&#x2F; teamName : Team2</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-3-컬렉션-페치-조인"><a href="#2-3-컬렉션-페치-조인" class="headerlink" title="2-3. 컬렉션 페치 조인"></a>2-3. 컬렉션 페치 조인</h3><ul>
+<li>일대다,다대다 관계, 컬렉션 페치 조인 </li>
+<li>[JPQL]<ul>
+<li>select t from Team t join fetch t.members where t.name = ‘팀A’</li>
+</ul>
+</li>
+<li>[SQL]<ul>
+<li>SELECT T.<em>, M.</em> FROM TEAM T INNER JOIN MEMBER M ON T.ID=M.TEAM_ID WHERE T.NAME = ‘팀A’</li>
+</ul>
+</li>
+</ul>
+<p><img src="/images/jpa/jpql-13.png" alt="컬렉션페치조인 예시"><br><img src="/images/jpa/jpql-14.png" alt="컬렉션페치코드 예시"></p>
+<h3 id="컬렉션-페치-조인-혹은-그냥-조인을-걸었는데-중복-발생"><a href="#컬렉션-페치-조인-혹은-그냥-조인을-걸었는데-중복-발생" class="headerlink" title="컬렉션 페치 조인 혹은 그냥 조인을 걸었는데 중복 발생?"></a>컬렉션 페치 조인 혹은 그냥 조인을 걸었는데 중복 발생?</h3><p>OneToMany특성상 쿼리 뻥튀기가 되었기때문에 중복 row발생된것임. 이걸 해결할라면 jpql의 distinct를 걸어주면 해결됨. </p>
+<h4 id="JPQL에서의-distinct"><a href="#JPQL에서의-distinct" class="headerlink" title="JPQL에서의 distinct"></a>JPQL에서의 distinct</h4><ul>
+<li>SQL의 distinct 처리를 명령함  </li>
+<li>JPQL에서는 distinct 2가지 기능 제공 <ol>
+<li>SQL distinct 를 추가시킴. </li>
+<li>애플리케이션에서 엔티티 중복을 제거시킴. </li>
+</ol>
+</li>
+</ul>
+<p>[Q1] Member 컬렉션을 조인하면 어떻게 될까?</p>
+<figure class="highlight java"><figcaption><span>컬렉션조인시</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">List&lt;Team&gt; teams2 = entityManager.createQuery(<span class="string">&quot;select t from Team t join t.members&quot;</span>, Team.class)</span><br><span class="line">                .getResultList();</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> (Team team1 : teams2) &#123;</span><br><span class="line">    System.out.println(<span class="string">&quot;team1.getName() = &quot;</span> + team1.getName() + <span class="string">&quot;/ members : &quot;</span>+ team1.getMembers().size());</span><br><span class="line">    <span class="keyword">for</span> (Member member1 : team1.getMembers()) &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;--&gt; member1.getUserName()  = &quot;</span> + member1.getUserName());</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plain"><figcaption><span>컬렉션조인결과</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line">Hibernate: </span><br><span class="line">    &#x2F;* select</span><br><span class="line">        t </span><br><span class="line">    from</span><br><span class="line">        Team t </span><br><span class="line">    join</span><br><span class="line">        t.members *&#x2F; select</span><br><span class="line">            team0_.team_id as team_id1_3_,</span><br><span class="line">            team0_.name as name2_3_ </span><br><span class="line">        from</span><br><span class="line">            Team team0_ </span><br><span class="line">        inner join</span><br><span class="line">            Member members1_ </span><br><span class="line">                on team0_.team_id&#x3D;members1_.team_id</span><br><span class="line">Hibernate: </span><br><span class="line">    select</span><br><span class="line">        members0_.team_id as team_id4_0_0_,</span><br><span class="line">        members0_.member_id as member_i1_0_0_,</span><br><span class="line">        members0_.member_id as member_i1_0_1_,</span><br><span class="line">        members0_.age as age2_0_1_,</span><br><span class="line">        members0_.team_id as team_id4_0_1_,</span><br><span class="line">        members0_.userName as userName3_0_1_ </span><br><span class="line">    from</span><br><span class="line">        Member members0_ </span><br><span class="line">    where</span><br><span class="line">        members0_.team_id&#x3D;?</span><br><span class="line">team1.getName() &#x3D; Team1&#x2F; members : 2</span><br><span class="line">--&gt; member1.getUserName()  &#x3D; m1</span><br><span class="line">--&gt; member1.getUserName()  &#x3D; m2</span><br><span class="line">team1.getName() &#x3D; Team1&#x2F; members : 2 &#x2F;&#x2F;컬렉션 조인시 요렇게 중복된 결과가 나오는걸 확인할수있음. 이럴때는 distinct를 걸어서 중복제거해야함. </span><br><span class="line">--&gt; member1.getUserName()  &#x3D; m1</span><br><span class="line">--&gt; member1.getUserName()  &#x3D; m2</span><br><span class="line">Hibernate: </span><br><span class="line">    select</span><br><span class="line">        members0_.team_id as team_id4_0_0_,</span><br><span class="line">        members0_.member_id as member_i1_0_0_,</span><br><span class="line">        members0_.member_id as member_i1_0_1_,</span><br><span class="line">        members0_.age as age2_0_1_,</span><br><span class="line">        members0_.team_id as team_id4_0_1_,</span><br><span class="line">        members0_.userName as userName3_0_1_ </span><br><span class="line">    from</span><br><span class="line">        Member members0_ </span><br><span class="line">    where</span><br><span class="line">        members0_.team_id&#x3D;?</span><br><span class="line">team1.getName() &#x3D; Team2&#x2F; members : 1</span><br><span class="line">--&gt; member1.getUserName()  &#x3D; m3</span><br></pre></td></tr></table></figure>
+
+<p>[Q2] 컬렉션 조인을 페치하면 어떻게 될까?<br>–&gt; 쿼리는 fetch가 되서 한방쿼리가 되었지만, distinct처리 안해서 중복 엔티티 row발생함. </p>
+<figure class="highlight java"><figcaption><span>컬렉션조인시</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">List&lt;Team&gt; teams2 = entityManager.createQuery(<span class="string">&quot;select t from Team t join fetch t.members&quot;</span>, Team.class)</span><br><span class="line">                .getResultList();</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> (Team team1 : teams2) &#123;</span><br><span class="line">    System.out.println(<span class="string">&quot;team1.getName() = &quot;</span> + team1.getName() + <span class="string">&quot;/ members : &quot;</span>+ team1.getMembers().size());</span><br><span class="line">    <span class="keyword">for</span> (Member member1 : team1.getMembers()) &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;--&gt; member1.getUserName()  = &quot;</span> + member1.getUserName());</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plain"><figcaption><span>컬렉션조인결과</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">Hibernate: </span><br><span class="line">    &#x2F;* select</span><br><span class="line">        t </span><br><span class="line">    from</span><br><span class="line">        Team t </span><br><span class="line">    join</span><br><span class="line">        fetch t.members *&#x2F; select</span><br><span class="line">            team0_.team_id as team_id1_3_0_,</span><br><span class="line">            members1_.member_id as member_i1_0_1_,</span><br><span class="line">            team0_.name as name2_3_0_,</span><br><span class="line">            members1_.age as age2_0_1_,</span><br><span class="line">            members1_.team_id as team_id4_0_1_,</span><br><span class="line">            members1_.userName as userName3_0_1_,</span><br><span class="line">            members1_.team_id as team_id4_0_0__,</span><br><span class="line">            members1_.member_id as member_i1_0_0__ </span><br><span class="line">        from</span><br><span class="line">            Team team0_ </span><br><span class="line">        inner join</span><br><span class="line">            Member members1_ </span><br><span class="line">                on team0_.team_id&#x3D;members1_.team_id</span><br><span class="line">team1.getName() &#x3D; Team1&#x2F; members : 2</span><br><span class="line">--&gt; member1.getUserName()  &#x3D; m1</span><br><span class="line">--&gt; member1.getUserName()  &#x3D; m2</span><br><span class="line">team1.getName() &#x3D; Team1&#x2F; members : 2 &#x2F;&#x2F;fetch를하면 쿼리는 줄지만 distinct를 처리하지 않았기때문에 여전히 중복 발생 </span><br><span class="line">--&gt; member1.getUserName()  &#x3D; m1</span><br><span class="line">--&gt; member1.getUserName()  &#x3D; m2</span><br><span class="line">team1.getName() &#x3D; Team2&#x2F; members : 1</span><br><span class="line">--&gt; member1.getUserName()  &#x3D; m3</span><br></pre></td></tr></table></figure>
+
+<p>[Q3] 위 쿼리에서 distinct를 걸면 해결되나?<br>–&gt; 해결됨</p>
+<figure class="highlight java"><figcaption><span>컬렉션페치조인 distinct처리</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">List&lt;Team&gt; teams2 = entityManager.createQuery(<span class="string">&quot;select distinct t from Team t join fetch t.members&quot;</span>, Team.class)</span><br><span class="line">                .getResultList();</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> (Team team1 : teams2) &#123;</span><br><span class="line">    System.out.println(<span class="string">&quot;team1.getName() = &quot;</span> + team1.getName() + <span class="string">&quot;/ members : &quot;</span>+ team1.getMembers().size());</span><br><span class="line">    <span class="keyword">for</span> (Member member1 : team1.getMembers()) &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;--&gt; member1.getUserName()  = &quot;</span> + member1.getUserName());</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plain"><figcaption><span>컬렉션페치조인 distinct처리결과</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">Hibernate: </span><br><span class="line">    &#x2F;* select</span><br><span class="line">        distinct t </span><br><span class="line">    from</span><br><span class="line">        Team t </span><br><span class="line">    join</span><br><span class="line">        fetch t.members *&#x2F; select</span><br><span class="line">            distinct team0_.team_id as team_id1_3_0_,</span><br><span class="line">            members1_.member_id as member_i1_0_1_,</span><br><span class="line">            team0_.name as name2_3_0_,</span><br><span class="line">            members1_.age as age2_0_1_,</span><br><span class="line">            members1_.team_id as team_id4_0_1_,</span><br><span class="line">            members1_.userName as userName3_0_1_,</span><br><span class="line">            members1_.team_id as team_id4_0_0__,</span><br><span class="line">            members1_.member_id as member_i1_0_0__ </span><br><span class="line">        from</span><br><span class="line">            Team team0_ </span><br><span class="line">        inner join</span><br><span class="line">            Member members1_ </span><br><span class="line">                on team0_.team_id&#x3D;members1_.team_id</span><br><span class="line">team1.getName() &#x3D; Team1&#x2F; members : 2</span><br><span class="line">--&gt; member1.getUserName()  &#x3D; m1</span><br><span class="line">--&gt; member1.getUserName()  &#x3D; m2</span><br><span class="line">team1.getName() &#x3D; Team2&#x2F; members : 1</span><br><span class="line">--&gt; member1.getUserName()  &#x3D; m3</span><br></pre></td></tr></table></figure>
+
+<p>[Q4] 컬렉션 페치 조인해서 페이징 적용하면 어떻게되나?<br>–&gt; 페이징 로직이 미적용되고, 메모리에 해당 엔티티들의 모든 row가 다 적재됨. (메모리 부하 발생 성능 다운됨.)</p>
+<figure class="highlight java"><figcaption><span>컬렉션페치조인 페이징처리시도</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">List&lt;Team&gt; teams2 = entityManager.createQuery(<span class="string">&quot;select distinct t from Team t join fetch t.members&quot;</span>, Team.class)</span><br><span class="line">                .setFirstResult(<span class="number">0</span>)</span><br><span class="line">                .setMaxResults(<span class="number">2</span>)</span><br><span class="line">                .getResultList();</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> (Team team1 : teams2) &#123;</span><br><span class="line">    System.out.println(<span class="string">&quot;team1.getName() = &quot;</span> + team1.getName() + <span class="string">&quot;/ members : &quot;</span>+ team1.getMembers().size());</span><br><span class="line">    <span class="keyword">for</span> (Member member1 : team1.getMembers()) &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;--&gt; member1.getUserName()  = &quot;</span> + member1.getUserName());</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plain"><figcaption><span>컬렉션페치조인 페이징적용결과</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">Hibernate: </span><br><span class="line">    &#x2F;* select</span><br><span class="line">        distinct t </span><br><span class="line">    from</span><br><span class="line">        Team t </span><br><span class="line">    join</span><br><span class="line">        fetch t.members *&#x2F; select</span><br><span class="line">            distinct team0_.team_id as team_id1_3_0_,</span><br><span class="line">            members1_.member_id as member_i1_0_1_,</span><br><span class="line">            team0_.name as name2_3_0_,</span><br><span class="line">            members1_.age as age2_0_1_,</span><br><span class="line">            members1_.team_id as team_id4_0_1_,</span><br><span class="line">            members1_.userName as userName3_0_1_,</span><br><span class="line">            members1_.team_id as team_id4_0_0__,</span><br><span class="line">            members1_.member_id as member_i1_0_0__ </span><br><span class="line">        from</span><br><span class="line">            Team team0_ </span><br><span class="line">        inner join</span><br><span class="line">            Member members1_ </span><br><span class="line">                on team0_.team_id&#x3D;members1_.team_id &#x2F;&#x2F;페이징 처리 로직 미적용됨. </span><br><span class="line">team1.getName() &#x3D; Team1&#x2F; members : 2</span><br><span class="line">--&gt; member1.getUserName()  &#x3D; m1</span><br><span class="line">--&gt; member1.getUserName()  &#x3D; m2</span><br><span class="line">team1.getName() &#x3D; Team2&#x2F; members : 1</span><br><span class="line">--&gt; member1.getUserName()  &#x3D; m3</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F;메모리 다 적재됫다고 경고떳음</span><br><span class="line">5월 08, 2021 3:11:40 오후 org.hibernate.hql.internal.ast.QueryTranslatorImpl list</span><br><span class="line">WARN: HHH000104: firstResult&#x2F;maxResults specified with collection fetch; applying in memory!</span><br><span class="line">5월 08, 2021 3:11:40 오후 org.hibernate.engine.jdbc.connections.internal.DriverManagerConnectionProviderImpl$PoolState stop</span><br><span class="line">INFO: HHH10001008: Cleaning up connection pool [jdbc:h2:tcp:&#x2F;&#x2F;localhost&#x2F;~&#x2F;jpqlshop]</span><br></pre></td></tr></table></figure>
+
+<p>–&gt; 페이징을 강제로 해결하려면 페치조인 걸었던것 제거하고 Team.members에 @BatchSize를 걸던지, 혹은 글로벌 설정에서 persistence.xml혹은 application.yml등에서 batchsize를 설정해야함. 보통 글로벌 설정으로 설정하고 시작한다고함. </p>
+<figure class="highlight java"><figcaption><span>컬렉션페치조인 페이징처리 batchsize적용상태</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/////// Team.java /////////</span></span><br><span class="line"></span><br><span class="line"><span class="meta">@BatchSize(size = 100)</span></span><br><span class="line"><span class="meta">@OneToMany(mappedBy = &quot;team&quot;)</span></span><br><span class="line"><span class="keyword">private</span> List&lt;Member&gt; members = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line"></span><br><span class="line"><span class="comment">///////// 구분 /////////////</span></span><br><span class="line"></span><br><span class="line">List&lt;Team&gt; teams2 = entityManager.createQuery(<span class="string">&quot;select distinct t from Team t&quot;</span>, Team.class)</span><br><span class="line">                .setFirstResult(<span class="number">0</span>)</span><br><span class="line">                .setMaxResults(<span class="number">2</span>)</span><br><span class="line">                .getResultList();</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> (Team team1 : teams2) &#123;</span><br><span class="line">    System.out.println(<span class="string">&quot;team1.getName() = &quot;</span> + team1.getName() + <span class="string">&quot;/ members : &quot;</span>+ team1.getMembers().size());</span><br><span class="line">    <span class="keyword">for</span> (Member member1 : team1.getMembers()) &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;--&gt; member1.getUserName()  = &quot;</span> + member1.getUserName());</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plain"><figcaption><span>컬렉션페치조인 페이징적용결과-batchsize적용했을때</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">Hibernate: </span><br><span class="line">    &#x2F;* select</span><br><span class="line">        distinct t </span><br><span class="line">    from</span><br><span class="line">        Team t *&#x2F; select</span><br><span class="line">            distinct team0_.team_id as team_id1_3_,</span><br><span class="line">            team0_.name as name2_3_ </span><br><span class="line">        from</span><br><span class="line">            Team team0_ limit ?</span><br><span class="line">Hibernate: </span><br><span class="line">    &#x2F;* load one-to-many entity.Team.members *&#x2F; select</span><br><span class="line">        members0_.team_id as team_id4_0_1_,</span><br><span class="line">        members0_.member_id as member_i1_0_1_,</span><br><span class="line">        members0_.member_id as member_i1_0_0_,</span><br><span class="line">        members0_.age as age2_0_0_,</span><br><span class="line">        members0_.team_id as team_id4_0_0_,</span><br><span class="line">        members0_.userName as userName3_0_0_ </span><br><span class="line">    from</span><br><span class="line">        Member members0_ </span><br><span class="line">    where</span><br><span class="line">        members0_.team_id in (</span><br><span class="line">            ?, ?</span><br><span class="line">        )</span><br><span class="line">team1.getName() &#x3D; Team1&#x2F; members : 2</span><br><span class="line">--&gt; member1.getUserName()  &#x3D; m1</span><br><span class="line">--&gt; member1.getUserName()  &#x3D; m2</span><br><span class="line">team1.getName() &#x3D; Team2&#x2F; members : 1</span><br><span class="line">--&gt; member1.getUserName()  &#x3D; m3</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-4-페치조인과-일반조인의-차이"><a href="#2-4-페치조인과-일반조인의-차이" class="headerlink" title="2-4. 페치조인과 일반조인의 차이"></a>2-4. 페치조인과 일반조인의 차이</h3><h4 id="일반-조인"><a href="#일반-조인" class="headerlink" title="일반 조인"></a>일반 조인</h4><ul>
+<li>일반조인 실행시 연관된 엔티티를 함께 조회 안함 </li>
+<li>[JPQL]<ul>
+<li>select t from Team t join t.members m where t.name = ‘팀A’</li>
+</ul>
+</li>
+<li>[SQL]<ul>
+<li>SELECT T.* FROM TEAM T INNER JOIN MEMBER M ON T.ID=M.TEAM_ID  WHERE T.NAME = ‘팀A’</li>
+</ul>
+</li>
+<li>JPQL은 결과를 반환할때 연관관계 고려안함</li>
+<li>단지 select절에 지정한 엔티티만 조회한다.</li>
+<li>따라서 Team엔티티만 조회할뿐, Member정보는 조회 안함</li>
+</ul>
+<h4 id="페치-조인"><a href="#페치-조인" class="headerlink" title="페치 조인"></a>페치 조인</h4><ul>
+<li>페치 조인을 사용할때만 연관된 엔티티도 함께 조회 (즉시로딩됨)</li>
+<li>페치 조인은 객체 그래프를 SQL한번에 조회하는 개념 </li>
+<li>페치 조인은 연관된 엔티티를 함께 조회함</li>
+<li>[JPQL]<ul>
+<li>select t from Team t join fetch t.members where t.name = ‘팀A’</li>
+</ul>
+</li>
+<li>[SQL]<ul>
+<li>SELECT T.<em>, M.</em> FROM TEAM T INNER JOIN MEMBER M ON T.ID=M.TEAM_ID WHERE T.NAME = ‘팀A’</li>
+</ul>
+</li>
+</ul>
+<h3 id="2-5-페치-조인의-특징-과-한계"><a href="#2-5-페치-조인의-특징-과-한계" class="headerlink" title="2-5. 페치 조인의 특징 과 한계"></a>2-5. 페치 조인의 특징 과 한계</h3><ul>
+<li>페치 조인 대상에서는 별칭을 줄수없다. (하이버네이트는 가능하지만 가급적 사용하지 말자)</li>
+<li>둘 이상의 컬렉션은 페치 조인 할수 없다. (1:N:M의 관계로 가져오기때문에 관련된 모든 정보를 끌고오기때문에)</li>
+<li>컬렉션을 페치조인하면 페이징 API를 사용할수 없다. <ul>
+<li>1:1, N:1 같은 단일 값 연관 필드들은 페치 조인해도 페이징 가능 </li>
+<li>1:N, N:M 같은 컬렉션은 강제로 페이징처리를 하면 페이징로직이 무시되고 해당 엔티티에 있는 모든 정보를 다 끌고옴. (하이버네이트에서 경고 로그 남기고 모든 row를 메모리에 올리는 불상사가 벌어짐.)</li>
+<li>컬렉션은 그럼 페이징을 못하는가? 컬렉션 상태에서는 아니고 fetch join한 부분을 지우고 @BatchSize혹은 글로벌설정에서 batchsize를 설정하고 조회하면 페이징 처리는 가능 하지만 N+1을 완벽하게 해소되지 않은 상태지만 성능에는 큰 도움이됨. </li>
+</ul>
+</li>
+<li>연관된 엔티티들을 SQL한번으로 조회 -&gt; 성능 최적화 </li>
+<li>엔티티에 직접 적용하는 글로벌 로딩 전략보다 우선함 </li>
+<li>실무에서는 글로벌 로딩전략은 모두 지연로딩으로 걸어두자</li>
+<li>최적화 필요한곳만 페치 조인 적용 </li>
+<li>페치조인을 사용해서 연관된 엔티티를 쿼리시점에 조회해서 지연로딩이 발생하지 않는데, 이때 준영속상태에서도 객체그래프를 탐색할수있다. 왜냐 1차캐시에 올라갔기때문에 </li>
+</ul>
+<h3 id="2-6-페치조인-정리"><a href="#2-6-페치조인-정리" class="headerlink" title="2-6. 페치조인 정리"></a>2-6. 페치조인 정리</h3><ul>
+<li>모든것을 페치 조인으로 해결이 안될때가 있음. </li>
+<li>페치 조인은 객체 그래프를 유지할때 사용하면 효과적 </li>
+<li>여러 테이블을 조인해서 엔티티가 가진 모양이 아닌 전혀 다른 결과를 내야하면, 페치조인보다 일반 조인을 사용하고 필요한 데이터들만 프로젝션해서 DTO로 반환하는 것이 효과적</li>
+</ul>
+<h2 id="3-다형성-쿼리"><a href="#3-다형성-쿼리" class="headerlink" title="3. 다형성 쿼리"></a>3. 다형성 쿼리</h2><h3 id="3-1-TYPE"><a href="#3-1-TYPE" class="headerlink" title="3-1. TYPE"></a>3-1. TYPE</h3><ul>
+<li>조회 대상을 특정 자식으로 한정 </li>
+<li>예) 위 예제중 Item중에 Book, Movie를 조회해라</li>
+<li>[JPQL]<ul>
+<li>select i from Item i where type(i) IN (Book, Movie)</li>
+</ul>
+</li>
+<li>[SQL]<ul>
+<li>select i from i where i.DTYPE in (‘B’, ‘M’)</li>
+</ul>
+</li>
+</ul>
+<h3 id="3-2-TREAT-JPA-2-1"><a href="#3-2-TREAT-JPA-2-1" class="headerlink" title="3-2. TREAT (JPA 2.1)"></a>3-2. TREAT (JPA 2.1)</h3><ul>
+<li>자바의 타입 캐스팅과 유사</li>
+<li>상속 구조에서 부모타입을 특정 자식 타입으로 다룰때 사용 </li>
+<li>FROM, WHERE, SELECT(하이버네이트 지원) 사용</li>
+<li>예) 부모인 Item과 자식 Book이 있다.</li>
+<li>[JPQL]<ul>
+<li>select i from Item i where treat(i as Book).auther = ‘kim’</li>
+</ul>
+</li>
+<li>[SQL]<ul>
+<li>select i.* from Item i where i.DTYPE = ‘B’ and i.auther = ‘kim’</li>
+</ul>
+</li>
+</ul>
+<h2 id="4-엔티티-직접-사용"><a href="#4-엔티티-직접-사용" class="headerlink" title="4. 엔티티 직접 사용"></a>4. 엔티티 직접 사용</h2><p><img src="/images/jpa/jpql-15.png" alt="엔티티직접사용 예시"></p>
+<ul>
+<li>JPQL에서 엔티티를 직접 사용하면 SQL에서 해당 엔티티의 기 본 키 값을 사용</li>
+<li>[JPQL]<ul>
+<li>select count(m.id) from Member m //엔티티의 아이디를 사용</li>
+<li>select count(m) from Member m //엔티티를 직접 사용</li>
+</ul>
+</li>
+<li>[SQL] (JPQL 둘다 같은 다음 SQL 실행)<ul>
+<li>select count(m.id) as cnt from Member m</li>
+</ul>
+</li>
+</ul>
+<p><img src="/images/jpa/jpql-16.png" alt="엔티티직접사용 기본키예시"><br><img src="/images/jpa/jpql-17.png" alt="엔티티직접사용 외래키예시"></p>
+<h2 id="5-Named-쿼리"><a href="#5-Named-쿼리" class="headerlink" title="5. Named 쿼리"></a>5. Named 쿼리</h2><h3 id="5-1-Named쿼리-정적-쿼리"><a href="#5-1-Named쿼리-정적-쿼리" class="headerlink" title="5-1. Named쿼리 - 정적 쿼리"></a>5-1. Named쿼리 - 정적 쿼리</h3><ul>
+<li>미리 정의해서 이름을 부여해두고 사용하는 JPQL</li>
+<li>정적 쿼리</li>
+<li>어노테이션, XML지원</li>
+<li>애플리케이션 로딩 시점에 초기화 후 재사용 </li>
+<li>애플리케이션 로딩 시점에 쿼리를 검증해줌 </li>
+</ul>
+<h3 id="5-2-Named쿼리-어노테이션-사용-방법"><a href="#5-2-Named쿼리-어노테이션-사용-방법" class="headerlink" title="5-2. Named쿼리 - 어노테이션 사용 방법"></a>5-2. Named쿼리 - 어노테이션 사용 방법</h3><p><img src="/images/jpa/jpql-18.png" alt="Named쿼리 어노테이션예시"></p>
+<h3 id="5-3-Named쿼리-XML-사용방법"><a href="#5-3-Named쿼리-XML-사용방법" class="headerlink" title="5-3. Named쿼리 - XML 사용방법"></a>5-3. Named쿼리 - XML 사용방법</h3><p><img src="/images/jpa/jpql-19.png" alt="Named쿼리 XML예시"></p>
+<h3 id="5-4-Named쿼리-환경에-따른-설정"><a href="#5-4-Named쿼리-환경에-따른-설정" class="headerlink" title="5-4. Named쿼리 환경에 따른 설정"></a>5-4. Named쿼리 환경에 따른 설정</h3><ul>
+<li>XML이 항상 우선권을 가짐 </li>
+<li>애플리케이션 운영 환경에 따라 다른 XML을 배포할수있다. </li>
+</ul>
+<h2 id="6-JPQL-벌크연산"><a href="#6-JPQL-벌크연산" class="headerlink" title="6. JPQL - 벌크연산"></a>6. JPQL - 벌크연산</h2><p><img src="/images/jpa/jpql-20.png" alt="벌크연산"><br><img src="/images/jpa/jpql-21.png" alt="벌크연산 예시"></p>
+<h3 id="6-1-벌크연산시-주의"><a href="#6-1-벌크연산시-주의" class="headerlink" title="6-1. 벌크연산시 주의"></a>6-1. 벌크연산시 주의</h3><ul>
+<li>벌크 연산은 영속성 컨텍스트를 무시하고 DB에 직접 쿼리 (JPQL로 사용하니 당연한 부분)<ul>
+<li>벌크 연산을 먼저 실행 </li>
+<li>벌크 연산 수행 후 영속성 컨텍스트 초기화 </li>
+</ul>
+</li>
+</ul>
+
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/2021/05/08/jpa-obj-query-2/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                Comment and share
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
                             href="/2021/05/07/jpa-obj-query-1/"
                             aria-label=": jpa-obj-query-1"
                         >
@@ -311,32 +588,31 @@
 
 <h3 id="1-5-조인"><a href="#1-5-조인" class="headerlink" title="1-5. 조인"></a>1-5. 조인</h3><p>기본적인 inner join / left (outer) join / cross join (세타조인) 이 지원된다. 기본적인 ANSI표준 join이 그대로 지원된다고 생각하면됨.</p>
 <h4 id="조인-ON절"><a href="#조인-ON절" class="headerlink" title="조인 - ON절"></a>조인 - ON절</h4><ol>
-<li>조인 대상 필터링</li>
-</ol>
-<ul>
+<li>조인 대상 필터링<ul>
 <li>SELECT m, t FROM Member m LEFT JOIN m.team t on t.name = ‘A’</li>
 <li>위 쿼리처럼 ON 절 뒤에 join하면서 필터작업을 미리 할수있는 기능  </li>
 </ul>
-<ol start="2">
-<li>연관관계 없는 엔티티 외부 조인 (하이버네이트 5.1부터가능)</li>
-</ol>
-<ul>
+</li>
+<li>연관관계 없는 엔티티 외부 조인 (하이버네이트 5.1부터가능)<ul>
 <li>보통 키값으로 조인을 하지만 전혀 관계없는 부분도 조인조건에 넣을수있음.</li>
 <li>SELECT m, t FROM Member m LEFT JOIN Team t on m.username = t.name</li>
 </ul>
+</li>
+</ol>
 <h3 id="1-6-서브쿼리"><a href="#1-6-서브쿼리" class="headerlink" title="1-6. 서브쿼리"></a>1-6. 서브쿼리</h3><p><img src="/images/jpa/jpql-7.png" alt="JPQL서브쿼리"></p>
 <figure class="highlight sql"><figcaption><span>서브쿼리-1</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">#나이가 평균보다 많은 회원 </span><br><span class="line"><span class="keyword">select</span> m <span class="keyword">from</span> <span class="keyword">Member</span> m </span><br><span class="line"><span class="keyword">where</span> m.age <span class="operator">&gt;</span> (<span class="keyword">select</span> <span class="built_in">avg</span>(m2.age) <span class="keyword">from</span> <span class="keyword">Member</span> m2) </span><br><span class="line"></span><br><span class="line">#한건이라도주문한고객</span><br><span class="line"><span class="keyword">select</span> m <span class="keyword">from</span> <span class="keyword">Member</span> m</span><br><span class="line"><span class="keyword">where</span> (<span class="keyword">select</span> <span class="built_in">count</span>(o) <span class="keyword">from</span> <span class="keyword">Order</span> o <span class="keyword">where</span> m <span class="operator">=</span> o.member) <span class="operator">&gt;</span> <span class="number">0</span></span><br><span class="line"></span><br><span class="line">#팀A 소속인 회원</span><br><span class="line"><span class="keyword">select</span> m <span class="keyword">from</span> <span class="keyword">Member</span> m</span><br><span class="line"><span class="keyword">where</span> <span class="keyword">exists</span> (<span class="keyword">select</span> t <span class="keyword">from</span> m.team t <span class="keyword">where</span> t.name <span class="operator">=</span> ‘팀A<span class="string">&#x27;)</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">#전체 상품 각각의 재고보다 주문량이 많은 주문들</span></span><br><span class="line"><span class="string">select o from Order o </span></span><br><span class="line"><span class="string">where o.orderAmount &gt; ALL (select p.stockAmount from Product p)</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">#어떤 팀이든 팀에 소속된 회원</span></span><br><span class="line"><span class="string">select m from Member m </span></span><br><span class="line"><span class="string">where m.team = ANY (select t from Team t)</span></span><br></pre></td></tr></table></figure>
 
 <h4 id="JPA-서브쿼리-한계"><a href="#JPA-서브쿼리-한계" class="headerlink" title="JPA 서브쿼리 한계"></a>JPA 서브쿼리 한계</h4><ul>
 <li>JPA는 WHERE/HAVING절만 서브쿼리 사용가능 </li>
 <li>하이버네이트에서는 SELECT절에서 서브쿼리 사용가능</li>
-<li>FROM 절 서브쿼리는 현재 JPQL에서는 불가능 </li>
-</ul>
-<ul>
+<li>FROM 절 서브쿼리는 현재 JPQL에서는 불가능 <ul>
 <li>조인으로 풀수있으면 해결하고 그래도 안되면 쿼리를 쪼개서 처리하거나 그래도 안되면 native쿼리로 처리 해야함. </li>
 </ul>
+</li>
+</ul>
 <h3 id="1-7-JPQL-타입표현"><a href="#1-7-JPQL-타입표현" class="headerlink" title="1-7. JPQL 타입표현"></a>1-7. JPQL 타입표현</h3><h4 id="JPQL-타입-표현"><a href="#JPQL-타입-표현" class="headerlink" title="JPQL 타입 표현"></a>JPQL 타입 표현</h4><ul>
-<li>문자: ‘HELLO’, ‘She’’s’ Boolean: TRUE, FALSE</li>
+<li>문자: ‘HELLO’, ‘She’’s’ </li>
+<li>Boolean: TRUE, FALSE</li>
 <li>숫자: 10L(Long), 10D(Double), 10F(Float)</li>
 <li>ENUM: jpabook.MemberType.Admin (패키지명 포함) </li>
 <li>엔티티 타입: TYPE(m) = Member (상속 관계에서 사용)</li>
@@ -1457,121 +1733,6 @@
                         <p>
                             <a
                                 href="/2021/03/18/jpa-persistence/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                Comment and share
-                            </a>
-                        </p>
-                    
-                </div>
-            
-        </div>
-        
-    </article>
-    
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/2021/02/24/java-effective-10/"
-                            aria-label=": java-effective-10"
-                        >
-                            java-effective-10
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time datetime="2021-02-24T06:07:49+00:00">
-	
-		    Feb 24, 2021
-    	
-    </time>
-    
-        <span>in </span>
-        
-    <a class="category-link" href="/categories/Effective-Java/">Effective Java</a>, <a class="category-link" href="/categories/Study/">Study</a>, <a class="category-link" href="/categories/%EB%AA%A8%EB%93%A0-%EA%B0%9D%EC%B2%B4%EC%9D%98-%EA%B3%B5%ED%86%B5-%EB%A9%94%EC%84%9C%EB%93%9C/">모든 객체의 공통 메서드</a>
-
-
-    
-</div>
-
-            </div>
-            
-                <div class="postShorten-content">
-                    <h2 id="equals는-일반규약을-지켜-재정의-하라"><a href="#equals는-일반규약을-지켜-재정의-하라" class="headerlink" title="equals는 일반규약을 지켜 재정의 하라"></a>equals는 일반규약을 지켜 재정의 하라</h2><h3 id="equals를-재정의-하지-말아야할-경우"><a href="#equals를-재정의-하지-말아야할-경우" class="headerlink" title="equals를 재정의 하지 말아야할 경우"></a>equals를 재정의 하지 말아야할 경우</h3><ul>
-<li><strong>각 인스턴스가 본질적으로 고유하다.</strong> 값을 표현하는게 아니라 동작하는 개체를 표현하는 클래스가 여기 해당됨. (Thread가 좋은예)</li>
-<li><strong>인스턴스의 ‘논리적 동치성’을 검사할 일이 없다.</strong> Pattern클래스로 인스턴스가 정규표현식을 나타내는지 검사하는 방법도 있지만, 설계자가 원하지 않고 필요없다고 판단할수도 있음 그럴때는 기본 equals만으로 해결해도됨.</li>
-<li><strong>상위 클래스에서 재정의한 equals가 하위 클래스에도 딱 들어맞는다</strong> (ex&gt; List구현체들은 AbstractList로부터 상속받아 그대로 사용.)</li>
-<li><strong>클래스가 private이거나 package-private이고 equals메서드를 호출할 일이 없다.</strong> <figure class="highlight java"><figcaption><span>equals메서드 호출금지방법</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span> <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">equals</span><span class="params">(Object o)</span> </span>&#123;</span><br><span class="line">	<span class="keyword">throw</span> <span class="keyword">new</span> AssertionError(); <span class="comment">//호출금지 </span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-</li>
-</ul>
-<p>그렇다면 equals를 재정의 해야할 때는 언제? </p>
-<ul>
-<li>객체 식별성(object identity; 두 객체가 물리적으로 같은가)이 아니라, 논리적 동치성을 확인해야하는데, 상위 클래스의 equals가 논리적 동치성을 비교하도록 재정의되지 않았을 때다. (주로 값클래스들이 해당됨. Integer,String)</li>
-<li>값 클래스라고 해도 값이 같은 인스턴스가 둘 이상 만들어지지 않음을 보장하는 인스턴스 통제 클래스(아이템1)이라면 equals재정의 안해도됨(Enum도 포함).</li>
-</ul>
-<blockquote><p>equals메서드를 재정의할때 반드시 지켜야하는 규약 </p>
-<ul>
-<li>반사성(reflexivity) : null이 아닌 모든 참조값 x에 대해 x.equals(x)는 true다. </li>
-<li>대칭성(symmetry) : null이 아닌 모든 참조값 x,y에 대해 x.equals(y)가 true면, y.equals(x)도 true다. </li>
-<li>추이성(transitivity) : null이 아닌 모든 참조값 x,y,z에 대해, x.equals(y)가 true이고, y.equals(z)도 true면, x.equals(z)도 true다.</li>
-<li>일관성(consistency) : null이 아닌 모든 참조값 x,y에 대해, x.equals(y)를 반복해서 호출하면 항상 true를 반환하거나 항상 false를 반환한다. </li>
-<li>null-아님 : null이 아닌 모든 참조값 x에 대해, x.equals(null)은 false다. </li>
-</ul>
-</blockquote>
-
-<h3 id="반사성"><a href="#반사성" class="headerlink" title="반사성"></a>반사성</h3><ul>
-<li>이부분은 일부로 어기지 않는 이상 거의 만족 시키는 조건이다. </li>
-</ul>
-<h3 id="대칭성"><a href="#대칭성" class="headerlink" title="대칭성"></a>대칭성</h3><figure class="highlight java"><figcaption><span>잘못된코드 - 대칭성위배!</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">CaseInsensitiveString</span> </span>&#123;</span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">final</span> String s; </span><br><span class="line">	</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="title">CaseUnsensitiveString</span><span class="params">(String s)</span> </span>&#123;</span><br><span class="line">		<span class="keyword">this</span>.s = Objects.requireNonNull(s); </span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="comment">// 대칭성 위배! </span></span><br><span class="line">	<span class="meta">@Override</span> <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">equals</span><span class="params">(Object o)</span> </span>&#123;</span><br><span class="line">		<span class="keyword">if</span>(o <span class="keyword">instanceof</span> CaseInsensitiveString) &#123;</span><br><span class="line">			<span class="keyword">return</span> s.equalsIgnoreCase((CaseInsensitiveString) o).s); </span><br><span class="line">		&#125;</span><br><span class="line">		</span><br><span class="line">		<span class="keyword">if</span>(o <span class="keyword">instanceof</span> String) &#123; <span class="comment">//한방향으로 작동함! </span></span><br><span class="line">			<span class="keyword">return</span> s.equalsIngnoreCase((String) o); </span><br><span class="line">		&#125;</span><br><span class="line">		</span><br><span class="line">		<span class="keyword">return</span> <span class="keyword">false</span>; </span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// ... 나머지 코드 생략 ... </span></span><br><span class="line"></span><br><span class="line"><span class="comment">/* 실제 구현할때 */</span></span><br><span class="line"></span><br><span class="line">CaseInsensitiveString cis = <span class="keyword">new</span> CaseInsensitiveString(<span class="string">&quot;Polish&quot;</span>); </span><br><span class="line">String s = <span class="string">&quot;polish&quot;</span>; </span><br><span class="line"></span><br><span class="line">cis.equals(s); <span class="comment">//true </span></span><br><span class="line">s.equals(cis); <span class="comment">//false 를 반환해서 대칭성 위반됨. String객체는 CaseInsensitiveString의 존재를 모름.  </span></span><br><span class="line"></span><br><span class="line">List&lt;CaseInsensitiveString&gt; list = <span class="keyword">new</span> ArrayList&lt;&gt;(); </span><br><span class="line">list.add(cis); </span><br><span class="line"></span><br><span class="line">list.contains(s); <span class="comment">//contains는 s.equals로 비교하기때문에, false로 반환하게 될것임. 하지만 타 JDK에서는 true나 예외처리가 발생할수도있음. </span></span><br></pre></td></tr></table></figure>
-
-<p>결국 위 문제를 해결하려면 CaseInsensitiveString의 equals를 String과도 연동하겠다는 허황된 꿈을 버려야한다. 아래 코드를 확인하자.</p>
-<figure class="highlight java"><figcaption><span>개선된코드</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span> <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">equals</span><span class="params">(Object o)</span> </span>&#123;</span><br><span class="line">	<span class="keyword">return</span> o <span class="keyword">instanceof</span> CaseInsensitiveString &amp;&amp; ((CaseInsensitiveString) o).s.equalsIgnoreCase(s); </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h3 id="추이성"><a href="#추이성" class="headerlink" title="추이성"></a>추이성</h3><figure class="highlight java"><figcaption><span>추이성</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br></pre></td><td class="code"><pre><span class="line"> </span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Point</span> </span>&#123;</span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">int</span> x; </span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">int</span> y; </span><br><span class="line">	</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="title">Point</span><span class="params">(<span class="keyword">int</span> x, <span class="keyword">int</span> y)</span> </span>&#123;</span><br><span class="line">		<span class="keyword">this</span>.x = x; </span><br><span class="line">		<span class="keyword">this</span>.y = y; </span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="meta">@Override</span> <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">equals</span><span class="params">(Object o)</span> </span>&#123;</span><br><span class="line">		<span class="keyword">if</span>(!(o <span class="keyword">instanceof</span> Point))</span><br><span class="line">			<span class="keyword">return</span> <span class="keyword">false</span>; </span><br><span class="line">		Point p = (Point) o; </span><br><span class="line">		<span class="keyword">return</span> p.x == x &amp;&amp; p.y == y; </span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="comment">//리스코브 치환 원칙 위배! </span></span><br><span class="line">	<span class="meta">@Override</span> <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">equals</span><span class="params">(Object o)</span> </span>&#123;</span><br><span class="line">		<span class="keyword">if</span>(o == <span class="keyword">null</span> || o.getClass != getClass()) &#123;</span><br><span class="line">			<span class="keyword">return</span> <span class="keyword">false</span>; </span><br><span class="line">		&#125;</span><br><span class="line">		Point p = (Point) o; </span><br><span class="line">		<span class="keyword">return</span> p.x == x &amp;&amp; p.y == y; </span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="comment">//...나머지 코드 생략...</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 이제 클래스를 확장해서 점에 색상을 더해봅시다. </span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ColorPoint</span> <span class="keyword">extends</span> <span class="title">Point</span> </span>&#123; </span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">final</span> Color color; </span><br><span class="line">	</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="title">ColorPoint</span><span class="params">(<span class="keyword">int</span> x, <span class="keyword">int</span> y, Color color)</span> </span>&#123;</span><br><span class="line">		<span class="keyword">super</span>(x,y); </span><br><span class="line">		<span class="keyword">this</span>.color = color; </span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="comment">//...나머지 코드 생략...</span></span><br><span class="line">	</span><br><span class="line">	<span class="comment">// 대칭성 위배 </span></span><br><span class="line">	<span class="meta">@Override</span> <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">equals</span><span class="params">(Object o)</span> </span>&#123;</span><br><span class="line">		<span class="keyword">if</span>(!(o <span class="keyword">instanceof</span> Point)) &#123;</span><br><span class="line">			<span class="keyword">return</span> <span class="keyword">false</span>; </span><br><span class="line">		&#125;</span><br><span class="line">		</span><br><span class="line">		<span class="comment">//o가 ColorPoint면 색상까지 비교한다. </span></span><br><span class="line">		<span class="keyword">return</span> <span class="keyword">super</span>.equals(o) &amp;&amp; ((ColorPoint) o).color == color; </span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="comment">// 추이성 위배 </span></span><br><span class="line">	<span class="meta">@Override</span> <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">equals</span><span class="params">(Object o)</span> </span>&#123;</span><br><span class="line">		<span class="keyword">if</span>(!(o <span class="keyword">instanceof</span> Point)) &#123;</span><br><span class="line">			<span class="keyword">return</span> <span class="keyword">false</span>; </span><br><span class="line">		&#125;</span><br><span class="line">		</span><br><span class="line">		<span class="comment">// o가 일반 Point면 색상을 무시하고 비교한다. </span></span><br><span class="line">		<span class="keyword">if</span>(!(o <span class="keyword">instanceof</span> ColorPoint)) &#123;</span><br><span class="line">			<span class="keyword">return</span> o.equals(<span class="keyword">this</span>); </span><br><span class="line">		&#125;</span><br><span class="line">		</span><br><span class="line">		<span class="comment">//o가 ColorPoint면 색상까지 비교한다. </span></span><br><span class="line">		<span class="keyword">return</span> <span class="keyword">super</span>.equals(o) &amp;&amp; ((ColorPoint) o).color == color; </span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/* 구현코드 */</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//대칭성 위배되는 equals를 사용 할 경우</span></span><br><span class="line">Point p = <span class="keyword">new</span> Point(<span class="number">1</span>,<span class="number">2</span>); </span><br><span class="line">ColorPoint cp = <span class="keyword">new</span> ColorPoint(<span class="number">1</span>,<span class="number">2</span>,Color.RED); </span><br><span class="line"></span><br><span class="line">p.equals(cp); <span class="comment">// true</span></span><br><span class="line">cp.equals(p); <span class="comment">// 무조건 false </span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">//추이성 위배되는 equals를 사용 할 경우 </span></span><br><span class="line">ColorPoint p1 = <span class="keyword">new</span> ColorPoint(<span class="number">1</span>,<span class="number">2</span>,Color.RED); </span><br><span class="line">Point p2 = <span class="keyword">new</span> Point(<span class="number">1</span>,<span class="number">2</span>); </span><br><span class="line">ColorPoint p3 = <span class="keyword">new</span> ColorPoint(<span class="number">1</span>,<span class="number">2</span>,Color.BULE);</span><br><span class="line"></span><br><span class="line">p1.equals(p2); <span class="comment">//true </span></span><br><span class="line">p2.equals(p3); <span class="comment">//true</span></span><br><span class="line">p1.equals(p3); <span class="comment">//false 추이성 위배! </span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">//리스코브치환 원칙을 위배하는 equals를 사용하는 경우 </span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> Set&lt;Point&gt; unitCircle = Set.of(<span class="keyword">new</span> Point(<span class="number">1</span>,<span class="number">0</span>), <span class="keyword">new</span> Point(<span class="number">0</span>,<span class="number">1</span>), <span class="keyword">new</span> Point(-<span class="number">1</span>,<span class="number">0</span>), <span class="keyword">new</span> Point(<span class="number">0</span>,-<span class="number">1</span>)); </span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">boolean</span> <span class="title">onUnitCircle</span><span class="params">(Point p)</span> </span>&#123;</span><br><span class="line">	<span class="keyword">return</span> unitCircle.contains(p); </span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//Point를 확장하여 만들어진 인스턴스 개수를 생성자에서 세도록 해보자 </span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">CounterPoint</span> <span class="keyword">extends</span> <span class="title">Point</span> </span>&#123;</span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> AtomicInteger count = <span class="keyword">new</span> AtomicInteger(); </span><br><span class="line">	</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="title">CountPoint</span><span class="params">(<span class="keyword">int</span> x, <span class="keyword">int</span> y)</span> </span>&#123;</span><br><span class="line">		<span class="keyword">super</span>(x,y); </span><br><span class="line">		counter.incrementAndGet();</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">int</span> <span class="title">numberCreated</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> counter.get(); </span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">CountPoint countPoint = <span class="keyword">new</span> CountPoint(<span class="number">0</span>,<span class="number">1</span>);</span><br><span class="line"><span class="comment">//아래 메서드는 false가 나올것이다. 왜냐면 리스코드치환원칙에 위배 되기때문 getClass비교로 인해 Point클래스 이외에 무조건 false처리됨.</span></span><br><span class="line">countPoint.onUnitCircle(countPoint); </span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>그렇다면 추이성 위배를 막으려면 어떻게 해야하는것이 좋을까? 아래 코드에서 확인가능하다. </p>
-<figure class="highlight java"><figcaption><span>추이성 위배를 방지방법</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ColorPoint</span> </span>&#123; </span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">final</span> Point; </span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">final</span> Color; </span><br><span class="line">	</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="title">ColorPoint</span><span class="params">(<span class="keyword">int</span> x, <span class="keyword">int</span> y, Color color)</span> </span>&#123;</span><br><span class="line">		point = <span class="keyword">new</span> Point(x,y); </span><br><span class="line">		<span class="keyword">this</span>.color = Objects.requireNonNull(color); </span><br><span class="line">	&#125; </span><br><span class="line">	</span><br><span class="line">	<span class="comment">//이 ColorPoint의 Point 뷰를 반환한다. </span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> Point <span class="title">asPoint</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> point; </span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">	<span class="meta">@Override</span> <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">equals</span><span class="params">(Object o)</span> </span>&#123;</span><br><span class="line">		<span class="keyword">if</span>(!(o <span class="keyword">instanceof</span> ColorPoint)) &#123;</span><br><span class="line">			<span class="keyword">return</span> <span class="keyword">false</span>; </span><br><span class="line">		&#125;</span><br><span class="line">		ColorPoint cp = (ColorPoint) o; </span><br><span class="line">		<span class="keyword">return</span> cp.point.equals(point) &amp;&amp; cp.color.equals(color); </span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="comment">//...나머지 코드 생략... </span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h3 id="일관성"><a href="#일관성" class="headerlink" title="일관성"></a>일관성</h3><ul>
-<li>클래스가 불변이든 가변인든 equals의 판단에 신뢰할 수 없는 자원이 끼어들게 해서는 안된다. (java.net.URL의 equals는 주어진 URL과 매핑된 호스트의 ip주소를 이용해 비교함.)</li>
-</ul>
-<h3 id="null-아님"><a href="#null-아님" class="headerlink" title="null-아님"></a>null-아님</h3><ul>
-<li>equals 메서드에서 null여부를 검사하는 부분은 하지말자. null여부를 검사하지말고, instanceof로 매개변수가 올바른 클래스타입인지 여부를 파악해야함. </li>
-</ul>
-<p>지금까지 내용을 종합해서 양질의 equals메서드 구현방법을 단계별로 기술하면?</p>
-<ol>
-<li>== 연산자를 사용해 입력이 자기 자신의 참조인지 확인한다. : 자기 자신이면 true를 반환. 이는 단순한 성능 최적화용으로, 비교 작업이 복잡한 상황일때 값어치가 있음.</li>
-<li>instanceof 연산자로 입력이 올바른 타입인지 확인한다. : 그렇지 않다면 false로 리턴함. </li>
-<li>입력을 올바른 타입으로 형변환한다. : 2번에서 instanceof검사를 했기때문에 이단계는 100% 성공</li>
-<li>입력 객체와 자기 자신의 대응되는 핵심필드들이 모두 일치하는지 하나씩 검사한다 : 모든 필드가 일치하면 true, 하나라도 불일치시 false리턴. </li>
-</ol>
-<p>equals를 다 구현했다면, 세가지만 자문해보자. 대칭적인가? 추이성이 있는가? 일관적인가? 자문에서 끝내지말고 단위테스트를 작성해서 돌려보자.<br>다음 이상의 비법을 따라 작성해본 PhoneNumber클래스용 equals메서드다. </p>
-<figure class="highlight java"><figcaption><span>전형적인 equals메서드의 예</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">PhoneNumber</span> </span>&#123;</span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">short</span> areaCode, prefix, lineNum; </span><br><span class="line">	</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="title">PhoneNumber</span><span class="params">(<span class="keyword">int</span> areaCode, <span class="keyword">int</span> prefix, <span class="keyword">int</span> lineNum)</span> </span>&#123;</span><br><span class="line">		<span class="keyword">this</span>.areaCode = rangeCheck(areaCode,<span class="number">999</span>,<span class="string">&quot;지역코드&quot;</span>);</span><br><span class="line">		<span class="keyword">this</span>.prefix = rangeCheck(prefix,<span class="number">999</span>,<span class="string">&quot;프리픽스&quot;</span>);</span><br><span class="line">		<span class="keyword">this</span>.lineNum = rangeCheck(lineNum,<span class="number">9999</span>,<span class="string">&quot;가입자번호&quot;</span>);</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">short</span> <span class="title">rangeCheck</span><span class="params">(<span class="keyword">int</span> val, <span class="keyword">int</span> max, String arg)</span> </span>&#123;</span><br><span class="line">		<span class="keyword">if</span>(val &lt; <span class="number">0</span> || val &gt; max) &#123;</span><br><span class="line">			<span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException(arg + <span class="string">&quot;: &quot;</span> + val);</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">return</span> (<span class="keyword">short</span>) val; </span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line"> 	<span class="meta">@Override</span> <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">equals</span><span class="params">(Object o)</span> </span>&#123;</span><br><span class="line">		<span class="keyword">if</span>(o == <span class="keyword">this</span>) &#123;</span><br><span class="line">			<span class="keyword">return</span> <span class="keyword">true</span>; </span><br><span class="line">		&#125;</span><br><span class="line">		</span><br><span class="line">		<span class="keyword">if</span>(!(o <span class="keyword">instanceof</span> PhoneNumber)) &#123;</span><br><span class="line">			<span class="keyword">return</span> <span class="keyword">false</span>; </span><br><span class="line">		&#125;</span><br><span class="line">		</span><br><span class="line">		PhoneNumber pn = (PhoneNumber) o; </span><br><span class="line">		<span class="keyword">return</span> pn.lineNum == lineNum &amp;&amp; pn.prefix == prefix &amp;&amp; pn.areaCode == areaCode; </span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>equals 메서드를 정의할때 주의사항! </p>
-<ul>
-<li>equals를 재정의할때는 hashCode도 반드시 재정의해아한다!!! (아이템11)</li>
-<li>너무 복잡하게 해결하려 들지 말자! 필드들의 동치성만 검사해도 equals 규약을 어렵지않게 지킬수있음. </li>
-<li>Object외의 타입을 매개변수로 받는 equals 메서드는 선언하지 말자. </li>
-</ul>
-
-                    
-                        
-
-
-                    
-                    
-                        <p>
-                            <a
-                                href="/2021/02/24/java-effective-10/#post-footer"
                                 class="postShorten-excerpt_link link"
                                 aria-label=""
                             >
