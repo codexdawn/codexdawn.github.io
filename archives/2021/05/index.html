@@ -247,6 +247,84 @@
                     
                         <a
                             class="link-unstyled"
+                            href="/2021/05/10/mapstruct-1/"
+                            aria-label=": mapstruct-1"
+                        >
+                            mapstruct-1
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2021-05-10T03:18:01+00:00">
+	
+		    May 10, 2021
+    	
+    </time>
+    
+        <span>in </span>
+        
+    <a class="category-link" href="/categories/Mapstruct/">Mapstruct</a>, <a class="category-link" href="/categories/%EC%9C%A0%EB%A0%88%EC%B9%B4or%EC%82%BD%EC%A7%88/">유레카or삽질</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <h1 id="Mapstruct-삽질기"><a href="#Mapstruct-삽질기" class="headerlink" title="Mapstruct 삽질기"></a>Mapstruct 삽질기</h1><h2 id="1-Mapstruct란"><a href="#1-Mapstruct란" class="headerlink" title="1. Mapstruct란?"></a>1. Mapstruct란?</h2><p><img src="https://mapstruct.org/" alt="Mapstruct 공식사이트"></p>
+<p>MapStruct is a code generator that greatly simplifies the implementation of mappings between Java bean types based on a convention over configuration approach.<br>자바빈즈기반의 객체를 간단한 컨벤션 설정을 통해 매핑시켜주는 역할을 담당한다고 생각하면 됨. 그냥 ModelMapper와 유사한 기능을 한다고 생각하면 됨. (그렇다고 둘이 매커니즘이 같은건 아님. )</p>
+<hr>
+<h2 id="2-왜-사용함"><a href="#2-왜-사용함" class="headerlink" title="2. 왜 사용함?"></a>2. 왜 사용함?</h2><p>Multi-layered applications often require to map between different object models (e.g. entities and DTOs). Writing such mapping code is a tedious and error-prone task. MapStruct aims at simplifying this work by automating it as much as possible.<br>In contrast to other mapping frameworks MapStruct generates bean mappings at compile-time which ensures a high performance, allows for fast developer feedback and thorough error checking.</p>
+<p>Multi-layered (멀티모듈 프로젝트 같은것?)은 다른 객체 모델에 대해서 매핑시켜줘야하는 일들이 많다. 예를들어서 Entity를 DTO로. 기존 노가다성 메핑할떄는 세레머니 코드들이 많이 들어가있고(map,mapToList..) 에러를 유발시킬수있는 코드로 실수할수있는데, MapStruct는 이런 부분을 자동으로 간단스하게 처리 해줌.<br>다른 매핑프레임워크에 비해서 MapStruct는 컴파일 시점에 mapping 코드를 생성하기때문에 성능적으로 안정적인 부분과 컴파일시점에 에러를 잡아낼수있어서, 개발자의 실수를 줄일수있음. (modelmapper는 runtime시점에 mapping하기때문에 생성비용이 꽤나큼 뭐 Bean Scope가 singleton이라 한번 컨테이너 올리면.. 그닥 큰 이슈가 아닐란가싶긴하지만..runtime과 compile시점은 엄청난 차이가 있음. compile시점이 사실 안정적으로 실수나 에러검증을 해주기가 아주 유리함!)</p>
+<hr>
+<h2 id="3-설정"><a href="#3-설정" class="headerlink" title="3. 설정"></a>3. 설정</h2><h3 id="3-1-build-gradle"><a href="#3-1-build-gradle" class="headerlink" title="3-1. build.gradle"></a>3-1. build.gradle</h3><p>설정위해서는 lombok 의존성을 추가한 root 프로젝트쪽 build.gradle쪽에 추가해줘야함. 중요한 부분은 lombok을 사용하면 의존성 추가할때 위치나 버전에 따라 설정이 달라질수있음. </p>
+<figure class="highlight plain"><figcaption><span>root-build.gradle</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"> </span><br><span class="line">dependencies &#123;</span><br><span class="line"></span><br><span class="line">        implementation &#39;org.mapstruct:mapstruct:1.4.1.Final&#39;</span><br><span class="line">        compileOnly &#39;org.projectlombok:lombok&#39;</span><br><span class="line">        compile group: &#39;org.projectlombok&#39;, name: &#39;lombok-mapstruct-binding&#39;, version: &#39;0.2.0&#39;</span><br><span class="line">        annotationProcessor &#39;org.springframework.boot:spring-boot-configuration-processor&#39;</span><br><span class="line">        annotationProcessor &#39;org.projectlombok:lombok&#39;</span><br><span class="line">        annotationProcessor &#39;org.mapstruct:mapstruct-processor:1.4.1.Final&#39;</span><br><span class="line"></span><br><span class="line">        testImplementation(&#39;org.springframework.boot:spring-boot-starter-test&#39;) &#123;</span><br><span class="line">            exclude group: &#39;org.junit.vintage&#39;, module: &#39;junit-vintage-engine&#39;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        &#x2F;&#x2F; jackson</span><br><span class="line">        implementation(&#39;com.fasterxml.jackson.core:jackson-databind&#39;)</span><br><span class="line">        implementation(&#39;com.google.code.gson:gson:2.8.0&#39;)</span><br><span class="line">        implementation(&#39;com.google.guava:guava:28.0-jre&#39;)</span><br><span class="line">        implementation(&#39;commons-codec:commons-codec&#39;)</span><br><span class="line">        implementation(&#39;org.apache.commons:commons-lang3:3.9&#39;)</span><br><span class="line"></span><br><span class="line">        &#x2F;&#x2F; jsr validation</span><br><span class="line">        implementation(&#39;javax.validation:validation-api:2.0.1.Final&#39;)</span><br><span class="line"></span><br><span class="line">        testCompile group: &#39;junit&#39;, name: &#39;junit&#39;, version: &#39;4.12&#39;</span><br><span class="line">        testImplementation(&#39;org.easytesting:fest-assert:1.4&#39;)</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-2-GenericMapper"><a href="#3-2-GenericMapper" class="headerlink" title="3-2. GenericMapper"></a>3-2. GenericMapper</h3><p>사실 굳이 안만들어도 되긴하는데, 한벌 만들어놓으면 공통로직으로 사용하기 용이함 </p>
+<figure class="highlight java"><figcaption><span>api-GenericMapper</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">package</span> com.wemakeprice.v.ocs.api.mapper;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> <span class="keyword">static</span> org.mapstruct.NullValuePropertyMappingStrategy.IGNORE;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> org.mapstruct.BeanMapping;</span><br><span class="line"><span class="keyword">import</span> org.mapstruct.MappingTarget;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">GenericMapper</span>&lt;<span class="title">D</span>,<span class="title">E</span>&gt; </span>&#123;</span><br><span class="line">    <span class="function">D <span class="title">toDto</span><span class="params">(E e)</span></span>;</span><br><span class="line">    <span class="function">E <span class="title">toEntity</span><span class="params">(D d)</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@BeanMapping(nullValuePropertyMappingStrategy = IGNORE)</span></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">updateFromDto</span><span class="params">(D dto, <span class="meta">@MappingTarget</span> E entity)</span></span>;</span><br><span class="line">&#125;</span><br><span class="line">	</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="4-사용방법"><a href="#4-사용방법" class="headerlink" title="4. 사용방법"></a>4. 사용방법</h2><p>사용 예시는 mapToList 의 예시이다. 하지만 기존 modelMapper에서 처리하는 부분도 @Mapper내에서 가능한것으로 파악되어짐. </p>
+<figure class="highlight java"><figcaption><span>entity to dto 사용방법</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">package</span> com.wemakeprice.v.ocs.api.mapper;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> com.wemakeprice.v.ocs.api.dto.order.PurchaseInfo;</span><br><span class="line"><span class="keyword">import</span> com.wemakeprice.v.ocs.domain.repository.escrow.order.Purchase;</span><br><span class="line"><span class="keyword">import</span> java.util.List;</span><br><span class="line"><span class="keyword">import</span> org.mapstruct.Mapper;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Mapper(componentModel = &quot;spring&quot;)</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">PurchaseMapper</span> <span class="keyword">extends</span> <span class="title">GenericMapper</span>&lt;<span class="title">PurchaseInfo</span>, <span class="title">Purchase</span>&gt; </span>&#123;</span><br><span class="line">    <span class="function">List&lt;PurchaseInfo&gt; <span class="title">getPurchaseInfo</span><span class="params">(List&lt;Purchase&gt; purchaseEntity)</span></span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><figcaption><span>실사용소스</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.wemakeprice.v.ocs.api.service.purchase;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> com.wemakeprice.v.ocs.api.dto.order.PurchaseInfo;</span><br><span class="line"><span class="keyword">import</span> com.wemakeprice.v.ocs.api.dto.order.PurchaseRequestParam;</span><br><span class="line"><span class="keyword">import</span> com.wemakeprice.v.ocs.api.mapper.PurchaseMapper;</span><br><span class="line"><span class="keyword">import</span> com.wemakeprice.v.ocs.domain.provider.order.PurchaseProvider;</span><br><span class="line"><span class="keyword">import</span> com.wemakeprice.v.ocs.domain.utils.ModelMapperUtils;</span><br><span class="line"><span class="keyword">import</span> com.wemakeprice.v.ocs.meta.order.OrderType;</span><br><span class="line"><span class="keyword">import</span> java.util.List;</span><br><span class="line"><span class="keyword">import</span> lombok.RequiredArgsConstructor;</span><br><span class="line"><span class="keyword">import</span> org.mapstruct.factory.Mappers;</span><br><span class="line"><span class="keyword">import</span> org.springframework.stereotype.Service;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Service</span></span><br><span class="line"><span class="meta">@RequiredArgsConstructor</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">PurchaseService</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> PurchaseProvider purchaseProvider;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> PurchaseMapper purchaseMapper = Mappers.getMapper(PurchaseMapper.class);</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> List&lt;PurchaseInfo&gt; <span class="title">getPurchaseInfo</span><span class="params">(PurchaseRequestParam param)</span> </span>&#123;</span><br><span class="line">        <span class="comment">//return ModelMapperUtils.mapToList(purchaseProvider.findByOrderTypeAndMid(param.getOrderType(),param.getMid()),PurchaseInfo.class);</span></span><br><span class="line">        <span class="keyword">return</span> purchaseMapper.getPurchaseInfo(purchaseProvider.findByOrderTypeAndMid(param.getOrderType(),param.getMid()));</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> List&lt;PurchaseInfo&gt; <span class="title">getPurchaseInfoByOrderType</span><span class="params">(OrderType orderType)</span> </span>&#123;</span><br><span class="line">        <span class="comment">//return ModelMapperUtils.mapToList(purchaseProvider.findByOrderTypeEquals(orderType),PurchaseInfo.class);</span></span><br><span class="line">        <span class="keyword">return</span> purchaseMapper.getPurchaseInfo(purchaseProvider.findByOrderTypeEquals(orderType));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="5-참고"><a href="#5-참고" class="headerlink" title="5. 참고"></a>5. 참고</h2><p><img src="https://www.baeldung.com/mapstruct" alt="baeldung-mapstruct 가이드"><br><img src="https://mapstruct.org/documentation/stable/reference/html/" alt="mapstruct공식사이트"></p>
+<hr>
+
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/2021/05/10/mapstruct-1/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                Comment and share
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
                             href="/2021/05/08/java8-chaptor2/"
                             aria-label=": java8-chaptor2"
                         >
