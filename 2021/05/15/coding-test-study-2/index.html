@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="generator" content="codexdawn">
-    <title>Tag: 코딩테스트369 - codexdawn</title>
+    <title>coding-test-study-2 - codexdawn</title>
     <meta name="author" content="codexdawn">
     
     
@@ -15,14 +15,24 @@
             <link rel="alternate" type="application/atom+xml" title="RSS" href="/atom.xml">
         
     
-    <script type="application/ld+json">{}</script>
-    <meta property="og:type" content="blog">
-<meta property="og:title" content="codexdawn">
-<meta property="og:url" content="https://codexdawn.github.io/tags/%EC%BD%94%EB%94%A9%ED%85%8C%EC%8A%A4%ED%8A%B8369/index.html">
+    <script type="application/ld+json">{"@context":"http://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"codexdawn","sameAs":["https://github.com/codexdawn","https://www.facebook.com/beherzt.dev","https://www.linkedin.com/in/sim-jisung-3048872a/","mailto:cloudkaiser@gmail.com"],"image":"https://www.gravatar.com/avatar/d97fd4b94c429915f1cb55eb27e7d4d9"},"articleBody":"linkedlist (링크드리스트)1. linkedlist 구조\n연결 리스트라고도 함\n\n배열은 순차적으로 연결된 공간에 데이터를 나열하는 데이터 구조\n\n링크드 리스트는 떨어진 곳에 존재하는 데이터를 화살표로 연결해서 관리하는 데이터 구조\n\n링크드 리스트 기본 구조와 용어\n\n노드(Node): 데이터 저장 단위 (데이터값, 포인터) 로 구성\n포인터(pointer): 각 노드 안에서, 다음이나 이전의 노드와의 연결 정보를 가지고 있는 공간\n\n\n일반적인 링크드 리스트 형태\n\n\n2. SingleLinkedList 구현linkedlist구현1-Node클래스1234567891011121314151617181920212223242526package linkedlist;public class Node &lt;T&gt; &#123;    private T data;    private Node&lt;T&gt; next = null;    public Node(T data) &#123;        this.data = data;    &#125;    public T getData() &#123;        return data;    &#125;    public void setData(T data) &#123;        this.data = data;    &#125;    public Node&lt;T&gt; getNext() &#123;        return next;    &#125;    public void setNext(Node&lt;T&gt; next) &#123;        this.next = next;    &#125;&#125;\n\nSingleLinkedList123456789101112131415161718192021222324252627282930313233343536373839404142434445464748495051525354555657585960616263646566676869707172737475767778798081828384858687888990919293949596979899100101102103104105106107108109110111112113114115package linkedlist;public class SingleLinkedList&lt;T&gt; &#123;    private Node&lt;T&gt; head = null;    //노트 추가    public void addNode(T data) &#123;        //head가 아무것도 없을경우        if(head == null) &#123;            head = new Node&lt;&gt;(data);        &#125; else &#123;            Node&lt;T&gt; node = this.head;            //노드 탐색 (null이 아닐때까지 탐색)            while(node.getNext() != null) &#123;                node = node.getNext();            &#125;            // 맨 마자막 노드의 next에 새로운 노드 추가 및 생성            node.setNext(new Node&lt;&gt;(data));        &#125;    &#125;    public void printNode() &#123;        if(head != null) &#123;            System.out.println(&quot;head.getData() = &quot; + head.getData());            Node&lt;T&gt; node = head;            while(node.getNext() != null) &#123;                node = node.getNext();                System.out.println(&quot;node.getData() = &quot; + node.getData());            &#125;        &#125;    &#125;    public void addNodeInside(T data, T target) &#123;        Node&lt;T&gt; targetNode = this.search(target);        Node&lt;T&gt; addNode = new Node&lt;&gt;(data);        // head노드가 targetNode와 같을때 head바로 뒷노드에 생성(next되는 노드들 변경)        if(head == targetNode) &#123;            addNode.setNext(head.getNext());            head.setNext(addNode);            //this.addNode(data);        &#125; else &#123;            // 정말 바보같이 한번 더 탐색을 했다. (이미 탐색해서 그정보가지고 하면 된다는걸 알았는데.. targetNode의 next노드를 미리 assignment를 해놓고 해야한다는 생각을 못했음.) \t\t\t// 정말 바보같은 짓을 했다. 한번 더 생각하라고 주석처리했음.  \t\t\t/*Node&lt;T&gt; node = head;            //노드 탐색            while(node.getNext() != null) &#123;                node = node.getNext();                //targetNode와 같은 노드일경우 그 다음 노드에 생성 역시 next로 참조되는 부분 변경                if(node == targetNode) &#123;                    addNode.setNext(node.getNext());                    node.setNext(addNode);                &#125;            &#125;*/            Node&lt;T&gt; nextNode = targetNode.getNext();            targetNode.setNext(addNode);            addNode.setNext(nextNode);        &#125;    &#125;    public Node&lt;T&gt; search(T target) &#123;        //head의 데이터가 target과 같을 경우        if(head.getData() == target) &#123;            return head;        &#125; else &#123;            Node&lt;T&gt; node = head;            //노드 탐색            while(node.getNext() != null) &#123;                //탐색된 노드의 데이터와 target이 같을경우 해당 노드반환                if(node.getData() == target) &#123;                    return node;                &#125;                node = node.getNext();            &#125;            //아무것도 탐색되지 않았을때는 그냥 마지막 노드 반환 (맨마지막에 넣어주기위해서)            return node;        &#125;    &#125;    public boolean deleteNode(T target) &#123;        //head가 제거 대상일경우는 다음 노드가 head가됨        if(head.getData() == target) &#123;            head = head.getNext();            return true;        &#125; else &#123;            Node&lt;T&gt; node = head;            //노드 탐색            while(node.getNext() != null) &#123;\t\t\t\t//처음에는 여기에 놨었다. 그래서 node.getNext의 또 다음 getNext를 가져오는 격이 되어버렸음. \t\t\t\t//그래서 잠재적인 버그를 유발 시켰었다. 이러면 낙제점이다. 디버깅을 했는데.. 왜 감지를 못했던가... \t\t\t\t//node = node.getNext();\t\t\t\t                //탐색된 노드의 다음 노드의 데이터가 일치할경우                if(node.getNext().getData() == target) &#123;                    node.setNext(node.getNext().getNext());                    return true;                &#125;\t\t\t\t                node = node.getNext();            &#125;        &#125;        return false;    &#125;&#125;\n\nSingleLinkedList 수행123456789101112131415161718192021package linkedlist;public class SingleLinkedListMain &#123;    public static void main(String[] args) &#123;        var single = new SingleLinkedList&lt;String&gt;();        single.addNode(&quot;sim&quot;);        single.addNode(&quot;ji&quot;);        single.addNode(&quot;sung&quot;);        single.addNodeInside(&quot;a.k.a&quot;, &quot;sim&quot;);        single.addNodeInside(&quot;dawn&quot;,&quot;a.k.a&quot;);        single.addNodeInside(&quot;s&quot;,&quot;sss&quot;);        System.out.println(single.deleteNode(&quot;ji&quot;));        System.out.println(single.deleteNode(&quot;s&quot;));        System.out.println(single.deleteNode(&quot;a&quot;));        single.printNode();    &#125;&#125;\n","dateCreated":"2021-05-15T09:15:44+00:00","dateModified":"2021-05-15T09:37:07+00:00","datePublished":"2021-05-15T09:15:44+00:00","description":"","headline":"coding-test-study-2","image":[],"mainEntityOfPage":{"@type":"WebPage","@id":"https://codexdawn.github.io/2021/05/15/coding-test-study-2/"},"publisher":{"@type":"Organization","name":"codexdawn","sameAs":["https://github.com/codexdawn","https://www.facebook.com/beherzt.dev","https://www.linkedin.com/in/sim-jisung-3048872a/","mailto:cloudkaiser@gmail.com"],"image":"https://www.gravatar.com/avatar/d97fd4b94c429915f1cb55eb27e7d4d9","logo":{"@type":"ImageObject","url":"https://www.gravatar.com/avatar/d97fd4b94c429915f1cb55eb27e7d4d9"}},"url":"https://codexdawn.github.io/2021/05/15/coding-test-study-2/","keywords":"Java, datasturct, 코딩테스트369, linkedlist"}</script>
+    <meta name="description" content="linkedlist (링크드리스트)1. linkedlist 구조 연결 리스트라고도 함  배열은 순차적으로 연결된 공간에 데이터를 나열하는 데이터 구조  링크드 리스트는 떨어진 곳에 존재하는 데이터를 화살표로 연결해서 관리하는 데이터 구조  링크드 리스트 기본 구조와 용어  노드(Node): 데이터 저장 단위 (데이터값, 포인터) 로 구성 포인터(pointe">
+<meta property="og:type" content="blog">
+<meta property="og:title" content="coding-test-study-2">
+<meta property="og:url" content="https://codexdawn.github.io/2021/05/15/coding-test-study-2/index.html">
 <meta property="og:site_name" content="codexdawn">
+<meta property="og:description" content="linkedlist (링크드리스트)1. linkedlist 구조 연결 리스트라고도 함  배열은 순차적으로 연결된 공간에 데이터를 나열하는 데이터 구조  링크드 리스트는 떨어진 곳에 존재하는 데이터를 화살표로 연결해서 관리하는 데이터 구조  링크드 리스트 기본 구조와 용어  노드(Node): 데이터 저장 단위 (데이터값, 포인터) 로 구성 포인터(pointe">
 <meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://www.fun-coding.org/00_Images/linkedlist.png">
+<meta property="article:published_time" content="2021-05-15T09:15:44.000Z">
+<meta property="article:modified_time" content="2021-05-15T09:37:07.308Z">
 <meta property="article:author" content="codexdawn">
+<meta property="article:tag" content="Java">
+<meta property="article:tag" content="datasturct">
+<meta property="article:tag" content="코딩테스트369">
+<meta property="article:tag" content="linkedlist">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://www.fun-coding.org/00_Images/linkedlist.png">
     
     
         
@@ -41,6 +51,8 @@
     
 
     
+        
+    
 </head>
 
     <body>
@@ -50,7 +62,7 @@
 
     
 
-<header id="header" data-behavior="2">
+<header id="header" data-behavior="5">
     <i id="btn-open-sidebar" class="fa fa-lg fa-bars"></i>
     <div class="header-title">
         <a
@@ -77,7 +89,7 @@
             <!-- Define author's picture -->
 
 
-<nav id="sidebar" data-behavior="2">
+<nav id="sidebar" data-behavior="5">
     <div class="sidebar-container">
         
         
@@ -231,30 +243,22 @@
 </nav>
 
             
-            <div id="main" data-behavior="2"
+            <div id="main" data-behavior="5"
                  class="
                         hasCoverMetaIn
                         ">
                 
-    <section class="postShorten-group main-content-wrap">
+<article class="post">
     
     
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/2021/05/15/coding-test-study-2/"
-                            aria-label=": coding-test-study-2"
-                        >
-                            coding-test-study-2
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
+        <div class="post-header main-content-wrap text-left">
+    
+        <h1 class="post-title">
+            coding-test-study-2
+        </h1>
+    
+    
+        <div class="post-meta">
     <time datetime="2021-05-15T09:15:44+00:00">
 	
 		    May 15, 2021
@@ -269,10 +273,13 @@
     
 </div>
 
-            </div>
-            
-                <div class="postShorten-content">
-                    <h1 id="linkedlist-링크드리스트"><a href="#linkedlist-링크드리스트" class="headerlink" title="linkedlist (링크드리스트)"></a>linkedlist (링크드리스트)</h1><h2 id="1-linkedlist-구조"><a href="#1-linkedlist-구조" class="headerlink" title="1. linkedlist 구조"></a>1. linkedlist 구조</h2><ul>
+    
+</div>
+
+    
+    <div class="post-content markdown">
+        <div class="main-content-wrap">
+            <h1 id="linkedlist-링크드리스트"><a href="#linkedlist-링크드리스트" class="headerlink" title="linkedlist (링크드리스트)"></a>linkedlist (링크드리스트)</h1><h2 id="1-linkedlist-구조"><a href="#1-linkedlist-구조" class="headerlink" title="1. linkedlist 구조"></a>1. linkedlist 구조</h2><ul>
 <li><p>연결 리스트라고도 함</p>
 </li>
 <li><p>배열은 순차적으로 연결된 공간에 데이터를 나열하는 데이터 구조</p>
@@ -294,145 +301,122 @@
 
 <figure class="highlight java"><figcaption><span>SingleLinkedList 수행</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> linkedlist;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">SingleLinkedListMain</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">var</span> single = <span class="keyword">new</span> SingleLinkedList&lt;String&gt;();</span><br><span class="line"></span><br><span class="line">        single.addNode(<span class="string">&quot;sim&quot;</span>);</span><br><span class="line">        single.addNode(<span class="string">&quot;ji&quot;</span>);</span><br><span class="line">        single.addNode(<span class="string">&quot;sung&quot;</span>);</span><br><span class="line"></span><br><span class="line">        single.addNodeInside(<span class="string">&quot;a.k.a&quot;</span>, <span class="string">&quot;sim&quot;</span>);</span><br><span class="line">        single.addNodeInside(<span class="string">&quot;dawn&quot;</span>,<span class="string">&quot;a.k.a&quot;</span>);</span><br><span class="line">        single.addNodeInside(<span class="string">&quot;s&quot;</span>,<span class="string">&quot;sss&quot;</span>);</span><br><span class="line"></span><br><span class="line">        System.out.println(single.deleteNode(<span class="string">&quot;ji&quot;</span>));</span><br><span class="line">        System.out.println(single.deleteNode(<span class="string">&quot;s&quot;</span>));</span><br><span class="line">        System.out.println(single.deleteNode(<span class="string">&quot;a&quot;</span>));</span><br><span class="line">        single.printNode();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-                    
-                        
-
-
-                    
-                    
-                        <p>
-                            <a
-                                href="/2021/05/15/coding-test-study-2/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                Comment and share
-                            </a>
-                        </p>
-                    
-                </div>
             
+
+
         </div>
+    </div>
+    <div id="post-footer" class="post-footer main-content-wrap">
         
-    </article>
-    
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/2021/05/13/coding-test-study-1/"
-                            aria-label=": coding-test-study-1"
-                        >
-                            coding-test-study-1
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time datetime="2021-05-13T14:05:38+00:00">
-	
-		    May 13, 2021
-    	
-    </time>
-    
-        <span>in </span>
-        
-    <a class="category-link" href="/categories/datasturct/">datasturct</a>, <a class="category-link" href="/categories/%EC%9E%90%EB%A3%8C%EA%B5%AC%EC%A1%B0/">자료구조</a>, <a class="category-link" href="/categories/%EC%BD%94%EB%94%A9%ED%85%8C%EC%8A%A4%ED%8A%B8369/">코딩테스트369</a>
-
-
-    
-</div>
+            <div class="post-footer-tags">
+                <span class="text-color-light text-small">TAGGED IN</span><br/>
+                
+    <a class="tag tag--primary tag--small t-none-link" href="/tags/Java/" rel="tag">Java</a> <a class="tag tag--primary tag--small t-none-link" href="/tags/datasturct/" rel="tag">datasturct</a> <a class="tag tag--primary tag--small t-none-link" href="/tags/linkedlist/" rel="tag">linkedlist</a> <a class="tag tag--primary tag--small t-none-link" href="/tags/%EC%BD%94%EB%94%A9%ED%85%8C%EC%8A%A4%ED%8A%B8369/" rel="tag">코딩테스트369</a>
 
             </div>
-            
-                <div class="postShorten-content">
-                    <h1 id="Queue-큐-Stack-스택"><a href="#Queue-큐-Stack-스택" class="headerlink" title="Queue (큐) / Stack (스택)"></a>Queue (큐) / Stack (스택)</h1><h2 id="1-Queue-구조"><a href="#1-Queue-구조" class="headerlink" title="1. Queue 구조"></a>1. Queue 구조</h2><ul>
-<li>FIFO (First-In First-Out) 처음들어간 element가 처음으로 빠져나감. </li>
-<li>소위, 줄서는 행위와 유사함. </li>
-</ul>
-<h3 id="자바에서-Queue-객체-사용하기"><a href="#자바에서-Queue-객체-사용하기" class="headerlink" title="자바에서 Queue 객체 사용하기"></a>자바에서 Queue 객체 사용하기</h3><ul>
-<li>JAVA 에서는 기본적으로 java.util 패키지에 Queue 클래스를 제공하고 있음<ul>
-<li>Enqueue 에 해당하는 기능으로 Queue 클래스에서는 add(value) 또는 offer(value) 메서드를 제공함</li>
-<li>Dequeue 에 해당하는 기능으로 Queue 클래스에서는 poll() 또는 remove() 메서드를 제공함<ul>
-<li>아쉽게도, Queue 클래스에 데이터 생성을 위해서는 java.util 패키지에 있는 LinkedList 클래스를 사용해야 함</li>
-<li>LinkedList 클래스는 자료구조의 링크드리스트 와 연관이 있으며, 관련 내용은 큐보다 복잡하므로 이후 챕터에서 상세히 익히도록 함</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<figure class="highlight java"><figcaption><span>java.util.Queue 사용</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Queue 사용을 위해, LinkedList 클래스를 사용하므로, 두 클래스 모두 import 해야 함</span></span><br><span class="line"><span class="keyword">import</span> java.util.LinkedList; </span><br><span class="line"><span class="keyword">import</span> java.util.Queue; </span><br><span class="line"></span><br><span class="line"><span class="comment">// 자료형 매개변수를 넣어서, 큐에 들어갈 데이터의 타입을 지정해야 함</span></span><br><span class="line">Queue&lt;Integer&gt; queue_int = <span class="keyword">new</span> LinkedList&lt;Integer&gt;(); <span class="comment">// Integer 형 queue 선언</span></span><br><span class="line">Queue&lt;String&gt; queue_str = <span class="keyword">new</span> LinkedList&lt;String&gt;(); <span class="comment">// String 형 queue 선언</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 데이터 추가는 add(value) 또는 offer(value) 를 사용함</span></span><br><span class="line">queue_int.add(<span class="number">1</span>);</span><br><span class="line">queue_int.offer(<span class="number">2</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// poll() 은 큐의 첫 번째 값 반환, 해당 값은 큐에서 삭제</span></span><br><span class="line">queue_int.poll();</span><br><span class="line"></span><br><span class="line"><span class="comment">// poll() 과 마찬가지로, 첫 번째 값 반환하고, 해당 값은 큐에서 삭제</span></span><br><span class="line">queue_int.remove();</span><br></pre></td></tr></table></figure>
-
-<h3 id="참고-어디에-큐가-많이-쓰일까"><a href="#참고-어디에-큐가-많이-쓰일까" class="headerlink" title="참고: 어디에 큐가 많이 쓰일까?"></a>참고: 어디에 큐가 많이 쓰일까?</h3><ul>
-<li>멀티 태스킹을 위한 프로세스 스케쥴링 방식을 구현하기 위해 많이 사용됨 (운영체제 참조)</li>
-</ul>
-<blockquote>
-<p>큐의 경우에는 장단점 보다는 (특별히 언급되는 장단점이 없음), 큐의 활용 예로 프로세스 스케쥴링 방식을 함께 이해해두는 것이 좋음</p>
-</blockquote>
-<h3 id="1-2-Queue구현-ArrayList-활용"><a href="#1-2-Queue구현-ArrayList-활용" class="headerlink" title="1-2. Queue구현 (ArrayList 활용)"></a>1-2. Queue구현 (ArrayList 활용)</h3><figure class="highlight java"><figcaption><span>queue구현</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> queue;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.util.ArrayList;</span><br><span class="line"><span class="keyword">import</span> java.util.List;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Queue</span> &lt;<span class="title">T</span>&gt; </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> List&lt;T&gt; queue = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line"></span><br><span class="line">    <span class="comment">//enqueue</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> T <span class="title">enqueue</span><span class="params">(T data)</span> </span>&#123;</span><br><span class="line">        queue.add(data);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> data;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//dequeue</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> T <span class="title">dequeue</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(queue.isEmpty()) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        T data = queue.get(<span class="number">0</span>);</span><br><span class="line">        queue.remove(data);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> data;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">printCurrentQueue</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;======================&quot;</span>);</span><br><span class="line">        queue.stream().forEach(System.out::println);</span><br><span class="line">        System.out.println(<span class="string">&quot;======================&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight java"><figcaption><span>Queue수행</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> queue;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">QueueMain</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        Queue&lt;String&gt; q1 = <span class="keyword">new</span> Queue&lt;&gt;();</span><br><span class="line"></span><br><span class="line">        q1.enqueue(<span class="string">&quot;sim&quot;</span>);</span><br><span class="line">        q1.enqueue(<span class="string">&quot;ji&quot;</span>);</span><br><span class="line">        q1.enqueue(<span class="string">&quot;sung&quot;</span>);</span><br><span class="line"></span><br><span class="line">        q1.printCurrentQueue();</span><br><span class="line"></span><br><span class="line">        q1.dequeue();</span><br><span class="line"></span><br><span class="line">        q1.printCurrentQueue();</span><br><span class="line"></span><br><span class="line">        q1.dequeue();</span><br><span class="line"></span><br><span class="line">        q1.printCurrentQueue();</span><br><span class="line"></span><br><span class="line">        q1.dequeue();</span><br><span class="line"></span><br><span class="line">        q1.printCurrentQueue();</span><br><span class="line"></span><br><span class="line">        System.out.println(<span class="string">&quot;q1.dequeue() = &quot;</span> + q1.dequeue());</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id="2-Stack-구조"><a href="#2-Stack-구조" class="headerlink" title="2. Stack 구조"></a>2. Stack 구조</h2><ul>
-<li>Stack은 LIFO(Last In First Out) 나중에 입력된 element가 가장 먼저 빠지는 구조 </li>
-<li>컴퓨터 내부의 프로세스 구조의 함수 동작 방식(OS의 프로세스 동작 방식)</li>
-</ul>
-<h3 id="2-1-자료-구조-스택의-장단점"><a href="#2-1-자료-구조-스택의-장단점" class="headerlink" title="2-1. 자료 구조 스택의 장단점"></a>2-1. 자료 구조 스택의 장단점</h3><ul>
-<li>장점<ul>
-<li>구조가 단순해서, 구현이 쉽다.</li>
-<li>데이터 저장/읽기 속도가 빠르다.</li>
-</ul>
-</li>
-<li>단점 (일반적인 스택 구현시) <ul>
-<li>데이터 최대 갯수를 미리 정해야 한다. </li>
-<li>저장 공간의 낭비가 발생할 수 있음<ul>
-<li>미리 최대 갯수만큼 저장 공간을 확보해야 함</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<blockquote>
-<p>스택은 단순하고 빠른 성능을 위해 사용되므로, 보통 배열 구조를 활용해서 구현하는 것이 일반적임.<br>이 경우, 위에서 열거한 단점이 있을 수 있음</p>
-</blockquote>
-<h3 id="2-2-Stack-구현-ArrayList-사용"><a href="#2-2-Stack-구현-ArrayList-사용" class="headerlink" title="2-2. Stack 구현 (ArrayList 사용)"></a>2-2. Stack 구현 (ArrayList 사용)</h3><figure class="highlight java"><figcaption><span>Stack클래스</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> stack;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.util.ArrayList;</span><br><span class="line"><span class="keyword">import</span> java.util.List;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Stack</span> &lt;<span class="title">T</span>&gt; </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> List&lt;T&gt; stack = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line"></span><br><span class="line">    <span class="comment">//push</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> T <span class="title">push</span><span class="params">(T data)</span> </span>&#123;</span><br><span class="line">        stack.add(data);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> data;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//pop</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> T <span class="title">pop</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(stack.isEmpty()) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">var</span> data = stack.get(stack.size() - <span class="number">1</span>);</span><br><span class="line">        stack.remove(data);</span><br><span class="line">        <span class="keyword">return</span> data;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">print</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;===========&quot;</span>);</span><br><span class="line">        stack.forEach(System.out::println);</span><br><span class="line">        System.out.println(<span class="string">&quot;===========&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight java"><figcaption><span>Stack수행</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> stack;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">StackMain</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">var</span> stack = <span class="keyword">new</span> Stack&lt;&gt;();</span><br><span class="line"></span><br><span class="line">        stack.push(<span class="number">1L</span>);</span><br><span class="line">        stack.push(<span class="number">2L</span>);</span><br><span class="line">        stack.push(<span class="number">3L</span>);</span><br><span class="line"></span><br><span class="line">        stack.print();</span><br><span class="line"></span><br><span class="line">        stack.pop();</span><br><span class="line">        stack.pop();</span><br><span class="line"></span><br><span class="line">        stack.print();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;\</span><br></pre></td></tr></table></figure>
-                    
+        
+        
+            <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    <a
+                        class="post-action-btn btn btn--disabled"
+                        aria-hidden="true"
+                    >
                         
-
-
+                        <i class="fa fa-angle-left" aria-hidden="true"></i>
+                        <span class="hide-xs hide-sm text-small icon-ml">PREVIOUS</span>
+                    </a>
+            </li>
+            <li class="post-action">
+                
                     
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/2021/05/13/coding-test-study-1/"
+                    data-tooltip="coding-test-study-1"
+                    aria-label="NEXT: coding-test-study-1"
+                >
                     
-                        <p>
-                            <a
-                                href="/2021/05/13/coding-test-study-1/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                Comment and share
-                            </a>
-                        </p>
-                    
-                </div>
+                        <span class="hide-xs hide-sm text-small icon-mr">NEXT</span>
+                        <i class="fa fa-angle-right" aria-hidden="true"></i>
+                    </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a
+                class="post-action-btn btn btn--default btn-open-shareoptions"
+                href="#btn-open-shareoptions"
+                aria-label="Share this post"
+            >
+                <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </a>
+        </li>
+        
             
-        </div>
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://codexdawn.github.io/2021/05/15/coding-test-study-2/"
+                    title="Share on Facebook"
+                    aria-label="Share on Facebook"
+                >
+                    <i class="fab fa-facebook" aria-hidden="true"></i>
+                </a>
+            </li>
         
-    </article>
-    
-    <div class="pagination-bar">
-    <ul class="pagination">
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://twitter.com/intent/tweet?text=https://codexdawn.github.io/2021/05/15/coding-test-study-2/"
+                    title="Share on Twitter"
+                    aria-label="Share on Twitter"
+                >
+                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://plus.google.com/share?url=https://codexdawn.github.io/2021/05/15/coding-test-study-2/"
+                    title="Share on Google+"
+                    aria-label="Share on Google+"
+                >
+                    <i class="fab fa-google-plus" aria-hidden="true"></i>
+                </a>
+            </li>
         
         
-        <li class="pagination-number">page 1 of 1</li>
+            
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#" aria-label="Back to top">
+            
+                <i class="fa fa-list" aria-hidden="true"></i>
+            </a>
+        </li>
     </ul>
 </div>
 
-</section>
+
+        
+        
+            
+        
+    </div>
+</article>
+
 
 
                 <footer id="footer" class="main-content-wrap">
@@ -442,6 +426,151 @@
 </footer>
 
             </div>
+            
+                <div id="bottom-bar" class="post-bottom-bar" data-behavior="5">
+                    <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    <a
+                        class="post-action-btn btn btn--disabled"
+                        aria-hidden="true"
+                    >
+                        
+                        <i class="fa fa-angle-left" aria-hidden="true"></i>
+                        <span class="hide-xs hide-sm text-small icon-ml">PREVIOUS</span>
+                    </a>
+            </li>
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/2021/05/13/coding-test-study-1/"
+                    data-tooltip="coding-test-study-1"
+                    aria-label="NEXT: coding-test-study-1"
+                >
+                    
+                        <span class="hide-xs hide-sm text-small icon-mr">NEXT</span>
+                        <i class="fa fa-angle-right" aria-hidden="true"></i>
+                    </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a
+                class="post-action-btn btn btn--default btn-open-shareoptions"
+                href="#btn-open-shareoptions"
+                aria-label="Share this post"
+            >
+                <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </a>
+        </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://codexdawn.github.io/2021/05/15/coding-test-study-2/"
+                    title="Share on Facebook"
+                    aria-label="Share on Facebook"
+                >
+                    <i class="fab fa-facebook" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://twitter.com/intent/tweet?text=https://codexdawn.github.io/2021/05/15/coding-test-study-2/"
+                    title="Share on Twitter"
+                    aria-label="Share on Twitter"
+                >
+                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://plus.google.com/share?url=https://codexdawn.github.io/2021/05/15/coding-test-study-2/"
+                    title="Share on Google+"
+                    aria-label="Share on Google+"
+                >
+                    <i class="fab fa-google-plus" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+        
+            
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#" aria-label="Back to top">
+            
+                <i class="fa fa-list" aria-hidden="true"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+                </div>
+                
+    <div id="share-options-bar" class="share-options-bar" data-behavior="5">
+        <i id="btn-close-shareoptions" class="fa fa-times"></i>
+        <ul class="share-options">
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://www.facebook.com/sharer/sharer.php?u=https://codexdawn.github.io/2021/05/15/coding-test-study-2/"
+                        aria-label="Share on Facebook"
+                    >
+                        <i class="fab fa-facebook" aria-hidden="true"></i><span>Share on Facebook</span>
+                    </a>
+                </li>
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://twitter.com/intent/tweet?text=https://codexdawn.github.io/2021/05/15/coding-test-study-2/"
+                        aria-label="Share on Twitter"
+                    >
+                        <i class="fab fa-twitter" aria-hidden="true"></i><span>Share on Twitter</span>
+                    </a>
+                </li>
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://plus.google.com/share?url=https://codexdawn.github.io/2021/05/15/coding-test-study-2/"
+                        aria-label="Share on Google+"
+                    >
+                        <i class="fab fa-google-plus" aria-hidden="true"></i><span>Share on Google+</span>
+                    </a>
+                </li>
+            
+        </ul>
+    </div>
+
+
             
         </div>
         
@@ -479,6 +608,8 @@
 
 <!--SCRIPTS END-->
 
+
+    
 
 
 
