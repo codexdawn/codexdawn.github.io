@@ -1,0 +1,638 @@
+
+<!DOCTYPE html>
+<html lang="en">
+    
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="generator" content="codexdawn">
+    <title>jpa-obj-query-3 - codexdawn</title>
+    <meta name="author" content="codexdawn">
+    
+    
+    
+        
+            <link rel="alternate" type="application/atom+xml" title="RSS" href="/atom.xml">
+        
+    
+    <script type="application/ld+json">{"@context":"http://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"codexdawn","sameAs":["https://github.com/codexdawn","https://www.facebook.com/beherzt.dev","https://www.linkedin.com/in/sim-jisung-3048872a/","mailto:cloudkaiser@gmail.com"],"image":"https://www.gravatar.com/avatar/d97fd4b94c429915f1cb55eb27e7d4d9"},"articleBody":"객체지향 쿼리 언어31. Persistance Context와 JPQL1-1. 쿼리후 영속상태인 것과 아닌것영속상태구분123select m form Member m //엔티티조회 (영속성 관리됨)select o.address from Order o //임베디드타입 조회 (영속성 관리 안됨)select m.id, m.username from Member m //단순 필드조회 (영속성 관리 안됨)\n\n위 예제를 통해 알수있듯이, 조회한 엔티티만 영속성 컨텍스트에 관리가 됨. \n1-2. JPQL로 조회한 엔티티와 영속성 컨텍스트영속상태구분1234em.find(Member.class,&quot;m1&quot;); //회원1 조회 //엔티티 쿼리 조회 결과가 회원1, 회원2List&lt;Member&gt; resultList = em.createQuery(&quot;select m from Member m&quot;, Member.class).getResultList(); \n\nem.find로 회원1을 조회했는데, JPQL로 전체를 가져오는 List를 호출하였다. 그럼 위 조회 과정은 어떻게 될까?\nem.find 호출뒤, List 조회 했을경우 \n\nJPQL을 사용해서 조회 요청\nJPQL은 SQL로 변환되어 DB에 조회 \n조회한 결과와 영속성 컨텍스트를 비교 (em.find로 조회된값 : m1 ,조회한값 :m1,m2)\n식별자 기준으로 m1은 이미 영속성관리에 있으므로 버리고, 기존에 영속성관리에 있던 m1이 반환대상이됨.\n식별자 기준으로 m2는 영속성 컨텍스트에 없으므로, 영속성컨텍스트에 추가 \n쿼리 결과인 m1,m2를 반환한다. 여기서 m1은 쿼리결과가 아니라 영속성 컨텍스트에 있던 엔티티임을 잊지말자! \n\n\n\n여기서 알수있는 2가지 사실이있다.\n\nJPQL로 조회한 엔티티는 영속상태다. \n영속성 컨텍스트에 이미 존재하는 엔티티가 있으면 기존 엔티티를 반환한다. \n\n영속성 컨텍스트는 영속상태인 엔티티의 동일성을 보장한다. em.find이든 JPQL로 조회하든 영속성 컨텍스트가 같으면 동일한 엔티티를 반환함. \n1-3. find() VS JPQLfind()\nfind 메서드는 엔티티를 영속성 컨텍스트에 먼저 찾고 없으면 DB에서 찾는다. 따라서 해당 엔티티가 영속성 컨텍스트에 존재하면 메모리에서 바로 찾으므로 성능상 이점이 있다. (그래서 1차캐시라 부름)\n\nJPQL\nJPQL은 항상 디비를 조회한다.\nJPQL로 조회한 엔티티는 영속상태다. (왜냐 DB 조회후,영속성컨텍스트에 집어넣기때문 )\n영속성 컨텍스트에 이미 존재하는 엔티티가있으면 기존 엔티티를 반환함. \n\n2. JPQL과 flush모드2-1. 쿼리와 플러시 모드\nJPQL은 영속성 컨텍스트 고려하지 않고, DB를 먼저 조회함. 따라서 JPQL을 실행하기전에 영속성 컨텍스트의 내용을 DB에 반영해야함. 그렇지 않으면 상이한결과가 발생할수있음. \nFlushMode는 두가지있음. AUTO,COMMIT 이다.\nAUTO : FlushMode를 따로 지정하지 않으면 기본값임. AUTO는 JPQL가 수행되면 자동 FLUSH시켜버림. \nCOMMIT : COMMIT모드면 말그대로 커밋시점에 FLUSH가 됨. 따라서 JPQL쿼리가 수행되도, FLUSH되지않음. \n\n\nFlushMode.COMMIT은 왜 씀? \nflush가 너무 빈번하게 일어나는 상황에서 이모드를 사용하면 쿼리시 발생하는 플러시 횟수를 줄여서 성능 최적화 가능함. \n\n\nJPA를 사용하지않고, JDBC를 직접 사용해서 SQL을 실행할때도 플러시모드는 고민해야함. JPA를 통하지않고 JDBC로 직접 실행하면 JPA는 JDBC가 실행한 쿼리를 인식할 방법이 없음. 따라서 별도 JDBC호출은 플러시 모드를 AUTO로설정해도 무의미함. 이때는 JDBC로 쿼리를 실행하기전에 em.flush를 호출해서 영속성 컨텍스트의 내용을 디비에 동기화 하는게 안점함. \n\n","dateCreated":"2021-05-20T10:59:56+00:00","dateModified":"2021-05-20T12:42:11+00:00","datePublished":"2021-05-20T10:59:56+00:00","description":"","headline":"jpa-obj-query-3","image":[],"mainEntityOfPage":{"@type":"WebPage","@id":"https://codexdawn.github.io/2021/05/20/jpa-obj-query-3/"},"publisher":{"@type":"Organization","name":"codexdawn","sameAs":["https://github.com/codexdawn","https://www.facebook.com/beherzt.dev","https://www.linkedin.com/in/sim-jisung-3048872a/","mailto:cloudkaiser@gmail.com"],"image":"https://www.gravatar.com/avatar/d97fd4b94c429915f1cb55eb27e7d4d9","logo":{"@type":"ImageObject","url":"https://www.gravatar.com/avatar/d97fd4b94c429915f1cb55eb27e7d4d9"}},"url":"https://codexdawn.github.io/2021/05/20/jpa-obj-query-3/","keywords":"Java,JPA, QueryDSL, 객체지향쿼리언어3"}</script>
+    <meta name="description" content="객체지향 쿼리 언어31. Persistance Context와 JPQL1-1. 쿼리후 영속상태인 것과 아닌것영속상태구분123select m form Member m &#x2F;&#x2F;엔티티조회 (영속성 관리됨)select o.address from Order o &#x2F;&#x2F;임베디드타입 조회 (영속성 관리 안됨)select m.id, m.username from Member m">
+<meta property="og:type" content="blog">
+<meta property="og:title" content="jpa-obj-query-3">
+<meta property="og:url" content="https://codexdawn.github.io/2021/05/20/jpa-obj-query-3/index.html">
+<meta property="og:site_name" content="codexdawn">
+<meta property="og:description" content="객체지향 쿼리 언어31. Persistance Context와 JPQL1-1. 쿼리후 영속상태인 것과 아닌것영속상태구분123select m form Member m &#x2F;&#x2F;엔티티조회 (영속성 관리됨)select o.address from Order o &#x2F;&#x2F;임베디드타입 조회 (영속성 관리 안됨)select m.id, m.username from Member m">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2021-05-20T10:59:56.000Z">
+<meta property="article:modified_time" content="2021-05-20T12:42:11.035Z">
+<meta property="article:author" content="codexdawn">
+<meta property="article:tag" content="Java,JPA">
+<meta property="article:tag" content="QueryDSL">
+<meta property="article:tag" content="객체지향쿼리언어3">
+<meta name="twitter:card" content="summary">
+    
+    
+        
+    
+    
+    
+    
+    
+    <!--STYLES-->
+    
+<link rel="stylesheet" href="/assets/css/style-3sspfygaapf5d6tbrnqmyrhdcstv0iwwmi4wor2yeip9c44sowy9gbdzyyjm.min.css">
+
+    <!--STYLES END-->
+    
+
+    
+
+    
+        
+    
+</head>
+
+    <body>
+        <div id="blog">
+            <!-- Define author's picture -->
+
+
+    
+
+<header id="header" data-behavior="5">
+    <i id="btn-open-sidebar" class="fa fa-lg fa-bars"></i>
+    <div class="header-title">
+        <a
+            class="header-title-link"
+            href="/"
+            aria-label=""
+        >
+            codexdawn
+        </a>
+    </div>
+    
+        
+            <a
+                class="header-right-picture "
+                href="#about"
+                aria-label="Open the link: /#about"
+            >
+        
+        
+        </a>
+    
+</header>
+
+            <!-- Define author's picture -->
+
+
+<nav id="sidebar" data-behavior="5">
+    <div class="sidebar-container">
+        
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/"
+                            
+                            rel="noopener"
+                            title="Home"
+                        >
+                        <i class="sidebar-button-icon fa fa-home" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Home</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/all-categories"
+                            
+                            rel="noopener"
+                            title="Categories"
+                        >
+                        <i class="sidebar-button-icon fa fa-bookmark" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Categories</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/all-tags"
+                            
+                            rel="noopener"
+                            title="Tags"
+                        >
+                        <i class="sidebar-button-icon fa fa-tags" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Tags</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="#about"
+                            
+                            rel="noopener"
+                            title="About"
+                        >
+                        <i class="sidebar-button-icon fa fa-question" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">About</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="https://github.com/codexdawn"
+                            
+                                target="_blank"
+                            
+                            rel="noopener"
+                            title="GitHub"
+                        >
+                        <i class="sidebar-button-icon fab fa-github" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">GitHub</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="https://www.facebook.com/beherzt.dev"
+                            
+                                target="_blank"
+                            
+                            rel="noopener"
+                            title="Facebook"
+                        >
+                        <i class="sidebar-button-icon fab fa-facebook" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Facebook</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="https://www.linkedin.com/in/sim-jisung-3048872a/"
+                            
+                                target="_blank"
+                            
+                            rel="noopener"
+                            title="LinkedIn"
+                        >
+                        <i class="sidebar-button-icon fab fa-linkedin" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">LinkedIn</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="mailto:cloudkaiser@gmail.com"
+                            
+                                target="_blank"
+                            
+                            rel="noopener"
+                            title="Mail"
+                        >
+                        <i class="sidebar-button-icon fa fa-envelope" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Mail</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/atom.xml"
+                            
+                            rel="noopener"
+                            title="RSS"
+                        >
+                        <i class="sidebar-button-icon fa fa-rss" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">RSS</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+    </div>
+</nav>
+
+            
+            <div id="main" data-behavior="5"
+                 class="
+                        hasCoverMetaIn
+                        ">
+                
+<article class="post">
+    
+    
+        <div class="post-header main-content-wrap text-left">
+    
+        <h1 class="post-title">
+            jpa-obj-query-3
+        </h1>
+    
+    
+        <div class="post-meta">
+    <time datetime="2021-05-20T10:59:56+00:00">
+	
+		    May 20, 2021
+    	
+    </time>
+    
+        <span>in </span>
+        
+    <a class="category-link" href="/categories/Study/">Study</a>, <a class="category-link" href="/categories/%EA%B0%9D%EC%B2%B4%EC%A7%80%ED%96%A5%EC%BF%BC%EB%A6%AC%EC%96%B8%EC%96%B4/">객체지향쿼리언어</a>, <a class="category-link" href="/categories/%EC%9E%90%EB%B0%94ORM%ED%91%9C%EC%A4%80JPA%ED%94%84%EB%A1%9C%EA%B7%B8%EB%9E%98%EB%B0%8D/">자바ORM표준JPA프로그래밍</a>
+
+
+    
+</div>
+
+    
+</div>
+
+    
+    <div class="post-content markdown">
+        <div class="main-content-wrap">
+            <h1 id="객체지향-쿼리-언어3"><a href="#객체지향-쿼리-언어3" class="headerlink" title="객체지향 쿼리 언어3"></a>객체지향 쿼리 언어3</h1><h2 id="1-Persistance-Context와-JPQL"><a href="#1-Persistance-Context와-JPQL" class="headerlink" title="1. Persistance Context와 JPQL"></a>1. Persistance Context와 JPQL</h2><h3 id="1-1-쿼리후-영속상태인-것과-아닌것"><a href="#1-1-쿼리후-영속상태인-것과-아닌것" class="headerlink" title="1-1. 쿼리후 영속상태인 것과 아닌것"></a>1-1. 쿼리후 영속상태인 것과 아닌것</h3><figure class="highlight java"><figcaption><span>영속상태구분</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">select m form Member m <span class="comment">//엔티티조회 (영속성 관리됨)</span></span><br><span class="line">select o.address from Order o <span class="comment">//임베디드타입 조회 (영속성 관리 안됨)</span></span><br><span class="line">select m.id, m.username from Member m <span class="comment">//단순 필드조회 (영속성 관리 안됨)</span></span><br></pre></td></tr></table></figure>
+
+<p>위 예제를 통해 알수있듯이, 조회한 엔티티만 영속성 컨텍스트에 관리가 됨. </p>
+<h3 id="1-2-JPQL로-조회한-엔티티와-영속성-컨텍스트"><a href="#1-2-JPQL로-조회한-엔티티와-영속성-컨텍스트" class="headerlink" title="1-2. JPQL로 조회한 엔티티와 영속성 컨텍스트"></a>1-2. JPQL로 조회한 엔티티와 영속성 컨텍스트</h3><figure class="highlight java"><figcaption><span>영속상태구분</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">em.find(Member.class,<span class="string">&quot;m1&quot;</span>); <span class="comment">//회원1 조회 </span></span><br><span class="line"></span><br><span class="line"><span class="comment">//엔티티 쿼리 조회 결과가 회원1, 회원2</span></span><br><span class="line">List&lt;Member&gt; resultList = em.createQuery(<span class="string">&quot;select m from Member m&quot;</span>, Member.class).getResultList(); </span><br></pre></td></tr></table></figure>
+
+<p>em.find로 회원1을 조회했는데, JPQL로 전체를 가져오는 List를 호출하였다. 그럼 위 조회 과정은 어떻게 될까?</p>
+<blockquote><p>em.find 호출뒤, List 조회 했을경우 </p>
+<ol>
+<li>JPQL을 사용해서 조회 요청</li>
+<li>JPQL은 SQL로 변환되어 DB에 조회 </li>
+<li>조회한 결과와 영속성 컨텍스트를 비교 (em.find로 조회된값 : m1 ,조회한값 :m1,m2)</li>
+<li>식별자 기준으로 m1은 이미 영속성관리에 있으므로 버리고, 기존에 영속성관리에 있던 m1이 반환대상이됨.</li>
+<li>식별자 기준으로 m2는 영속성 컨텍스트에 없으므로, 영속성컨텍스트에 추가 </li>
+<li>쿼리 결과인 m1,m2를 반환한다. 여기서 m1은 쿼리결과가 아니라 영속성 컨텍스트에 있던 엔티티임을 잊지말자! </li>
+</ol>
+</blockquote>
+
+<p>여기서 알수있는 2가지 사실이있다.</p>
+<ol>
+<li>JPQL로 조회한 엔티티는 영속상태다. </li>
+<li>영속성 컨텍스트에 이미 존재하는 엔티티가 있으면 기존 엔티티를 반환한다. </li>
+</ol>
+<p>영속성 컨텍스트는 영속상태인 엔티티의 동일성을 보장한다. em.find이든 JPQL로 조회하든 영속성 컨텍스트가 같으면 동일한 엔티티를 반환함. </p>
+<h3 id="1-3-find-VS-JPQL"><a href="#1-3-find-VS-JPQL" class="headerlink" title="1-3. find() VS JPQL"></a>1-3. find() VS JPQL</h3><h4 id="find"><a href="#find" class="headerlink" title="find()"></a>find()</h4><ul>
+<li>find 메서드는 엔티티를 영속성 컨텍스트에 먼저 찾고 없으면 DB에서 찾는다. 따라서 해당 엔티티가 영속성 컨텍스트에 존재하면 메모리에서 바로 찾으므로 성능상 이점이 있다. (그래서 1차캐시라 부름)</li>
+</ul>
+<h4 id="JPQL"><a href="#JPQL" class="headerlink" title="JPQL"></a>JPQL</h4><ul>
+<li>JPQL은 항상 디비를 조회한다.</li>
+<li>JPQL로 조회한 엔티티는 영속상태다. (왜냐 DB 조회후,영속성컨텍스트에 집어넣기때문 )</li>
+<li>영속성 컨텍스트에 이미 존재하는 엔티티가있으면 기존 엔티티를 반환함. </li>
+</ul>
+<h2 id="2-JPQL과-flush모드"><a href="#2-JPQL과-flush모드" class="headerlink" title="2. JPQL과 flush모드"></a>2. JPQL과 flush모드</h2><h3 id="2-1-쿼리와-플러시-모드"><a href="#2-1-쿼리와-플러시-모드" class="headerlink" title="2-1. 쿼리와 플러시 모드"></a>2-1. 쿼리와 플러시 모드</h3><ul>
+<li>JPQL은 영속성 컨텍스트 고려하지 않고, DB를 먼저 조회함. 따라서 JPQL을 실행하기전에 영속성 컨텍스트의 내용을 DB에 반영해야함. 그렇지 않으면 상이한결과가 발생할수있음. </li>
+<li>FlushMode는 두가지있음. AUTO,COMMIT 이다.<ul>
+<li>AUTO : FlushMode를 따로 지정하지 않으면 기본값임. AUTO는 JPQL가 수행되면 자동 FLUSH시켜버림. </li>
+<li>COMMIT : COMMIT모드면 말그대로 커밋시점에 FLUSH가 됨. 따라서 JPQL쿼리가 수행되도, FLUSH되지않음. </li>
+</ul>
+</li>
+<li>FlushMode.COMMIT은 왜 씀? <ul>
+<li>flush가 너무 빈번하게 일어나는 상황에서 이모드를 사용하면 쿼리시 발생하는 플러시 횟수를 줄여서 성능 최적화 가능함. </li>
+</ul>
+</li>
+<li>JPA를 사용하지않고, JDBC를 직접 사용해서 SQL을 실행할때도 플러시모드는 고민해야함. JPA를 통하지않고 JDBC로 직접 실행하면 JPA는 JDBC가 실행한 쿼리를 인식할 방법이 없음. 따라서 별도 JDBC호출은 플러시 모드를 AUTO로설정해도 무의미함. 이때는 JDBC로 쿼리를 실행하기전에 em.flush를 호출해서 영속성 컨텍스트의 내용을 디비에 동기화 하는게 안점함. </li>
+</ul>
+
+            
+
+
+        </div>
+    </div>
+    <div id="post-footer" class="post-footer main-content-wrap">
+        
+            <div class="post-footer-tags">
+                <span class="text-color-light text-small">TAGGED IN</span><br/>
+                
+    <a class="tag tag--primary tag--small t-none-link" href="/tags/Java-JPA/" rel="tag">Java,JPA</a> <a class="tag tag--primary tag--small t-none-link" href="/tags/QueryDSL/" rel="tag">QueryDSL</a> <a class="tag tag--primary tag--small t-none-link" href="/tags/%EA%B0%9D%EC%B2%B4%EC%A7%80%ED%96%A5%EC%BF%BC%EB%A6%AC%EC%96%B8%EC%96%B43/" rel="tag">객체지향쿼리언어3</a>
+
+            </div>
+        
+        
+            <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    <a
+                        class="post-action-btn btn btn--disabled"
+                        aria-hidden="true"
+                    >
+                        
+                        <i class="fa fa-angle-left" aria-hidden="true"></i>
+                        <span class="hide-xs hide-sm text-small icon-ml">PREVIOUS</span>
+                    </a>
+            </li>
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/2021/05/15/coding-test-study-2/"
+                    data-tooltip="coding-test-study-2"
+                    aria-label="NEXT: coding-test-study-2"
+                >
+                    
+                        <span class="hide-xs hide-sm text-small icon-mr">NEXT</span>
+                        <i class="fa fa-angle-right" aria-hidden="true"></i>
+                    </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a
+                class="post-action-btn btn btn--default btn-open-shareoptions"
+                href="#btn-open-shareoptions"
+                aria-label="Share this post"
+            >
+                <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </a>
+        </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://codexdawn.github.io/2021/05/20/jpa-obj-query-3/"
+                    title="Share on Facebook"
+                    aria-label="Share on Facebook"
+                >
+                    <i class="fab fa-facebook" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://twitter.com/intent/tweet?text=https://codexdawn.github.io/2021/05/20/jpa-obj-query-3/"
+                    title="Share on Twitter"
+                    aria-label="Share on Twitter"
+                >
+                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://plus.google.com/share?url=https://codexdawn.github.io/2021/05/20/jpa-obj-query-3/"
+                    title="Share on Google+"
+                    aria-label="Share on Google+"
+                >
+                    <i class="fab fa-google-plus" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+        
+            
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#" aria-label="Back to top">
+            
+                <i class="fa fa-list" aria-hidden="true"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+        
+        
+            
+        
+    </div>
+</article>
+
+
+
+                <footer id="footer" class="main-content-wrap">
+    <span class="copyrights">
+        Copyrights &copy; 2021 codexdawn. All Rights Reserved.
+    </span>
+</footer>
+
+            </div>
+            
+                <div id="bottom-bar" class="post-bottom-bar" data-behavior="5">
+                    <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    <a
+                        class="post-action-btn btn btn--disabled"
+                        aria-hidden="true"
+                    >
+                        
+                        <i class="fa fa-angle-left" aria-hidden="true"></i>
+                        <span class="hide-xs hide-sm text-small icon-ml">PREVIOUS</span>
+                    </a>
+            </li>
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/2021/05/15/coding-test-study-2/"
+                    data-tooltip="coding-test-study-2"
+                    aria-label="NEXT: coding-test-study-2"
+                >
+                    
+                        <span class="hide-xs hide-sm text-small icon-mr">NEXT</span>
+                        <i class="fa fa-angle-right" aria-hidden="true"></i>
+                    </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a
+                class="post-action-btn btn btn--default btn-open-shareoptions"
+                href="#btn-open-shareoptions"
+                aria-label="Share this post"
+            >
+                <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </a>
+        </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://codexdawn.github.io/2021/05/20/jpa-obj-query-3/"
+                    title="Share on Facebook"
+                    aria-label="Share on Facebook"
+                >
+                    <i class="fab fa-facebook" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://twitter.com/intent/tweet?text=https://codexdawn.github.io/2021/05/20/jpa-obj-query-3/"
+                    title="Share on Twitter"
+                    aria-label="Share on Twitter"
+                >
+                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://plus.google.com/share?url=https://codexdawn.github.io/2021/05/20/jpa-obj-query-3/"
+                    title="Share on Google+"
+                    aria-label="Share on Google+"
+                >
+                    <i class="fab fa-google-plus" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+        
+            
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#" aria-label="Back to top">
+            
+                <i class="fa fa-list" aria-hidden="true"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+                </div>
+                
+    <div id="share-options-bar" class="share-options-bar" data-behavior="5">
+        <i id="btn-close-shareoptions" class="fa fa-times"></i>
+        <ul class="share-options">
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://www.facebook.com/sharer/sharer.php?u=https://codexdawn.github.io/2021/05/20/jpa-obj-query-3/"
+                        aria-label="Share on Facebook"
+                    >
+                        <i class="fab fa-facebook" aria-hidden="true"></i><span>Share on Facebook</span>
+                    </a>
+                </li>
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://twitter.com/intent/tweet?text=https://codexdawn.github.io/2021/05/20/jpa-obj-query-3/"
+                        aria-label="Share on Twitter"
+                    >
+                        <i class="fab fa-twitter" aria-hidden="true"></i><span>Share on Twitter</span>
+                    </a>
+                </li>
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://plus.google.com/share?url=https://codexdawn.github.io/2021/05/20/jpa-obj-query-3/"
+                        aria-label="Share on Google+"
+                    >
+                        <i class="fab fa-google-plus" aria-hidden="true"></i><span>Share on Google+</span>
+                    </a>
+                </li>
+            
+        </ul>
+    </div>
+
+
+            
+        </div>
+        
+
+
+<div id="about">
+    <div id="about-card">
+        <div id="about-btn-close">
+            <i class="fa fa-times"></i>
+        </div>
+        
+            <h4 id="about-card-name">codexdawn</h4>
+        
+            <div id="about-card-bio"><p>author.bio</p>
+</div>
+        
+        
+            <div id="about-card-job">
+                <i class="fa fa-briefcase"></i>
+                <br/>
+                <p>author.job</p>
+
+            </div>
+        
+        
+    </div>
+</div>
+
+        
+        
+<div id="cover" style="background-image:url('/assets/images/cover-v1.2.0.jpg');"></div>
+        <!--SCRIPTS-->
+
+<script src="/assets/js/script-ikbi0v8fyzuu91xv5rmpcrnwb4qinfgborzd5kejmj8wr6ibfra8oaxqshyg.min.js"></script>
+
+<!--SCRIPTS END-->
+
+
+    
+
+
+
+
+    </body>
+</html>
