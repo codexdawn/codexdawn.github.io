@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="generator" content="codexdawn">
-    <title>Tag: Java8 - codexdawn</title>
+    <title>java8-chaptor3 - codexdawn</title>
     <meta name="author" content="codexdawn">
     
     
@@ -15,14 +15,24 @@
             <link rel="alternate" type="application/atom+xml" title="RSS" href="/atom.xml">
         
     
-    <script type="application/ld+json">{}</script>
-    <meta property="og:type" content="blog">
-<meta property="og:title" content="codexdawn">
-<meta property="og:url" content="https://codexdawn.github.io/tags/Java8/index.html">
+    <script type="application/ld+json">{"@context":"http://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"codexdawn","sameAs":["https://github.com/codexdawn","https://www.facebook.com/beherzt.dev","https://www.linkedin.com/in/sim-jisung-3048872a/","mailto:cloudkaiser@gmail.com"],"image":"https://www.gravatar.com/avatar/d97fd4b94c429915f1cb55eb27e7d4d9"},"articleBody":"Chaptor3. 람다 표현식3-1. 람다란?람다는 메서드로 전달할수 있는 익명함수를 단순화 한것 \n람다의 특징\n익명 : 보통의 메서드와 달리 익명이라표현 \n함수 : 람다는 메서드처럼 특정 클래스에 종속되지 않으므로 함수 라고 부름. 단, 메서드와 동일하게 파라미터, 바디, 반환형식 간으한 예외 리스트를 포함함.\n전달 : 람다 표현식을 메서드 인수로 전달하거나 변수로 저장할수 있음. \n간결성 : 익명 클래스처럼 많은 자질 구레한 코드를 구현할 필요가 없음. \n\n3-2. 함수형 인터페이스함수형 인터페이스는 정확히 하나의 추상 메서드를 지정하는 인터페이스다! \n함수형인터페이스들1234567891011121314151617181920212223public interface Predicate&lt;T&gt; &#123;\tboolean test(T t); &#125;public interface Comparator&lt;T&gt; &#123;\tint compare(T o1, T o2); &#125;public interface Runnable &#123;\tvoid run(); &#125;public interface ActionListener extends EventListener &#123;\tvoid actionPerformed(ActionEvent e);&#125;public interface Callable&lt;V&gt; &#123;\tV call(); &#125;public interface PrivilegedAction&lt;V&gt; &#123;\tT run();&#125;\n\n3-3. 람다 활용processFile메서드를 람다로 변환 과정12345public static String processFile() throws IOException &#123;\t\ttry(BufferedReader br = new BufferedReader(new FileReader(&quot;data.txt&quot;))) &#123;\t\treturn br.readLine();\t&#125;&#125;\n\n1단계: 동작 파라미터화를 기억하라!위 코드는 파일에서 한번에 한줄만 읽을수 있음. 한번에 두줄을 읽거나 가장 자주 사용되는 단어를 반환하려면 어떻게 해야할까?결론은 동작파라미터화를 사용하는것이다. 아래 코드처럼 작성이 되어야할것이다. \nprocessFile메서드를 람다로 변환 과정-동작파라미터화11String result = processFile((BufferedReader br) -&gt; br.readLine() + br.readLine()); \n\n2단계: 함수형 인터페이스를 이용해서 동작 전달!processFile메서드를 람다로 변환 과정-동작파라미터화212345678@FunctionalInterfacepublic interface BufferedReaderProcessor &#123;\tString process(BufferedReader b) throws IOException; &#125;public static String processFile(BufferedReaderProcessor p) throws IOException &#123;... &#125;\n\n3단계: 동작실행!processFile메서드를 람다로 변환 과정-동작파라미터화3123456public static String processFile(BufferedReaderProcessor p) throws IOException &#123;\ttry(BufferedReader br = new BufferedReader(new FileReader(&quot;data.txt&quot;))) &#123;\t\treturn p.process(br);\t&#125;&#125;\n\n4단계: 람다 전달!processFile메서드를 람다로 변환 과정-동작파라미터화412String oneLine = processFile((BufferedReader br) -&gt; br.readLine());String twoLine = processFile((BufferedReader br) -&gt; br.readLine() + br.readLine());\n\n3-4. 함수형 인터페이스 사용PredicatePredicate사용1234567891011121314151617@FunctionalInterfacepublic interface Predicate&lt;T&gt; &#123;\tboolean test(T t); &#125;public static &lt;T&gt; List&lt;T&gt; filter(List&lt;T&gt; list, Predicate&lt;T&gt; p) &#123;\tList&lt;T&gt; results = new ArrayList&lt;&gt;();\tfor(T s: list) &#123;\t\tif(p.test(s)) &#123;\t\t\tresults.add(s);\t\t&#125;\t&#125;\treturn results; &#125;Predicate&lt;String&gt; nonEmptyStringPredicate = (String s) -&gt; !s.isEmpty();List&lt;String&gt; nonEmpty = filter(listOfStrings, noneEmptyStringPredicate); \n\nConsumerConsumer사용123456789101112@FunctionalInterfacepublic interface Consumer&lt;T&gt; &#123;\tvoid accept(T t); &#125;public static &lt;T&gt; void forEach(List&lt;T&gt; list, Consumer&lt;T&gt; c) &#123;\tfor(T i: list) &#123;\t\tc.accept(i); \t\t\t&#125;&#125;foreach(Arrays.asList(1,2,3,4,5), (Integer i) -&gt; System.out.println(i));\n\nFunctionFunction사용1234567891011121314@FunctionalInterfacepublic interface Function&lt;T,R&gt; &#123;\tR apply(T t); &#125;public static &lt;T,R&gt; List&lt;R&gt; map(List&lt;T&gt; list, Function&lt;T,R&gt; f) &#123;\tList&lt;R&gt; result = new ArrayList&lt;&gt;(); \tfor(T s: list) &#123;\t\t result.add(f.apply(s));\t\t\t&#125;\treturn result; &#125;List&lt;Integer&gt; stringLength = map(Arrays.asList(&quot;lambdas&quot;,&quot;in&quot;,&quot;action&quot;),((String s) -&gt; s.length()));\n\n기본형 특화자바의 모든형식은 참조형과 기본형으로 나눌수있음. \n\n참조형 : Byte, Integer, Object..기본형 : int,double,long,char..기본형을 참조형으로 변환하는 부분을 박싱(boxing)이라고 하고, 참조형을 기본형으로 변호나하는 동작을 언박싱(unboxing)이라고함. 자바에서는 이런 박싱/언박싱을 자동으로 해주는데, 이를 오토박싱이라함.하지만 이런 변환과정은 비용이 소모됨. 박싱한 값은 기본형으로 감싸는 래퍼며 힙에 저장됨. 따라서 박싱한 값은 메모리를 더 소비하며 기본형을 가져올때도 메모리를 탐색하는 과정이 필요함. \n\n자바8에서는 이런 박싱/언박싱 되는 부분을 위해서 함수형인터페이스로 아예 제공하고있음.예를들면 int파라미터를 받는 부분을 boolean으로 변환시켜주는 Predicate는 IntPredicate이런식으로 아예 기본클래스로 제공하고있음.더 자세한 부분은 아래 참고 \n\n\n예외,람다,함수형 인터페이스 관계함수형 인터페이스는 확인된 예외를 던지는 동작을 허용하지 않는다. 즉, 예외를 던지는 람다 표현식을 만드려면 확인된 예외를 선언하는 함수형 인터페이스를 직접 정의하거나 람다를 try/catch블록으로 감싸야함\n@FunctionalInterfacepublic interface BufferedReaderProcessor {    String process(BufferedReader b) throws IOException;}BufferedReaderProcessor p = (BufferedReader br) -&gt; br.readLine();\n위와같이 지난 예제에서 동작파라미터화를 통해 BufferedReaderProcessor를 만들어서 예외처리까지 가능하도록 만들었었다. 하지만 이부분은 함수형 인터페이스의 Function&lt;T,R&gt;의 형태를 사용하고 있기 때문에 아래와같이 더 간단한 람다표현식으로 변경시켜서 명시적으로 확인된 예외를 체크할수있다. \nFunction&lt;BufferedReader, String&gt; f =  (BufferedReader b) -&gt; {    try {      return b.readLine();    }    catch(IOException e) {      throw new RuntimeException(e);    }  };\n\n\n3-5. 형식 검사, 형식 추론, 제약지역 변수 사용람다 표현식에는 익명함수가 하는 것처럼 자유 변수(파라미터로 넘겨진 변수가 아닌 외부에서 정의된 변수)를 활용 할수 있다. 이와 같은 동작을 람다 캡처링이라고 부른다. 람다는 인스턴스 변수와 정적 변수를 캡처(자신의 바디에서 참조할수 있도록) 할수 있다. 하지만 지역 변수는 명시적으로 final로 선언되어 있어야 하거나 실질적으로 final 로 선언된 변수와 똑같이 사용되어야 한다. \n지역변수의 제약지역 변수에 왜 이런 제약이 필요할까?\n\n인스턴스 변수 와 지역변수는 태생적으로 다름. 인스턴수 변수는 힙에 저장되지만, 지역변수는 스택에 쌓임 \n만약 람다에서 지역 변수에 바로 접근 할수 있다는 가정하에 람다가 스레드에서 실행된다면, 변수를 할당한 스레드가 사라져서 변수 할당이 해제되었는데도 람다를 실행하는 스레드에서는 해당변수에 접근하려 할 수 있다. \n위 와 같은 이유로 자바는 원래 변수에 접근을 허용하는것이 아니라, 자유 지역 변수의 복사본을 제공한다. 따라서 복사본의 값이 바뀌지 않아야 하므로 지역변수에는 한 번만 값을 할당해야 한다는 제약이 생긴것이다. \n\n클로저????원칙적으로 클로저란 함수의 비지역 변수를 자유롭게 참조할수있는 함수의 인스턴스를 가르킨다. 클로저는 클로저 외부에 정의된 변수의값에 접근하고, 갑을 바꿀수 있다. 다만 람다와 익명 클래스는 람다가 정의된 메서드의 지역변수의 값은 바꿀수없다. 람다가 정의된 메서드의 지역변수값은 final 변수여야한다. 위에 설명하였지만 지역 변수값은 스택에 쌓이기때문에 자신을 정의한 스레드와 생존을 같이 해야 하며, 따라서 지역변수는 final이어야한다. 가변 지역 변수를 새로운 스레드에서 캡처할수있다면 안전하지 않은 동작을 수행할 가능성이 생긴다.(인스턴스 변수는 스레드가 공유하는 힙에 존재하므로 특별한 제약이 없다.)\n\n\n3-6. 메서드 레퍼런스메서드 레퍼런스를 만드는 방법\n정적 메서드 레퍼런스 \nInteger::parInt \n\n\n다양한 형식의 인스턴스 메서드 레퍼런스\nString::length\n\n\n기존 객체의 인스턴스 메서드 레퍼런스 \nTransaction a1 = new Transaction(); void getValue() {}; a1::getValue \n\n\n\n생성자 레퍼런스생성자레퍼런스 예시12345678910111213141516171819202122232425Supplier&lt;Apple&gt; c1 = Apple::new; //디폴트 생성자Apple a1 = c1.get();//위 예제는 아래와 같음 Supplier&lt;Apple&gt; c1 = () -&gt; new Apple();Apple a1 = c1.get(); Function&lt;Integer, Apple&gt; c2 = Apple::new; //Apple(Integer weight) 생성자 함수 Apple a2 = c2.get(110);//위 예제는 아래와 같음 Function&lt;Integer, Apple&gt; c2 = (Integer weight) -&gt; new Apple(weight);Apple a2 = c2.get(110); //map과 같은 메서드를 이용해서 Apple생성자로 전달 가능 List&lt;Integer&gt; weights = Arrays.asList(1,2,3,4,5);List&lt;Apple&gt; apples = map(weights, Apple::new);public static List&lt;Apple&gt; map(List&lt;Integer&gt; list, Function&lt;Integer, Apple&gt; f) &#123;\tList&lt;Apple&gt; result = new ArrayList&lt;&gt;();\tfor(Integer e : list) &#123;\t\tresult.add(f.apply(e));\t&#125;\treturn result; &#125;\n\n3-7. 람다 표현식을 조합할수 있는 유용한 메서드Comparator 조합Comparator 조합1234567Comparator&lt;Apple&gt; c = Comparator.comparing(Apple::getWeight);//역정렬 가능 inventory.sort(comparing(Apple::getWeight).reversed());inventory.sort(comparing(Apple::getWeight)\t\t\t\t\t\t.reversed() //무게를 내림차순으로 정렬\t\t\t\t\t\t.thenComparing(Apple::getCountry)); // 두 사과의 무게가 같음 국가별로 정렬 (2차 정렬)\n\nPredicate 조합Predicate 조합12Predicate&lt;Apple&gt; redAndHeavyAppleOrGreen = redApple.and(a -&gt; a.getWeight() &gt; 150)\t\t\t\t\t\t\t\t\t\t\t\t   .or(a -&gt; &quot;green&quot;.equals(a.getColor()));\n\nFunction 조합Predicate 조합123456789101112131415161718192021222324252627282930313233343536//andThenFunction&lt;Integer,Integer&gt; f = x -&gt; x + 1; Function&lt;Integer,Integer&gt; g = x -&gt; x * 2;Function&lt;Integer,Integer&gt; h = f.andThen(g);int result = h.apply(1); //4반환 f먼저 계산하고 g계산 //compose Function&lt;Integer,Integer&gt; f = x -&gt; x + 1; Function&lt;Integer,Integer&gt; g = x -&gt; x * 2;Function&lt;Integer,Integer&gt; h = f.compose(g);int result = h.apply(1); //3반환 g먼저 계산하고 f계산public class Letter&#123;    public static String addHeader(String text) &#123;        return &quot;From Raoul, Mario and Alan: &quot; + text;    &#125;    public static String addFooter(String text) &#123;        return text + &quot; Kind regards&quot;;    &#125;    public static String checkSpelling(String text) &#123;        return text.replaceAll(&quot;labda&quot;, &quot;lambda&quot;);    &#125;&#125;//header추가 -&gt; 스펠링체크 -&gt; footer추가 순으로 파이프라이닝을 만들수있음. (메서드체이닝)Function&lt;String, String&gt; addHeader = Letter::addHeader;Function&lt;String, String&gt; transformationPipeline  = addHeader.andThen(Letter::checkSpelling)             .andThen(Letter::addFooter);//스펠링체크는 제낄수있음.\t\t\t Function&lt;String, String&gt; addHeader = Letter::addHeader;Function&lt;String, String&gt; transformationPipeline  = addHeader.andThen(Letter::addFooter);\n\n","dateCreated":"2021-05-20T14:08:15+00:00","dateModified":"2021-05-21T14:50:28+00:00","datePublished":"2021-05-20T14:08:15+00:00","description":"","headline":"java8-chaptor3","image":[],"mainEntityOfPage":{"@type":"WebPage","@id":"https://codexdawn.github.io/2021/05/20/java8-chaptor3/"},"publisher":{"@type":"Organization","name":"codexdawn","sameAs":["https://github.com/codexdawn","https://www.facebook.com/beherzt.dev","https://www.linkedin.com/in/sim-jisung-3048872a/","mailto:cloudkaiser@gmail.com"],"image":"https://www.gravatar.com/avatar/d97fd4b94c429915f1cb55eb27e7d4d9","logo":{"@type":"ImageObject","url":"https://www.gravatar.com/avatar/d97fd4b94c429915f1cb55eb27e7d4d9"}},"url":"https://codexdawn.github.io/2021/05/20/java8-chaptor3/","keywords":"Java8, 람다 표현식, lambda"}</script>
+    <meta name="description" content="Chaptor3. 람다 표현식3-1. 람다란?람다는 메서드로 전달할수 있는 익명함수를 단순화 한것  람다의 특징 익명 : 보통의 메서드와 달리 익명이라표현  함수 : 람다는 메서드처럼 특정 클래스에 종속되지 않으므로 함수 라고 부름. 단, 메서드와 동일하게 파라미터, 바디, 반환형식 간으한 예외 리스트를 포함함. 전달 : 람다 표현식을 메서드 인수로 전달하">
+<meta property="og:type" content="blog">
+<meta property="og:title" content="java8-chaptor3">
+<meta property="og:url" content="https://codexdawn.github.io/2021/05/20/java8-chaptor3/index.html">
 <meta property="og:site_name" content="codexdawn">
+<meta property="og:description" content="Chaptor3. 람다 표현식3-1. 람다란?람다는 메서드로 전달할수 있는 익명함수를 단순화 한것  람다의 특징 익명 : 보통의 메서드와 달리 익명이라표현  함수 : 람다는 메서드처럼 특정 클래스에 종속되지 않으므로 함수 라고 부름. 단, 메서드와 동일하게 파라미터, 바디, 반환형식 간으한 예외 리스트를 포함함. 전달 : 람다 표현식을 메서드 인수로 전달하">
 <meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://codexdawn.github.io/images/java8/java-2.png">
+<meta property="og:image" content="https://codexdawn.github.io/images/java8/java-3.png">
+<meta property="article:published_time" content="2021-05-20T14:08:15.000Z">
+<meta property="article:modified_time" content="2021-05-21T14:50:28.609Z">
 <meta property="article:author" content="codexdawn">
+<meta property="article:tag" content="Java8">
+<meta property="article:tag" content="람다 표현식">
+<meta property="article:tag" content="lambda">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://codexdawn.github.io/images/java8/java-2.png">
     
     
         
@@ -41,6 +51,8 @@
     
 
     
+        
+    
 </head>
 
     <body>
@@ -50,7 +62,7 @@
 
     
 
-<header id="header" data-behavior="2">
+<header id="header" data-behavior="5">
     <i id="btn-open-sidebar" class="fa fa-lg fa-bars"></i>
     <div class="header-title">
         <a
@@ -77,7 +89,7 @@
             <!-- Define author's picture -->
 
 
-<nav id="sidebar" data-behavior="2">
+<nav id="sidebar" data-behavior="5">
     <div class="sidebar-container">
         
         
@@ -231,30 +243,22 @@
 </nav>
 
             
-            <div id="main" data-behavior="2"
+            <div id="main" data-behavior="5"
                  class="
                         hasCoverMetaIn
                         ">
                 
-    <section class="postShorten-group main-content-wrap">
+<article class="post">
     
     
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/2021/05/20/java8-chaptor3/"
-                            aria-label=": java8-chaptor3"
-                        >
-                            java8-chaptor3
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
+        <div class="post-header main-content-wrap text-left">
+    
+        <h1 class="post-title">
+            java8-chaptor3
+        </h1>
+    
+    
+        <div class="post-meta">
     <time datetime="2021-05-20T14:08:15+00:00">
 	
 		    May 20, 2021
@@ -269,10 +273,13 @@
     
 </div>
 
-            </div>
-            
-                <div class="postShorten-content">
-                    <h1 id="Chaptor3-람다-표현식"><a href="#Chaptor3-람다-표현식" class="headerlink" title="Chaptor3. 람다 표현식"></a>Chaptor3. 람다 표현식</h1><h2 id="3-1-람다란"><a href="#3-1-람다란" class="headerlink" title="3-1. 람다란?"></a>3-1. 람다란?</h2><p>람다는 메서드로 전달할수 있는 익명함수를 단순화 한것 </p>
+    
+</div>
+
+    
+    <div class="post-content markdown">
+        <div class="main-content-wrap">
+            <h1 id="Chaptor3-람다-표현식"><a href="#Chaptor3-람다-표현식" class="headerlink" title="Chaptor3. 람다 표현식"></a>Chaptor3. 람다 표현식</h1><h2 id="3-1-람다란"><a href="#3-1-람다란" class="headerlink" title="3-1. 람다란?"></a>3-1. 람다란?</h2><p>람다는 메서드로 전달할수 있는 익명함수를 단순화 한것 </p>
 <h3 id="람다의-특징"><a href="#람다의-특징" class="headerlink" title="람다의 특징"></a>람다의 특징</h3><ul>
 <li>익명 : 보통의 메서드와 달리 익명이라표현 </li>
 <li>함수 : 람다는 메서드처럼 특정 클래스에 종속되지 않으므로 <strong>함수</strong> 라고 부름. 단, 메서드와 동일하게 파라미터, 바디, 반환형식 간으한 예외 리스트를 포함함.</li>
@@ -345,136 +352,122 @@
 <h3 id="Function-조합"><a href="#Function-조합" class="headerlink" title="Function 조합"></a>Function 조합</h3><figure class="highlight java"><figcaption><span>Predicate 조합</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//andThen</span></span><br><span class="line">Function&lt;Integer,Integer&gt; f = x -&gt; x + <span class="number">1</span>; </span><br><span class="line">Function&lt;Integer,Integer&gt; g = x -&gt; x * <span class="number">2</span>;</span><br><span class="line">Function&lt;Integer,Integer&gt; h = f.andThen(g);</span><br><span class="line"><span class="keyword">int</span> result = h.apply(<span class="number">1</span>); <span class="comment">//4반환 f먼저 계산하고 g계산 </span></span><br><span class="line"></span><br><span class="line"><span class="comment">//compose </span></span><br><span class="line">Function&lt;Integer,Integer&gt; f = x -&gt; x + <span class="number">1</span>; </span><br><span class="line">Function&lt;Integer,Integer&gt; g = x -&gt; x * <span class="number">2</span>;</span><br><span class="line">Function&lt;Integer,Integer&gt; h = f.compose(g);</span><br><span class="line"><span class="keyword">int</span> result = h.apply(<span class="number">1</span>); <span class="comment">//3반환 g먼저 계산하고 f계산</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Letter</span></span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> String <span class="title">addHeader</span><span class="params">(String text)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;From Raoul, Mario and Alan: &quot;</span> + text;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> String <span class="title">addFooter</span><span class="params">(String text)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> text + <span class="string">&quot; Kind regards&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> String <span class="title">checkSpelling</span><span class="params">(String text)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> text.replaceAll(<span class="string">&quot;labda&quot;</span>, <span class="string">&quot;lambda&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//header추가 -&gt; 스펠링체크 -&gt; footer추가 순으로 파이프라이닝을 만들수있음. (메서드체이닝)</span></span><br><span class="line">Function&lt;String, String&gt; addHeader = Letter::addHeader;</span><br><span class="line">Function&lt;String, String&gt; transformationPipeline</span><br><span class="line">  = addHeader.andThen(Letter::checkSpelling)</span><br><span class="line">             .andThen(Letter::addFooter);</span><br><span class="line"></span><br><span class="line"><span class="comment">//스펠링체크는 제낄수있음.			 </span></span><br><span class="line">Function&lt;String, String&gt; addHeader = Letter::addHeader;</span><br><span class="line">Function&lt;String, String&gt; transformationPipeline</span><br><span class="line">  = addHeader.andThen(Letter::addFooter);</span><br><span class="line"></span><br></pre></td></tr></table></figure>
 
 
-                    
-                        
-
-
-                    
-                    
-                        <p>
-                            <a
-                                href="/2021/05/20/java8-chaptor3/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                Comment and share
-                            </a>
-                        </p>
-                    
-                </div>
             
+
+
         </div>
+    </div>
+    <div id="post-footer" class="post-footer main-content-wrap">
         
-    </article>
-    
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/2021/05/08/java8-chaptor2/"
-                            aria-label=": java8-chaptor2"
-                        >
-                            java8-chaptor2
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time datetime="2021-05-08T08:18:24+00:00">
-	
-		    May 08, 2021
-    	
-    </time>
-    
-        <span>in </span>
-        
-    <a class="category-link" href="/categories/Java8InAction/">Java8InAction</a>, <a class="category-link" href="/categories/Study/">Study</a>
-
-
-    
-</div>
+            <div class="post-footer-tags">
+                <span class="text-color-light text-small">TAGGED IN</span><br/>
+                
+    <a class="tag tag--primary tag--small t-none-link" href="/tags/Java8/" rel="tag">Java8</a> <a class="tag tag--primary tag--small t-none-link" href="/tags/lambda/" rel="tag">lambda</a> <a class="tag tag--primary tag--small t-none-link" href="/tags/%EB%9E%8C%EB%8B%A4-%ED%91%9C%ED%98%84%EC%8B%9D/" rel="tag">람다 표현식</a>
 
             </div>
-            
-                <div class="postShorten-content">
-                    <h1 id="Chapter-2-동작파라미터화-코드-전달하기"><a href="#Chapter-2-동작파라미터화-코드-전달하기" class="headerlink" title="Chapter 2. 동작파라미터화 코드 전달하기"></a>Chapter 2. 동작파라미터화 코드 전달하기</h1><h2 id="목차"><a href="#목차" class="headerlink" title="목차"></a>목차</h2><p><a href="#1.%EB%B3%80%ED%99%94%ED%95%98%EB%8A%94-%EC%9A%94%EA%B5%AC%EC%82%AC%ED%95%AD%EC%97%90-%EB%8C%80%EC%9D%91">1.변화하는 요구사항에 대응</a><br><a href="#2.%EB%8F%99%EC%9E%91%ED%8C%8C%EB%9D%BC%EB%AF%B8%ED%84%B0%ED%99%94">2.동작파라미터화</a><br><a href="#3.%EC%9D%B5%EB%AA%85%ED%81%B4%EB%9E%98%EC%8A%A4">3.익명클래스</a><br><a href="#4.%EB%9E%8C%EB%8B%A4-%ED%91%9C%ED%98%84%EC%8B%9D-%EB%AF%B8%EB%A6%AC%EB%B3%B4%EA%B8%B0">4.람다 표현식 미리보기</a><br><a href="#5.%EC%8B%A4%EC%A0%84%EC%98%88%EC%A0%9C:-Comparator,Runnable,GUI">5.실전예제: Comparator,Runnable,GUI</a></p>
-<hr>
-<h2 id="1-변화하는-요구사항에-대응"><a href="#1-변화하는-요구사항에-대응" class="headerlink" title="1.변화하는 요구사항에 대응"></a>1.변화하는 요구사항에 대응</h2><ul>
-<li>우리가 어떤 상황에서 일을 하든 소비자 요구사항은 항상 바뀐다. 변화하는 요구사항은 소프트웨어 엔지니어링에서 피할수 없는 문제다. </li>
-<li>동작 파라미터화(behavior parameterization) 을 활용하면 자주 바뀌는 요구사항에 효과적으로 대응 할수 있다. </li>
-<li>동작 파라미터란? 아직은 어떻게 실행할 것인지 결정하지 않은 코드 블록을 의미함. 이 코드 블록은 나중에 프로그램에서 호출한다. 즉, 코드블록의 실행은 나중으로 미뤄진다. </li>
-</ul>
-<h3 id="1-1-첫번째시도-녹색사과-필터링"><a href="#1-1-첫번째시도-녹색사과-필터링" class="headerlink" title="1-1. 첫번째시도:녹색사과 필터링"></a>1-1. 첫번째시도:녹색사과 필터링</h3><figure class="highlight java"><figcaption><span>filterGreenApples</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"> </span><br><span class="line"><span class="class"><span class="keyword">enum</span> <span class="title">Color</span> </span>&#123; RED, GREEN &#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> List&lt;Apple&gt; <span class="title">filterGreenApples</span><span class="params">(List&lt;Apple&gt; inventory)</span> </span>&#123;</span><br><span class="line">    List&lt;Apple&gt; result = <span class="keyword">new</span> ArrayList&lt;&gt;();                          <span class="number">1.</span>사과 누적리스트</span><br><span class="line">    <span class="keyword">for</span>(Apple apple: inventory)&#123;</span><br><span class="line">        <span class="keyword">if</span>( GREEN.equals(apple.getColor() ) &#123;                        <span class="number">2.</span>녹색사과 필터 </span><br><span class="line">            result.add(apple);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> result;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h4 id="1-2-두번째시도-색을-파라미터화"><a href="#1-2-두번째시도-색을-파라미터화" class="headerlink" title="1-2. 두번째시도:색을 파라미터화"></a>1-2. 두번째시도:색을 파라미터화</h4><figure class="highlight java"><figcaption><span>filterGreenApples</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"> </span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> List&lt;Apple&gt; <span class="title">filterApplesByColor</span><span class="params">(List&lt;Apple&gt; inventory,</span></span></span><br><span class="line"><span class="function"><span class="params">Color color)</span> </span>&#123;</span><br><span class="line">    List&lt;Apple&gt; result = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">    <span class="keyword">for</span> (Apple apple: inventory) &#123;</span><br><span class="line">        <span class="keyword">if</span> ( apple.getColor().equals(color) ) &#123;</span><br><span class="line">            result.add(apple);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> result;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">List&lt;Apple&gt; greenApples = filterApplesByColor(inventory, GREEN);</span><br><span class="line">List&lt;Apple&gt; redApples = filterApplesByColor(inventory, RED);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 농부의 다양한 요구사항을 들어보니 색과 마찬가지로 앞으로 무게의 기준도 얼마든지 바뀔수있다는걸 알게됫음.</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> List&lt;Apple&gt; <span class="title">filterApplesByWeight</span><span class="params">(List&lt;Apple&gt; inventory,</span></span></span><br><span class="line"><span class="function"><span class="params"><span class="keyword">int</span> weight)</span> </span>&#123;</span><br><span class="line">    List&lt;Apple&gt; result = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">    For (Apple apple: inventory)&#123;</span><br><span class="line">        <span class="keyword">if</span> ( apple.getWeight() &gt; weight ) &#123;</span><br><span class="line">            result.add(apple);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> result;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>주로 내가 현업에서 개발하던 스타일이며 자주 보던 스타일이다. 코드 자체가 저렇게 필터링 되는 조건만 달라지고 나머지는 거의 동일한 로직으로 처리되는 로직들을 종종 볼수있었다. 그렇다보니 최악의 코드이며 가장 더러운 방식까지 내려가던일도 진짜 가끔있었다. 세번째 시도를 한번 보자.</p>
-<h4 id="1-3-세번째-시도-가능한-모든-속성으로-필터링"><a href="#1-3-세번째-시도-가능한-모든-속성으로-필터링" class="headerlink" title="1-3. 세번째 시도: 가능한 모든 속성으로 필터링"></a>1-3. 세번째 시도: 가능한 모든 속성으로 필터링</h4><figure class="highlight java"><figcaption><span>filterApples</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"> </span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> List&lt;Apple&gt; <span class="title">filterApples</span><span class="params">(List&lt;Apple&gt; inventory, Color color,</span></span></span><br><span class="line"><span class="function"><span class="params">                                       <span class="keyword">int</span> weight, <span class="keyword">boolean</span> flag)</span> </span>&#123;</span><br><span class="line">    List&lt;Apple&gt; result = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">    <span class="keyword">for</span> (Apple apple: inventory) &#123;</span><br><span class="line">        <span class="keyword">if</span> ( (flag &amp;&amp; apple.getColor().equals(color)) ||</span><br><span class="line">             (!flag &amp;&amp; apple.getWeight() &gt; weight) )&#123;          <span class="number">1.</span> 정말 더럽다. 코드가..-_-; flag의 용도는 대체 뭐임? </span><br><span class="line">            result.add(apple);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> result;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>위 코드를 보자하니, 정말 답이없다. 우선 flag의 용도는 뭘까? 하나의 공통 코드로 만들어보려다가 오히려 똥 만들어놨다. 부끄럽지만 나도 저렇게 짜려고 했던적이 있던것 같다. 이제부터 동작 파라미터화를 하는 방법에 대해서 확인해보자! </p>
-<hr>
-<h2 id="2-동작파라미터화"><a href="#2-동작파라미터화" class="headerlink" title="2.동작파라미터화"></a>2.동작파라미터화</h2><h3 id="2-1-네번째시도-추상적조건으로-필터링"><a href="#2-1-네번째시도-추상적조건으로-필터링" class="headerlink" title="2-1. 네번째시도: 추상적조건으로 필터링"></a>2-1. 네번째시도: 추상적조건으로 필터링</h3><figure class="highlight java"><figcaption><span>predicate</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"> </span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">ApplePredicate</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">boolean</span> <span class="title">test</span> <span class="params">(Apple apple)</span></span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">AppleHeavyWeightPredicate</span> <span class="keyword">implements</span> <span class="title">ApplePredicate</span> </span>&#123;   <span class="number">1.</span> 무게 <span class="number">150</span>이상</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">test</span><span class="params">(Apple apple)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> apple.getWeight() &gt; <span class="number">150</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">AppleGreenColorPredicate</span> <span class="keyword">implements</span> <span class="title">ApplePredicate</span> </span>&#123;    <span class="number">2.</span> 녹색사과만 </span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">test</span><span class="params">(Apple apple)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> GREEN.equals(apple.getColor());</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">AppleRedAndHeavyPredicate</span> <span class="keyword">implements</span> <span class="title">ApplePredicate</span> </span>&#123;</span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">test</span><span class="params">(Apple apple)</span></span>&#123;</span><br><span class="line">                <span class="keyword">return</span> RED.equals(apple.getColor())</span><br><span class="line">                       &amp;&amp; apple.getWeight() &gt; <span class="number">150</span>;</span><br><span class="line">        &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> List&lt;Apple&gt; <span class="title">filterApples</span><span class="params">(List&lt;Apple&gt; inventory,</span></span></span><br><span class="line"><span class="function"><span class="params">                                       ApplePredicate p)</span> </span>&#123;</span><br><span class="line">    List&lt;Apple&gt; result = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">    <span class="keyword">for</span>(Apple apple: inventory) &#123;</span><br><span class="line">        <span class="keyword">if</span>(p.test(apple)) &#123;                       <span class="number">1.</span> predicate객체로 사과 검사 조건 캡슐화</span><br><span class="line">            result.add(apple);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> result;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">List&lt;Apple&gt; redAndHeavyApples =</span><br><span class="line">    filterApples(inventory, <span class="keyword">new</span> AppleRedAndHeavyPredicate());</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p><img src="/images/java8/java-1.png" alt="사과를 선택하는 다양한 전략"></p>
-<p>위 그림처럼 전략패턴을 활용해서 사과의 필터조건을 결정하도록 개발하게되었다. 이렇게되면 각 구체 클래스에서 정의한 조건을 ApplePredicate 에 파라미터화 시키면 된다. 확실히 더러웠던 3번째시도 보다는 아주 스마트하고 깔끔해졌다. 역시 이래서 디자인패턴을 활용해야하나 보다. </p>
-<hr>
-<h2 id="3-익명클래스"><a href="#3-익명클래스" class="headerlink" title="3.익명클래스"></a>3.익명클래스</h2><ul>
-<li>익명 클래스는 자바의 지역클래스(블록 내부에 설정된 클래스)와 비슷한개념이다.</li>
-<li>익명 클래스를 이용하면 클래스 선언과 인스턴스화를 동시에 할 수 있다.</li>
-</ul>
-<h3 id="3-1-다섯번째-시도-익명클래스-사용"><a href="#3-1-다섯번째-시도-익명클래스-사용" class="headerlink" title="3-1. 다섯번째 시도: 익명클래스 사용"></a>3-1. 다섯번째 시도: 익명클래스 사용</h3><figure class="highlight java"><figcaption><span>filterApples</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"> </span><br><span class="line">List&lt;Apple&gt; redApples = filterApples(inventory, <span class="keyword">new</span> ApplePredicate() &#123;     <span class="number">1.</span>메서드를 파라미터화 시켰음. </span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">test</span><span class="params">(Apple apple)</span></span>&#123;</span><br><span class="line">        <span class="keyword">return</span> RED.equals(apple.getColor());</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
-
-<p>위 처럼 메서드를 파라미터화 시켜서 익명클래스를 적용은 시켰지만 여전히 빨간사과를 필터링하는 조건이 이외에 코드들이 너무 장황하다. 이런 익명클래스는 람다식을 통해 코드량을 단축시킬수있다. </p>
-<hr>
-<h2 id="4-람다-표현식-미리보기"><a href="#4-람다-표현식-미리보기" class="headerlink" title="4.람다 표현식 미리보기"></a>4.람다 표현식 미리보기</h2><h3 id="4-1-여섯번째-시도-람다-표현식-사용"><a href="#4-1-여섯번째-시도-람다-표현식-사용" class="headerlink" title="4-1. 여섯번째 시도: 람다 표현식 사용"></a>4-1. 여섯번째 시도: 람다 표현식 사용</h3><figure class="highlight java"><figcaption><span>filterApples</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"> </span><br><span class="line">List&lt;Apple&gt; result =</span><br><span class="line">  filterApples(inventory, (Apple apple) -&gt; RED.equals(apple.getColor()));</span><br></pre></td></tr></table></figure>
-
-<p>이렇게 람다 표현식을 사용하면 코드를 더 심플하게 작성이 가능하다. </p>
-<h3 id="4-2-일곱번째-시도-리스트형식-추상화"><a href="#4-2-일곱번째-시도-리스트형식-추상화" class="headerlink" title="4-2. 일곱번째 시도: 리스트형식 추상화"></a>4-2. 일곱번째 시도: 리스트형식 추상화</h3><figure class="highlight java"><figcaption><span>filterApples:generic</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"> </span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">Predicate</span>&lt;<span class="title">T</span>&gt; </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">boolean</span> <span class="title">test</span><span class="params">(T t)</span></span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> &lt;T&gt; <span class="function">List&lt;T&gt; <span class="title">filter</span><span class="params">(List&lt;T&gt; list, Predicate&lt;T&gt; p)</span> </span>&#123;     <span class="number">1</span></span><br><span class="line">    List&lt;T&gt; result = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">    <span class="keyword">for</span>(T e: list) &#123;</span><br><span class="line">        <span class="keyword">if</span>(p.test(e)) &#123;</span><br><span class="line">            result.add(e);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> result;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>앞으로 이렇게 추상화 시켜서, 공통 모듈로 만드는 습관이 필요하다. 모든 개발할때 저런 추상화를 늘 고려해서 개발하는 경지에 이르렀으면 좋겠다. </p>
-<hr>
-<h2 id="5-실전예제-Comparator-Runnable-GUI"><a href="#5-실전예제-Comparator-Runnable-GUI" class="headerlink" title="5.실전예제: Comparator,Runnable,GUI"></a>5.실전예제: Comparator,Runnable,GUI</h2><h3 id="5-1-Comparator로-정렬하기"><a href="#5-1-Comparator로-정렬하기" class="headerlink" title="5-1. Comparator로 정렬하기"></a>5-1. Comparator로 정렬하기</h3><figure class="highlight java"><figcaption><span>Comparator정렬</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"> </span><br><span class="line">inventory.sort(<span class="keyword">new</span> Comparator&lt;Apple&gt;() &#123;</span><br><span class="line">		<span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">compare</span><span class="params">(Apple a1, Apple a2)</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> a1.getWeight().compareTo(a2.getWeight());</span><br><span class="line">	&#125;</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">inventory.sort(</span><br><span class="line">  (Apple a1, Apple a2) -&gt; a1.getWeight().compareTo(a2.getWeight()));</span><br><span class="line">  </span><br></pre></td></tr></table></figure>
-
-
-<h3 id="5-2-Runnable"><a href="#5-2-Runnable" class="headerlink" title="5-2. Runnable"></a>5-2. Runnable</h3><figure class="highlight java"><figcaption><span>Runnable</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"> </span><br><span class="line"><span class="comment">// java.lang.Runnable 인터페이스</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">Runnable</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">run</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//익명클래스 표현</span></span><br><span class="line">Thread t = <span class="keyword">new</span> Thread(<span class="keyword">new</span> Runnable() &#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;Hello world&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"><span class="comment">//람다식표현</span></span><br><span class="line">Thread t = <span class="keyword">new</span> Thread(() -&gt; System.out.println(<span class="string">&quot;Hello world&quot;</span>));</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">// java.util.concurrent.Callable</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">Callable</span>&lt;<span class="title">V</span>&gt; </span>&#123;</span><br><span class="line">    <span class="function">V <span class="title">call</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">ExecutorService executorService = Executors.newCachedThreadPool();</span><br><span class="line">Future&lt;String&gt; threadName = executorService.submit(<span class="keyword">new</span> Callable&lt;String&gt;() &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">call</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> Thread.currentThread().getName();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">Future&lt;String&gt; threadName = executorService.submit(</span><br><span class="line">                     () -&gt; Thread.currentThread().getName());</span><br></pre></td></tr></table></figure>
-
-
-<h3 id="5-3-GUI-이벤트-처리하기"><a href="#5-3-GUI-이벤트-처리하기" class="headerlink" title="5-3. GUI 이벤트 처리하기"></a>5-3. GUI 이벤트 처리하기</h3><figure class="highlight java"><figcaption><span>GUI</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"> </span><br><span class="line">Button button = <span class="keyword">new</span> Button(<span class="string">&quot;Send&quot;</span>);</span><br><span class="line">button.setOnAction(<span class="keyword">new</span> EventHandler&lt;ActionEvent&gt;() &#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">handle</span><span class="params">(ActionEvent event)</span> </span>&#123;</span><br><span class="line">        label.setText(<span class="string">&quot;Sent!!&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">button.setOnAction((ActionEvent event) -&gt; label.setText(<span class="string">&quot;Sent!!&quot;</span>));</span><br><span class="line">  </span><br></pre></td></tr></table></figure>
-                    
+        
+        
+            <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    <a
+                        class="post-action-btn btn btn--disabled"
+                        aria-hidden="true"
+                    >
                         
-
-
+                        <i class="fa fa-angle-left" aria-hidden="true"></i>
+                        <span class="hide-xs hide-sm text-small icon-ml">PREVIOUS</span>
+                    </a>
+            </li>
+            <li class="post-action">
+                
                     
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/2021/05/20/jpa-obj-query-3/"
+                    data-tooltip="jpa-obj-query-3"
+                    aria-label="NEXT: jpa-obj-query-3"
+                >
                     
-                        <p>
-                            <a
-                                href="/2021/05/08/java8-chaptor2/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                Comment and share
-                            </a>
-                        </p>
-                    
-                </div>
+                        <span class="hide-xs hide-sm text-small icon-mr">NEXT</span>
+                        <i class="fa fa-angle-right" aria-hidden="true"></i>
+                    </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a
+                class="post-action-btn btn btn--default btn-open-shareoptions"
+                href="#btn-open-shareoptions"
+                aria-label="Share this post"
+            >
+                <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </a>
+        </li>
+        
             
-        </div>
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://codexdawn.github.io/2021/05/20/java8-chaptor3/"
+                    title="Share on Facebook"
+                    aria-label="Share on Facebook"
+                >
+                    <i class="fab fa-facebook" aria-hidden="true"></i>
+                </a>
+            </li>
         
-    </article>
-    
-    <div class="pagination-bar">
-    <ul class="pagination">
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://twitter.com/intent/tweet?text=https://codexdawn.github.io/2021/05/20/java8-chaptor3/"
+                    title="Share on Twitter"
+                    aria-label="Share on Twitter"
+                >
+                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://plus.google.com/share?url=https://codexdawn.github.io/2021/05/20/java8-chaptor3/"
+                    title="Share on Google+"
+                    aria-label="Share on Google+"
+                >
+                    <i class="fab fa-google-plus" aria-hidden="true"></i>
+                </a>
+            </li>
         
         
-        <li class="pagination-number">page 1 of 1</li>
+            
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#" aria-label="Back to top">
+            
+                <i class="fa fa-list" aria-hidden="true"></i>
+            </a>
+        </li>
     </ul>
 </div>
 
-</section>
+
+        
+        
+            
+        
+    </div>
+</article>
+
 
 
                 <footer id="footer" class="main-content-wrap">
@@ -484,6 +477,151 @@
 </footer>
 
             </div>
+            
+                <div id="bottom-bar" class="post-bottom-bar" data-behavior="5">
+                    <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    <a
+                        class="post-action-btn btn btn--disabled"
+                        aria-hidden="true"
+                    >
+                        
+                        <i class="fa fa-angle-left" aria-hidden="true"></i>
+                        <span class="hide-xs hide-sm text-small icon-ml">PREVIOUS</span>
+                    </a>
+            </li>
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/2021/05/20/jpa-obj-query-3/"
+                    data-tooltip="jpa-obj-query-3"
+                    aria-label="NEXT: jpa-obj-query-3"
+                >
+                    
+                        <span class="hide-xs hide-sm text-small icon-mr">NEXT</span>
+                        <i class="fa fa-angle-right" aria-hidden="true"></i>
+                    </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a
+                class="post-action-btn btn btn--default btn-open-shareoptions"
+                href="#btn-open-shareoptions"
+                aria-label="Share this post"
+            >
+                <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </a>
+        </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://codexdawn.github.io/2021/05/20/java8-chaptor3/"
+                    title="Share on Facebook"
+                    aria-label="Share on Facebook"
+                >
+                    <i class="fab fa-facebook" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://twitter.com/intent/tweet?text=https://codexdawn.github.io/2021/05/20/java8-chaptor3/"
+                    title="Share on Twitter"
+                    aria-label="Share on Twitter"
+                >
+                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://plus.google.com/share?url=https://codexdawn.github.io/2021/05/20/java8-chaptor3/"
+                    title="Share on Google+"
+                    aria-label="Share on Google+"
+                >
+                    <i class="fab fa-google-plus" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+        
+            
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#" aria-label="Back to top">
+            
+                <i class="fa fa-list" aria-hidden="true"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+                </div>
+                
+    <div id="share-options-bar" class="share-options-bar" data-behavior="5">
+        <i id="btn-close-shareoptions" class="fa fa-times"></i>
+        <ul class="share-options">
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://www.facebook.com/sharer/sharer.php?u=https://codexdawn.github.io/2021/05/20/java8-chaptor3/"
+                        aria-label="Share on Facebook"
+                    >
+                        <i class="fab fa-facebook" aria-hidden="true"></i><span>Share on Facebook</span>
+                    </a>
+                </li>
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://twitter.com/intent/tweet?text=https://codexdawn.github.io/2021/05/20/java8-chaptor3/"
+                        aria-label="Share on Twitter"
+                    >
+                        <i class="fab fa-twitter" aria-hidden="true"></i><span>Share on Twitter</span>
+                    </a>
+                </li>
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://plus.google.com/share?url=https://codexdawn.github.io/2021/05/20/java8-chaptor3/"
+                        aria-label="Share on Google+"
+                    >
+                        <i class="fab fa-google-plus" aria-hidden="true"></i><span>Share on Google+</span>
+                    </a>
+                </li>
+            
+        </ul>
+    </div>
+
+
             
         </div>
         
@@ -521,6 +659,8 @@
 
 <!--SCRIPTS END-->
 
+
+    
 
 
 
