@@ -247,6 +247,77 @@
                     
                         <a
                             class="link-unstyled"
+                            href="/2021/06/02/jpa-query-custom-repository/"
+                            aria-label=": jpa-query-custom-repository"
+                        >
+                            jpa-query-custom-repository
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2021-06-02T11:44:52+00:00">
+	
+		    Jun 02, 2021
+    	
+    </time>
+    
+        <span>in </span>
+        
+    <a class="category-link" href="/categories/QueryDSL/">QueryDSL</a>, <a class="category-link" href="/categories/Spring-Boot/">Spring Boot</a>, <a class="category-link" href="/categories/Spring-Data-JPA/">Spring Data JPA</a>, <a class="category-link" href="/categories/%EC%9C%A0%EB%A0%88%EC%B9%B4or%EC%82%BD%EC%A7%88/">유레카or삽질</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <h1 id="QueryDSL-삽질기-Custom-CustomImpl-Repository-설정-삽질"><a href="#QueryDSL-삽질기-Custom-CustomImpl-Repository-설정-삽질" class="headerlink" title="QueryDSL 삽질기! (Custom / CustomImpl Repository 설정 삽질)"></a>QueryDSL 삽질기! (Custom / CustomImpl Repository 설정 삽질)</h1><h2 id="사건의-발단"><a href="#사건의-발단" class="headerlink" title="사건의 발단"></a>사건의 발단</h2><p>오늘 근무하다가 동료가 QueryDSL관련 오류가 있다고해서 같이 확인하게되었는데, 결국 동료가 발견하게되었다.<br>사건의 발단은 QueryDSL과 Spring Data JPA를 같이 사용하기 위해서는 사용하는 interface/구체클래스에 Custom/CustomImpl 네이밍을 맞추는것을 국룰로 정해놨다. 근데 동료분께서 Impl쪽 구체클래스에 xxxxCustomsImpl로 s를 붙여넣고 말았다. 근데 문제는 쿼리가 의도한 쿼리가 안나가고 Spring Data JPA쿼리로 나가버리는것이었다. </p>
+<h2 id="원인"><a href="#원인" class="headerlink" title="원인"></a>원인</h2><ul>
+<li>Custom/CustomImpl은 Spring DATA JPA 네이밍 쿼리가 먹도록 설계되어있다. 그래서 국룰로 정하라는것이었다. </li>
+<li>네이밍이 안맞아서 interface의 정의한 쿼리 네이밍을 가져와서 쿼리로 작성한것으로 판단되었다. 근데 네이밍을 좀 이상하게 지어도 나가는것보면, 그냥 기본쿼리로 나가는것으로 확인되어진다. </li>
+</ul>
+<p><a target="_blank" rel="noopener" href="https://jojoldu.tistory.com/372">jojoldu JPA 정리</a><br><a target="_blank" rel="noopener" href="https://docs.spring.io/spring-data/jpa/docs/2.1.3.RELEASE/reference/html/#repositories.custom-implementations">Spring Data JPA 공식문서</a></p>
+<h2 id="해결방법"><a href="#해결방법" class="headerlink" title="해결방법"></a>해결방법</h2><ul>
+<li>절대로 QueryDSL 에서 Custom/CustomImpl의 클래스 네이밍은 오타 내지말자! (삽질의 시작이 될수 있음.)</li>
+</ul>
+<h2 id="정리"><a href="#정리" class="headerlink" title="정리"></a>정리</h2><ul>
+<li>Custom/CustomImpl 도 Spring Data JPA 네임드쿼리가 적용됨.(repository interface만 되는줄 알았음.)</li>
+<li>Custom/CustomImpl 의 클래스 네이밍은 절대로 오타내지말자! </li>
+<li>CustomImpl의 오타가 났음에도 불구하고 기본 조회 쿼리가 나간것 확인해보면 interface정의한 부분에서 메서드 네임을 인식한것으로 확인되어짐. (조금 이상하게 날려도 나가긴 나갔음. 하지만 아예 이상하게 날리면 Spring DATA Jpa에서 네임드 쿼리 인식이 안된다고 오류 밷어냄.)</li>
+</ul>
+
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/2021/06/02/jpa-query-custom-repository/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                Comment and share
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
                             href="/2021/05/20/jpa-obj-query-3/"
                             aria-label=": jpa-obj-query-3"
                         >

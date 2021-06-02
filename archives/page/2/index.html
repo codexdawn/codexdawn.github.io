@@ -247,6 +247,147 @@
                     
                         <a
                             class="link-unstyled"
+                            href="/2021/05/07/jpa-obj-query-1/"
+                            aria-label=": jpa-obj-query-1"
+                        >
+                            jpa-obj-query-1
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2021-05-07T11:42:32+00:00">
+	
+		    May 07, 2021
+    	
+    </time>
+    
+        <span>in </span>
+        
+    <a class="category-link" href="/categories/Study/">Study</a>, <a class="category-link" href="/categories/%EA%B0%9D%EC%B2%B4%EC%A7%80%ED%96%A5%EC%BF%BC%EB%A6%AC%EC%96%B8%EC%96%B4/">객체지향쿼리언어</a>, <a class="category-link" href="/categories/%EC%9E%90%EB%B0%94ORM%ED%91%9C%EC%A4%80JPA%ED%94%84%EB%A1%9C%EA%B7%B8%EB%9E%98%EB%B0%8D/">자바ORM표준JPA프로그래밍</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <h1 id="객체지향-쿼리-언어"><a href="#객체지향-쿼리-언어" class="headerlink" title="객체지향 쿼리 언어"></a>객체지향 쿼리 언어</h1><p>JPA는 다양한 쿼리 방법을 지원한다. JPQL,JPA Criteria, QueryDSL, 네이티브 SQL, JDBC API/MyBatis등과 같은 외부라이브러리 사용등<br>하지만 결론적으로 실무에서 자주 사용할것은, JPQL/QueryDSL 일것이다. 따라서 JPQL/QueryDSL 위주로 정리하도록 한다. </p>
+<h2 id="1-JPQL"><a href="#1-JPQL" class="headerlink" title="1. JPQL"></a>1. JPQL</h2><h3 id="1-1-JPQL-특징"><a href="#1-1-JPQL-특징" class="headerlink" title="1-1. JPQL 특징"></a>1-1. JPQL 특징</h3><ul>
+<li>JPQL은 객체지향 쿼리 언어이다. 따라서 테이블을 대상으로 쿼리하는것이 아니라, <strong>엔티티 객체를 대상</strong> 으로 쿼리한다.</li>
+<li>JPQL은 SQL을 추상화해서 특정 데이터베이스 SQL에 의존하지 않는다. (여러 DB방언 지원 및 ANSI표준까지 지원)</li>
+<li>JPQL의 종착지는 SQL이다. SQL로 결국 변환됨.</li>
+</ul>
+<p><img src="/images/jpa/jpql-1.png" alt="실습 샘플 모델"></p>
+<h3 id="1-2-JPQL-기본-문법"><a href="#1-2-JPQL-기본-문법" class="headerlink" title="1-2. JPQL 기본 문법"></a>1-2. JPQL 기본 문법</h3><p><img src="/images/jpa/jpql-2.png" alt="JPQL기본문법 구조1"></p>
+<ul>
+<li>엔티티와 속성은 대소문자 구분함. </li>
+<li>jpql 키워드는 대소문자 구분안함.</li>
+<li>반드시 엔티티 이름으로 사용해야함. (테이블이름 안됨)</li>
+<li>별칭은 필수! </li>
+</ul>
+<p><img src="/images/jpa/jpql-3.png" alt="JPQL기본문법 구조2"><br><img src="/images/jpa/jpql-4.png" alt="JPQL기본문법 구조3"></p>
+<figure class="highlight java"><figcaption><span>jpql-basic-1</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">List&lt;Member&gt; members = entityManager.createQuery(<span class="string">&quot;select m from Member m&quot;</span>, Member.class)</span><br><span class="line">               .getResultList();</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><figcaption><span>jpql-basic-2</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">List&lt;Member&gt; paramResult = entityManager.createQuery(<span class="string">&quot;select m from Member m where m.userName = :userName&quot;</span>, Member.class)</span><br><span class="line">               .setParameter(<span class="string">&quot;userName&quot;</span>,<span class="string">&quot;m2&quot;</span>)</span><br><span class="line">               .getResultList();</span><br></pre></td></tr></table></figure>
+
+<p>[주의] 아래와 같이 쿼리 짜지 말자! </p>
+<figure class="highlight java"><figcaption><span>jpql-basic-3</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//이런식으로 쿼리짜지말자. join걸어서 가져오는걸로 (가독성이 떨어짐 비추 무조건 명시적조인을 하자)</span></span><br><span class="line"><span class="comment">//그리고 JPQL에서는 fetch상태 자체가 무시됨.(LAZY로 걸어도 그냥 조인됨)</span></span><br><span class="line">List&lt;Team&gt; teams = entityManager.createQuery(<span class="string">&quot;select m.team from Member m&quot;</span>, Team.class)</span><br><span class="line">               				.getResultList();</span><br></pre></td></tr></table></figure>
+
+<h3 id="1-3-프로젝션"><a href="#1-3-프로젝션" class="headerlink" title="1-3. 프로젝션"></a>1-3. 프로젝션</h3><p><img src="/images/jpa/jpql-5.png" alt="JPQL프로젝션"><br><img src="/images/jpa/jpql-6.png" alt="JPQL프로젝션-여러값조회"></p>
+<p>[참고]</p>
+<ul>
+<li>엔티티프로젝션은 Persistance Context에 관리된다.</li>
+<li>임베디드타입은 엔티티 타입이 아닌 값타입이다. 따라서 직접 조회한 값타입인 임베디드타입은 Persistance Context에 관리되지않는다.</li>
+</ul>
+<figure class="highlight java"><figcaption><span>jpql-projection</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">List&lt;MemberInfo&gt; memberInfos = entityManager</span><br><span class="line">                .createQuery(<span class="string">&quot;select new entity.MemberInfo(m.userName,m.age) from Member m&quot;</span>, MemberInfo.class)</span><br><span class="line">                .getResultList();</span><br></pre></td></tr></table></figure>
+
+<h3 id="1-4-페이징-API"><a href="#1-4-페이징-API" class="headerlink" title="1-4. 페이징 API"></a>1-4. 페이징 API</h3><p>JPA의 페이징은 여러 DB방언의 페이징처리를 추상화 되어있다.</p>
+<ul>
+<li>setFirstResult(int startPosition) : 조회 시작 위치 (0부터시작)</li>
+<li>setMaxResults(int maxResult) : 조회할 데이터수 </li>
+</ul>
+<figure class="highlight java"><figcaption><span>jpql-paging</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">List&lt;Member&gt; memberList = entityManager.createQuery(<span class="string">&quot;select m from Member m join fetch m.team t order by m.age desc&quot;</span>, Member.class)</span><br><span class="line">                .setFirstResult(<span class="number">0</span>)</span><br><span class="line">                .setMaxResults(<span class="number">20</span>)</span><br><span class="line">                .getResultList();</span><br></pre></td></tr></table></figure>
+
+<h3 id="1-5-조인"><a href="#1-5-조인" class="headerlink" title="1-5. 조인"></a>1-5. 조인</h3><p>기본적인 inner join / left (outer) join / cross join (세타조인) 이 지원된다. 기본적인 ANSI표준 join이 그대로 지원된다고 생각하면됨.</p>
+<h4 id="조인-ON절"><a href="#조인-ON절" class="headerlink" title="조인 - ON절"></a>조인 - ON절</h4><ol>
+<li>조인 대상 필터링<ul>
+<li>SELECT m, t FROM Member m LEFT JOIN m.team t on t.name = ‘A’</li>
+<li>위 쿼리처럼 ON 절 뒤에 join하면서 필터작업을 미리 할수있는 기능  </li>
+</ul>
+</li>
+<li>연관관계 없는 엔티티 외부 조인 (하이버네이트 5.1부터가능)<ul>
+<li>보통 키값으로 조인을 하지만 전혀 관계없는 부분도 조인조건에 넣을수있음.</li>
+<li>SELECT m, t FROM Member m LEFT JOIN Team t on m.username = t.name</li>
+</ul>
+</li>
+</ol>
+<h3 id="1-6-서브쿼리"><a href="#1-6-서브쿼리" class="headerlink" title="1-6. 서브쿼리"></a>1-6. 서브쿼리</h3><p><img src="/images/jpa/jpql-7.png" alt="JPQL서브쿼리"></p>
+<figure class="highlight sql"><figcaption><span>서브쿼리-1</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">#나이가 평균보다 많은 회원 </span><br><span class="line"><span class="keyword">select</span> m <span class="keyword">from</span> <span class="keyword">Member</span> m </span><br><span class="line"><span class="keyword">where</span> m.age <span class="operator">&gt;</span> (<span class="keyword">select</span> <span class="built_in">avg</span>(m2.age) <span class="keyword">from</span> <span class="keyword">Member</span> m2) </span><br><span class="line"></span><br><span class="line">#한건이라도주문한고객</span><br><span class="line"><span class="keyword">select</span> m <span class="keyword">from</span> <span class="keyword">Member</span> m</span><br><span class="line"><span class="keyword">where</span> (<span class="keyword">select</span> <span class="built_in">count</span>(o) <span class="keyword">from</span> <span class="keyword">Order</span> o <span class="keyword">where</span> m <span class="operator">=</span> o.member) <span class="operator">&gt;</span> <span class="number">0</span></span><br><span class="line"></span><br><span class="line">#팀A 소속인 회원</span><br><span class="line"><span class="keyword">select</span> m <span class="keyword">from</span> <span class="keyword">Member</span> m</span><br><span class="line"><span class="keyword">where</span> <span class="keyword">exists</span> (<span class="keyword">select</span> t <span class="keyword">from</span> m.team t <span class="keyword">where</span> t.name <span class="operator">=</span> ‘팀A<span class="string">&#x27;)</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">#전체 상품 각각의 재고보다 주문량이 많은 주문들</span></span><br><span class="line"><span class="string">select o from Order o </span></span><br><span class="line"><span class="string">where o.orderAmount &gt; ALL (select p.stockAmount from Product p)</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">#어떤 팀이든 팀에 소속된 회원</span></span><br><span class="line"><span class="string">select m from Member m </span></span><br><span class="line"><span class="string">where m.team = ANY (select t from Team t)</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="JPA-서브쿼리-한계"><a href="#JPA-서브쿼리-한계" class="headerlink" title="JPA 서브쿼리 한계"></a>JPA 서브쿼리 한계</h4><ul>
+<li>JPA는 WHERE/HAVING절만 서브쿼리 사용가능 </li>
+<li>하이버네이트에서는 SELECT절에서 서브쿼리 사용가능</li>
+<li>FROM 절 서브쿼리는 현재 JPQL에서는 불가능 <ul>
+<li>조인으로 풀수있으면 해결하고 그래도 안되면 쿼리를 쪼개서 처리하거나 그래도 안되면 native쿼리로 처리 해야함. </li>
+</ul>
+</li>
+</ul>
+<h3 id="1-7-JPQL-타입표현"><a href="#1-7-JPQL-타입표현" class="headerlink" title="1-7. JPQL 타입표현"></a>1-7. JPQL 타입표현</h3><h4 id="JPQL-타입-표현"><a href="#JPQL-타입-표현" class="headerlink" title="JPQL 타입 표현"></a>JPQL 타입 표현</h4><ul>
+<li>문자: ‘HELLO’, ‘She’’s’ </li>
+<li>Boolean: TRUE, FALSE</li>
+<li>숫자: 10L(Long), 10D(Double), 10F(Float)</li>
+<li>ENUM: jpabook.MemberType.Admin (패키지명 포함) </li>
+<li>엔티티 타입: TYPE(m) = Member (상속 관계에서 사용)</li>
+</ul>
+<h4 id="JPQL-논리연산-및-비교연산"><a href="#JPQL-논리연산-및-비교연산" class="headerlink" title="JPQL 논리연산 및 비교연산"></a>JPQL 논리연산 및 비교연산</h4><ul>
+<li>EXISTS, IN</li>
+<li>AND, OR, NOT</li>
+<li>=, &gt;, &gt;=, &lt;, &lt;=, &lt;&gt; BETWEEN, LIKE, IS NULL</li>
+</ul>
+<h4 id="JPQL-연산자-우선순위"><a href="#JPQL-연산자-우선순위" class="headerlink" title="JPQL 연산자 우선순위"></a>JPQL 연산자 우선순위</h4><ol>
+<li>경로탐색연산(.)</li>
+<li>수학연산 : 단항연산자(+,-),*,/,+,-</li>
+<li>비교연산 : =,&gt;,&gt;=,&lt;,&lt;=,&lt;&gt;(다름),BETWEEN,LIKE,IN,IS NULL,IS EMPTY,EXIST </li>
+<li>논리연산 : AND,OR,NOT</li>
+</ol>
+<h3 id="1-8-CASE-식"><a href="#1-8-CASE-식" class="headerlink" title="1-8. CASE 식"></a>1-8. CASE 식</h3><p><img src="/images/jpa/jpql-8.png" alt="CASE1"><br><img src="/images/jpa/jpql-9.png" alt="COALESCE/NULLIF"></p>
+<h3 id="1-9-기본함수"><a href="#1-9-기본함수" class="headerlink" title="1-9. 기본함수"></a>1-9. 기본함수</h3><ul>
+<li>concat, substring, trim, lower/upper, length, locate, abs, sqrt, mod, size, index(jpq전용)</li>
+</ul>
+<h4 id="사용자-정의-함수"><a href="#사용자-정의-함수" class="headerlink" title="사용자 정의 함수"></a>사용자 정의 함수</h4><p><img src="/images/jpa/jpql-10.png" alt="사용자정의함수"></p>
+
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/2021/05/07/jpa-obj-query-1/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                Comment and share
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
                             href="/2021/05/07/jpa-querydsl-1/"
                             aria-label=": jpa-querydsl-1"
                         >
@@ -1247,139 +1388,6 @@
                         <p>
                             <a
                                 href="/2021/03/24/relation-mapping-basic/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                Comment and share
-                            </a>
-                        </p>
-                    
-                </div>
-            
-        </div>
-        
-    </article>
-    
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/2021/03/19/jpa-entity-mapping/"
-                            aria-label=": jpa-entity-mapping"
-                        >
-                            jpa-entity-mapping
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time datetime="2021-03-19T08:26:18+00:00">
-	
-		    Mar 19, 2021
-    	
-    </time>
-    
-        <span>in </span>
-        
-    <a class="category-link" href="/categories/Study/">Study</a>, <a class="category-link" href="/categories/%EC%97%94%ED%8B%B0%ED%8B%B0-%EB%A7%A4%ED%95%91/">엔티티 매핑</a>, <a class="category-link" href="/categories/%EC%9E%90%EB%B0%94ORM%ED%91%9C%EC%A4%80JPA%ED%94%84%EB%A1%9C%EA%B7%B8%EB%9E%98%EB%B0%8D/">자바ORM표준JPA프로그래밍</a>
-
-
-    
-</div>
-
-            </div>
-            
-                <div class="postShorten-content">
-                    <h1 id="엔티티-매핑-Entity-Mapping"><a href="#엔티티-매핑-Entity-Mapping" class="headerlink" title="엔티티 매핑 (Entity Mapping)"></a>엔티티 매핑 (Entity Mapping)</h1><h2 id="Entity"><a href="#Entity" class="headerlink" title="@Entity"></a>@Entity</h2><p>@Entity가 붙은 클래스는 JPA가 관리하는것 </p>
-<p>@Entity적용시 주의 사항 </p>
-<ul>
-<li>기본생성자는 필수 (public 또는 protected 생성자)</li>
-<li>final 클래스, enum,interface,inner클래스에 사용불가 </li>
-<li>저장할 필드에 final 사용불가 </li>
-</ul>
-<h2 id="Table"><a href="#Table" class="headerlink" title="@Table"></a>@Table</h2><p>@Table은 Entity와 매핑할 테이블 지정함. 생략하면 Entity 이름을 테이블이름으로 사용 </p>
-<h2 id="다양한-매핑-사용"><a href="#다양한-매핑-사용" class="headerlink" title="다양한 매핑 사용"></a>다양한 매핑 사용</h2><figure class="highlight java"><figcaption><span>회원 엔티티</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Entity</span> </span><br><span class="line"><span class="meta">@Table(name=&quot;MEMBER&quot;)</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Member</span> </span>&#123;</span><br><span class="line">	</span><br><span class="line">	<span class="meta">@Id</span> </span><br><span class="line">	<span class="meta">@Column(name = &quot;ID&quot;)</span></span><br><span class="line">	<span class="keyword">private</span> String id;</span><br><span class="line">	</span><br><span class="line">	<span class="meta">@Column(name = &quot;NAME&quot;, nullable = false, length = 10)</span> </span><br><span class="line">	<span class="keyword">private</span> String username;</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">private</span> Integer age; </span><br><span class="line">	</span><br><span class="line">	<span class="meta">@Enumerated(EnumType.STRING)</span></span><br><span class="line">	<span class="keyword">private</span> RoleType roleType; </span><br><span class="line">	</span><br><span class="line">	<span class="keyword">private</span> LocalDateTime createdDate; </span><br><span class="line">	</span><br><span class="line">	<span class="keyword">private</span> LocalDateTime lastModifiedDate; </span><br><span class="line">	</span><br><span class="line">	<span class="meta">@Lob</span> </span><br><span class="line">	<span class="keyword">private</span> String description; </span><br><span class="line">	</span><br><span class="line">	<span class="comment">//Getter, Setter 세팅</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">enum</span> <span class="title">RoleType</span> </span>&#123;</span><br><span class="line">	ADMIN, USER </span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<ul>
-<li>RoleType의 @Enumerated설정은 특별한 이유없음 EnumType.STRING 으로 설정하자 (기본값이 ORDINAL 인데 이걸 사용하면 0,1,2..로 지정됨.)</li>
-<li>Date타입은 요즘 사용하는 jpa버전에서는 @Temporal생략하고 LocalDateTime 혹은 LocalDate만 적어도 됨. </li>
-<li>description 필드는 회원을 설명하는 필드인데, 길이제한이 없다. 따라서 DB에 varchar타입대신 CLOB으로 저장됨. @Lob을 사용하면 CLOB,BLOB 매핑가능 </li>
-</ul>
-<h2 id="데이터베이스-스키마-자동생성"><a href="#데이터베이스-스키마-자동생성" class="headerlink" title="데이터베이스 스키마 자동생성"></a>데이터베이스 스키마 자동생성</h2><p>persistence.xml에서 스키마 자동생성 기능을 설정할수있음.</p>
-<figure class="highlight xml"><figcaption><span>스키자 자동생성 방법</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">&quot;hibernate.hbm2ddl.auto&quot;</span> <span class="attr">value</span>=<span class="string">&quot;create&quot;</span>/&gt;</span></span><br></pre></td></tr></table></figure>
-
-<h3 id="hibernate-hbm2ddl-auto-속성-정리"><a href="#hibernate-hbm2ddl-auto-속성-정리" class="headerlink" title="hibernate.hbm2ddl.auto 속성 정리"></a>hibernate.hbm2ddl.auto 속성 정리</h3><ul>
-<li>create : 기존 테이블 삭제 하고 새로 생성 (DROP + CREATE) </li>
-<li>create-drop : create 기능에서 앱 종료시 다시 DROP 시킴</li>
-<li>update : db테이블과 entity매핑 정보 비교해서 변경사항만 수정 </li>
-<li>validate : db테이블과 entity매핑 정보 비교해서 차이가 있으면 경고를 남기고 앱 실행 안함. (DDL수행안함)</li>
-<li>none : 이 기능 사용안하려면 적고, 아니면 property자체를 제거하면 기능 사용 안함. </li>
-</ul>
-<p>hibernate.hbm2ddl.auto 사용시 주의사항은 가급적 자동 DDL은 local환경에서 테스트 개발할때 사용하는것 아니면 사용하지말고, 굳이 써야한다면 dev환경에서 validate정도만 쓰는데, 이것도 가급적 사용하지 말자. 그냥 local에서만 잠깐 쓰자. </p>
-<h2 id="DDL-생성-기능"><a href="#DDL-생성-기능" class="headerlink" title="DDL 생성 기능"></a>DDL 생성 기능</h2><p>엔티티 설정할때 각 필드에 아래와 같이 설정이 가능함 </p>
-<p>@Column(name = “NAME”, nullable = false, length = 10) </p>
-<p>위 기능의 nullable,length를 통해 DDL을 생성할때 위 제약조건을 자동으로 테이블설정에 추가할수있음.<br>이밖에 @Table에 유니크 제약조건도 걸수있음. (uniqueConstraints 참고)</p>
-<p>결론은 위 기능은 hbm2ddl기능을 활성화 했을때만 적용되는 기술이다. 하지만 표기성으로 타 개발자가 제약조건에 대한 설명을 알게 할수있는 기능이 있어서, 추가해주면 나쁘지 않을듯 하다. (굳이 테이블 까서 볼 필요없이 엔티티통해서 한눈에 확인가능)</p>
-<h2 id="기본키-매핑"><a href="#기본키-매핑" class="headerlink" title="기본키 매핑"></a>기본키 매핑</h2><p>JPA가 제공하는 DB기본키 생성전략 2가지 </p>
-<ol>
-<li>직접 할당 : 기본 키를 애플리케이션에서 직접 할당 (@Id 만 사용)</li>
-<li>자동 생성 : 대리키 사용방식 </li>
-</ol>
-<ul>
-<li>IDENTITY : 기본키 생성을 DB에 위임.  </li>
-<li>SEQUENCE : DB 시퀀스를 사용해서 기본 키를 할당한다. </li>
-<li>TABLE : 키 생성 테이블을 사용. </li>
-</ul>
-<h3 id="기본키-직접-할당-전략"><a href="#기본키-직접-할당-전략" class="headerlink" title="기본키 직접 할당 전략"></a>기본키 직접 할당 전략</h3><p>@Id적용 가능 자바 타입 </p>
-<ul>
-<li>자바 기본형 </li>
-<li>자바 래퍼형(warpper)</li>
-<li>String </li>
-<li>java.util.Date</li>
-<li>java.sql.Date</li>
-<li>java.math.BigDecimal</li>
-<li>java.math.BigInteger</li>
-</ul>
-<h3 id="Identity-전략"><a href="#Identity-전략" class="headerlink" title="Identity 전략"></a>Identity 전략</h3><p>Identity 전략은 기본 키 생성을 DB에 위임하는 전략. 주로 MySql/PostgreSql/SqlServer/DB2에서 사용함.<br>Identity 전략은 AUTO_INCREMENT처럼 DB에 값을 저장하고 나서야 기본 키 값을 구할수 있음 </p>
-<blockquote><p>entity가 영속상태가 되려면 (persistence context에 저장되려면) 반드시 식별자가 있어야함. 근데 Identity 식별자 생성 전략은 엔티티를 DB에 저장해야 식별자를 구할수있음. 따라서 em.persist()를 호출하는 즉시 insert sql문이 db에 전달됨 (auto flush). 따라서 이 전략은 트랜잭션을 지원하는 쓰기 지연이 동작하지 않는다. </p>
-<p>결론은 Identity전략은 persist를 하는순간 바로 flush가 되기때문에 쓰기지연SQL저장소에는 저장이 안됨. </p>
-</blockquote>
-
-<h3 id="Sequence-전략"><a href="#Sequence-전략" class="headerlink" title="Sequence 전략"></a>Sequence 전략</h3><p>Sequence전략은 유일한 값을 순서대로 생성하는 특별한 DB오브젝트다. 이 전략은 시퀀스를 지원하는 오라클, PostgreSql, DB2, H2에서 사용가능함.<br>시퀀스를 사용하기위해서는 시퀀스 생성 해야함.(CREATE SEQUENCE BOARD_SEQ START WITH 1 INCREAMENT BY 1)</p>
-<figure class="highlight java"><figcaption><span>시퀀스사용방법</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Entity</span> </span><br><span class="line"><span class="meta">@SequenceGenerator(name = &quot;BOARD_SEQ_GENERATOR&quot;, sequnceName = &quot;BOARD_SEQ&quot;, initialValue=1, allocationSize=1)</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Board</span> </span>&#123;</span><br><span class="line">	<span class="meta">@Id</span> </span><br><span class="line">	<span class="meta">@GenerateValue(strategy= GenerateValue.SEQUENCE, genertor = &quot;BOARD_SEQ_GENERATOR&quot;)</span></span><br><span class="line">	<span class="keyword">private</span> Long id; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>위 코드의 sequnceName 은 앞서 미리 디비에서 생성한 시퀀스 이름이다. 그리고 allocationSize를 통해서 시퀀스 한번 호출에 증가하는 수를 가져올수있는데,매번 시퀀스 테이블을 조회하는것도 성능상 저하를 일으킬수도 있기때문에 시퀀스를 1개씩만 가져오는것보다 한번에 여러개를 가져와서 쓰고 다쓰면 다시 가져오는 형태로 쓸때 유용하고 성능상 이점을 가져올수있음. 하지만 주의점은 allocationSize는 DDL매핑할때 increment by {allocatiuonSize}인데 1로 설정했으면, 반드시 1로 값을 할당해야함. 기본값은 50이기때문에 반드시 확인해야한다! </p>
-<p>시퀀스 전략은 Identity전략과 내부동작방식이 다르다. 시퀀스 전략은 em.persist()를 호출할때 DB시퀀스테이블을 먼저 식별자값을 조회하고, 조회한 식별자를 엔티티에 할당한 후 엔티티를 Persistence Context에 저장한다. 이후 트랜잭션을 커밋해서 플러스가 일어나면 엔티티를 DB에 저장한다. </p>
-<h3 id="TABLE-전략"><a href="#TABLE-전략" class="headerlink" title="TABLE 전략"></a>TABLE 전략</h3><p>TABLE전략은 키 생성 전용 테이블을 하나 만들고 여기에 이름과 값으로 사용할 컬럼을 만들어 데이터베이스 시퀀스를 흉내내는 전략이다. 이 전략은 테이블을 사용하므로 모든 DB에 적용가능하다.<br>TABLE전략은 기본적으로 Sequence전략과 유사함. 그리고 @TableGenerator로 시퀀스 생성하듯 유사하게 생성하면됨. (키 전용 테이블 생성해야함.)<br>TABLE전략은 값을 조회하면서 SELECT쿼리를 사용하고 다음 값으로 증가시키기 위해 UPDATE쿼리를 사용한다. 이 전략은 SEQUENCE전략과 비교해서 DB와 한번 더 통신하는 단점이 있다. TABLE전략을 최적화 하려면 시퀀스와 유사하게 @TableGenerator.allocationSize를 사용하면됨. </p>
-<h3 id="AUTO전략"><a href="#AUTO전략" class="headerlink" title="AUTO전략"></a>AUTO전략</h3><p>AUTO전략은 다양한 DB종류의 맞춰서 IDENTITY,SQUENCE,TABLE전략중 하나를 자동으로 선택해서 사용함. (EX&gt; 오라클=SEQUENCE, MYSQL=IDENTITY)<br>AUTO전략은 DB를 변경해도 코드를 수정할 필요없으며, 특히 키 생성 전략이 아직 확정되지 않은 개발 초기단계나 프로토타입 개발시 편리하게 사용가능하다.<br>AUTO전략을 사용할때 SEQUENCE나 TABLE 전략이 선택되면 시퀀스나 키생성용 테이블을 미리 만들어둬야하는데, 만약 DDL자동생성기능을 사용하면 하이버네이트가 기본값을 사용해서 적절한 시퀀스나 키생성 테이블을 만들어줌. </p>
-<h2 id="ACCESS"><a href="#ACCESS" class="headerlink" title="@ACCESS"></a>@ACCESS</h2><p>JPA가 Entity 데이터에 접근하는 방식을 지정할수있음. </p>
-<ul>
-<li>필드 접근: AccessType.FILED로 지정한다. 필드에 직접 접근한다. 필드 접근 권한이 private이어도 접근할수있다. </li>
-<li>프로퍼티 접근: AccessType.PROPERTY로 지정한다. 접근자 Getter를 사용한다. </li>
-</ul>
-<p>@Access(AccessType.PROPERTY)는 getter위에 선언하면 entity를통해 받아온 데이터를 getter에 저장한다. </p>
-<figure class="highlight java"><figcaption><span>프로퍼티접근</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Entity</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Member</span> </span>&#123;</span><br><span class="line">	<span class="meta">@Id</span> </span><br><span class="line">	<span class="keyword">private</span> Long id; </span><br><span class="line">	</span><br><span class="line">	<span class="meta">@Transient</span> </span><br><span class="line">	<span class="keyword">private</span> String firstName; </span><br><span class="line">	</span><br><span class="line">	<span class="meta">@Transient</span> </span><br><span class="line">	<span class="keyword">private</span> String lastName; </span><br><span class="line">	</span><br><span class="line">	<span class="meta">@Access(AccessType.PROPERTY)</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> String <span class="title">getFullName</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> firstName + lastName; </span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h1 id="실전-예제"><a href="#실전-예제" class="headerlink" title="실전 예제"></a>실전 예제</h1><figure class="highlight java"><figcaption><span>Member</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Entity</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Member</span> </span>&#123;</span><br><span class="line">	<span class="meta">@Id</span></span><br><span class="line">    <span class="meta">@GeneratedValue</span></span><br><span class="line">    <span class="meta">@Column(name = &quot;MEMBER_ID&quot;)</span></span><br><span class="line">    <span class="keyword">private</span> Long id;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> String name;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> String city; </span><br><span class="line">	<span class="keyword">private</span> String street; </span><br><span class="line">	<span class="keyword">private</span> String zipcode; </span><br><span class="line"></span><br><span class="line">    <span class="comment">// 사실상 양방향으로 매핑할일은 거의 없음.</span></span><br><span class="line">    <span class="comment">// 이부분은 학습상 넣어둔 부분임. (실제 설계할때는 반드시 빼야함)</span></span><br><span class="line">    <span class="meta">@OneToMany(mappedBy = &quot;member&quot;)</span></span><br><span class="line">    <span class="keyword">private</span> List&lt;Order&gt; orders = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Long <span class="title">getId</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> id;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setId</span><span class="params">(Long id)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.id = id;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">getName</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> name;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setName</span><span class="params">(String name)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.name = name;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> List&lt;Order&gt; <span class="title">getOrders</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> orders;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setOrders</span><span class="params">(List&lt;Order&gt; orders)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.orders = orders;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">getCity</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> city; </span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setCity</span><span class="params">(String city)</span> </span>&#123;</span><br><span class="line">		<span class="keyword">this</span>.city = city; </span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="function"><span class="keyword">public</span> String <span class="title">getStreet</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> street; </span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setStreet</span><span class="params">(String street)</span> </span>&#123;</span><br><span class="line">		<span class="keyword">this</span>.street = street; </span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight java"><figcaption><span>Orders</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Entity</span></span><br><span class="line"><span class="meta">@Table(name = &quot;ORDERS&quot;)</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Order</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Id</span></span><br><span class="line">    <span class="meta">@GeneratedValue</span></span><br><span class="line">    <span class="meta">@Column(name = &quot;ORDER_ID&quot;)</span></span><br><span class="line">    <span class="keyword">private</span> Long id;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@ManyToOne(fetch = FetchType.LAZY)</span></span><br><span class="line">    <span class="meta">@JoinColumn(name = &quot;MEMBER_ID&quot;)</span></span><br><span class="line">    <span class="keyword">private</span> Member member;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> LocalDateTime orderDate;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Enumerated(EnumType.STRING)</span></span><br><span class="line">    <span class="keyword">private</span> OrderStatus orderStatus;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@OneToMany(mappedBy = &quot;order&quot;, cascade = CascadeType.ALL)</span></span><br><span class="line">    <span class="keyword">private</span> List&lt;OrderItem&gt; orderItems = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> List&lt;OrderItem&gt; <span class="title">getOrderItems</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> orderItems;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//연관 관계 편의 메서드 (getter/setter관례와 다르게 네이밍하자)</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">addOrderItem</span><span class="params">(OrderItem orderItem)</span> </span>&#123;</span><br><span class="line">        orderItems.add(orderItem);</span><br><span class="line">        orderItem.setOrder(<span class="keyword">this</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Long <span class="title">getId</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> id;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setId</span><span class="params">(Long id)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.id = id;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Member <span class="title">getMember</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> member;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setMember</span><span class="params">(Member member)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.member = member;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> LocalDateTime <span class="title">getOrderDate</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> orderDate;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setOrderDate</span><span class="params">(LocalDateTime orderDate)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.orderDate = orderDate;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> OrderStatus <span class="title">getOrderStatus</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> orderStatus;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setOrderStatus</span><span class="params">(OrderStatus orderStatus)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.orderStatus = orderStatus;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight java"><figcaption><span>OrderItem</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br></pre></td><td class="code"><pre><span class="line">    <span class="meta">@Id</span></span><br><span class="line">    <span class="meta">@GeneratedValue</span></span><br><span class="line">    <span class="meta">@Column(name = &quot;ORDER_ITEM_ID&quot;)</span></span><br><span class="line">    <span class="keyword">private</span> Long id;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@ManyToOne(fetch = FetchType.LAZY)</span></span><br><span class="line">    <span class="meta">@JoinColumn(name = &quot;ORDER_ID&quot;)</span></span><br><span class="line">    <span class="keyword">private</span> Order order;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@ManyToOne(fetch = FetchType.LAZY)</span></span><br><span class="line">    <span class="meta">@JoinColumn(name = &quot;ITEM_ID&quot;)</span></span><br><span class="line">    <span class="keyword">private</span> Item item;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">int</span> orderPrice;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">int</span> count;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Long <span class="title">getId</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> id;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setId</span><span class="params">(Long id)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.id = id;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Order <span class="title">getOrder</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> order;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setOrder</span><span class="params">(Order order)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.order = order;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Item <span class="title">getItem</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> item;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setItem</span><span class="params">(Item item)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.item = item;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">getOrderPrice</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> orderPrice;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setOrderPrice</span><span class="params">(<span class="keyword">int</span> orderPrice)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.orderPrice = orderPrice;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">getCount</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> count;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setCount</span><span class="params">(<span class="keyword">int</span> count)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.count = count;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight java"><figcaption><span>Item</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Id</span></span><br><span class="line"><span class="meta">@GeneratedValue</span></span><br><span class="line"><span class="meta">@Column(name = &quot;ITEM_ID&quot;)</span></span><br><span class="line"><span class="keyword">private</span> Long id;</span><br><span class="line"><span class="keyword">private</span> String name;</span><br><span class="line"><span class="keyword">private</span> <span class="keyword">int</span> price;</span><br><span class="line"><span class="keyword">private</span> <span class="keyword">int</span> stockQuantity;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setId</span><span class="params">(Long id)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">this</span>.id = id;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> String <span class="title">getName</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> name;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setName</span><span class="params">(String name)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">this</span>.name = name;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">getPrice</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> price;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setPrice</span><span class="params">(<span class="keyword">int</span> price)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">this</span>.price = price;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">getStockQuantity</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> stockQuantity;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setStockQuantity</span><span class="params">(<span class="keyword">int</span> stockQuantity)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">this</span>.stockQuantity = stockQuantity;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-                    
-                        
-
-
-                    
-                    
-                        <p>
-                            <a
-                                href="/2021/03/19/jpa-entity-mapping/#post-footer"
                                 class="postShorten-excerpt_link link"
                                 aria-label=""
                             >
