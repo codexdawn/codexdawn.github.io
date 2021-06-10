@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="generator" content="codexdawn">
-    <title>Archives: 2021/6 - codexdawn</title>
+    <title>jpa-collection-etc - codexdawn</title>
     <meta name="author" content="codexdawn">
     
     
@@ -15,13 +15,21 @@
             <link rel="alternate" type="application/atom+xml" title="RSS" href="/atom.xml">
         
     
-    <script type="application/ld+json">{}</script>
-    <meta property="og:type" content="blog">
-<meta property="og:title" content="codexdawn">
-<meta property="og:url" content="https://codexdawn.github.io/archives/2021/06/index.html">
+    <script type="application/ld+json">{"@context":"http://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"codexdawn","sameAs":["https://github.com/codexdawn","https://www.facebook.com/beherzt.dev","https://www.linkedin.com/in/sim-jisung-3048872a/","mailto:cloudkaiser@gmail.com"],"image":"https://www.gravatar.com/avatar/d97fd4b94c429915f1cb55eb27e7d4d9"},"articleBody":"컬렉션과 부가기능1. 컬렉션JPA에서 컬렉션을 사용할때 2가지\n\n@OneToMany, @ManyToMany 를 사용해서 일대다 나 다대다 엔티티 관계를 매핑할때 \n@ElementCollection을 사용해서 값 타입을 하나 이상 보관 할때 \n\n자바 컬렉션 인터페이스 특징\n\nCollection : 자바가 제공하는 최상위 컬렉션. 하이버네이트는 중복을 허용하고 순서를 보장하지 않는다고 가정\nSet: 중복을 허용하지 않고,순서 보장안됨.\nList: 순서가 있는 컬렉션. 순서를 보장하지만 중복 허용됨.\nMap: Key,Value구조로 되어있는 특수한 컬렉션이다. (Map은 잘 활용안됨.)\n\nCollection,ListCollection,List는 엔티티를 추가할때 중복된 엔티티가 있는지 비교하지않고, 단순히 저장만하면 된다. 따라서 엔티티를 추가해도 지연 로딩된 컬렉션을 초기화 하지 않는다. \nSetSet은 엔티티를 추가할때 중복된 엔티티가 있는지 비교해야 한다. 따라서 엔티티를 추가할때 지연로딩된 컬렉션을 초기화한다.(Set사용시, equals,hashcode 재정의 무조건 반드시 해야함!!! )\n@OrderBy@OrderBy는 모든 컬렉션에 사용가능 \n@OrderBy 예제123456789101112131415161718192021222324252627282930313233 @Entitypublic class Team &#123;\t@Id @GenerateValue\tprivate Long id; \tprivate String name;\t\t@OneToMany(mappedBy=&quot;team&quot;)\t@OrderBy(&quot;username desc, id asc&quot;)\tprivate Set&lt;Member&gt; members = new HashSet&lt;&gt;(); \t\t...&#125;@Entity public class Member &#123;\t@Id @GenerateValue\tprivate Long id;\t\t@Column(name = &quot;member_name&quot;)\tprivate String username;\t\t@ManyToOne\tprivate Team team; \t\t...&#125;Team findTeam = em.find(Team.class, team.getId()); findTeam.getMembers().size(); //초기화 //위 코드의 나갈쿼리는  아래와 같다. (정렬붙은것 확인됨)//SELECT M.* FROM MEMBER M WHERE M.TEAM = ? ORDER BY M.MEMBER_NAME DESC, M.ID ASC \n\n2. @Converter@Converter123456789101112131415161718192021222324252627@Entitypublic class Member &#123;\t@Id @GenerateValue\tprivate Long id; \t\tprivate String username; \t\t@Convert(converter = BooleanToYnConverter.class) \t//글로벌 설정으로 하면 위 애너테이션 지워됨. \tprivate boolean vip; &#125;@Converter//@Converter(autoApply = true) 요렇게 하면 글로벌 설정으로 설정됨. public class BooleanToYnConverter implements AttributeConverter&lt;Boolean, String&gt; &#123;\t\t@Override \tpublic String convertToDatabaseColumn(Boolean attribute) &#123;\t\treturn (attribute != null &amp;&amp; attribute) ? &quot;Y&quot; : &quot;N&quot;; \t&#125;\t\t@Override\tpublic Boolean convertToEntityAttribute(Strig dbData) &#123;\t\treturn &quot;Y&quot;.equals(dbData); \t&#125;&#125;\n\n3. 엔티티 그래프엔티티를 조회할때 연관된 엔티티를 함께 조회 하려면 글로벌페치전략을 Eager로 설정하거나, Lazy로딩해서 fetch조인 사용하기도한다. 하지만 페치조인을 사용하면 JPQL을 중복해서 작성하는 경우가 많다. \n\nselect o from Orders o where o.status = ?  \nselet o from Order o join fetch o.member where o.status = ?\nselect o from Orders join fetch o.orderItems where o.status = ?위와같이 상황에 따라 각기 다른 쿼리를 직접 개발해야함. \n\n엔티티그래프를 사용하면 엔티티를 조회하는 시점에 함께 조회할 연관된엔티티를 선택할수있다. 그래서 아래쿼리만 작성하면 연관된 엔티티도 같이 끌고옴.\n\nselect o from Orders o where o.status = ?  \n\n엔티티그래프 기능은 엔티티 조회시점에 연관된 엔티티 들을 함께 조회하는 기능이다.  \n엔티티그래프 사용방법1234567891011121314151617181920@NamedEntityGraph(name = &quot;Order.withMember&quot;, attributeNodes = &#123;\t@NamedAttributeNode(&quot;member&quot;)&#125;)@Entitypublic class Orders &#123;\t@Id @GenerateValue\tprivate Long id; \t\t@ManyToOne(fetch=LAZY, optional=false)\t@JoinColumn(name = &quot;member_id&quot;)\tprivate Member member; &#125;//em.find 사용 EntityGraph g = em.getEntityGraph(&quot;Order.withMember&quot;);Map hints = new HashMap();hints.put(&quot;javax.persistence.fetchgraph&quot;, g);Order order = em.find(Order.class, orderId, hints); \n\nsubgraph서브그래프 사용방법1234567891011121314151617181920212223242526272829303132333435363738394041424344@NamedEntityGraph(name = &quot;Order.withAll&quot;, attributeNodes = &#123;\t@NamedAttributeNode(&quot;member&quot;),\t@NamedAttributeNode(value=&quot;orderItems&quot;, subgraph = &quot;orderItems&quot;)&#125;, subgraphs = @NamedSubgraph(name= &quot;orderItems&quot;, attributeNodes = &#123;\t@NamedAttributeNode(&quot;item&quot;)&#125;))@Entitypublic class Orders &#123;\t@Id @GenerateValue\tprivate Long id; \t\t@ManyToOne(fetch=LAZY, optional=false)\t@JoinColumn(name = &quot;member_id&quot;)\tprivate Member member; \t\t@OneToMany(mappedBy=&quot;order&quot;, cascade = CascadeType.ALL)\tprivate List&lt;OrderItem&gt; orderItems = new ArrayList&lt;&gt;(); &#125;@Entitypublic class OrderItem &#123;\t@Id @GenerateValue\tprivate Long id;\t\t@ManyToOne(fetch = LAZY)\t@JoinColumn(name = &quot;item_id&quot;)\tprivate Item item; &#125;//em.find 사용 EntityGraph g = em.getEntityGraph(&quot;Order.withAll&quot;);Map hints = new HashMap();hints.put(&quot;javax.persistence.fetchgraph&quot;, g);Order order = em.find(Order.class, orderId, hints);//jpql 사용 List&lt;Orders&gt; result = em.createQuery(&quot;select o from Orders o where o.id = :orderId&quot;, Orders.class)\t\t\t\t\t\t.setParameter(&quot;orderId&quot;, orderId)\t\t\t\t\t\t.setHint(&quot;javax.persistence.fetchgraph&quot;, em.getEntityGraph(&quot;Order.withAll&quot;))\t\t\t\t\t\t.getResultList(); \n\n엔티티그래프 사용시 참고!!em.find를 사용하면 연관관계 매핑시 optional=true로 걸면 inner Join으로 필수관계가 자동으로 매핑되지만, JPQL에서 엔티티그래프를 사용하면 항상 외부조인으로 잡힌다. 따라서 내부조인을 사용하고 싶으면 아래와 같이 내부조인을 명시시켜줘야함.select o from Orders o join fetch o.member where o.id = :orderId\n엔티티그래프 정리\nROOT에서 시작 \n엔티티그래프는  항상 조회하는 엔티티의 ROOT에서 시작해야함. Order엔티티를 조회하는데 Member부터 시작하는 엔티티그래프를 사용하면 안됨.\n\n\n이미 로딩된 엔티티\n다음처럼 영속성 컨텍스트에 이미 로딩되어있으면 엔티티그래프 적용안됨.Orders order1 = em.find(Orders.class, orderId); //이미 조회hints.put(“javax.persistence.fetchgraph”, em.getEntityGraph(“Order.withMember”));Orders order2 = em.find(Orders.class, orderId, hints); //이미 로딩되었기 때문에 엔티티그래프 적용X \n\n\nfetchgraph vs loadgraph \nfetchgraph는 선택한 엔티티속성만 가져옴 \nloadgraph는 글로벌 페치전략이 EAGER전략으로 설정된 연관관계도 포함해서 함께 조회한다고함. \n\n\n\n","dateCreated":"2021-06-10T08:41:35+00:00","dateModified":"2021-06-10T14:33:35+00:00","datePublished":"2021-06-10T08:41:35+00:00","description":"","headline":"jpa-collection-etc","image":[],"mainEntityOfPage":{"@type":"WebPage","@id":"https://codexdawn.github.io/2021/06/10/jpa-collection-etc/"},"publisher":{"@type":"Organization","name":"codexdawn","sameAs":["https://github.com/codexdawn","https://www.facebook.com/beherzt.dev","https://www.linkedin.com/in/sim-jisung-3048872a/","mailto:cloudkaiser@gmail.com"],"image":"https://www.gravatar.com/avatar/d97fd4b94c429915f1cb55eb27e7d4d9","logo":{"@type":"ImageObject","url":"https://www.gravatar.com/avatar/d97fd4b94c429915f1cb55eb27e7d4d9"}},"url":"https://codexdawn.github.io/2021/06/10/jpa-collection-etc/","keywords":"Java,JPA, collection, entity graph, converter"}</script>
+    <meta name="description" content="컬렉션과 부가기능1. 컬렉션JPA에서 컬렉션을 사용할때 2가지  @OneToMany, @ManyToMany 를 사용해서 일대다 나 다대다 엔티티 관계를 매핑할때  @ElementCollection을 사용해서 값 타입을 하나 이상 보관 할때   자바 컬렉션 인터페이스 특징  Collection : 자바가 제공하는 최상위 컬렉션. 하이버네이트는 중복을 허용하고">
+<meta property="og:type" content="blog">
+<meta property="og:title" content="jpa-collection-etc">
+<meta property="og:url" content="https://codexdawn.github.io/2021/06/10/jpa-collection-etc/index.html">
 <meta property="og:site_name" content="codexdawn">
+<meta property="og:description" content="컬렉션과 부가기능1. 컬렉션JPA에서 컬렉션을 사용할때 2가지  @OneToMany, @ManyToMany 를 사용해서 일대다 나 다대다 엔티티 관계를 매핑할때  @ElementCollection을 사용해서 값 타입을 하나 이상 보관 할때   자바 컬렉션 인터페이스 특징  Collection : 자바가 제공하는 최상위 컬렉션. 하이버네이트는 중복을 허용하고">
 <meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2021-06-10T08:41:35.000Z">
+<meta property="article:modified_time" content="2021-06-10T14:33:35.266Z">
 <meta property="article:author" content="codexdawn">
+<meta property="article:tag" content="Java,JPA">
+<meta property="article:tag" content="collection">
+<meta property="article:tag" content="entity graph">
+<meta property="article:tag" content="converter">
 <meta name="twitter:card" content="summary">
     
     
@@ -41,6 +49,8 @@
     
 
     
+        
+    
 </head>
 
     <body>
@@ -50,7 +60,7 @@
 
     
 
-<header id="header" data-behavior="2">
+<header id="header" data-behavior="5">
     <i id="btn-open-sidebar" class="fa fa-lg fa-bars"></i>
     <div class="header-title">
         <a
@@ -77,7 +87,7 @@
             <!-- Define author's picture -->
 
 
-<nav id="sidebar" data-behavior="2">
+<nav id="sidebar" data-behavior="5">
     <div class="sidebar-container">
         
         
@@ -231,30 +241,22 @@
 </nav>
 
             
-            <div id="main" data-behavior="2"
+            <div id="main" data-behavior="5"
                  class="
                         hasCoverMetaIn
                         ">
                 
-    <section class="postShorten-group main-content-wrap">
+<article class="post">
     
     
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/2021/06/10/jpa-collection-etc/"
-                            aria-label=": jpa-collection-etc"
-                        >
-                            jpa-collection-etc
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
+        <div class="post-header main-content-wrap text-left">
+    
+        <h1 class="post-title">
+            jpa-collection-etc
+        </h1>
+    
+    
+        <div class="post-meta">
     <time datetime="2021-06-10T08:41:35+00:00">
 	
 		    Jun 10, 2021
@@ -269,10 +271,13 @@
     
 </div>
 
-            </div>
-            
-                <div class="postShorten-content">
-                    <h1 id="컬렉션과-부가기능"><a href="#컬렉션과-부가기능" class="headerlink" title="컬렉션과 부가기능"></a>컬렉션과 부가기능</h1><h2 id="1-컬렉션"><a href="#1-컬렉션" class="headerlink" title="1. 컬렉션"></a>1. 컬렉션</h2><p>JPA에서 컬렉션을 사용할때 2가지</p>
+    
+</div>
+
+    
+    <div class="post-content markdown">
+        <div class="main-content-wrap">
+            <h1 id="컬렉션과-부가기능"><a href="#컬렉션과-부가기능" class="headerlink" title="컬렉션과 부가기능"></a>컬렉션과 부가기능</h1><h2 id="1-컬렉션"><a href="#1-컬렉션" class="headerlink" title="1. 컬렉션"></a>1. 컬렉션</h2><p>JPA에서 컬렉션을 사용할때 2가지</p>
 <ol>
 <li>@OneToMany, @ManyToMany 를 사용해서 일대다 나 다대다 엔티티 관계를 매핑할때 </li>
 <li>@ElementCollection을 사용해서 값 타입을 하나 이상 보관 할때 </li>
@@ -323,229 +328,121 @@
 </li>
 </ol>
 
-                    
-                        
-
-
-                    
-                    
-                        <p>
-                            <a
-                                href="/2021/06/10/jpa-collection-etc/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                Comment and share
-                            </a>
-                        </p>
-                    
-                </div>
             
+
+
         </div>
+    </div>
+    <div id="post-footer" class="post-footer main-content-wrap">
         
-    </article>
-    
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/2021/06/05/jpa-webapp-persistence/"
-                            aria-label=": jpa-webapp-persistence"
-                        >
-                            jpa-webapp-persistence
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time datetime="2021-06-05T11:27:18+00:00">
-	
-		    Jun 05, 2021
-    	
-    </time>
-    
-        <span>in </span>
-        
-    <a class="category-link" href="/categories/Study/">Study</a>, <a class="category-link" href="/categories/%EC%9B%B9-%EC%95%A0%ED%94%8C%EB%A6%AC%EC%BC%80%EC%9D%B4%EC%85%98%EA%B3%BC-%EC%98%81%EC%86%8D%EC%84%B1-%EA%B4%80%EB%A6%AC/">웹 애플리케이션과 영속성 관리</a>, <a class="category-link" href="/categories/%EC%9E%90%EB%B0%94ORM%ED%91%9C%EC%A4%80JPA%ED%94%84%EB%A1%9C%EA%B7%B8%EB%9E%98%EB%B0%8D/">자바ORM표준JPA프로그래밍</a>
-
-
-    
-</div>
+            <div class="post-footer-tags">
+                <span class="text-color-light text-small">TAGGED IN</span><br/>
+                
+    <a class="tag tag--primary tag--small t-none-link" href="/tags/Java-JPA/" rel="tag">Java,JPA</a> <a class="tag tag--primary tag--small t-none-link" href="/tags/collection/" rel="tag">collection</a> <a class="tag tag--primary tag--small t-none-link" href="/tags/converter/" rel="tag">converter</a> <a class="tag tag--primary tag--small t-none-link" href="/tags/entity-graph/" rel="tag">entity graph</a>
 
             </div>
-            
-                <div class="postShorten-content">
-                    <h1 id="웹-애플리케이션과-영속성-관리"><a href="#웹-애플리케이션과-영속성-관리" class="headerlink" title="웹 애플리케이션과 영속성 관리"></a>웹 애플리케이션과 영속성 관리</h1><h2 id="1-트랜잭션-범위의-영속성-컨텍스트"><a href="#1-트랜잭션-범위의-영속성-컨텍스트" class="headerlink" title="1. 트랜잭션 범위의 영속성 컨텍스트"></a>1. 트랜잭션 범위의 영속성 컨텍스트</h2><h3 id="1-1-스프링-컨테이너의-기본-전략"><a href="#1-1-스프링-컨테이너의-기본-전략" class="headerlink" title="1-1. 스프링 컨테이너의 기본 전략"></a>1-1. 스프링 컨테이너의 기본 전략</h3><p>스프링 컨테이너는 <strong>트랜잭션 범위의 영속성 컨텍스트</strong> 전략을 기본으로 사용한다. 보통 스프링에서 비즈니스 로직을 시작하는 서비스 계층에 @Transactional 어노테이션을 선언해서 트랜잭션을 시작한다. 이 어노테이션이 선언되면 Spring의 트랜잭션 AOP가 먼저 동작한다.</p>
-<blockquote><p>스프링 트랜잭션 생명주기 (@Transactional선언된 메서드 일 경우)</p>
-<ol>
-<li>스프링 트랜잭션 AOP는 대상 메소드를 호출하기 직전에 트랜잭션을 시작</li>
-<li>대상 메소드가 종료되면 트랜잭션을 커밋하면서 종료한다.<ul>
-<li>이때 트랜잭션을 커밋하면서 JPA는 먼저 영속성 컨텍스트를 플러시 해서 변경내용을 DB에 반영하고 DB 트랜잭션을 컷밋한다. </li>
-<li>따라서, 영속성 컨텍스트의 변경내용이 DB에 정상반영된다. 만약 예외 발생하면 트랜잭션 롤백하고 종료되고, 플러시 호출은 안됨. </li>
-</ul>
-</li>
-</ol>
-</blockquote>
-
-<figure class="highlight java"><figcaption><span>transactional lifecycle</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Service</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">HelloService</span>() </span>&#123;</span><br><span class="line"></span><br><span class="line">	<span class="meta">@PersistenceContext</span> <span class="comment">//엔티티매니저 주입 </span></span><br><span class="line">	EntiryManager em; <span class="comment">//?왜했지? </span></span><br><span class="line"></span><br><span class="line">	<span class="meta">@Autowired</span> Repository1 repo1; </span><br><span class="line">	<span class="meta">@Autowired</span> Repository2 repo2; </span><br><span class="line">	</span><br><span class="line">	<span class="comment">//트랜잭션 시작 </span></span><br><span class="line">	<span class="meta">@Transactional</span> </span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">logic</span><span class="params">()</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">		repo1.hello(); </span><br><span class="line"></span><br><span class="line">		<span class="comment">//member는 영속상태다. </span></span><br><span class="line">		Member member = repo2.findMember();</span><br><span class="line">		<span class="keyword">return</span> member; </span><br><span class="line"></span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">//트랜잭션 종료</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Repository</span> </span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Repository1</span> </span>&#123;</span><br><span class="line">	<span class="meta">@PersistenceContext</span></span><br><span class="line">	EntityManager em; </span><br><span class="line">	</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">hello</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		em.xxx(); <span class="comment">//A. 영속성 컨텍스트 접근 </span></span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Repository</span> </span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Repository2</span> </span>&#123;</span><br><span class="line">	<span class="meta">@PersistenceContext</span></span><br><span class="line">	EntityManager em; </span><br><span class="line">	</span><br><span class="line">	<span class="function"><span class="keyword">public</span> Member <span class="title">findMember</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> em.find(Member.class, <span class="string">&quot;m1&quot;</span>); <span class="comment">//B. 영속성 컨텍스트 접근 </span></span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>위 코드의 트랜잭션 생명주기는 어떻까?</p>
-<ol>
-<li>HelloService.logic 메서드에 @Transactional이 선언되었으므로, 스프링 트랜잭션 AOP에 의해 트랜잭션 시작 </li>
-<li>repo2.findMember를 통해 조회한 Member엔티티는 트랜잭션 범위에 있으므로 영속성 컨텍스트 관리를 받는다. 따라서 영속상태임.</li>
-<li>@Transactional 선언한 메서드가 정상 종료되면 트랜잭션을 커밋하는데, 이때 영속성 컨텍스트를 종료한다. 영속성 컨텍스트가 사라졋으므로 조회한 엔티티(member)는 이제부터 준영속 상태가 된다.</li>
-<li>서비스 메서드가 끝나면서 트랜잭션과 영속성 컨텍스트가 종료되었다. 따라서 컨트롤러에 반환된 member엔티티는 준영속상태로 관리된다. </li>
-</ol>
-<h3 id="트랜잭션이-같으면-같은-영속성-컨텍스트를-사용한다"><a href="#트랜잭션이-같으면-같은-영속성-컨텍스트를-사용한다" class="headerlink" title="트랜잭션이 같으면 같은 영속성 컨텍스트를 사용한다."></a>트랜잭션이 같으면 같은 영속성 컨텍스트를 사용한다.</h3><p>위 코드의 2개의 repository 로 접근한 A,B는 같은 트랜잭션에서 수행됨에따라, A,B는 비록 다른 엔티티매니저 이지만, 같은 영속성 컨텍스트를 사용하게 된다.</p>
-<h3 id="트랜잭션이-다르면-다른-영속성-컨텍스트를-사용한다"><a href="#트랜잭션이-다르면-다른-영속성-컨텍스트를-사용한다" class="headerlink" title="트랜잭션이 다르면 다른 영속성 컨텍스트를 사용한다."></a>트랜잭션이 다르면 다른 영속성 컨텍스트를 사용한다.</h3><p>위 코드에서 여러 스레드에서 동시에 요청이와서 같은 엔티티 매니저를 사용해도 트랜잭션에 따라 접근하는 영속성 컨텍스트가 다르다. 좀 더 들어가면 스프링 컨테이너는 스레드마다 각각 다른 트랜잭션을 할당한다. 따라서 같은 엔티티 매니저를 호출해도 접근하는 영속성 컨텍스트가 다르므로 멀티스레드 환경에서 안전하다. </p>
-<h2 id="2-준영속-상태와-지연로딩"><a href="#2-준영속-상태와-지연로딩" class="headerlink" title="2. 준영속 상태와 지연로딩"></a>2. 준영속 상태와 지연로딩</h2><h3 id="준영속-상태와-지연로딩"><a href="#준영속-상태와-지연로딩" class="headerlink" title="준영속 상태와 지연로딩"></a>준영속 상태와 지연로딩</h3><p>준영속 상태의 가장 골치아픈 문제는 지연로딩 기능이 동작하지 않는다. 예를들어 뷰를 렌더링할때 연관된 엔티티도 함께 사용해야 하는데 연관된 엔티티를 지연 로딩으로 설정해서 프록시 객체로 조회했다고 가장하자. 아직 초기화 하지 않은 프록시객체를 사용하려고 초기화를 시도함. 하지만 준영속 상태에서는 영속성 컨텍스트가 없으므로 지연로딩을 할수 없다. 이때 지연로딩을 시도하면 문제가 발생함. (LazyInitializationException 예외 발생)</p>
-<h4 id="준영속-상태의-지연로딩-문제를-해결하는-방법-2가지"><a href="#준영속-상태의-지연로딩-문제를-해결하는-방법-2가지" class="headerlink" title="준영속 상태의 지연로딩 문제를 해결하는 방법 2가지"></a>준영속 상태의 지연로딩 문제를 해결하는 방법 2가지</h4><ol>
-<li>뷰가 필요한 엔티티를 미리 로딩해두는 방법 <ul>
-<li>글로벌 패치 전략 수정 </li>
-<li>JPQL fetch join </li>
-<li>강제로 초기화 </li>
-</ul>
-</li>
-<li>OSIV를 사용해서 엔티티를 항상 영속상태로 유지하는 방법 </li>
-</ol>
-<h4 id="1-글로벌-페치-전략-수정"><a href="#1-글로벌-페치-전략-수정" class="headerlink" title="1. 글로벌 페치 전략 수정"></a>1. 글로벌 페치 전략 수정</h4><p>글로벌 페치 전략을 Lazy로딩 상태에서 Eager로 수정하면 쿼리를 조인해서 한꺼번에 가져오게된다.<br>하지만 즉시로딩을 전략을 사용하게되면 치명적인 단점 2가지가 존재한다.</p>
-<blockquote><p>글로벌 페치 전략에 즉시로딩을 사용시 단점 </p>
-<ol>
-<li>사용하지 않는 엔티티를 로딩한다. <ul>
-<li>말그대로 의도와 다르게 하나의 엔티티만 사용하고싶은데, 즉시로딩 전략상 조인된 테이블을 한꺼번에 가져와야하기때문에 </li>
-</ul>
-</li>
-<li>N+1 문제 유발 <ul>
-<li>JPA가 JPQL을 분석해서 SQL을 생성할때는 글로벌 페치 전략을 참고하지 않고 오직 JPQL 자체만 사용한다. </li>
-<li>select o from Order o -&gt; JPQL을 수행하면 실제로 select * from Order만 나가는게 아니라 Member테이블의 정보도 같이 조회 해야한다. 즉시로딩으로 정보를 가져와야하기때문에</li>
-</ul>
-</li>
-</ol>
-</blockquote>
-
-<h4 id="2-JPQL-fetch-join-사용"><a href="#2-JPQL-fetch-join-사용" class="headerlink" title="2. JPQL fetch join 사용"></a>2. JPQL fetch join 사용</h4><p>fetch join하게되면 한방쿼리로 만들어줘서, 미리 로딩시키는 효과를 볼수있음. (N+1문제도 자연스럽게 해결됨.)</p>
-<h4 id="3-강제로-초기화"><a href="#3-강제로-초기화" class="headerlink" title="3. 강제로 초기화"></a>3. 강제로 초기화</h4><p>서비스 로직에서 orderRepository.findOrder(id) 호출후 order.getMember().getName()까지 호출해서 프록시 객체를 강제로 초기화 시켜둔다.<br>이런 강제로 초기화 작업을 해주기 위해서는 프록시 초기화를 담당하는 계층이 필요하다. 그 계층이 FACADE계층이다. </p>
-<blockquote><p>FACADE 계층의 역할과 특징 </p>
-<ul>
-<li>프리젠테이션 계층과 도메인 모델 계층간의 논리적 의존성 분리를 해줌.</li>
-<li>프리젠테이션 꼐층에서 필요한 프록시 객체를 초기화 한다.</li>
-<li>서비스 계층을 호출해서 비즈니스 로직을 실행한다.</li>
-<li>리포지토리를 직접 호출해서 뷰가 요구하는 엔티티를 찾는다. </li>
-</ul>
-<p>FACADE 계층 사용시 주의점 </p>
-<ul>
-<li>프록시를 초기화하라면 영속성컨텍스트가 필요하므로 FACADE에서 @Transactional이 선언되어야함. (서비스도 호출하고 리포지토리도 호출하기 때문)</li>
-</ul>
-</blockquote>
-
-<p>하지만 위 3가지 방법으로 지연로딩에서 VIEW에서 호출하기 전에 데이터를 미리 담아두는 방법을 사용해도, 결국 준영속 상태에서 초기화 이슈에 대한 예외발생은 발생할수밖에없음. 이런 부분을 해결하기 위해서는 OSIV를 적용해야함.  </p>
-
-                    
+        
+        
+            <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    <a
+                        class="post-action-btn btn btn--disabled"
+                        aria-hidden="true"
+                    >
                         
-
-
+                        <i class="fa fa-angle-left" aria-hidden="true"></i>
+                        <span class="hide-xs hide-sm text-small icon-ml">PREVIOUS</span>
+                    </a>
+            </li>
+            <li class="post-action">
+                
                     
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/2021/06/05/jpa-webapp-persistence/"
+                    data-tooltip="jpa-webapp-persistence"
+                    aria-label="NEXT: jpa-webapp-persistence"
+                >
                     
-                        <p>
-                            <a
-                                href="/2021/06/05/jpa-webapp-persistence/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                Comment and share
-                            </a>
-                        </p>
-                    
-                </div>
+                        <span class="hide-xs hide-sm text-small icon-mr">NEXT</span>
+                        <i class="fa fa-angle-right" aria-hidden="true"></i>
+                    </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a
+                class="post-action-btn btn btn--default btn-open-shareoptions"
+                href="#btn-open-shareoptions"
+                aria-label="Share this post"
+            >
+                <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </a>
+        </li>
+        
             
-        </div>
-        
-    </article>
-    
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
             
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/2021/06/02/jpa-query-custom-repository/"
-                            aria-label=": jpa-query-custom-repository"
-                        >
-                            jpa-query-custom-repository
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time datetime="2021-06-02T11:44:52+00:00">
-	
-		    Jun 02, 2021
-    	
-    </time>
-    
-        <span>in </span>
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://codexdawn.github.io/2021/06/10/jpa-collection-etc/"
+                    title="Share on Facebook"
+                    aria-label="Share on Facebook"
+                >
+                    <i class="fab fa-facebook" aria-hidden="true"></i>
+                </a>
+            </li>
         
-    <a class="category-link" href="/categories/QueryDSL/">QueryDSL</a>, <a class="category-link" href="/categories/Spring-Boot/">Spring Boot</a>, <a class="category-link" href="/categories/Spring-Data-JPA/">Spring Data JPA</a>, <a class="category-link" href="/categories/%EC%9C%A0%EB%A0%88%EC%B9%B4or%EC%82%BD%EC%A7%88/">유레카or삽질</a>
-
-
-    
-</div>
-
-            </div>
             
-                <div class="postShorten-content">
-                    <h1 id="QueryDSL-삽질기-Custom-CustomImpl-Repository-설정-삽질"><a href="#QueryDSL-삽질기-Custom-CustomImpl-Repository-설정-삽질" class="headerlink" title="QueryDSL 삽질기! (Custom / CustomImpl Repository 설정 삽질)"></a>QueryDSL 삽질기! (Custom / CustomImpl Repository 설정 삽질)</h1><h2 id="사건의-발단"><a href="#사건의-발단" class="headerlink" title="사건의 발단"></a>사건의 발단</h2><p>오늘 근무하다가 동료가 QueryDSL관련 오류가 있다고해서 같이 확인하게되었는데, 결국 동료가 발견하게되었다.<br>사건의 발단은 QueryDSL과 Spring Data JPA를 같이 사용하기 위해서는 사용하는 interface/구체클래스에 Custom/CustomImpl 네이밍을 맞추는것을 국룰로 정해놨다. 근데 동료분께서 Impl쪽 구체클래스에 xxxxCustomsImpl로 s를 붙여넣고 말았다. 근데 문제는 쿼리가 의도한 쿼리가 안나가고 Spring Data JPA쿼리로 나가버리는것이었다. </p>
-<h2 id="원인"><a href="#원인" class="headerlink" title="원인"></a>원인</h2><ul>
-<li>Custom/CustomImpl은 Spring DATA JPA 네이밍 쿼리가 먹도록 설계되어있다. 그래서 국룰로 정하라는것이었다. </li>
-<li>네이밍이 안맞아서 interface의 정의한 쿼리 네이밍을 가져와서 쿼리로 작성한것으로 판단되었다. 근데 네이밍을 좀 이상하게 지어도 나가는것보면, 그냥 기본쿼리로 나가는것으로 확인되어진다. </li>
-</ul>
-<p><a target="_blank" rel="noopener" href="https://jojoldu.tistory.com/372">jojoldu JPA 정리</a><br><a target="_blank" rel="noopener" href="https://docs.spring.io/spring-data/jpa/docs/2.1.3.RELEASE/reference/html/#repositories.custom-implementations">Spring Data JPA 공식문서</a></p>
-<h2 id="해결방법"><a href="#해결방법" class="headerlink" title="해결방법"></a>해결방법</h2><ul>
-<li>절대로 QueryDSL 에서 Custom/CustomImpl의 클래스 네이밍은 오타 내지말자! (삽질의 시작이 될수 있음.)</li>
-</ul>
-<h2 id="정리"><a href="#정리" class="headerlink" title="정리"></a>정리</h2><ul>
-<li>Custom/CustomImpl 도 Spring Data JPA 네임드쿼리가 적용됨.(repository interface만 되는줄 알았음.)</li>
-<li>Custom/CustomImpl 의 클래스 네이밍은 절대로 오타내지말자! </li>
-<li>CustomImpl의 오타가 났음에도 불구하고 기본 조회 쿼리가 나간것 확인해보면 interface정의한 부분에서 메서드 네임을 인식한것으로 확인되어짐. (조금 이상하게 날려도 나가긴 나갔음. 하지만 아예 이상하게 날리면 Spring DATA Jpa에서 네임드 쿼리 인식이 안된다고 오류 밷어냄.)</li>
-</ul>
-
-                    
-                        
-
-
-                    
-                    
-                        <p>
-                            <a
-                                href="/2021/06/02/jpa-query-custom-repository/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                Comment and share
-                            </a>
-                        </p>
-                    
-                </div>
             
-        </div>
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://twitter.com/intent/tweet?text=https://codexdawn.github.io/2021/06/10/jpa-collection-etc/"
+                    title="Share on Twitter"
+                    aria-label="Share on Twitter"
+                >
+                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                </a>
+            </li>
         
-    </article>
-    
-    <div class="pagination-bar">
-    <ul class="pagination">
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://plus.google.com/share?url=https://codexdawn.github.io/2021/06/10/jpa-collection-etc/"
+                    title="Share on Google+"
+                    aria-label="Share on Google+"
+                >
+                    <i class="fab fa-google-plus" aria-hidden="true"></i>
+                </a>
+            </li>
         
         
-        <li class="pagination-number">page 1 of 1</li>
+            
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#" aria-label="Back to top">
+            
+                <i class="fa fa-list" aria-hidden="true"></i>
+            </a>
+        </li>
     </ul>
 </div>
 
-</section>
+
+        
+        
+            
+        
+    </div>
+</article>
 
 
 
@@ -556,6 +453,151 @@
 </footer>
 
             </div>
+            
+                <div id="bottom-bar" class="post-bottom-bar" data-behavior="5">
+                    <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    <a
+                        class="post-action-btn btn btn--disabled"
+                        aria-hidden="true"
+                    >
+                        
+                        <i class="fa fa-angle-left" aria-hidden="true"></i>
+                        <span class="hide-xs hide-sm text-small icon-ml">PREVIOUS</span>
+                    </a>
+            </li>
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/2021/06/05/jpa-webapp-persistence/"
+                    data-tooltip="jpa-webapp-persistence"
+                    aria-label="NEXT: jpa-webapp-persistence"
+                >
+                    
+                        <span class="hide-xs hide-sm text-small icon-mr">NEXT</span>
+                        <i class="fa fa-angle-right" aria-hidden="true"></i>
+                    </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a
+                class="post-action-btn btn btn--default btn-open-shareoptions"
+                href="#btn-open-shareoptions"
+                aria-label="Share this post"
+            >
+                <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </a>
+        </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://codexdawn.github.io/2021/06/10/jpa-collection-etc/"
+                    title="Share on Facebook"
+                    aria-label="Share on Facebook"
+                >
+                    <i class="fab fa-facebook" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://twitter.com/intent/tweet?text=https://codexdawn.github.io/2021/06/10/jpa-collection-etc/"
+                    title="Share on Twitter"
+                    aria-label="Share on Twitter"
+                >
+                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://plus.google.com/share?url=https://codexdawn.github.io/2021/06/10/jpa-collection-etc/"
+                    title="Share on Google+"
+                    aria-label="Share on Google+"
+                >
+                    <i class="fab fa-google-plus" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+        
+            
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#" aria-label="Back to top">
+            
+                <i class="fa fa-list" aria-hidden="true"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+                </div>
+                
+    <div id="share-options-bar" class="share-options-bar" data-behavior="5">
+        <i id="btn-close-shareoptions" class="fa fa-times"></i>
+        <ul class="share-options">
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://www.facebook.com/sharer/sharer.php?u=https://codexdawn.github.io/2021/06/10/jpa-collection-etc/"
+                        aria-label="Share on Facebook"
+                    >
+                        <i class="fab fa-facebook" aria-hidden="true"></i><span>Share on Facebook</span>
+                    </a>
+                </li>
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://twitter.com/intent/tweet?text=https://codexdawn.github.io/2021/06/10/jpa-collection-etc/"
+                        aria-label="Share on Twitter"
+                    >
+                        <i class="fab fa-twitter" aria-hidden="true"></i><span>Share on Twitter</span>
+                    </a>
+                </li>
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://plus.google.com/share?url=https://codexdawn.github.io/2021/06/10/jpa-collection-etc/"
+                        aria-label="Share on Google+"
+                    >
+                        <i class="fab fa-google-plus" aria-hidden="true"></i><span>Share on Google+</span>
+                    </a>
+                </li>
+            
+        </ul>
+    </div>
+
+
             
         </div>
         
@@ -593,6 +635,8 @@
 
 <!--SCRIPTS END-->
 
+
+    
 
 
 
