@@ -247,6 +247,184 @@
                     
                         <a
                             class="link-unstyled"
+                            href="/2021/06/12/jpa-performance-optimazation/"
+                            aria-label=": jpa-performance-optimazation"
+                        >
+                            jpa-performance-optimazation
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2021-06-12T06:44:47+00:00">
+	
+		    Jun 12, 2021
+    	
+    </time>
+    
+        <span>in </span>
+        
+    <a class="category-link" href="/categories/Study/">Study</a>, <a class="category-link" href="/categories/%EA%B3%A0%EA%B8%89%EC%A3%BC%EC%A0%9C%EC%99%80-%EC%84%B1%EB%8A%A5%EC%B5%9C%EC%A0%81%ED%99%94/">고급주제와 성능최적화</a>, <a class="category-link" href="/categories/%EC%9E%90%EB%B0%94ORM%ED%91%9C%EC%A4%80JPA%ED%94%84%EB%A1%9C%EA%B7%B8%EB%9E%98%EB%B0%8D/">자바ORM표준JPA프로그래밍</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <h1 id="고급주제와-성능최적화"><a href="#고급주제와-성능최적화" class="headerlink" title="고급주제와 성능최적화"></a>고급주제와 성능최적화</h1><h2 id="1-예외-처리"><a href="#1-예외-처리" class="headerlink" title="1. 예외 처리"></a>1. 예외 처리</h2><ul>
+<li><p>JPA 표준 예외들은 javax.persistence.PersistenceException의 자식 클래스이다. 그리고 이 예외 클래스는 RuntimeExeption의 자식이다. 따라서 JPA예외는 모두 언체크 예외에 속함. </p>
+</li>
+<li><p>JPA표준예외는 크게 2가지로 나뉨 </p>
+<ul>
+<li>트랜잭션 롤백을 표시하는 예외 </li>
+<li>트랜잭션 롤백을 표시하지 않는 예외 </li>
+</ul>
+</li>
+<li><p>트랜잭션을 표시하는 예외는 심각한 예외이때문에 복구해선안됨. 이 예외가 발생하면 트랜잭션을 강제로 커밋해도 트랜잭션 커밋되지 않고 대신에 javax.persistence.RollbackException 예외가 발생함. </p>
+</li>
+</ul>
+<p><img src="https://www.objectdb.com/api/java/jpa/exceptions" alt="참고-objectdb-jpa exception정리"></p>
+<h3 id="트랜잭션-롤백시-주의사항"><a href="#트랜잭션-롤백시-주의사항" class="headerlink" title="트랜잭션 롤백시 주의사항"></a>트랜잭션 롤백시 주의사항</h3><ul>
+<li>트랜잭션을 롤백하는건 db의 반영사항만 롤백하는것이지 숮어한 자바 객체까지 원상태로 복구 안해줌. (영속성 컨텍스트의 1차캐시에 그대로 남아있음.)</li>
+<li>이 롤백된 영속성 컨텍스트를 그대로 사용하는건 굉장히 위험함. 따라서 이부분은 EntityManager.clear()를 호출해서 영속성 컨텍스트를 초기화 해야함. </li>
+<li>스프링 프레임워크는 위 2가지 문제를 예방하기위해 영속성 컨텍스트 범위에 따라 다른방법을 사용함.<ul>
+<li>기본전략 : 트랜잭션당 영속성 컨텍스트 전략 <ul>
+<li>문제가 발생하면 트랜잭션 AOP종료시점에 트랜잭션을 롤백하면서 영속성 컨텍스트도 함께 종료시킴 </li>
+</ul>
+</li>
+<li>OSIV처럼 트랜잭션을 범위를 넓게 사용하는 경우 <ul>
+<li>위 경우는 문제가 발생한 경우 다른 트랜잭션에서 문제가 되는 영속성 컨텍스트를 참조하는 경우 문제가 발생한다. </li>
+<li>그래서 스프링에서는 문제 발생시 EntityManager.clear()를 자동호출하여 다른 트랜잭션이 문제가 되는 영속성 컨텍스트에 접근하지못하도록 막는다. </li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="2-엔티티-비교"><a href="#2-엔티티-비교" class="headerlink" title="2. 엔티티 비교"></a>2. 엔티티 비교</h2><ul>
+<li>영속성 컨텍스트 내부에는 1차캐시가 있는데, 1차캐시는 영속성 컨텍스트와 생명주기를 같이함. </li>
+<li>영속성 컨텍스트를 통해 데이터를 저장하거나, 조회하면 1차 캐시에 엔티티가 저장됨. (1차캐시 덕분에 변경감지기능 과 db접근하지않고 1차캐시로 데이터 조회 바로 가능함)</li>
+<li>같은 영속성 컨텍스트로 반환받은 엔티티는 항상 같은 엔티티 인스턴스를 반환함(단순 동등성이 아니라, 주소까지 같은 인스턴스임) </li>
+</ul>
+<h2 id="3-프록시-심화-주제"><a href="#3-프록시-심화-주제" class="headerlink" title="3. 프록시 심화 주제"></a>3. 프록시 심화 주제</h2><h3 id="em-getReference-호출-후-em-find-호출"><a href="#em-getReference-호출-후-em-find-호출" class="headerlink" title="em.getReference 호출 후 em.find 호출"></a>em.getReference 호출 후 em.find 호출</h3><ul>
+<li>em.getReference를 호출하고 em.find를 호출하면 같은 엔티티로 보장됨.</li>
+<li>그리고 처음 getReference로 프록시를 호출하고나서, em.find로 원본 엔티티를 조회해도 em.find로 가져온 엔티티는 처음 getReference로 호출한 프록시 객체 주소로 반환하게 됨. </li>
+</ul>
+<h3 id="em-find-호출후-em-getReference-호출"><a href="#em-find-호출후-em-getReference-호출" class="headerlink" title="em.find 호출후 em.getReference 호출"></a>em.find 호출후 em.getReference 호출</h3><ul>
+<li>역시나 같은 엔티티 보장됨.</li>
+<li>em.find로 호출했기때문에, 원본 엔티티를 리턴한다. 그리고 em.getReference를 호출하면 프록시 객체를 리턴할것 같지만, 원본 엔티티를 리턴하게됨. </li>
+<li>이렇게 처음 호출한 엔티티를 그대로 리턴하는 이유는 엔티티 동일성 보장을 위한 장치라고 생각하면 될듯하다. </li>
+</ul>
+<h3 id="프록시-타입-비교"><a href="#프록시-타입-비교" class="headerlink" title="프록시 타입 비교"></a>프록시 타입 비교</h3><ul>
+<li>instanceof로 무조건 비교해야함. (==비교 안됨.)</li>
+</ul>
+<h3 id="프록시-동등성-비교"><a href="#프록시-동등성-비교" class="headerlink" title="프록시 동등성 비교"></a>프록시 동등성 비교</h3><ul>
+<li>equals 재정의해서 비교하면 됨. </li>
+</ul>
+<h2 id="4-성능-최적화"><a href="#4-성능-최적화" class="headerlink" title="4. 성능 최적화"></a>4. 성능 최적화</h2><h3 id="N-1-문제"><a href="#N-1-문제" class="headerlink" title="N+1 문제"></a>N+1 문제</h3><figure class="highlight java"><figcaption><span>Member-Order</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Entity</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Member</span> </span>&#123;</span><br><span class="line">	<span class="meta">@Id</span> <span class="meta">@GenerateValue</span></span><br><span class="line">	<span class="keyword">private</span> Long id; </span><br><span class="line">	</span><br><span class="line">	<span class="meta">@OneToMany(mappedBy = &quot;member&quot;, fetch = FetchType.EAGER)</span></span><br><span class="line">	<span class="keyword">private</span> List&lt;Order&gt; orders = <span class="keyword">new</span> ArrayList&lt;&gt;(); </span><br><span class="line">	...</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Entity</span></span><br><span class="line"><span class="meta">@Table(name = &quot;Orders&quot;)</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Order</span> </span>&#123;</span><br><span class="line">	<span class="meta">@Id</span> <span class="meta">@GenerateValue</span></span><br><span class="line">	<span class="keyword">private</span> Long id; </span><br><span class="line">	</span><br><span class="line">	<span class="meta">@ManyToOne</span></span><br><span class="line">	<span class="keyword">private</span> Member member;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>위 코드는 주문-회원간 엔티티로 주문정보는 1:N,N:1 양방향 연관관계 매핑된 엔티티들이다. 특이점은 글로벌 페치전략을 즉시로딩으로 걸었다. </p>
+<h4 id="즉시로딩과-N-1"><a href="#즉시로딩과-N-1" class="headerlink" title="즉시로딩과 N+1"></a>즉시로딩과 N+1</h4><p>위 코드를 em.find로 조회하면 어떤 쿼리가 나갈까?<br>select M.<em>, O.</em> FROM MEMBER M OUTER JOIN ORDERS O ON M.ID = O.MEMBER_ID<br>즉시로딩이기때문에 위와같이 한방쿼리로 나간다. 하지만 문제는 JPQL로 조회했을때다.<br>List<Member> members = em.createQuery(“select m from Member m”, Member.class).getResultList();<br>위 JPQL을 수행하면 즉시로딩과 지연로딩 전혀 신경쓰지않고, JPQL만 사용해서 SQL을 생성한다. 따라서 아래와 같은 쿼리가 나가게된다.<br>SELECT * FROM MEMBER<br>SQL의 실행결과로 회원 엔티티 정보를 애플리케이션에 로딩한다. 그런데말입니다. 회원 엔티티와 연관된 주문 컬렉션이 즉시 로딩으로 설정되어있으므로, JPA는 주문 컬렉션을 즉시로딩하려고 아래 SQL을 추가로 실행한다.<br>SELECT * FROM ORDERS WHERE MEMBER_ID = ?<br>이렇게 회원의 숫자에 따라서 N의 쿼리가 추가로 나가게되는데, 이부분을 N+1이슈라고 한다. </Member></p>
+<h4 id="지연로딩과-N-1"><a href="#지연로딩과-N-1" class="headerlink" title="지연로딩과 N+1"></a>지연로딩과 N+1</h4><p>그렇다면 위 코드를 즉시로딩 대신 지연로딩으로 사용하면 N+1문제에서 해결할수있을까? 결론부터 말하면 NOPE! JPQL로 수행하면 원하는대로 쿼리는 하나만 출력될것이다. 하지만 주문 컬렉션을 실제로 사용했을때 프록시 객체에서 디비초기화를 요청하게 되기때문에, 역시나 회원 엔티티 숫자만큼 요청하게된다. </p>
+<h4 id="페치-조인-사용-으로-N-1해결"><a href="#페치-조인-사용-으로-N-1해결" class="headerlink" title="페치 조인 사용 으로 N+1해결"></a>페치 조인 사용 으로 N+1해결</h4><ul>
+<li>fetch join으로 한방쿼리 만들어서 출력가능.</li>
+<li>위 예제기준으로는 1:N 조인을 했으므로 중복된 결과가 나올수있기때문에 JPQL의 DISTINCT를 사용해서 중복제거해야함. </li>
+</ul>
+<h4 id="하이버네이트-BatchSize"><a href="#하이버네이트-BatchSize" class="headerlink" title="하이버네이트 @BatchSize"></a>하이버네이트 @BatchSize</h4><ul>
+<li>발생되는 컬렉션 객체위에 @BatchSize 를 설정하거나</li>
+<li>application.yml에서 default_batch_size 를 설정해서 글로벌하게 설정할수 있음. </li>
+</ul>
+<h4 id="하이버네이트-Fetch-FetchMode-SUBSELECT"><a href="#하이버네이트-Fetch-FetchMode-SUBSELECT" class="headerlink" title="하이버네이트 @Fetch(FetchMode.SUBSELECT)"></a>하이버네이트 @Fetch(FetchMode.SUBSELECT)</h4><ul>
+<li>BatchSize를걸었던것 처럼 컬렉션객체위에 선언하면 서브쿼리가 생성되서 사이즈만큼 where절 서브쿼리로 한방쿼리로 수행될수있음. </li>
+</ul>
+<h4 id="N-1정리"><a href="#N-1정리" class="headerlink" title="N+1정리"></a>N+1정리</h4><ul>
+<li>즉시로딩은 가급적 사용하지말자!(즉시로딩은 성능 최적화가 어렵다.)</li>
+<li>지연로딩으로 다 발라버리고, 성능 최적화가 필요한곳에 fetch join사용하자</li>
+</ul>
+<h3 id="읽기전용-쿼리의-성능-최적화"><a href="#읽기전용-쿼리의-성능-최적화" class="headerlink" title="읽기전용 쿼리의 성능 최적화"></a>읽기전용 쿼리의 성능 최적화</h3><p>엔티티가 영속성 컨텍스트에 관리되면 1차캐시부터 변경감지까지 얻을수있는 장점이 많지만, 영속성 컨텍스트는 변경감지를 위해 스냅샷 인스턴스를 보관하므로 더 많은 메모리를 사용한다는 단점이 있다.</p>
+<h4 id="스칼라-타입으로-조회-커스텀-프로젝션-설정"><a href="#스칼라-타입으로-조회-커스텀-프로젝션-설정" class="headerlink" title="스칼라 타입으로 조회 (커스텀 프로젝션 설정)"></a>스칼라 타입으로 조회 (커스텀 프로젝션 설정)</h4><ul>
+<li>가장 확실한 방법임 (엔티티가 아닌 스칼라 타입으로 필드 조회 )</li>
+<li>스칼라 타입은 영속성 컨텍스트가 결과를 관리하지 않음.</li>
+</ul>
+<h4 id="읽기전용-쿼리-힌트-사용"><a href="#읽기전용-쿼리-힌트-사용" class="headerlink" title="읽기전용 쿼리 힌트 사용"></a>읽기전용 쿼리 힌트 사용</h4><ul>
+<li>query.setHint(“org.hibernate.readOnly”, true);</li>
+<li>위 설정을 하면 읽기전용이기때문에 스냅샷에서 저장안함. (스냅샷이 없기때문에 변경감지같은 기능 못사용함.)</li>
+</ul>
+<h4 id="읽기전용-트랜잭션-사용"><a href="#읽기전용-트랜잭션-사용" class="headerlink" title="읽기전용 트랜잭션 사용"></a>읽기전용 트랜잭션 사용</h4><ul>
+<li>@Transactional(readOnly = true)</li>
+<li>위 옵션을 주면 스프링에서 entityManager 플러시 모드를 manual로 설정함. (강제로 flush를 호출하지않는한 플러시 발생안함.)</li>
+<li>트랜잭션을 설사 커밋해도 플러시 안함 (등록,삭제,갱신등 안됨)</li>
+<li>플러시할때 일어나는 스냅샷 비교같은 무거운 로직들을 수행안해서 성능이 향상됨. </li>
+<li>트랜잭션을 시작했기때문에 트랜잭션시작, 로직수행,트랜잭션 커밋의 과정은 이뤄지지만, 단지 영속성 컨텍스트 플러시를 안할뿐이다. </li>
+</ul>
+<h4 id="트랜잭션-밖에서-읽기"><a href="#트랜잭션-밖에서-읽기" class="headerlink" title="트랜잭션 밖에서 읽기"></a>트랜잭션 밖에서 읽기</h4><ul>
+<li>@Transactional(propagation= Propagation.NOT_SUPPORTED) </li>
+<li>위 설정은 트랜잭션을 사용하지 않는것이다. 따라서 자연스럽게 커밋할일이없어짐. JPQL쿼리도 트랜잭션 없이 실행하면 플러시를 호출 안함.</li>
+</ul>
+<p>읽기 전용 데이터를 조회할때, 메모리 최적화하려면 스칼라 타입(커스텀 프로젝션)으로 조회등 위 내용대로 설정하면 됨.<br>(보통 읽기전용트랜잭션 + 읽기전용쿼리힌트 로 성능최적화를 많이 함.)</p>
+<h3 id="배치처리"><a href="#배치처리" class="headerlink" title="배치처리"></a>배치처리</h3><p>배치 처리처럼 수천 수백만건의 데이터를 처리해야하는것이라면, 영속성 컨텍스트에 무자비하게 쌓이기때문에 메모리부족 현상이 발생할수있음. 2차캐시 사용한다면 2차캐시에 보관되지않도록 해야햠.</p>
+<h4 id="JPA-등록배치"><a href="#JPA-등록배치" class="headerlink" title="JPA 등록배치"></a>JPA 등록배치</h4><ul>
+<li>주기적으로 em.flush(), em.clear() 호출 (if(i % 100 == 0))</li>
+</ul>
+<h4 id="JPA-페이징-배치-처리"><a href="#JPA-페이징-배치-처리" class="headerlink" title="JPA 페이징 배치 처리"></a>JPA 페이징 배치 처리</h4><ul>
+<li>페이징으로 100건씩 쿼리 조회하면서 em.flush,em.clear호출  </li>
+</ul>
+<h4 id="하이버네이트-Scroll사용"><a href="#하이버네이트-Scroll사용" class="headerlink" title="하이버네이트 Scroll사용"></a>하이버네이트 Scroll사용</h4><ul>
+<li>하이버네이트는 scroll로 jdbc 커서를 지원함. (JPA는 커서 지원안함)</li>
+<li>Session session = em.unwrap(Session.class); 을 사용해야함. </li>
+<li>2차캐시 기능은 꺼야함(setCacheMode(CacheMode.IGNORE))</li>
+</ul>
+<h4 id="하이버네이트-무상태-세션-사용"><a href="#하이버네이트-무상태-세션-사용" class="headerlink" title="하이버네이트 무상태 세션 사용"></a>하이버네이트 무상태 세션 사용</h4><ul>
+<li>영속성 컨텍스트 생성안함. 2차캐시도 사용안함</li>
+<li>엔티티를 수정하려면 무상태 세션이 제공하는 update()메소드를 직접 호출해야함. </li>
+</ul>
+<h3 id="SQL-쿼리-힌트"><a href="#SQL-쿼리-힌트" class="headerlink" title="SQL 쿼리 힌트"></a>SQL 쿼리 힌트</h3><ul>
+<li>JPA는 데이터베이스 SQL힌트기능이 없음 (하이버네이트를 직업 사용해야함.)</li>
+<li>addQueryHint(“FULL (MEMBER)”) 이런식으로 힌트 추가 (하이버네이트 세션에서)</li>
+</ul>
+<h3 id="트랜잭션을-지원하는-쓰기지연-과-성능-최적화"><a href="#트랜잭션을-지원하는-쓰기지연-과-성능-최적화" class="headerlink" title="트랜잭션을 지원하는 쓰기지연 과 성능 최적화"></a>트랜잭션을 지원하는 쓰기지연 과 성능 최적화</h3><ul>
+<li>hibernate.jdbc.batch_size 속성 사용 </li>
+<li>위 설정으로 배치처리를하면 사이즈만큼 모아서 처리함. </li>
+<li>하지만 같은 SQL일때만 유효하다. 중간에 다른 쿼리가 끼면 SQL배치를 다시 시작하게됨. </li>
+</ul>
+<h3 id="트랜잭션을-지원하는-쓰기지연과-애플리케이션-확장성"><a href="#트랜잭션을-지원하는-쓰기지연과-애플리케이션-확장성" class="headerlink" title="트랜잭션을 지원하는 쓰기지연과 애플리케이션 확장성"></a>트랜잭션을 지원하는 쓰기지연과 애플리케이션 확장성</h3><ul>
+<li>트랜잭션을 지원하는 쓰기지연과 변경감지 기능으로 개발 편의성 장점을 얻었지만 진짜 찐장점은 데이터베이스 테이블 row에 lock이 걸리는 시간을 최소화 한다.</li>
+<li>flush 하기 전까지는 등록,삭제,수정같은 트랜잭션이 발생안하기때문에 락이 안걸림. </li>
+<li>트랜잭션 격리수준에 따라 다르지만 보통 많이 사용하는 커밋된 읽기 (Read Commited) 격리수준이나 그 이상에서는 데이터베이스에 현재 수정중인 데이터를 수정하려는 다른 트랜잭션은 락이 풀릴때까지 대기한다. </li>
+<li>jpa는 커밋을 해야 플러시를 호출하고 데이터베이스에 수정 쿼리를 보낸다. 쿼리를 보내고 트랜잭션을 커밋하므로 결과적으로 디비에 락이 걸리는 시간을 최소화함. </li>
+</ul>
+
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/2021/06/12/jpa-performance-optimazation/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                Comment and share
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
                             href="/2021/06/10/jpa-collection-etc/"
                             aria-label=": jpa-collection-etc"
                         >
@@ -1493,132 +1671,6 @@
                         <p>
                             <a
                                 href="/2021/03/30/variable-relation-mapping/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                Comment and share
-                            </a>
-                        </p>
-                    
-                </div>
-            
-        </div>
-        
-    </article>
-    
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/2021/03/24/relation-mapping-basic/"
-                            aria-label=": relation-mapping-basic"
-                        >
-                            relation-mapping-basic
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time datetime="2021-03-24T10:39:36+00:00">
-	
-		    Mar 24, 2021
-    	
-    </time>
-    
-        <span>in </span>
-        
-    <a class="category-link" href="/categories/Study/">Study</a>, <a class="category-link" href="/categories/%EC%97%B0%EA%B4%80%EA%B4%80%EA%B3%84-%EB%A7%A4%ED%95%91-%EA%B8%B0%EC%B4%88/">연관관계 매핑 기초</a>, <a class="category-link" href="/categories/%EC%9E%90%EB%B0%94ORM%ED%91%9C%EC%A4%80JPA%ED%94%84%EB%A1%9C%EA%B7%B8%EB%9E%98%EB%B0%8D/">자바ORM표준JPA프로그래밍</a>
-
-
-    
-</div>
-
-            </div>
-            
-                <div class="postShorten-content">
-                    <h1 id="연관관계-매핑-기초"><a href="#연관관계-매핑-기초" class="headerlink" title="연관관계 매핑 기초"></a>연관관계 매핑 기초</h1><blockquote><p>연관관계 매핑을 이해하기 위한 핵심 키워드 </p>
-<ul>
-<li>방향 (Direction) : [단방향,양방향]이 있다. 예를들어 회원-&gt;팀 또는 팀 -&gt; 회원 둘 중 한쪽만 참조하는 것을 단방향이라하며, 회원 -&gt; 팀 과 팀 -&gt; 회원 양쪽모두 참조하는것을 양방향 관계라고 한다. 방향은 객체관계에서만 존재하고 테이블 관계는 무조건 <strong>양방향</strong> 이다.</li>
-<li>다중성(Multiplicity) : [N:1,1:N,1:1,M:N] 다중성이 있다. 예를들어 회원과 팀이 관계가 있을때 여러 회원은 한 팀에 속하므로, N:1관계며, 반대로 한 팀에 여러 회원이 소속될수 있으므로 팀과 회원은 1:N관계다. </li>
-<li>연관관계 주인 (Owner) : 객체를 양방향 연관관계로 만들면 연관관계의 주인을 정해야함. (주로 외래키를 관리하는 N쪽이 주인이됨.)</li>
-</ul>
-</blockquote>
-
-<h2 id="단방향-연관관계"><a href="#단방향-연관관계" class="headerlink" title="단방향 연관관계"></a>단방향 연관관계</h2><figure class="highlight java"><figcaption><span>단방향연관관계1</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Entity</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Member</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Id</span></span><br><span class="line">    <span class="meta">@GeneratedValue</span></span><br><span class="line">    <span class="keyword">private</span> Long id;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Column(name = &quot;username&quot;)</span></span><br><span class="line">    <span class="keyword">private</span> String name;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Column(updatable = false)</span></span><br><span class="line">    <span class="keyword">private</span> LocalDateTime regDate;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> LocalDateTime uptDate;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Enumerated(EnumType.STRING)</span></span><br><span class="line">    <span class="keyword">private</span> MemberType memberType;</span><br><span class="line">	</span><br><span class="line">	<span class="comment">// 회원은 N , 팀은 1이기때문에 N:1로 ManyToOne으로 설정</span></span><br><span class="line">	<span class="comment">// @JoinColumn은 생략가능(생략하게되면 필드명 + _ + id로 자동으로 탐색해줌)</span></span><br><span class="line">    <span class="meta">@ManyToOne(fetch = FetchType.LAZY)</span></span><br><span class="line">    <span class="meta">@JoinColumn(name = &quot;team_id&quot;)</span></span><br><span class="line">    <span class="keyword">private</span> Team team;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Entity</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Team</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Id</span></span><br><span class="line">    <span class="meta">@GeneratedValue</span></span><br><span class="line">    <span class="keyword">private</span> Long id;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> String name;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id="연관관계-사용"><a href="#연관관계-사용" class="headerlink" title="연관관계 사용"></a>연관관계 사용</h2><h3 id="저장"><a href="#저장" class="headerlink" title="저장"></a>저장</h3><figure class="highlight java"><figcaption><span>persist</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"> </span><br><span class="line"><span class="comment">//entityManager 및 commmit부분 표기상 생략 </span></span><br><span class="line"><span class="keyword">final</span> Team team1 = Team.builder().name(<span class="string">&quot;Team1&quot;</span>).build();</span><br><span class="line">entityManager.persist(team1);</span><br><span class="line"><span class="keyword">final</span> Member member1 = Member.builder().name(<span class="string">&quot;hellojpa&quot;</span>).memberType(MemberType.ADMIN).team(team1).build();</span><br><span class="line">entityManager.persist(member1);</span><br></pre></td></tr></table></figure>
-
-<h3 id="조회"><a href="#조회" class="headerlink" title="조회"></a>조회</h3><p>연관관계가 있는 엔티티를 조회하는 방법은 크게 2가지다. </p>
-<ol>
-<li>객체그래프 탐색 (객체 연관관계를 사용한 조회)</li>
-<li>객체지향 쿼리 사용 JPQL </li>
-</ol>
-<figure class="highlight java"><figcaption><span>select방법들</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"> </span><br><span class="line"><span class="comment">//객체그래프활용</span></span><br><span class="line"><span class="keyword">final</span> Member gmember2 = entityManager.find(Member.class, member2.getId());</span><br><span class="line">Team team = gmember2.getTeam(); </span><br><span class="line">System.out.println(team.getName());</span><br><span class="line"></span><br><span class="line"><span class="comment">//객체지향 쿼리 사용 (JPQL)</span></span><br><span class="line">List&lt;Member&gt; members = entityManager.createQuery(<span class="string">&quot;select m from Member m&quot;</span>, Member.class)</span><br><span class="line">                .getResultList();</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span>(Member m : members) &#123;</span><br><span class="line">    System.out.println(<span class="string">&quot;m = &quot;</span> + m.getUserName());</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">List&lt;Member&gt; paramResult = entityManager.createQuery(<span class="string">&quot;select m from Member m where m.userName = :userName&quot;</span>,Member.class).setParameter(<span class="string">&quot;userName&quot;</span>,<span class="string">&quot;m2&quot;</span>).getResultList();</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span>(Member m2 : paramResult) &#123;</span><br><span class="line">	System.out.println(<span class="string">&quot;m2 = &quot;</span> + m2.getUserName());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h3 id="수정"><a href="#수정" class="headerlink" title="수정"></a>수정</h3><figure class="highlight java"><figcaption><span>select방법들</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"> </span><br><span class="line"><span class="comment">//entityManager 및 commmit부분 표기상 생략 </span></span><br><span class="line"><span class="keyword">final</span> Team team2 = Team.builder().name(<span class="string">&quot;Team2&quot;</span>).build();</span><br><span class="line">entityManager.persist(team2);</span><br><span class="line"></span><br><span class="line">Member member1 = entityManager.find(Member.class, <span class="string">&quot;member1&quot;</span>);</span><br><span class="line"><span class="comment">//update쿼리가 자동으로 날아감. (정확하게 쓰기지연SQL저장소에 저장되었다가, commit시점에 쿼리가 반영될것임)</span></span><br><span class="line">member1.setTeam(team2); </span><br></pre></td></tr></table></figure>
-
-<h3 id="연관관계-제거"><a href="#연관관계-제거" class="headerlink" title="연관관계 제거"></a>연관관계 제거</h3><figure class="highlight java"><figcaption><span>select방법들</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"> </span><br><span class="line">Member member1 = entityManager.find(Member.class, <span class="string">&quot;member1&quot;</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">//update쿼리로 team_id = null로 세팅되서 날라감. </span></span><br><span class="line">member1.setTeam(<span class="keyword">null</span>); </span><br></pre></td></tr></table></figure>
-
-<h3 id="연관된-엔티티-삭제"><a href="#연관된-엔티티-삭제" class="headerlink" title="연관된 엔티티 삭제"></a>연관된 엔티티 삭제</h3><p>연관된 엔티티를 삭제하려면 기존에 있던 연관관계를 먼저 제거하고 삭제해야한다. 그렇지 않으면 외래 키 제약조건으로 인해, DB에서 오류가 발생됨. </p>
-<figure class="highlight java"><figcaption><span>select방법들</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"> </span><br><span class="line">Member member1 = entityManager.find(Member.class, <span class="string">&quot;member1&quot;</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">//update쿼리로 team_id = null로 세팅되서 날라감. </span></span><br><span class="line">member1.setTeam(<span class="keyword">null</span>); </span><br><span class="line">entityManager.remove(team1);</span><br></pre></td></tr></table></figure>
-
-<h2 id="양방향-연관관계"><a href="#양방향-연관관계" class="headerlink" title="양방향 연관관계"></a>양방향 연관관계</h2><h3 id="양방향-연관관계-매핑-방법"><a href="#양방향-연관관계-매핑-방법" class="headerlink" title="양방향 연관관계 매핑 방법"></a>양방향 연관관계 매핑 방법</h3><figure class="highlight java"><figcaption><span>단방향연관관계1</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Entity</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Member</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Id</span></span><br><span class="line">    <span class="meta">@GeneratedValue</span></span><br><span class="line">    <span class="keyword">private</span> Long id;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Column(name = &quot;username&quot;)</span></span><br><span class="line">    <span class="keyword">private</span> String name;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Column(updatable = false)</span></span><br><span class="line">    <span class="keyword">private</span> LocalDateTime regDate;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> LocalDateTime uptDate;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Enumerated(EnumType.STRING)</span></span><br><span class="line">    <span class="keyword">private</span> MemberType memberType;</span><br><span class="line">	</span><br><span class="line">	<span class="comment">// 회원은 N , 팀은 1이기때문에 N:1로 ManyToOne으로 설정</span></span><br><span class="line">	<span class="comment">// @JoinColumn은 생략가능(생략하게되면 필드명 + _ + id로 자동으로 탐색해줌)</span></span><br><span class="line">    <span class="meta">@ManyToOne(fetch = FetchType.LAZY)</span></span><br><span class="line">    <span class="meta">@JoinColumn(name = &quot;team_id&quot;)</span></span><br><span class="line">    <span class="keyword">private</span> Team team;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Entity</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Team</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Id</span></span><br><span class="line">    <span class="meta">@GeneratedValue</span></span><br><span class="line">    <span class="keyword">private</span> Long id;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> String name;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@OneToMany(mappedBy = &quot;team&quot;)</span></span><br><span class="line">    <span class="keyword">private</span> List&lt;Member&gt; members = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h3 id="1-N-컬렉션-조회"><a href="#1-N-컬렉션-조회" class="headerlink" title="1:N 컬렉션 조회"></a>1:N 컬렉션 조회</h3><figure class="highlight java"><figcaption><span>select방법들</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"> </span><br><span class="line"><span class="comment">//entityManager 및 commmit부분 표기상 생략 </span></span><br><span class="line">Team team = entityManaber.find(Team.class,<span class="string">&quot;team1&quot;</span>);</span><br><span class="line">List&lt;Member&gt; members = team.getMembers();</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> (Member m : members) &#123;</span><br><span class="line">	<span class="comment">//...출력.. </span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id="연관관계의-주인"><a href="#연관관계의-주인" class="headerlink" title="연관관계의 주인"></a>연관관계의 주인</h2><h3 id="양방향-매핑의-규칙-연관관계의-주인"><a href="#양방향-매핑의-규칙-연관관계의-주인" class="headerlink" title="양방향 매핑의 규칙 : 연관관계의 주인"></a>양방향 매핑의 규칙 : 연관관계의 주인</h3><p>양방향 연관관계 매핑시 지켜야할 규칙이 있는데 두 연관관계 중 하나를 연관관계 주인으로 정해야한다. 연관관계의 주인만이 DB연관관계와 매핑되고 외래 키를 관리(등록,수정,삭제) 할 수 있다. 반만에 주인이 아닌쪽은 읽기만 할 수 있다.<br>어떤 연관관계를 주인으로 정할지는 mappedBy속성을 사용하면된다. </p>
-<ul>
-<li>주인은 mappedBy를 사용하지 않는다.</li>
-<li>주인이 아니면 mappedBy속성을 사용해서 속성의 값으로 연관관계의 주인을 지정해야 한다. </li>
-</ul>
-<p>연관관계의 주인을 정한다는것은 사실 외래키 관리자를 선택하는 것이다.<br>그래서 중요한건 엔티티 설계시 외래키가 존재하는 곳이 연관관계의 주인이 되야함. 그러니까 N:1에서 N이 결국 외래키를 관리하는 주인이라는 말이다. </p>
-<h2 id="양방향-연관관계-저장"><a href="#양방향-연관관계-저장" class="headerlink" title="양방향 연관관계 저장"></a>양방향 연관관계 저장</h2><p>양방향 연관관계를 맺고나서, 저장할때 주의점은 한쪽 객체에만 저장하면 안된다는것이다.<br>그렇게되면 제대로 저장이 안된다. 그럼 어떻게 해야할까?<br>결론은 그냥 양쪽 다 저장하면 된다. 이부분의 실수를 줄이기 위해서 <strong>연관관계 편의성 메소드</strong> 를 만들어서 사용하는것을 저자는 추천하고있다. </p>
-<figure class="highlight java"><figcaption><span>양방향 연관관계 매핑 저장1</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line">Team team = <span class="keyword">new</span> Team();</span><br><span class="line">team.setName(<span class="string">&quot;Team1&quot;</span>);</span><br><span class="line">entityManager.persist(team);</span><br><span class="line"></span><br><span class="line">Team team2 = <span class="keyword">new</span> Team();</span><br><span class="line">team2.setName(<span class="string">&quot;Team2&quot;</span>);</span><br><span class="line">entityManager.persist(team2);</span><br><span class="line"></span><br><span class="line">Member member = <span class="keyword">new</span> Member();</span><br><span class="line">member.setUserName(<span class="string">&quot;m1&quot;</span>);</span><br><span class="line">member.setAge(<span class="number">36</span>);</span><br><span class="line">member.setTeam(team);</span><br><span class="line">entityManager.persist(member);</span><br><span class="line"></span><br><span class="line">Member member2 = <span class="keyword">new</span> Member();</span><br><span class="line">member2.setUserName(<span class="string">&quot;m2&quot;</span>);</span><br><span class="line">member2.setAge(<span class="number">30</span>);</span><br><span class="line">member2.setTeam(team2);</span><br><span class="line"></span><br><span class="line">entityManager.persist(member2);</span><br><span class="line"></span><br><span class="line"><span class="comment">//위와 같이 저장하면 문제는 없다 왜냐.. 연관관계주인으로 저장했기때문에..</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//아래와 같이 주인관계로 저장하지 않으면 어떻게 될까? member.team_id = null로 들어감. </span></span><br><span class="line"></span><br><span class="line">Member member3 = <span class="keyword">new</span> Member();</span><br><span class="line">member3.setUserName(<span class="string">&quot;m3&quot;</span>);</span><br><span class="line">member3.setAge(<span class="number">22</span>);</span><br><span class="line"><span class="comment">//member3.setTeam(team3);</span></span><br><span class="line"></span><br><span class="line">entityManager.persist(member3);</span><br><span class="line"></span><br><span class="line">Team team3 = <span class="keyword">new</span> Team();</span><br><span class="line">team3.setName(<span class="string">&quot;t3&quot;</span>);</span><br><span class="line">team3.getMembers().add(member3);</span><br><span class="line">entityManager.persist(team3);</span><br></pre></td></tr></table></figure>
-
-<p>위 소스코드와 같이 단반향만 저장을 하면 문제가 발생하게된다. 물론 member1,member2는 member.team_id를 각각 잘 저장했을것이다. 그리고 memeber3는 연관관계 주인의 객체로 저장하지않았기때문에 저장이안됫다. 그럼 member1,2는 문제가 없는걸까? 결론은 문제가 있다. 왜냐하면 단방향으로만 저장을 했기때문이다.<br>물론 member1,2는 저장하는데는 큰 이슈가 없다. 하지만 객체지향관점에서 봤을때는 문제가 있는 코드다. 아래 코드를 확인해보자. </p>
-<figure class="highlight java"><figcaption><span>양방향 연관관계 매핑 저장2</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">long</span> count = team.getMembers().stream().count();</span><br><span class="line">System.out.println(<span class="string">&quot;count = &quot;</span> + count); <span class="comment">// 0개</span></span><br></pre></td></tr></table></figure>
-
-<p>객체지향적으로만 봤을때는 양방향으로 저장이 안되었기때문에 반대방향으로 조회했을때는 0개가 나오게되는것이다.<br>그래서 양방향 연관관계 매핑으로 저장할때는 양방향으로 저장을 필수적으로 해야한다.<br>하지만 단순히 양방향으로만 저장한다고 되는일이 아니다. 추가적으로 해야하는 작업이 있는데 그것은 무엇일까?</p>
-<figure class="highlight java"><figcaption><span>양방향 연관관계 매핑 저장3</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"> </span><br><span class="line"><span class="comment">//1. 편의성 메소드 버그 기본 세팅 </span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setTeam</span><span class="params">(Team team)</span> </span>&#123;</span><br><span class="line">	member.setTeam(team);</span><br><span class="line">	team.setMembers().add(<span class="keyword">this</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//2. 버그를 잡는 편의성 메소드 </span></span><br><span class="line"><span class="comment">//Why? </span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setTeam</span><span class="params">(Team team)</span> </span>&#123;</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">if</span>(<span class="keyword">this</span>.team != <span class="keyword">null</span>) &#123;</span><br><span class="line">		<span class="keyword">this</span>.team.getMembers().remove(<span class="keyword">this</span>); </span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	member.setTeam(team);</span><br><span class="line">	team.setMembers().add(<span class="keyword">this</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>1번 코드는 기본적인 편의성메소드인데, 무엇이 문제일까?<br>만약에 아래 코드처럼 추가하면 어떻게 될까? </p>
-<figure class="highlight java"><figcaption><span>편의 메소드 주의점</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"> </span><br><span class="line">Member member3 = <span class="keyword">new</span> Member();</span><br><span class="line">member3.setUserName(<span class="string">&quot;m3&quot;</span>);</span><br><span class="line">member3.setAge(<span class="number">22</span>);</span><br><span class="line">member3.setTeam(team3);</span><br><span class="line">member3.setTeam(team);</span><br><span class="line"></span><br><span class="line"><span class="comment">//결과는? member = Member[id=null, userName=&#x27;m3&#x27;, age=22] 나오지 말아야 하는데..? </span></span><br><span class="line">team3.getMembers().stream().forEach(v -&gt; System.out.println(<span class="string">&quot;member = &quot;</span> + v));</span><br></pre></td></tr></table></figure>
-
-<p>위와 같이 setTeam을 두번하여, Team3 -&gt; Team으로 변경하였는데, member3는 더이상 team3를 참조하지 않는데 id는 null로빠졌지만 나머지값이 나왔다.<br>결국 삭제되지 않는 관계가 남아서 team3에 member3의 흔적이 남게된것이다. 따라서 2번 코드처럼 remove를 시켜주면 해당 부분이 깔끔하게 정리 될수있음.<br>어쨋든 team3(Team 엔티티)는 외래키의 주인이 아니기때문에 DB에 영향을 주지는 않지만, 나중에 대형시스템에서 영속성컨텍스트가 살아있는 상태에서 복잡한 비즈니스 코드를 처리하다보면, 잔재된 데이터로인해 버그를 유발시킬수도 있다. 따라서 항상 2번과 같은 방어코드를 신경써야하며, 늘 양방향관계에 있을때는 양쪽 객체를 항상 신경써야한다는것을 잊지 말자. </p>
-<blockquote><p>연관관계 매핑 정리 </p>
-<ul>
-<li>단방향 매핑만으로 테이블과 객체의 연관관계 매핑은 이미 완료 되었다. (꼭 양방향만 고집할 필요는 없다. )</li>
-<li>단방향을 양방향으로 만들면 반대방향으로 객체 그래프 탐색 기능이 추가된다. </li>
-<li>양방향 연관관계를 매핑하려면 객체에서 양쪽 방향을 모두 관리해야한다. </li>
-</ul>
-</blockquote>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                    
-                        
-
-
-                    
-                    
-                        <p>
-                            <a
-                                href="/2021/03/24/relation-mapping-basic/#post-footer"
                                 class="postShorten-excerpt_link link"
                                 aria-label=""
                             >
