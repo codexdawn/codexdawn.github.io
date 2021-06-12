@@ -284,7 +284,7 @@
 <li><p>트랜잭션을 표시하는 예외는 심각한 예외이때문에 복구해선안됨. 이 예외가 발생하면 트랜잭션을 강제로 커밋해도 트랜잭션 커밋되지 않고 대신에 javax.persistence.RollbackException 예외가 발생함. </p>
 </li>
 </ul>
-<p><img src="https://www.objectdb.com/api/java/jpa/exceptions" alt="참고-objectdb-jpa exception정리"></p>
+<p><a target="_blank" rel="noopener" href="https://www.objectdb.com/api/java/jpa/exceptions">참고-objectdb-jpa exception정리</a></p>
 <h3 id="트랜잭션-롤백시-주의사항"><a href="#트랜잭션-롤백시-주의사항" class="headerlink" title="트랜잭션 롤백시 주의사항"></a>트랜잭션 롤백시 주의사항</h3><ul>
 <li>트랜잭션을 롤백하는건 db의 반영사항만 롤백하는것이지 숮어한 자바 객체까지 원상태로 복구 안해줌. (영속성 컨텍스트의 1차캐시에 그대로 남아있음.)</li>
 <li>이 롤백된 영속성 컨텍스트를 그대로 사용하는건 굉장히 위험함. 따라서 이부분은 EntityManager.clear()를 호출해서 영속성 컨텍스트를 초기화 해야함. </li>
