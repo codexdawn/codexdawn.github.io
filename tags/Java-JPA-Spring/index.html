@@ -247,6 +247,86 @@
                     
                         <a
                             class="link-unstyled"
+                            href="/2021/06/22/jpa-work-1/"
+                            aria-label=": jpa-work-1"
+                        >
+                            jpa-work-1
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2021-06-22T13:34:43+00:00">
+	
+		    Jun 22, 2021
+    	
+    </time>
+    
+        <span>in </span>
+        
+    <a class="category-link" href="/categories/JPA/">JPA</a>, <a class="category-link" href="/categories/%EC%9C%A0%EB%A0%88%EC%B9%B4or%EC%82%BD%EC%A7%88/">유레카or삽질</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <h1 id="Collection-Fetch에서-limit를-하니까-메모리를-다-올려버리네"><a href="#Collection-Fetch에서-limit를-하니까-메모리를-다-올려버리네" class="headerlink" title="Collection Fetch에서 limit를 하니까 메모리를 다 올려버리네?"></a>Collection Fetch에서 limit를 하니까 메모리를 다 올려버리네?</h1><p>오늘 업무를 하다가 JPA쪽 이슈를 발견하게 되었다. Collection Fetch 로 데이터 조회를 기존에 잘했었는데, 최대 20개 제한로직이 걸리는 바람에 기존 로직에서 limit를 걸게되었다. 그래서 아무생각없이 fetchJoin걸린상태에서 limit를 걸었더니.. Collection Fetch조인한상태에서 페이징 로직을 걸면 발생하는 연관된 모든 엔티티를 메모리에 다 올려버리는 경고 창이 뜨게 되었다. (크읍.. 처음봤다..) 대략 소스는 아래와 같다.</p>
+<figure class="highlight java"><figcaption><span>문제의 코드</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//after limit 20 </span></span><br><span class="line">   <span class="function"><span class="keyword">public</span> SimilarBrandGroupEntity <span class="title">findByBrandCode</span><span class="params">(Long brandCode)</span> </span>&#123;</span><br><span class="line">       <span class="keyword">return</span> jpaQueryFactory</span><br><span class="line">           .selectFrom(QSimilarBrandGroupEntity.similarBrandGroupEntity)</span><br><span class="line">           .join(similarBrandEntity).fetchJoin()</span><br><span class="line">           .where(isEqualsBrandCode(brandCode), isUsableTrue())</span><br><span class="line">           .limit(<span class="number">20L</span>)</span><br><span class="line">		.fetchOne();</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+
+<p>위 와 같이 하니까, </p>
+<p><strong>HHH000104: firstResult/maxResults specified with collection fetch; applying in memory!</strong> </p>
+<p>위 문구와 함께 정상적으로 노출은되었지만, 성능에 지대한 영향을 끼칠수밖에 없는 이슈가 발생하기때문에 당장 고쳐야했다.<br>그래서 JPA공부한대로, Collection Fetch조인시 fetchJoin빼고, @BatchSize를 넣어봤지만, 쿼리는 한방에 나간것 같은데, 쿼리가 2방이 나갔다. 그것도 좀 이상한 쿼리가 나가서, 검색 해본 결과 대략 3가지 방법으로 줄여지게 되었음.  </p>
+<ol>
+<li>projection 처리 (해당 사용방법 채택)<ul>
+<li>projection처리하는 방법이 여러가지 있는데, 가장 베스트는 @queryprojection으로 사용하는것이 베스트임.</li>
+</ul>
+</li>
+<li>Native SQL <ul>
+<li>@Query로 직접 쿼리 작성 </li>
+</ul>
+</li>
+<li>collection fetchjoin하지 말고 반대기준으로 조회 <ul>
+<li>ManyToOne쪽기준으로 조회 하면 정상적으로 된다고 함. </li>
+</ul>
+</li>
+</ol>
+<figure class="highlight java"><figcaption><span>해결 코드</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> List&lt;Long&gt; <span class="title">findSimilarBrandCodesByGroupBrandCode</span><span class="params">(Long brandCode)</span> </span>&#123;</span><br><span class="line">       <span class="keyword">return</span> jpaQueryFactory</span><br><span class="line">           .select(getSimilarBrandCodesProjection())</span><br><span class="line">           .from(similarBrandGroupEntity, similarBrandGroupEntity)</span><br><span class="line">           .join(similarBrandGroupEntity.brands, similarBrandEntity)</span><br><span class="line">           .where(isEqualsBrandCode(brandCode), isUsableTrue())</span><br><span class="line">           .limit(MAX_DISPLAY_BRAND_CODES)</span><br><span class="line">           .fetch()</span><br><span class="line">           ;</span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//@queryprojection은 아니지만 아래와같이 커스텀 프로젝션을 만들 수 있음. </span></span><br><span class="line"><span class="function"><span class="keyword">private</span> ConstructorExpression&lt;Long&gt; <span class="title">getSimilarBrandCodesProjection</span><span class="params">()</span> </span>&#123;</span><br><span class="line">       <span class="keyword">return</span> Projections.constructor(Long.class,similarBrandEntity.brandCode);</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+
+<p>우선, projection으로 쿼리조회하면 영속성관리에 관리되지 못하지만, 일단 DTO조회는 가능하게됨. 딱히 영속성관리 받을 이유가 크게 없다면 그냥 projection으로 조회해서 가져오는편이 가장 깔끔하다. 늘 엔티티를 영속성 컨텍스트에 올리는것이 정석은 아니다. 경우에 따라서는 projection dto로 쿼리조회하는것이 성능상 이점이 될 수 있음. </p>
+
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/2021/06/22/jpa-work-1/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                Comment and share
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
                             href="/2021/06/02/jpa-query-custom-repository/"
                             aria-label=": jpa-query-custom-repository"
                         >
