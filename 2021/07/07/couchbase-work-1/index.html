@@ -1,0 +1,658 @@
+
+<!DOCTYPE html>
+<html lang="en">
+    
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="generator" content="codexdawn">
+    <title>couchbase-work-1 - codexdawn</title>
+    <meta name="author" content="codexdawn">
+    
+    
+    
+        
+            <link rel="alternate" type="application/atom+xml" title="RSS" href="/atom.xml">
+        
+    
+    <script type="application/ld+json">{"@context":"http://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"codexdawn","sameAs":["https://github.com/codexdawn","https://www.facebook.com/beherzt.dev","https://www.linkedin.com/in/sim-jisung-3048872a/","mailto:cloudkaiser@gmail.com"],"image":"https://www.gravatar.com/avatar/d97fd4b94c429915f1cb55eb27e7d4d9"},"articleBody":"CouchBase 삽질 도전기CouchBase ?\n기존적으로 json문서 지원 (RDBMS와 달리 스키마가 없어서 document db 라고 불림)\nkey - value 형태 (key: string, value : json)\n\n\ncache db로 조회속도가 빠름 \nmemcached 도 지원됨.\n\n\nSQL 지원해서 RDBMS사용하듯 사용할수는 있음 (N1QL)\n정확하게 말하면 SQL형태임 (where/group by /order by 등으로 )\n\n\n스키마리스 \n스카마가 없어서 유연하게 테이블 구성이 가능함 \n\n\n인덱싱 가능 \nN1QL로 인덱싱 조회 가능 (데이터양이 많음 인덱스사용 가능)\n\n\n확장성 (multi-master구조) \n엘라스틱서치처럼 master-slave구조가 아닌 multi-master구조임 \nauto sharding지원 (각 shard마다 자동 동기화 진행 및 분산 처리 가능)\n서버추가를 복잡한 과정없이 추가가능 \n\n\n다양한 언어 지원 \nJAVA/Python/PHP/RUBY 등 다양한 언어 지원\n\n\nBucket ?\nBucket은 RDBMS의 테이블이라고 생각하면 된다. \n\n\n\nCouchBase 세팅 방법 (JAVA/Spring Boot 기준)설정 및 사전세팅application-xxx.yml123456789101112cache:  couchbase:    cluster:      contents-cluster:        userName: &#123;접속할 couchbase id&#125;        password: &#123;password&#125;        ip:          - &#123;ip주소&#125;        bucket:          - name: promotion-cache\n\nBucket123456789101112package com.wemakeprice.v.content.domain.configuration.cache.config;import lombok.Getter;import lombok.Setter;import lombok.ToString;@Getter@Setterpublic class Bucket &#123;    private String name;&#125;\n\nBucketRouterName123456789101112package com.wemakeprice.v.content.domain.configuration.cache.config;import lombok.Getter;import lombok.RequiredArgsConstructor;@RequiredArgsConstructor@Getterpublic enum BucketRouterName &#123;    PROMOTION(&quot;promotion-cache&quot;);    private final String bucket;&#125;\n\nClusterRouterName12345678910111213package com.wemakeprice.v.content.domain.configuration.cache.config;import lombok.Getter;import lombok.RequiredArgsConstructor;@RequiredArgsConstructor@Getterpublic enum ClusterRouterName &#123;    CONTENTS(&quot;contents-cluster&quot;)    ;    private final String cluster;&#125;\n\nCouchbaseDatasource12345678910111213141516171819202122package com.wemakeprice.v.content.domain.configuration.cache.config;import lombok.Getter;import lombok.NoArgsConstructor;import lombok.Setter;import lombok.ToString;import java.util.List;@Getter@Setterpublic class CouchbaseDatasource &#123;    private String userName;    private String password;    private List&lt;String&gt; ip;    private List&lt;Bucket&gt; bucket;    public String getConnectionString() &#123;        return String.join(&quot;,&quot;,this.ip);    &#125;&#125;\n\nCouchbaseHolder12345678910111213141516171819202122package com.wemakeprice.v.content.domain.configuration.cache.config;import lombok.Getter;import lombok.Setter;import org.springframework.boot.context.properties.ConfigurationProperties;import org.springframework.util.Assert;import java.util.HashMap;import java.util.Map;@Getter@Setter@ConfigurationProperties(prefix = &quot;cache.couchbase&quot;)public class CouchbaseHolder &#123;    private Map&lt;String,CouchbaseDatasource&gt; cluster = new HashMap&lt;&gt;();    public CouchbaseDatasource getClient(ClusterRouterName clusterRouterName) &#123;        Assert.notNull(this.cluster.get(clusterRouterName.getCluster()), &quot;Map&lt;String, CouchbaseDatasource&gt; must not be null. Please check application.yml : cache.couchbase.cluster&quot;);        return this.cluster.get(clusterRouterName.getCluster());    &#125;&#125;\n\nCouchbaseConnector12345678910111213141516171819202122232425262728293031323334353637383940414243444546474849505152535455565758596061626364656667package com.wemakeprice.v.content.domain.configuration.cache.config;import com.couchbase.client.core.env.TimeoutConfig;import com.couchbase.client.java.Cluster;import com.couchbase.client.java.ClusterOptions;import com.couchbase.client.java.env.ClusterEnvironment;import lombok.extern.slf4j.Slf4j;import org.springframework.beans.factory.InitializingBean;import org.springframework.data.couchbase.CouchbaseClientFactory;import org.springframework.data.couchbase.SimpleCouchbaseClientFactory;import org.springframework.data.couchbase.core.CouchbaseTemplate;import org.springframework.data.couchbase.core.convert.MappingCouchbaseConverter;import org.springframework.util.Assert;import java.time.Duration;import java.util.HashMap;import java.util.Map;@Slf4jpublic class CouchbaseConnector implements InitializingBean &#123;    private final CouchbaseHolder couchbaseHolder;    private final Map&lt;String, CouchbaseTemplate&gt; couchbaseTemplate = new HashMap&lt;&gt;();    private final static int CONNECTION_TIMEOUT = 10;    public CouchbaseConnector(CouchbaseHolder couchbaseHolder) &#123;        this.couchbaseHolder = couchbaseHolder;        this.setCouchbaseTemplate();    &#125;    public void setCouchbaseTemplate() &#123;        final ClusterEnvironment clusterEnvironment = ClusterEnvironment.builder()                .timeoutConfig(TimeoutConfig.connectTimeout(Duration.ofSeconds(CONNECTION_TIMEOUT))).build();        for(String clusterName : couchbaseHolder.getCluster().keySet()) &#123;            final CouchbaseDatasource couchbaseDatasource = couchbaseHolder.getCluster().get(clusterName);            final String userName = couchbaseDatasource.getUserName();            final String password = couchbaseDatasource.getPassword();            Cluster cluster = Cluster.connect(couchbaseDatasource.getConnectionString(), ClusterOptions.clusterOptions(userName, password).environment(clusterEnvironment));            for(Bucket bucket : couchbaseDatasource.getBucket()) &#123;                final CouchbaseClientFactory couchbaseClientFactory = new SimpleCouchbaseClientFactory(cluster,bucket.getName(),null);                final CouchbaseTemplate template = new CouchbaseTemplate(couchbaseClientFactory,new MappingCouchbaseConverter());                couchbaseTemplate.put(clusterName + bucket.getName(),template);            &#125;            log.info(&quot;couchbase datasource : &#123;&#125;&quot;,couchbaseDatasource);        &#125;    &#125;    public CouchbaseTemplate getCouchbaseTemplate(final ClusterRouterName clusterRouterName, final BucketRouterName bucketRouterName) &#123;        Assert.notNull(this.couchbaseTemplate.get(clusterRouterName.getCluster() + bucketRouterName.getBucket()),                &quot;ClusterRouteName : &quot; + clusterRouterName.getCluster() + &quot; or BucketRouteName : &quot; + bucketRouterName.getBucket() + &quot; must not be null. Please check application.yml : cache.couchbase.cluster&quot;);        return this.couchbaseTemplate.get(clusterRouterName.getCluster() + bucketRouterName.getBucket());    &#125;    @Override    public void afterPropertiesSet() throws Exception &#123;        if(this.couchbaseTemplate.isEmpty()) &#123;            throw new IllegalArgumentException(&quot;couchbaseTemplate is empty&quot;);        &#125;    &#125;&#125;\n\nCouchbaseConfig1234567891011121314151617181920package com.wemakeprice.v.content.domain.configuration.cache.config;import lombok.RequiredArgsConstructor;import org.springframework.boot.context.properties.EnableConfigurationProperties;import org.springframework.context.annotation.Bean;import org.springframework.context.annotation.Configuration;@Configuration@RequiredArgsConstructor@EnableConfigurationProperties(CouchbaseHolder.class)public class CouchbaseConfig &#123;    private final CouchbaseHolder couchbaseHolder;    @Bean    public CouchbaseConnector getCouchbaseConfig() &#123;        return new CouchbaseConnector(couchbaseHolder);    &#125;&#125;\n\nCouchbaseClient12345678910111213141516171819202122232425262728293031323334353637383940414243444546package com.wemakeprice.v.content.domain.configuration.cache.client;import com.wemakeprice.v.content.domain.configuration.cache.config.BucketRouterName;import com.wemakeprice.v.content.domain.configuration.cache.config.ClusterRouterName;public interface CouchbaseClientApi &#123;    &lt;T&gt; T findOne(final ClusterRouterName clusterRouterName, final BucketRouterName bucketRouterName, final String id, final Class&lt;T&gt; entityClass) throws Exception;&#125;package com.wemakeprice.v.content.domain.configuration.cache.client;import com.wemakeprice.v.content.domain.configuration.cache.config.BucketRouterName;import com.wemakeprice.v.content.domain.configuration.cache.config.ClusterRouterName;import com.wemakeprice.v.content.domain.configuration.cache.config.CouchbaseConnector;import com.wemakeprice.v.content.domain.exception.etc.CouchbaseClientInitializeException;import lombok.RequiredArgsConstructor;import lombok.extern.slf4j.Slf4j;import org.springframework.data.couchbase.core.CouchbaseTemplate;import org.springframework.stereotype.Component;@Component@RequiredArgsConstructor@Slf4jpublic class CouchbaseClient implements CouchbaseClientApi &#123;    private final CouchbaseConnector couchbaseConnector;    private CouchbaseTemplate getCouchbaseTemplate(final ClusterRouterName clusterRouterName, final BucketRouterName bucketRouterName) throws Exception &#123;        CouchbaseTemplate couchbaseTemplate;        try &#123;            couchbaseTemplate = couchbaseConnector.getCouchbaseTemplate(clusterRouterName,bucketRouterName);        &#125; catch (Exception e) &#123;            log.error(&quot;Couchbase Initialize Error : &#123;&#125;&quot;, e);            throw new CouchbaseClientInitializeException();        &#125;        return couchbaseTemplate;    &#125;    @Override    public &lt;T&gt; T findOne(final ClusterRouterName clusterRouterName, final BucketRouterName bucketRouterName, final String id, final Class&lt;T&gt; entityClass) throws Exception &#123;        return this.getCouchbaseTemplate(clusterRouterName, bucketRouterName).findById(entityClass).one(id);    &#125;&#125;\n\nInitializingBean ?\nafterPropertiesSet() 메서드를 반드시 구현하게 되어있음 \nBeanFactory에 의해 모든 property가 설정된뒤 실행되는 메소드 \n주로 실행시점에 custom초기화 로직을 넣거나, 주입받은 property를 확인할때 사용함 \n\nConfigurationProperties ?\napplication.yml 과 같이 yml에 설정파일을 등록해두는데, ConfigurationProperties 사용하면 yml혹은 정의된 경로의 properties에 정의돈 property들을 가져와서 Bean으로 등록시켜줌. \nspring boot 2.2 이상부터는 EnableConfigurationProperties를 사용할 필요가 없다고함. 컨테이너에서 알아서 등록해서 바인딩까지 해주는듯하다. 추가적으로 @Component 혹은 @Configuration 과 같은 애너테이션도 추가할 필요없음. \n\n","dateCreated":"2021-07-07T06:45:34+00:00","dateModified":"2021-07-07T09:00:03+00:00","datePublished":"2021-07-07T06:45:34+00:00","description":"","headline":"couchbase-work-1","image":[],"mainEntityOfPage":{"@type":"WebPage","@id":"https://codexdawn.github.io/2021/07/07/couchbase-work-1/"},"publisher":{"@type":"Organization","name":"codexdawn","sameAs":["https://github.com/codexdawn","https://www.facebook.com/beherzt.dev","https://www.linkedin.com/in/sim-jisung-3048872a/","mailto:cloudkaiser@gmail.com"],"image":"https://www.gravatar.com/avatar/d97fd4b94c429915f1cb55eb27e7d4d9","logo":{"@type":"ImageObject","url":"https://www.gravatar.com/avatar/d97fd4b94c429915f1cb55eb27e7d4d9"}},"url":"https://codexdawn.github.io/2021/07/07/couchbase-work-1/","keywords":"couchbase, NoSQL, document db, memcached"}</script>
+    <meta name="description" content="CouchBase 삽질 도전기CouchBase ? 기존적으로 json문서 지원 (RDBMS와 달리 스키마가 없어서 document db 라고 불림) key - value 형태 (key: string, value : json)   cache db로 조회속도가 빠름  memcached 도 지원됨.   SQL 지원해서 RDBMS사용하듯 사용할수는 있음 (N1QL">
+<meta property="og:type" content="blog">
+<meta property="og:title" content="couchbase-work-1">
+<meta property="og:url" content="https://codexdawn.github.io/2021/07/07/couchbase-work-1/index.html">
+<meta property="og:site_name" content="codexdawn">
+<meta property="og:description" content="CouchBase 삽질 도전기CouchBase ? 기존적으로 json문서 지원 (RDBMS와 달리 스키마가 없어서 document db 라고 불림) key - value 형태 (key: string, value : json)   cache db로 조회속도가 빠름  memcached 도 지원됨.   SQL 지원해서 RDBMS사용하듯 사용할수는 있음 (N1QL">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2021-07-07T06:45:34.000Z">
+<meta property="article:modified_time" content="2021-07-07T09:00:03.522Z">
+<meta property="article:author" content="codexdawn">
+<meta property="article:tag" content="couchbase">
+<meta property="article:tag" content="NoSQL">
+<meta property="article:tag" content="document db">
+<meta property="article:tag" content="memcached">
+<meta name="twitter:card" content="summary">
+    
+    
+        
+    
+    
+    
+    
+    
+    <!--STYLES-->
+    
+<link rel="stylesheet" href="/assets/css/style-3sspfygaapf5d6tbrnqmyrhdcstv0iwwmi4wor2yeip9c44sowy9gbdzyyjm.min.css">
+
+    <!--STYLES END-->
+    
+
+    
+
+    
+        
+    
+</head>
+
+    <body>
+        <div id="blog">
+            <!-- Define author's picture -->
+
+
+    
+
+<header id="header" data-behavior="5">
+    <i id="btn-open-sidebar" class="fa fa-lg fa-bars"></i>
+    <div class="header-title">
+        <a
+            class="header-title-link"
+            href="/"
+            aria-label=""
+        >
+            codexdawn
+        </a>
+    </div>
+    
+        
+            <a
+                class="header-right-picture "
+                href="#about"
+                aria-label="Open the link: /#about"
+            >
+        
+        
+        </a>
+    
+</header>
+
+            <!-- Define author's picture -->
+
+
+<nav id="sidebar" data-behavior="5">
+    <div class="sidebar-container">
+        
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/"
+                            
+                            rel="noopener"
+                            title="Home"
+                        >
+                        <i class="sidebar-button-icon fa fa-home" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Home</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/all-categories"
+                            
+                            rel="noopener"
+                            title="Categories"
+                        >
+                        <i class="sidebar-button-icon fa fa-bookmark" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Categories</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/all-tags"
+                            
+                            rel="noopener"
+                            title="Tags"
+                        >
+                        <i class="sidebar-button-icon fa fa-tags" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Tags</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="#about"
+                            
+                            rel="noopener"
+                            title="About"
+                        >
+                        <i class="sidebar-button-icon fa fa-question" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">About</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="https://github.com/codexdawn"
+                            
+                                target="_blank"
+                            
+                            rel="noopener"
+                            title="GitHub"
+                        >
+                        <i class="sidebar-button-icon fab fa-github" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">GitHub</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="https://www.facebook.com/beherzt.dev"
+                            
+                                target="_blank"
+                            
+                            rel="noopener"
+                            title="Facebook"
+                        >
+                        <i class="sidebar-button-icon fab fa-facebook" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Facebook</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="https://www.linkedin.com/in/sim-jisung-3048872a/"
+                            
+                                target="_blank"
+                            
+                            rel="noopener"
+                            title="LinkedIn"
+                        >
+                        <i class="sidebar-button-icon fab fa-linkedin" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">LinkedIn</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="mailto:cloudkaiser@gmail.com"
+                            
+                                target="_blank"
+                            
+                            rel="noopener"
+                            title="Mail"
+                        >
+                        <i class="sidebar-button-icon fa fa-envelope" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Mail</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/atom.xml"
+                            
+                            rel="noopener"
+                            title="RSS"
+                        >
+                        <i class="sidebar-button-icon fa fa-rss" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">RSS</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+    </div>
+</nav>
+
+            
+            <div id="main" data-behavior="5"
+                 class="
+                        hasCoverMetaIn
+                        ">
+                
+<article class="post">
+    
+    
+        <div class="post-header main-content-wrap text-left">
+    
+        <h1 class="post-title">
+            couchbase-work-1
+        </h1>
+    
+    
+        <div class="post-meta">
+    <time datetime="2021-07-07T06:45:34+00:00">
+	
+		    Jul 07, 2021
+    	
+    </time>
+    
+        <span>in </span>
+        
+    <a class="category-link" href="/categories/couchbase/">couchbase</a>, <a class="category-link" href="/categories/%EC%9C%A0%EB%A0%88%EC%B9%B4or%EC%82%BD%EC%A7%88/">유레카or삽질</a>
+
+
+    
+</div>
+
+    
+</div>
+
+    
+    <div class="post-content markdown">
+        <div class="main-content-wrap">
+            <h1 id="CouchBase-삽질-도전기"><a href="#CouchBase-삽질-도전기" class="headerlink" title="CouchBase 삽질 도전기"></a>CouchBase 삽질 도전기</h1><h2 id="CouchBase"><a href="#CouchBase" class="headerlink" title="CouchBase ?"></a>CouchBase ?</h2><ul>
+<li>기존적으로 json문서 지원 (RDBMS와 달리 스키마가 없어서 document db 라고 불림)<ul>
+<li>key - value 형태 (key: string, value : json)</li>
+</ul>
+</li>
+<li>cache db로 조회속도가 빠름 <ul>
+<li>memcached 도 지원됨.</li>
+</ul>
+</li>
+<li>SQL 지원해서 RDBMS사용하듯 사용할수는 있음 (N1QL)<ul>
+<li>정확하게 말하면 SQL형태임 (where/group by /order by 등으로 )</li>
+</ul>
+</li>
+<li>스키마리스 <ul>
+<li>스카마가 없어서 유연하게 테이블 구성이 가능함 </li>
+</ul>
+</li>
+<li>인덱싱 가능 <ul>
+<li>N1QL로 인덱싱 조회 가능 (데이터양이 많음 인덱스사용 가능)</li>
+</ul>
+</li>
+<li>확장성 (multi-master구조) <ul>
+<li>엘라스틱서치처럼 master-slave구조가 아닌 multi-master구조임 </li>
+<li>auto sharding지원 (각 shard마다 자동 동기화 진행 및 분산 처리 가능)</li>
+<li>서버추가를 복잡한 과정없이 추가가능 </li>
+</ul>
+</li>
+<li>다양한 언어 지원 <ul>
+<li>JAVA/Python/PHP/RUBY 등 다양한 언어 지원</li>
+</ul>
+</li>
+<li>Bucket ?<ul>
+<li>Bucket은 RDBMS의 테이블이라고 생각하면 된다. </li>
+</ul>
+</li>
+</ul>
+<h2 id="CouchBase-세팅-방법-JAVA-Spring-Boot-기준"><a href="#CouchBase-세팅-방법-JAVA-Spring-Boot-기준" class="headerlink" title="CouchBase 세팅 방법 (JAVA/Spring Boot 기준)"></a>CouchBase 세팅 방법 (JAVA/Spring Boot 기준)</h2><h3 id="설정-및-사전세팅"><a href="#설정-및-사전세팅" class="headerlink" title="설정 및 사전세팅"></a>설정 및 사전세팅</h3><figure class="highlight plain"><figcaption><span>application-xxx.yml</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">cache:</span><br><span class="line">  couchbase:</span><br><span class="line">    cluster:</span><br><span class="line">      contents-cluster:</span><br><span class="line">        userName: &#123;접속할 couchbase id&#125;</span><br><span class="line">        password: &#123;password&#125;</span><br><span class="line">        ip:</span><br><span class="line">          - &#123;ip주소&#125;</span><br><span class="line">        bucket:</span><br><span class="line">          - name: promotion-cache</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><figcaption><span>Bucket</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.wemakeprice.v.content.domain.configuration.cache.config;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> lombok.Getter;</span><br><span class="line"><span class="keyword">import</span> lombok.Setter;</span><br><span class="line"><span class="keyword">import</span> lombok.ToString;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Getter</span></span><br><span class="line"><span class="meta">@Setter</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Bucket</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> String name;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><figcaption><span>BucketRouterName</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.wemakeprice.v.content.domain.configuration.cache.config;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> lombok.Getter;</span><br><span class="line"><span class="keyword">import</span> lombok.RequiredArgsConstructor;</span><br><span class="line"></span><br><span class="line"><span class="meta">@RequiredArgsConstructor</span></span><br><span class="line"><span class="meta">@Getter</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">enum</span> <span class="title">BucketRouterName</span> </span>&#123;</span><br><span class="line">    PROMOTION(<span class="string">&quot;promotion-cache&quot;</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> String bucket;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><figcaption><span>ClusterRouterName</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.wemakeprice.v.content.domain.configuration.cache.config;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> lombok.Getter;</span><br><span class="line"><span class="keyword">import</span> lombok.RequiredArgsConstructor;</span><br><span class="line"></span><br><span class="line"><span class="meta">@RequiredArgsConstructor</span></span><br><span class="line"><span class="meta">@Getter</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">enum</span> <span class="title">ClusterRouterName</span> </span>&#123;</span><br><span class="line">    CONTENTS(<span class="string">&quot;contents-cluster&quot;</span>)</span><br><span class="line">    ;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> String cluster;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><figcaption><span>CouchbaseDatasource</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.wemakeprice.v.content.domain.configuration.cache.config;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> lombok.Getter;</span><br><span class="line"><span class="keyword">import</span> lombok.NoArgsConstructor;</span><br><span class="line"><span class="keyword">import</span> lombok.Setter;</span><br><span class="line"><span class="keyword">import</span> lombok.ToString;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.util.List;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Getter</span></span><br><span class="line"><span class="meta">@Setter</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">CouchbaseDatasource</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> String userName;</span><br><span class="line">    <span class="keyword">private</span> String password;</span><br><span class="line">    <span class="keyword">private</span> List&lt;String&gt; ip;</span><br><span class="line">    <span class="keyword">private</span> List&lt;Bucket&gt; bucket;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">getConnectionString</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> String.join(<span class="string">&quot;,&quot;</span>,<span class="keyword">this</span>.ip);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><figcaption><span>CouchbaseHolder</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.wemakeprice.v.content.domain.configuration.cache.config;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> lombok.Getter;</span><br><span class="line"><span class="keyword">import</span> lombok.Setter;</span><br><span class="line"><span class="keyword">import</span> org.springframework.boot.context.properties.ConfigurationProperties;</span><br><span class="line"><span class="keyword">import</span> org.springframework.util.Assert;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.util.HashMap;</span><br><span class="line"><span class="keyword">import</span> java.util.Map;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Getter</span></span><br><span class="line"><span class="meta">@Setter</span></span><br><span class="line"><span class="meta">@ConfigurationProperties(prefix = &quot;cache.couchbase&quot;)</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">CouchbaseHolder</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> Map&lt;String,CouchbaseDatasource&gt; cluster = <span class="keyword">new</span> HashMap&lt;&gt;();</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> CouchbaseDatasource <span class="title">getClient</span><span class="params">(ClusterRouterName clusterRouterName)</span> </span>&#123;</span><br><span class="line">        Assert.notNull(<span class="keyword">this</span>.cluster.get(clusterRouterName.getCluster()), <span class="string">&quot;Map&lt;String, CouchbaseDatasource&gt; must not be null. Please check application.yml : cache.couchbase.cluster&quot;</span>);</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">this</span>.cluster.get(clusterRouterName.getCluster());</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><figcaption><span>CouchbaseConnector</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.wemakeprice.v.content.domain.configuration.cache.config;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> com.couchbase.client.core.env.TimeoutConfig;</span><br><span class="line"><span class="keyword">import</span> com.couchbase.client.java.Cluster;</span><br><span class="line"><span class="keyword">import</span> com.couchbase.client.java.ClusterOptions;</span><br><span class="line"><span class="keyword">import</span> com.couchbase.client.java.env.ClusterEnvironment;</span><br><span class="line"><span class="keyword">import</span> lombok.extern.slf4j.Slf4j;</span><br><span class="line"><span class="keyword">import</span> org.springframework.beans.factory.InitializingBean;</span><br><span class="line"><span class="keyword">import</span> org.springframework.data.couchbase.CouchbaseClientFactory;</span><br><span class="line"><span class="keyword">import</span> org.springframework.data.couchbase.SimpleCouchbaseClientFactory;</span><br><span class="line"><span class="keyword">import</span> org.springframework.data.couchbase.core.CouchbaseTemplate;</span><br><span class="line"><span class="keyword">import</span> org.springframework.data.couchbase.core.convert.MappingCouchbaseConverter;</span><br><span class="line"><span class="keyword">import</span> org.springframework.util.Assert;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.time.Duration;</span><br><span class="line"><span class="keyword">import</span> java.util.HashMap;</span><br><span class="line"><span class="keyword">import</span> java.util.Map;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Slf4j</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">CouchbaseConnector</span> <span class="keyword">implements</span> <span class="title">InitializingBean</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> CouchbaseHolder couchbaseHolder;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> Map&lt;String, CouchbaseTemplate&gt; couchbaseTemplate = <span class="keyword">new</span> HashMap&lt;&gt;();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">static</span> <span class="keyword">int</span> CONNECTION_TIMEOUT = <span class="number">10</span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">CouchbaseConnector</span><span class="params">(CouchbaseHolder couchbaseHolder)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.couchbaseHolder = couchbaseHolder;</span><br><span class="line">        <span class="keyword">this</span>.setCouchbaseTemplate();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setCouchbaseTemplate</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">final</span> ClusterEnvironment clusterEnvironment = ClusterEnvironment.builder()</span><br><span class="line">                .timeoutConfig(TimeoutConfig.connectTimeout(Duration.ofSeconds(CONNECTION_TIMEOUT))).build();</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span>(String clusterName : couchbaseHolder.getCluster().keySet()) &#123;</span><br><span class="line">            <span class="keyword">final</span> CouchbaseDatasource couchbaseDatasource = couchbaseHolder.getCluster().get(clusterName);</span><br><span class="line">            <span class="keyword">final</span> String userName = couchbaseDatasource.getUserName();</span><br><span class="line">            <span class="keyword">final</span> String password = couchbaseDatasource.getPassword();</span><br><span class="line"></span><br><span class="line">            Cluster cluster = Cluster.connect(couchbaseDatasource.getConnectionString(), ClusterOptions.clusterOptions(userName, password).environment(clusterEnvironment));</span><br><span class="line"></span><br><span class="line">            <span class="keyword">for</span>(Bucket bucket : couchbaseDatasource.getBucket()) &#123;</span><br><span class="line">                <span class="keyword">final</span> CouchbaseClientFactory couchbaseClientFactory = <span class="keyword">new</span> SimpleCouchbaseClientFactory(cluster,bucket.getName(),<span class="keyword">null</span>);</span><br><span class="line">                <span class="keyword">final</span> CouchbaseTemplate template = <span class="keyword">new</span> CouchbaseTemplate(couchbaseClientFactory,<span class="keyword">new</span> MappingCouchbaseConverter());</span><br><span class="line"></span><br><span class="line">                couchbaseTemplate.put(clusterName + bucket.getName(),template);</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            log.info(<span class="string">&quot;couchbase datasource : &#123;&#125;&quot;</span>,couchbaseDatasource);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> CouchbaseTemplate <span class="title">getCouchbaseTemplate</span><span class="params">(<span class="keyword">final</span> ClusterRouterName clusterRouterName, <span class="keyword">final</span> BucketRouterName bucketRouterName)</span> </span>&#123;</span><br><span class="line">        Assert.notNull(<span class="keyword">this</span>.couchbaseTemplate.get(clusterRouterName.getCluster() + bucketRouterName.getBucket()),</span><br><span class="line">                <span class="string">&quot;ClusterRouteName : &quot;</span> + clusterRouterName.getCluster() + <span class="string">&quot; or BucketRouteName : &quot;</span> + bucketRouterName.getBucket() + <span class="string">&quot; must not be null. Please check application.yml : cache.couchbase.cluster&quot;</span>);</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">this</span>.couchbaseTemplate.get(clusterRouterName.getCluster() + bucketRouterName.getBucket());</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">afterPropertiesSet</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(<span class="keyword">this</span>.couchbaseTemplate.isEmpty()) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException(<span class="string">&quot;couchbaseTemplate is empty&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><figcaption><span>CouchbaseConfig</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">package</span> com.wemakeprice.v.content.domain.configuration.cache.config;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> lombok.RequiredArgsConstructor;</span><br><span class="line"><span class="keyword">import</span> org.springframework.boot.context.properties.EnableConfigurationProperties;</span><br><span class="line"><span class="keyword">import</span> org.springframework.context.annotation.Bean;</span><br><span class="line"><span class="keyword">import</span> org.springframework.context.annotation.Configuration;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Configuration</span></span><br><span class="line"><span class="meta">@RequiredArgsConstructor</span></span><br><span class="line"><span class="meta">@EnableConfigurationProperties(CouchbaseHolder.class)</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">CouchbaseConfig</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> CouchbaseHolder couchbaseHolder;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Bean</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> CouchbaseConnector <span class="title">getCouchbaseConfig</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> CouchbaseConnector(couchbaseHolder);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><figcaption><span>CouchbaseClient</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.wemakeprice.v.content.domain.configuration.cache.client;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> com.wemakeprice.v.content.domain.configuration.cache.config.BucketRouterName;</span><br><span class="line"><span class="keyword">import</span> com.wemakeprice.v.content.domain.configuration.cache.config.ClusterRouterName;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">CouchbaseClientApi</span> </span>&#123;</span><br><span class="line">    &lt;T&gt; <span class="function">T <span class="title">findOne</span><span class="params">(<span class="keyword">final</span> ClusterRouterName clusterRouterName, <span class="keyword">final</span> BucketRouterName bucketRouterName, <span class="keyword">final</span> String id, <span class="keyword">final</span> Class&lt;T&gt; entityClass)</span> <span class="keyword">throws</span> Exception</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">package</span> com.wemakeprice.v.content.domain.configuration.cache.client;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> com.wemakeprice.v.content.domain.configuration.cache.config.BucketRouterName;</span><br><span class="line"><span class="keyword">import</span> com.wemakeprice.v.content.domain.configuration.cache.config.ClusterRouterName;</span><br><span class="line"><span class="keyword">import</span> com.wemakeprice.v.content.domain.configuration.cache.config.CouchbaseConnector;</span><br><span class="line"><span class="keyword">import</span> com.wemakeprice.v.content.domain.exception.etc.CouchbaseClientInitializeException;</span><br><span class="line"><span class="keyword">import</span> lombok.RequiredArgsConstructor;</span><br><span class="line"><span class="keyword">import</span> lombok.extern.slf4j.Slf4j;</span><br><span class="line"><span class="keyword">import</span> org.springframework.data.couchbase.core.CouchbaseTemplate;</span><br><span class="line"><span class="keyword">import</span> org.springframework.stereotype.Component;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="meta">@RequiredArgsConstructor</span></span><br><span class="line"><span class="meta">@Slf4j</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">CouchbaseClient</span> <span class="keyword">implements</span> <span class="title">CouchbaseClientApi</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> CouchbaseConnector couchbaseConnector;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> CouchbaseTemplate <span class="title">getCouchbaseTemplate</span><span class="params">(<span class="keyword">final</span> ClusterRouterName clusterRouterName, <span class="keyword">final</span> BucketRouterName bucketRouterName)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        CouchbaseTemplate couchbaseTemplate;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            couchbaseTemplate = couchbaseConnector.getCouchbaseTemplate(clusterRouterName,bucketRouterName);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">            log.error(<span class="string">&quot;Couchbase Initialize Error : &#123;&#125;&quot;</span>, e);</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> CouchbaseClientInitializeException();</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> couchbaseTemplate;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> &lt;T&gt; <span class="function">T <span class="title">findOne</span><span class="params">(<span class="keyword">final</span> ClusterRouterName clusterRouterName, <span class="keyword">final</span> BucketRouterName bucketRouterName, <span class="keyword">final</span> String id, <span class="keyword">final</span> Class&lt;T&gt; entityClass)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">this</span>.getCouchbaseTemplate(clusterRouterName, bucketRouterName).findById(entityClass).one(id);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h3 id="InitializingBean"><a href="#InitializingBean" class="headerlink" title="InitializingBean ?"></a>InitializingBean ?</h3><ul>
+<li>afterPropertiesSet() 메서드를 반드시 구현하게 되어있음 </li>
+<li>BeanFactory에 의해 모든 property가 설정된뒤 실행되는 메소드 </li>
+<li>주로 실행시점에 custom초기화 로직을 넣거나, 주입받은 property를 확인할때 사용함 </li>
+</ul>
+<h3 id="ConfigurationProperties"><a href="#ConfigurationProperties" class="headerlink" title="ConfigurationProperties ?"></a>ConfigurationProperties ?</h3><ul>
+<li>application.yml 과 같이 yml에 설정파일을 등록해두는데, ConfigurationProperties 사용하면 yml혹은 정의된 경로의 properties에 정의돈 property들을 가져와서 Bean으로 등록시켜줌. </li>
+<li>spring boot 2.2 이상부터는 EnableConfigurationProperties를 사용할 필요가 없다고함. 컨테이너에서 알아서 등록해서 바인딩까지 해주는듯하다. 추가적으로 @Component 혹은 @Configuration 과 같은 애너테이션도 추가할 필요없음. </li>
+</ul>
+
+            
+
+
+        </div>
+    </div>
+    <div id="post-footer" class="post-footer main-content-wrap">
+        
+            <div class="post-footer-tags">
+                <span class="text-color-light text-small">TAGGED IN</span><br/>
+                
+    <a class="tag tag--primary tag--small t-none-link" href="/tags/NoSQL/" rel="tag">NoSQL</a> <a class="tag tag--primary tag--small t-none-link" href="/tags/couchbase/" rel="tag">couchbase</a> <a class="tag tag--primary tag--small t-none-link" href="/tags/document-db/" rel="tag">document db</a> <a class="tag tag--primary tag--small t-none-link" href="/tags/memcached/" rel="tag">memcached</a>
+
+            </div>
+        
+        
+            <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    <a
+                        class="post-action-btn btn btn--disabled"
+                        aria-hidden="true"
+                    >
+                        
+                        <i class="fa fa-angle-left" aria-hidden="true"></i>
+                        <span class="hide-xs hide-sm text-small icon-ml">PREVIOUS</span>
+                    </a>
+            </li>
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/2021/06/22/jpa-work-1/"
+                    data-tooltip="jpa-work-1"
+                    aria-label="NEXT: jpa-work-1"
+                >
+                    
+                        <span class="hide-xs hide-sm text-small icon-mr">NEXT</span>
+                        <i class="fa fa-angle-right" aria-hidden="true"></i>
+                    </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a
+                class="post-action-btn btn btn--default btn-open-shareoptions"
+                href="#btn-open-shareoptions"
+                aria-label="Share this post"
+            >
+                <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </a>
+        </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://codexdawn.github.io/2021/07/07/couchbase-work-1/"
+                    title="Share on Facebook"
+                    aria-label="Share on Facebook"
+                >
+                    <i class="fab fa-facebook" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://twitter.com/intent/tweet?text=https://codexdawn.github.io/2021/07/07/couchbase-work-1/"
+                    title="Share on Twitter"
+                    aria-label="Share on Twitter"
+                >
+                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://plus.google.com/share?url=https://codexdawn.github.io/2021/07/07/couchbase-work-1/"
+                    title="Share on Google+"
+                    aria-label="Share on Google+"
+                >
+                    <i class="fab fa-google-plus" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+        
+            
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#" aria-label="Back to top">
+            
+                <i class="fa fa-list" aria-hidden="true"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+        
+        
+            
+        
+    </div>
+</article>
+
+
+
+                <footer id="footer" class="main-content-wrap">
+    <span class="copyrights">
+        Copyrights &copy; 2021 codexdawn. All Rights Reserved.
+    </span>
+</footer>
+
+            </div>
+            
+                <div id="bottom-bar" class="post-bottom-bar" data-behavior="5">
+                    <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    <a
+                        class="post-action-btn btn btn--disabled"
+                        aria-hidden="true"
+                    >
+                        
+                        <i class="fa fa-angle-left" aria-hidden="true"></i>
+                        <span class="hide-xs hide-sm text-small icon-ml">PREVIOUS</span>
+                    </a>
+            </li>
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/2021/06/22/jpa-work-1/"
+                    data-tooltip="jpa-work-1"
+                    aria-label="NEXT: jpa-work-1"
+                >
+                    
+                        <span class="hide-xs hide-sm text-small icon-mr">NEXT</span>
+                        <i class="fa fa-angle-right" aria-hidden="true"></i>
+                    </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a
+                class="post-action-btn btn btn--default btn-open-shareoptions"
+                href="#btn-open-shareoptions"
+                aria-label="Share this post"
+            >
+                <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </a>
+        </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://codexdawn.github.io/2021/07/07/couchbase-work-1/"
+                    title="Share on Facebook"
+                    aria-label="Share on Facebook"
+                >
+                    <i class="fab fa-facebook" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://twitter.com/intent/tweet?text=https://codexdawn.github.io/2021/07/07/couchbase-work-1/"
+                    title="Share on Twitter"
+                    aria-label="Share on Twitter"
+                >
+                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://plus.google.com/share?url=https://codexdawn.github.io/2021/07/07/couchbase-work-1/"
+                    title="Share on Google+"
+                    aria-label="Share on Google+"
+                >
+                    <i class="fab fa-google-plus" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+        
+            
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#" aria-label="Back to top">
+            
+                <i class="fa fa-list" aria-hidden="true"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+                </div>
+                
+    <div id="share-options-bar" class="share-options-bar" data-behavior="5">
+        <i id="btn-close-shareoptions" class="fa fa-times"></i>
+        <ul class="share-options">
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://www.facebook.com/sharer/sharer.php?u=https://codexdawn.github.io/2021/07/07/couchbase-work-1/"
+                        aria-label="Share on Facebook"
+                    >
+                        <i class="fab fa-facebook" aria-hidden="true"></i><span>Share on Facebook</span>
+                    </a>
+                </li>
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://twitter.com/intent/tweet?text=https://codexdawn.github.io/2021/07/07/couchbase-work-1/"
+                        aria-label="Share on Twitter"
+                    >
+                        <i class="fab fa-twitter" aria-hidden="true"></i><span>Share on Twitter</span>
+                    </a>
+                </li>
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://plus.google.com/share?url=https://codexdawn.github.io/2021/07/07/couchbase-work-1/"
+                        aria-label="Share on Google+"
+                    >
+                        <i class="fab fa-google-plus" aria-hidden="true"></i><span>Share on Google+</span>
+                    </a>
+                </li>
+            
+        </ul>
+    </div>
+
+
+            
+        </div>
+        
+
+
+<div id="about">
+    <div id="about-card">
+        <div id="about-btn-close">
+            <i class="fa fa-times"></i>
+        </div>
+        
+            <h4 id="about-card-name">codexdawn</h4>
+        
+            <div id="about-card-bio"><p>author.bio</p>
+</div>
+        
+        
+            <div id="about-card-job">
+                <i class="fa fa-briefcase"></i>
+                <br/>
+                <p>author.job</p>
+
+            </div>
+        
+        
+    </div>
+</div>
+
+        
+        
+<div id="cover" style="background-image:url('/assets/images/cover-v1.2.0.jpg');"></div>
+        <!--SCRIPTS-->
+
+<script src="/assets/js/script-ikbi0v8fyzuu91xv5rmpcrnwb4qinfgborzd5kejmj8wr6ibfra8oaxqshyg.min.js"></script>
+
+<!--SCRIPTS END-->
+
+
+    
+
+
+
+
+    </body>
+</html>
