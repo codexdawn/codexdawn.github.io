@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="generator" content="codexdawn">
-    <title>Archives: 2021/7 - codexdawn</title>
+    <title>kotlin-basic-1 - codexdawn</title>
     <meta name="author" content="codexdawn">
     
     
@@ -15,13 +15,20 @@
             <link rel="alternate" type="application/atom+xml" title="RSS" href="/atom.xml">
         
     
-    <script type="application/ld+json">{}</script>
-    <meta property="og:type" content="blog">
-<meta property="og:title" content="codexdawn">
-<meta property="og:url" content="https://codexdawn.github.io/archives/2021/07/index.html">
+    <script type="application/ld+json">{"@context":"http://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"codexdawn","sameAs":["https://github.com/codexdawn","https://www.facebook.com/beherzt.dev","https://www.linkedin.com/in/sim-jisung-3048872a/","mailto:cloudkaiser@gmail.com"],"image":"https://www.gravatar.com/avatar/d97fd4b94c429915f1cb55eb27e7d4d9"},"articleBody":"1. 코틀린?코틀린 특징\n정적 타입 지정 언어 \n타입을 컴파일 시점에 컴파일러가 타입 검증을 해준다는 의미.\n동적 타입 지정 언어는? 런타임 시점에서 타입 검증을 함. (runtime시점에 오류가 발견됨)\n\n\n함수형/객체지향 프로그래밍 지원 \n일급시민함수 \n함수를 변수에 저장하고, 인자로 다른 함수에 전달하고 함수에서 새로운 함수를 만들어 반환 할수있는 함수를 어디서든 적용가능한 개념 \n\n\n불변성 \n일단 만들어지면 내부 상태가 절대로 바뀌지않음. (기본 final처럼 불변으로 되어있음.)\n\n\n사이드이펙트 없음 \n불변성과 이어지는 맥락인데, input 과 output이 같다. 외부함수 혹은 다른 바깥환경에 영향받지 않고 입력한 함수 그대로 리턴해주는 개념 \n\n\n\n\n안드로이드 및 서버 개발 지원 \n\n코틀린 기초 문법함수함수123456789//함수 기초 fun max(a: Int, b: Int): Int &#123;\treturn if (a &gt; b) a else b&#125;//한줄로 변경 가능 중괄호 제거 //타입추론으로 리턴되는 타입을 생략해도 되지만 가급적 넣어주자. fun max(a:Int, b:Int):Int = if(a &gt; b) a else b \n\n변수\nval \n자바에서 final임. 기본이 불변\nval변수는 블록실행할때 정확하게 한번만 수행해야함. \nval참조 자체는 불변이지만, 그 참조가 가리키는 객체의 내부값은 변경될수있음. \n\n\nvar \n일반 자바변수와 동일 \n\n\n\n변수1234567891011// 블록당 한번 초기화  val msg:String if(valid()) &#123;\tmsg = &quot;Success&quot;&#125; else &#123;\tmsg = &quot;Fail&quot;&#125;// 불변참조val list = arrayListOf(&quot;Java&quot;)list.add(&quot;Kotlin&quot;) // 불변이지만 이렇게 값이 추가되거나 변경되는건 가능\n\n클래스 &amp; 프로퍼티클래스&프로퍼티12345678910111213class Person(val name:String,  //val로 하면 읽기전용(getter만 허용)\t\t\tvar isMarried:Boolean) //var로하면 읽기/쓰기 모두 가능 (getter/setter 둘다가능)//클래스 인스턴스 생성 var person = Person(&quot;JS&quot;, false)//커스텀 접근 class Rectangle(val height:Int, val width:Int) &#123;\tval isSquare:Boolean \t\tget() &#123;\t\t\treturn height == width \t\t&#125;&#125;\n\n코틀린 소스코드 구조: 디렉터리와 패키지\n코틀린도 자바와 동일하게 import한후 클래스 및 기타 정의 가능 \n자바에서는 패키지 구조내에 클래스명과 동일한 클래스파일을 생성하는 소스구조지만, 코트린은 kt파일자체가 패키지라고 생각하면됨. (파일 내부에 여러 클래스 인터페이스 정의 가능)\n\nenum / whenenum&when1234567891011121314151617181920212223242526272829303132333435enum class Color (    val r: Int, val g: Int, val b: Int    ) &#123;    RED(255,0,0), ORANGE(255,165,0),    YELLOW(255,255,0),GREEN(0,255,0),    BLUE(0,0,255),INDIGO(75,0,130),    VIORET(238,130,238);        fun rgb() = (r * 256 + g) * 256 + b&#125;println(Color.BLUE.rgb()) // &gt;&gt;&gt; 255 //when1 fun getWarmth(color: Color) = when (color) &#123;    Color.RED, Color.YELLOW, Color.ORANGE -&gt; &quot;warm&quot;     Color.GREEN -&gt; &quot;natural&quot;    Color.BLUE, Color.INDIGO, Color.VIORET -&gt; &quot;cold&quot;&#125;//when2 -&gt; setOf컬렉션 사용으로 구분 fun mix(c1: Color, c2: Color) = when (setOf(c1,c2)) &#123;    setOf(RED,YELLOW) -&gt; ORANGE    setOf(YELLOW,BLUE) -&gt; GREEN    setOf(BLUE,VIORET) -&gt; INDIGO    else -&gt; throw Exception(&quot;Dirty Color&quot;)&#125;//when3 -&gt; 인자없이 구분 fun mixOptimized(c1: Color, c2: Color) = when &#123;    (c1 == RED &amp;&amp; c2 == YELLOW) || (c1 == YELLOW &amp;&amp; c2 == RED) -&gt; ORANGE    (c1 == YELLOW &amp;&amp; c2 == BLUE) || (c1 == BLUE &amp;&amp; c2 == YELLOW) -&gt; GREEN    (c1 == BLUE &amp;&amp; c2 == VIORET) || (c1 == VIORET &amp;&amp; c2 == BLUE) -&gt; INDIGO    else -&gt; throw Exception(&quot;Dirty Color&quot;)&#125;\n\n스마트캐스팅 : 타입검사 및 타입 캐스트스마트캐스팅123456789101112131415161718interface Exprclass Num(val value:Int): Expr //Expr인터페이스구현 class Sum(val left:Expr, val right:Expr): Expr // Expr인터페이스로 Num/Sum 인자로 받을수있음 fun eval(e:Expr): Int &#123;\tif(e is Num ) &#123;//Num클래스인지 확인 \t\t//val n = e as Num //명시적인 타입 캐스팅 \t\t//return n.value\t\t\t\treturn e.value //is로 검사한부분은 코틀린이 알아서 자동 캐스팅을 해줌. 그래서 명시적인 캐스팅을 할 필요가 없음\t&#125;\t\tif(e is Sum) &#123;\t\teval(e.right) + eval(e.left) //return 생략가능 \t&#125;\t\tthrow IllegalArgumentException(&quot;Unknown Expression&quot;)&#125;\n\nfor/while loop\nwhile루프는 자바와 동일 \nfor \n자바처럼 기본형태의 for문은 없음 \n\n\n\nfor문123456789101112131415161718192021222324for(num in 1..100) &#123;    print(&quot;$&#123;fizzBuzz(num)&#125; &quot;)&#125;        for(num in 100 downTo 1 step 2) &#123;    print(&quot;$&#123;fizzBuzz(num)&#125; \\n&quot;)&#125;val binaryReps = TreeMap&lt;Char,String&gt;()for(c in &#x27;A&#x27;..&#x27;F&#x27;) &#123;\tval binary = Integer.toBinaryString(c.toInt())\tbinaryReps[c] = binary &#125;    for((letter,binary) in binaryReps) &#123;\tprintln(&quot;$letter = $binary&quot;)&#125;val list = arrayListOf(&quot;10&quot;,&quot;11&quot;,&quot;1100&quot;)for((index,element) in list.withIndex()) &#123;\tprintln(&quot;$index: $element&quot;)&#125;\n\nin 으로 컬렉션 혹은 범위의 원소 검사in으로 range검사1234567fun isLetter(c:Char) = c in &#x27;a&#x27;..&#x27;z&#x27; || c in &#x27;A&#x27;..&#x27;Z&#x27;fun isNotDigit(c:Char) = c !in &#x27;0&#x27;..&#x27;9&#x27;fun recognize(c: Char) = when(c) &#123;    in &#x27;0&#x27;..&#x27;9&#x27; -&gt; &quot;It&#x27;s digit!&quot;    in &#x27;a&#x27;..&#x27;z&#x27;, in &#x27;A&#x27;..&#x27;Z&#x27; -&gt; &quot;It&#x27;s letter!&quot;    else -&gt; &quot;I don&#x27;t know...&quot;&#125;\n\ntry, catch, finallytry-catch-finally12345678910111213141516171819202122//java와 달리 코틀린은 함수에 throws 정의하는 명령어가 없음. fun readNumber(reader: BufferedReader) &#123;    // java와 문법은 거의 흡사함     try &#123;        val line = reader.readLine()        return Integer.parseInt(line)    &#125; catch(e: NumberFormatException) &#123;        return null    &#125; finally &#123;        reader.close()    &#125;    \t//try-with-resource 와 유사     val number = try &#123;        Integer.parseInt(reader.readLine())    &#125; catch(e: NumberFormatException) &#123;        null     &#125;\t    println(number)&#125;\n\n함수 정의 및 호출joinTotring123456789101112131415161718fun&lt;T&gt; joinToString(collection:Cellection&lt;T&gt;, \t\t\t\t\tseperate:String = &quot;, &quot;, // defalt값을 넣을수있음.  \t\t\t\t\tprefix:String = &quot;&quot;,\t\t\t\t\tpostfix:String = &quot;&quot;):String &#123;\t\t\t\t\t\tval result = StringBuilder(prefix)\tfor((index,element) in collection.withIndex()) &#123;\t\tif(index &gt; 0) result.append(separate) //두번째 원소부터 separate 붙임\t\tresult.append(element)\t&#125;\t\tresult.append(postfix)\treturn result.toString() &#125;&gt;&gt;&gt; joinToString(collection, separate=&quot; &quot;, prefix=&quot; &quot;,postfix=&quot;.&quot;)&gt;&gt;&gt; joinToString(collection) //기본설정된 파라미터로 출력됨 \n\n최상위 함수와 프로퍼티\nkt파일 생성하고 클래스 생성없이 fun함수 하나만 걸어두면 정적메서드화됨 (유틸클래스처럼)\nkt파일 생성하고 변수를 설정하면 정적 변수가 설정됨 (글로벌 변수가 됨)\n\n확장함수 와 확장 프로퍼티\n확장함수는 마치 어떤 클래스의 멤버 메서드 처럼 호출 가능하지만, 그 클래스 밖에서 선언된 함수다. \n확장프로퍼티는 확장함수내에 getter/setter를 세팅하는 작업이다. \n\n확장함수12345678910111213141516171819202122232425262728293031323334package stringsfun String.lastChar(): Char = this.get(this.length-1) //this는 수신객체 (String 이다.)//확장프로퍼티val String.lastChar: Char \tget() = get(length-1)var String.lastChar: Char\tget() = get(length-1)\tset(value:Char) &#123;\t\tthis.setCharAt(length-1,value) //String의 setCharAt호출 \t&#125;\t\t//////////////////import시켜서 사용하기import strings.lastChar //확장함수를 마치 기존 멤버메서드처럼 import도 가능함. val c  &quot;Kotlin&quot;.lastChar()//joinToString 확장함수판! fun&lt;T&gt; Collection&lt;T&gt;.joinToString(seperate:String = &quot;, &quot;, // defalt값을 넣을수있음.  \t\t\t\t\tprefix:String = &quot;&quot;,\t\t\t\t\tpostfix:String = &quot;&quot;):String &#123;\t\t\t\t\t\tval result = StringBuilder(prefix)\tfor((index,element) in collection.withIndex()) &#123;\t\tif(index &gt; 0) result.append(separate) //두번째 원소부터 separate 붙임\t\tresult.append(element)\t&#125;\t\tresult.append(postfix)\treturn result.toString() &#125;\n\n확장함수 참고\n자바에서 확장함수사용하려면  그냥 자바에서는 StringUtilKt.lastChar(“Kotlin”) 이런식으로 호출하면됨 (StringUtil.kt파일이 있을때)\n이쯤되면 확장함수의 원리가 궁금한데, 확장함수는 그냥 유틸클래스 처럼 정적 함수로 구현되어있음 \n정적함수 특성상 오버라이드가 안됨. (프로퍼티도 마찬가지!)\n확장함수는 해당 클래스의 멤버변수를 접근할수있음!!\n\n","dateCreated":"2021-07-13T07:56:35+00:00","dateModified":"2021-07-13T10:52:51+00:00","datePublished":"2021-07-13T07:56:35+00:00","description":"","headline":"kotlin-basic-1","image":[],"mainEntityOfPage":{"@type":"WebPage","@id":"https://codexdawn.github.io/2021/07/13/kotlin-basic-1/"},"publisher":{"@type":"Organization","name":"codexdawn","sameAs":["https://github.com/codexdawn","https://www.facebook.com/beherzt.dev","https://www.linkedin.com/in/sim-jisung-3048872a/","mailto:cloudkaiser@gmail.com"],"image":"https://www.gravatar.com/avatar/d97fd4b94c429915f1cb55eb27e7d4d9","logo":{"@type":"ImageObject","url":"https://www.gravatar.com/avatar/d97fd4b94c429915f1cb55eb27e7d4d9"}},"url":"https://codexdawn.github.io/2021/07/13/kotlin-basic-1/","keywords":"kotlin, kotlininaction, kotlin문법"}</script>
+    <meta name="description" content="1. 코틀린?코틀린 특징 정적 타입 지정 언어  타입을 컴파일 시점에 컴파일러가 타입 검증을 해준다는 의미. 동적 타입 지정 언어는? 런타임 시점에서 타입 검증을 함. (runtime시점에 오류가 발견됨)   함수형&#x2F;객체지향 프로그래밍 지원  일급시민함수  함수를 변수에 저장하고, 인자로 다른 함수에 전달하고 함수에서 새로운 함수를 만들어 반환 할수있는 함">
+<meta property="og:type" content="blog">
+<meta property="og:title" content="kotlin-basic-1">
+<meta property="og:url" content="https://codexdawn.github.io/2021/07/13/kotlin-basic-1/index.html">
 <meta property="og:site_name" content="codexdawn">
+<meta property="og:description" content="1. 코틀린?코틀린 특징 정적 타입 지정 언어  타입을 컴파일 시점에 컴파일러가 타입 검증을 해준다는 의미. 동적 타입 지정 언어는? 런타임 시점에서 타입 검증을 함. (runtime시점에 오류가 발견됨)   함수형&#x2F;객체지향 프로그래밍 지원  일급시민함수  함수를 변수에 저장하고, 인자로 다른 함수에 전달하고 함수에서 새로운 함수를 만들어 반환 할수있는 함">
 <meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2021-07-13T07:56:35.000Z">
+<meta property="article:modified_time" content="2021-07-13T10:52:51.524Z">
 <meta property="article:author" content="codexdawn">
+<meta property="article:tag" content="kotlin">
+<meta property="article:tag" content="kotlininaction">
+<meta property="article:tag" content="kotlin문법">
 <meta name="twitter:card" content="summary">
     
     
@@ -41,6 +48,8 @@
     
 
     
+        
+    
 </head>
 
     <body>
@@ -50,7 +59,7 @@
 
     
 
-<header id="header" data-behavior="2">
+<header id="header" data-behavior="5">
     <i id="btn-open-sidebar" class="fa fa-lg fa-bars"></i>
     <div class="header-title">
         <a
@@ -77,7 +86,7 @@
             <!-- Define author's picture -->
 
 
-<nav id="sidebar" data-behavior="2">
+<nav id="sidebar" data-behavior="5">
     <div class="sidebar-container">
         
         
@@ -231,30 +240,22 @@
 </nav>
 
             
-            <div id="main" data-behavior="2"
+            <div id="main" data-behavior="5"
                  class="
                         hasCoverMetaIn
                         ">
                 
-    <section class="postShorten-group main-content-wrap">
+<article class="post">
     
     
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/2021/07/13/kotlin-basic-1/"
-                            aria-label=": kotlin-basic-1"
-                        >
-                            kotlin-basic-1
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
+        <div class="post-header main-content-wrap text-left">
+    
+        <h1 class="post-title">
+            kotlin-basic-1
+        </h1>
+    
+    
+        <div class="post-meta">
     <time datetime="2021-07-13T07:56:35+00:00">
 	
 		    Jul 13, 2021
@@ -269,10 +270,13 @@
     
 </div>
 
-            </div>
-            
-                <div class="postShorten-content">
-                    <h1 id="1-코틀린"><a href="#1-코틀린" class="headerlink" title="1. 코틀린?"></a>1. 코틀린?</h1><h2 id="코틀린-특징"><a href="#코틀린-특징" class="headerlink" title="코틀린 특징"></a>코틀린 특징</h2><ol>
+    
+</div>
+
+    
+    <div class="post-content markdown">
+        <div class="main-content-wrap">
+            <h1 id="1-코틀린"><a href="#1-코틀린" class="headerlink" title="1. 코틀린?"></a>1. 코틀린?</h1><h2 id="코틀린-특징"><a href="#코틀린-특징" class="headerlink" title="코틀린 특징"></a>코틀린 특징</h2><ol>
 <li>정적 타입 지정 언어 <ul>
 <li>타입을 컴파일 시점에 컴파일러가 타입 검증을 해준다는 의미.</li>
 <li>동적 타입 지정 언어는? 런타임 시점에서 타입 검증을 함. (runtime시점에 오류가 발견됨)</li>
@@ -353,157 +357,121 @@
 <li>확장함수는 해당 클래스의 멤버변수를 접근할수있음!!</li>
 </ul>
 
-                    
-                        
-
-
-                    
-                    
-                        <p>
-                            <a
-                                href="/2021/07/13/kotlin-basic-1/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                Comment and share
-                            </a>
-                        </p>
-                    
-                </div>
             
+
+
         </div>
+    </div>
+    <div id="post-footer" class="post-footer main-content-wrap">
         
-    </article>
-    
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/2021/07/07/couchbase-work-1/"
-                            aria-label=": couchbase-work-1"
-                        >
-                            couchbase-work-1
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time datetime="2021-07-07T06:45:34+00:00">
-	
-		    Jul 07, 2021
-    	
-    </time>
-    
-        <span>in </span>
-        
-    <a class="category-link" href="/categories/couchbase/">couchbase</a>, <a class="category-link" href="/categories/%EC%9C%A0%EB%A0%88%EC%B9%B4or%EC%82%BD%EC%A7%88/">유레카or삽질</a>
-
-
-    
-</div>
+            <div class="post-footer-tags">
+                <span class="text-color-light text-small">TAGGED IN</span><br/>
+                
+    <a class="tag tag--primary tag--small t-none-link" href="/tags/kotlin/" rel="tag">kotlin</a> <a class="tag tag--primary tag--small t-none-link" href="/tags/kotlininaction/" rel="tag">kotlininaction</a> <a class="tag tag--primary tag--small t-none-link" href="/tags/kotlin%EB%AC%B8%EB%B2%95/" rel="tag">kotlin문법</a>
 
             </div>
-            
-                <div class="postShorten-content">
-                    <h1 id="CouchBase-삽질-도전기"><a href="#CouchBase-삽질-도전기" class="headerlink" title="CouchBase 삽질 도전기"></a>CouchBase 삽질 도전기</h1><h2 id="CouchBase"><a href="#CouchBase" class="headerlink" title="CouchBase ?"></a>CouchBase ?</h2><ul>
-<li>기존적으로 json문서 지원 (RDBMS와 달리 스키마가 없어서 document db 라고 불림)<ul>
-<li>key - value 형태 (key: string, value : json)</li>
-</ul>
-</li>
-<li>cache db로 조회속도가 빠름 <ul>
-<li>memcached 도 지원됨.</li>
-</ul>
-</li>
-<li>SQL 지원해서 RDBMS사용하듯 사용할수는 있음 (N1QL)<ul>
-<li>정확하게 말하면 SQL형태임 (where/group by /order by 등으로 )</li>
-</ul>
-</li>
-<li>스키마리스 <ul>
-<li>스카마가 없어서 유연하게 테이블 구성이 가능함 </li>
-</ul>
-</li>
-<li>인덱싱 가능 <ul>
-<li>N1QL로 인덱싱 조회 가능 (데이터양이 많음 인덱스사용 가능)</li>
-</ul>
-</li>
-<li>확장성 (multi-master구조) <ul>
-<li>엘라스틱서치처럼 master-slave구조가 아닌 multi-master구조임 </li>
-<li>auto sharding지원 (각 shard마다 자동 동기화 진행 및 분산 처리 가능)</li>
-<li>서버추가를 복잡한 과정없이 추가가능 </li>
-</ul>
-</li>
-<li>다양한 언어 지원 <ul>
-<li>JAVA/Python/PHP/RUBY 등 다양한 언어 지원</li>
-</ul>
-</li>
-<li>Bucket ?<ul>
-<li>Bucket은 RDBMS의 테이블이라고 생각하면 된다. </li>
-</ul>
-</li>
-</ul>
-<h2 id="CouchBase-세팅-방법-JAVA-Spring-Boot-기준"><a href="#CouchBase-세팅-방법-JAVA-Spring-Boot-기준" class="headerlink" title="CouchBase 세팅 방법 (JAVA/Spring Boot 기준)"></a>CouchBase 세팅 방법 (JAVA/Spring Boot 기준)</h2><h3 id="설정-및-사전세팅"><a href="#설정-및-사전세팅" class="headerlink" title="설정 및 사전세팅"></a>설정 및 사전세팅</h3><figure class="highlight plain"><figcaption><span>application-xxx.yml</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">cache:</span><br><span class="line">  couchbase:</span><br><span class="line">    cluster:</span><br><span class="line">      contents-cluster:</span><br><span class="line">        userName: &#123;접속할 couchbase id&#125;</span><br><span class="line">        password: &#123;password&#125;</span><br><span class="line">        ip:</span><br><span class="line">          - &#123;ip주소&#125;</span><br><span class="line">        bucket:</span><br><span class="line">          - name: promotion-cache</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<figure class="highlight java"><figcaption><span>Bucket</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.wemakeprice.v.content.domain.configuration.cache.config;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> lombok.Getter;</span><br><span class="line"><span class="keyword">import</span> lombok.Setter;</span><br><span class="line"><span class="keyword">import</span> lombok.ToString;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Getter</span></span><br><span class="line"><span class="meta">@Setter</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Bucket</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> String name;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<figure class="highlight java"><figcaption><span>BucketRouterName</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.wemakeprice.v.content.domain.configuration.cache.config;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> lombok.Getter;</span><br><span class="line"><span class="keyword">import</span> lombok.RequiredArgsConstructor;</span><br><span class="line"></span><br><span class="line"><span class="meta">@RequiredArgsConstructor</span></span><br><span class="line"><span class="meta">@Getter</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">enum</span> <span class="title">BucketRouterName</span> </span>&#123;</span><br><span class="line">    PROMOTION(<span class="string">&quot;promotion-cache&quot;</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> String bucket;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight java"><figcaption><span>ClusterRouterName</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.wemakeprice.v.content.domain.configuration.cache.config;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> lombok.Getter;</span><br><span class="line"><span class="keyword">import</span> lombok.RequiredArgsConstructor;</span><br><span class="line"></span><br><span class="line"><span class="meta">@RequiredArgsConstructor</span></span><br><span class="line"><span class="meta">@Getter</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">enum</span> <span class="title">ClusterRouterName</span> </span>&#123;</span><br><span class="line">    CONTENTS(<span class="string">&quot;contents-cluster&quot;</span>)</span><br><span class="line">    ;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> String cluster;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight java"><figcaption><span>CouchbaseDatasource</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.wemakeprice.v.content.domain.configuration.cache.config;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> lombok.Getter;</span><br><span class="line"><span class="keyword">import</span> lombok.NoArgsConstructor;</span><br><span class="line"><span class="keyword">import</span> lombok.Setter;</span><br><span class="line"><span class="keyword">import</span> lombok.ToString;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.util.List;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Getter</span></span><br><span class="line"><span class="meta">@Setter</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">CouchbaseDatasource</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> String userName;</span><br><span class="line">    <span class="keyword">private</span> String password;</span><br><span class="line">    <span class="keyword">private</span> List&lt;String&gt; ip;</span><br><span class="line">    <span class="keyword">private</span> List&lt;Bucket&gt; bucket;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">getConnectionString</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> String.join(<span class="string">&quot;,&quot;</span>,<span class="keyword">this</span>.ip);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<figure class="highlight java"><figcaption><span>CouchbaseHolder</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.wemakeprice.v.content.domain.configuration.cache.config;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> lombok.Getter;</span><br><span class="line"><span class="keyword">import</span> lombok.Setter;</span><br><span class="line"><span class="keyword">import</span> org.springframework.boot.context.properties.ConfigurationProperties;</span><br><span class="line"><span class="keyword">import</span> org.springframework.util.Assert;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.util.HashMap;</span><br><span class="line"><span class="keyword">import</span> java.util.Map;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Getter</span></span><br><span class="line"><span class="meta">@Setter</span></span><br><span class="line"><span class="meta">@ConfigurationProperties(prefix = &quot;cache.couchbase&quot;)</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">CouchbaseHolder</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> Map&lt;String,CouchbaseDatasource&gt; cluster = <span class="keyword">new</span> HashMap&lt;&gt;();</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> CouchbaseDatasource <span class="title">getClient</span><span class="params">(ClusterRouterName clusterRouterName)</span> </span>&#123;</span><br><span class="line">        Assert.notNull(<span class="keyword">this</span>.cluster.get(clusterRouterName.getCluster()), <span class="string">&quot;Map&lt;String, CouchbaseDatasource&gt; must not be null. Please check application.yml : cache.couchbase.cluster&quot;</span>);</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">this</span>.cluster.get(clusterRouterName.getCluster());</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<figure class="highlight java"><figcaption><span>CouchbaseConnector</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.wemakeprice.v.content.domain.configuration.cache.config;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> com.couchbase.client.core.env.TimeoutConfig;</span><br><span class="line"><span class="keyword">import</span> com.couchbase.client.java.Cluster;</span><br><span class="line"><span class="keyword">import</span> com.couchbase.client.java.ClusterOptions;</span><br><span class="line"><span class="keyword">import</span> com.couchbase.client.java.env.ClusterEnvironment;</span><br><span class="line"><span class="keyword">import</span> lombok.extern.slf4j.Slf4j;</span><br><span class="line"><span class="keyword">import</span> org.springframework.beans.factory.InitializingBean;</span><br><span class="line"><span class="keyword">import</span> org.springframework.data.couchbase.CouchbaseClientFactory;</span><br><span class="line"><span class="keyword">import</span> org.springframework.data.couchbase.SimpleCouchbaseClientFactory;</span><br><span class="line"><span class="keyword">import</span> org.springframework.data.couchbase.core.CouchbaseTemplate;</span><br><span class="line"><span class="keyword">import</span> org.springframework.data.couchbase.core.convert.MappingCouchbaseConverter;</span><br><span class="line"><span class="keyword">import</span> org.springframework.util.Assert;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.time.Duration;</span><br><span class="line"><span class="keyword">import</span> java.util.HashMap;</span><br><span class="line"><span class="keyword">import</span> java.util.Map;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Slf4j</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">CouchbaseConnector</span> <span class="keyword">implements</span> <span class="title">InitializingBean</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> CouchbaseHolder couchbaseHolder;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> Map&lt;String, CouchbaseTemplate&gt; couchbaseTemplate = <span class="keyword">new</span> HashMap&lt;&gt;();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">static</span> <span class="keyword">int</span> CONNECTION_TIMEOUT = <span class="number">10</span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">CouchbaseConnector</span><span class="params">(CouchbaseHolder couchbaseHolder)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.couchbaseHolder = couchbaseHolder;</span><br><span class="line">        <span class="keyword">this</span>.setCouchbaseTemplate();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setCouchbaseTemplate</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">final</span> ClusterEnvironment clusterEnvironment = ClusterEnvironment.builder()</span><br><span class="line">                .timeoutConfig(TimeoutConfig.connectTimeout(Duration.ofSeconds(CONNECTION_TIMEOUT))).build();</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span>(String clusterName : couchbaseHolder.getCluster().keySet()) &#123;</span><br><span class="line">            <span class="keyword">final</span> CouchbaseDatasource couchbaseDatasource = couchbaseHolder.getCluster().get(clusterName);</span><br><span class="line">            <span class="keyword">final</span> String userName = couchbaseDatasource.getUserName();</span><br><span class="line">            <span class="keyword">final</span> String password = couchbaseDatasource.getPassword();</span><br><span class="line"></span><br><span class="line">            Cluster cluster = Cluster.connect(couchbaseDatasource.getConnectionString(), ClusterOptions.clusterOptions(userName, password).environment(clusterEnvironment));</span><br><span class="line"></span><br><span class="line">            <span class="keyword">for</span>(Bucket bucket : couchbaseDatasource.getBucket()) &#123;</span><br><span class="line">                <span class="keyword">final</span> CouchbaseClientFactory couchbaseClientFactory = <span class="keyword">new</span> SimpleCouchbaseClientFactory(cluster,bucket.getName(),<span class="keyword">null</span>);</span><br><span class="line">                <span class="keyword">final</span> CouchbaseTemplate template = <span class="keyword">new</span> CouchbaseTemplate(couchbaseClientFactory,<span class="keyword">new</span> MappingCouchbaseConverter());</span><br><span class="line"></span><br><span class="line">                couchbaseTemplate.put(clusterName + bucket.getName(),template);</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            log.info(<span class="string">&quot;couchbase datasource : &#123;&#125;&quot;</span>,couchbaseDatasource);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> CouchbaseTemplate <span class="title">getCouchbaseTemplate</span><span class="params">(<span class="keyword">final</span> ClusterRouterName clusterRouterName, <span class="keyword">final</span> BucketRouterName bucketRouterName)</span> </span>&#123;</span><br><span class="line">        Assert.notNull(<span class="keyword">this</span>.couchbaseTemplate.get(clusterRouterName.getCluster() + bucketRouterName.getBucket()),</span><br><span class="line">                <span class="string">&quot;ClusterRouteName : &quot;</span> + clusterRouterName.getCluster() + <span class="string">&quot; or BucketRouteName : &quot;</span> + bucketRouterName.getBucket() + <span class="string">&quot; must not be null. Please check application.yml : cache.couchbase.cluster&quot;</span>);</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">this</span>.couchbaseTemplate.get(clusterRouterName.getCluster() + bucketRouterName.getBucket());</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">afterPropertiesSet</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(<span class="keyword">this</span>.couchbaseTemplate.isEmpty()) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException(<span class="string">&quot;couchbaseTemplate is empty&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<figure class="highlight java"><figcaption><span>CouchbaseConfig</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">package</span> com.wemakeprice.v.content.domain.configuration.cache.config;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> lombok.RequiredArgsConstructor;</span><br><span class="line"><span class="keyword">import</span> org.springframework.boot.context.properties.EnableConfigurationProperties;</span><br><span class="line"><span class="keyword">import</span> org.springframework.context.annotation.Bean;</span><br><span class="line"><span class="keyword">import</span> org.springframework.context.annotation.Configuration;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Configuration</span></span><br><span class="line"><span class="meta">@RequiredArgsConstructor</span></span><br><span class="line"><span class="meta">@EnableConfigurationProperties(CouchbaseHolder.class)</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">CouchbaseConfig</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> CouchbaseHolder couchbaseHolder;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Bean</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> CouchbaseConnector <span class="title">getCouchbaseConfig</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> CouchbaseConnector(couchbaseHolder);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<figure class="highlight java"><figcaption><span>CouchbaseClient</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.wemakeprice.v.content.domain.configuration.cache.client;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> com.wemakeprice.v.content.domain.configuration.cache.config.BucketRouterName;</span><br><span class="line"><span class="keyword">import</span> com.wemakeprice.v.content.domain.configuration.cache.config.ClusterRouterName;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">CouchbaseClientApi</span> </span>&#123;</span><br><span class="line">    &lt;T&gt; <span class="function">T <span class="title">findOne</span><span class="params">(<span class="keyword">final</span> ClusterRouterName clusterRouterName, <span class="keyword">final</span> BucketRouterName bucketRouterName, <span class="keyword">final</span> String id, <span class="keyword">final</span> Class&lt;T&gt; entityClass)</span> <span class="keyword">throws</span> Exception</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">package</span> com.wemakeprice.v.content.domain.configuration.cache.client;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> com.wemakeprice.v.content.domain.configuration.cache.config.BucketRouterName;</span><br><span class="line"><span class="keyword">import</span> com.wemakeprice.v.content.domain.configuration.cache.config.ClusterRouterName;</span><br><span class="line"><span class="keyword">import</span> com.wemakeprice.v.content.domain.configuration.cache.config.CouchbaseConnector;</span><br><span class="line"><span class="keyword">import</span> com.wemakeprice.v.content.domain.exception.etc.CouchbaseClientInitializeException;</span><br><span class="line"><span class="keyword">import</span> lombok.RequiredArgsConstructor;</span><br><span class="line"><span class="keyword">import</span> lombok.extern.slf4j.Slf4j;</span><br><span class="line"><span class="keyword">import</span> org.springframework.data.couchbase.core.CouchbaseTemplate;</span><br><span class="line"><span class="keyword">import</span> org.springframework.stereotype.Component;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="meta">@RequiredArgsConstructor</span></span><br><span class="line"><span class="meta">@Slf4j</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">CouchbaseClient</span> <span class="keyword">implements</span> <span class="title">CouchbaseClientApi</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> CouchbaseConnector couchbaseConnector;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> CouchbaseTemplate <span class="title">getCouchbaseTemplate</span><span class="params">(<span class="keyword">final</span> ClusterRouterName clusterRouterName, <span class="keyword">final</span> BucketRouterName bucketRouterName)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        CouchbaseTemplate couchbaseTemplate;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            couchbaseTemplate = couchbaseConnector.getCouchbaseTemplate(clusterRouterName,bucketRouterName);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">            log.error(<span class="string">&quot;Couchbase Initialize Error : &#123;&#125;&quot;</span>, e);</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> CouchbaseClientInitializeException();</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> couchbaseTemplate;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> &lt;T&gt; <span class="function">T <span class="title">findOne</span><span class="params">(<span class="keyword">final</span> ClusterRouterName clusterRouterName, <span class="keyword">final</span> BucketRouterName bucketRouterName, <span class="keyword">final</span> String id, <span class="keyword">final</span> Class&lt;T&gt; entityClass)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">this</span>.getCouchbaseTemplate(clusterRouterName, bucketRouterName).findById(entityClass).one(id);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<h3 id="InitializingBean"><a href="#InitializingBean" class="headerlink" title="InitializingBean ?"></a>InitializingBean ?</h3><ul>
-<li>afterPropertiesSet() 메서드를 반드시 구현하게 되어있음 </li>
-<li>BeanFactory에 의해 모든 property가 설정된뒤 실행되는 메소드 </li>
-<li>주로 실행시점에 custom초기화 로직을 넣거나, 주입받은 property를 확인할때 사용함 </li>
-</ul>
-<h3 id="ConfigurationProperties"><a href="#ConfigurationProperties" class="headerlink" title="ConfigurationProperties ?"></a>ConfigurationProperties ?</h3><ul>
-<li>application.yml 과 같이 yml에 설정파일을 등록해두는데, ConfigurationProperties 사용하면 yml혹은 정의된 경로의 properties에 정의돈 property들을 가져와서 Bean으로 등록시켜줌. </li>
-<li>spring boot 2.2 이상부터는 EnableConfigurationProperties를 사용할 필요가 없다고함. 컨테이너에서 알아서 등록해서 바인딩까지 해주는듯하다. 추가적으로 @Component 혹은 @Configuration 과 같은 애너테이션도 추가할 필요없음. </li>
-</ul>
-
-                    
+        
+        
+            <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    <a
+                        class="post-action-btn btn btn--disabled"
+                        aria-hidden="true"
+                    >
                         
-
-
+                        <i class="fa fa-angle-left" aria-hidden="true"></i>
+                        <span class="hide-xs hide-sm text-small icon-ml">PREVIOUS</span>
+                    </a>
+            </li>
+            <li class="post-action">
+                
                     
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/2021/07/07/couchbase-work-1/"
+                    data-tooltip="couchbase-work-1"
+                    aria-label="NEXT: couchbase-work-1"
+                >
                     
-                        <p>
-                            <a
-                                href="/2021/07/07/couchbase-work-1/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                Comment and share
-                            </a>
-                        </p>
-                    
-                </div>
+                        <span class="hide-xs hide-sm text-small icon-mr">NEXT</span>
+                        <i class="fa fa-angle-right" aria-hidden="true"></i>
+                    </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a
+                class="post-action-btn btn btn--default btn-open-shareoptions"
+                href="#btn-open-shareoptions"
+                aria-label="Share this post"
+            >
+                <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </a>
+        </li>
+        
             
-        </div>
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://codexdawn.github.io/2021/07/13/kotlin-basic-1/"
+                    title="Share on Facebook"
+                    aria-label="Share on Facebook"
+                >
+                    <i class="fab fa-facebook" aria-hidden="true"></i>
+                </a>
+            </li>
         
-    </article>
-    
-    <div class="pagination-bar">
-    <ul class="pagination">
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://twitter.com/intent/tweet?text=https://codexdawn.github.io/2021/07/13/kotlin-basic-1/"
+                    title="Share on Twitter"
+                    aria-label="Share on Twitter"
+                >
+                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://plus.google.com/share?url=https://codexdawn.github.io/2021/07/13/kotlin-basic-1/"
+                    title="Share on Google+"
+                    aria-label="Share on Google+"
+                >
+                    <i class="fab fa-google-plus" aria-hidden="true"></i>
+                </a>
+            </li>
         
         
-        <li class="pagination-number">page 1 of 1</li>
+            
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#" aria-label="Back to top">
+            
+                <i class="fa fa-list" aria-hidden="true"></i>
+            </a>
+        </li>
     </ul>
 </div>
 
-</section>
+
+        
+        
+            
+        
+    </div>
+</article>
 
 
 
@@ -514,6 +482,151 @@
 </footer>
 
             </div>
+            
+                <div id="bottom-bar" class="post-bottom-bar" data-behavior="5">
+                    <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    <a
+                        class="post-action-btn btn btn--disabled"
+                        aria-hidden="true"
+                    >
+                        
+                        <i class="fa fa-angle-left" aria-hidden="true"></i>
+                        <span class="hide-xs hide-sm text-small icon-ml">PREVIOUS</span>
+                    </a>
+            </li>
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/2021/07/07/couchbase-work-1/"
+                    data-tooltip="couchbase-work-1"
+                    aria-label="NEXT: couchbase-work-1"
+                >
+                    
+                        <span class="hide-xs hide-sm text-small icon-mr">NEXT</span>
+                        <i class="fa fa-angle-right" aria-hidden="true"></i>
+                    </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a
+                class="post-action-btn btn btn--default btn-open-shareoptions"
+                href="#btn-open-shareoptions"
+                aria-label="Share this post"
+            >
+                <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </a>
+        </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://codexdawn.github.io/2021/07/13/kotlin-basic-1/"
+                    title="Share on Facebook"
+                    aria-label="Share on Facebook"
+                >
+                    <i class="fab fa-facebook" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://twitter.com/intent/tweet?text=https://codexdawn.github.io/2021/07/13/kotlin-basic-1/"
+                    title="Share on Twitter"
+                    aria-label="Share on Twitter"
+                >
+                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://plus.google.com/share?url=https://codexdawn.github.io/2021/07/13/kotlin-basic-1/"
+                    title="Share on Google+"
+                    aria-label="Share on Google+"
+                >
+                    <i class="fab fa-google-plus" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+        
+            
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#" aria-label="Back to top">
+            
+                <i class="fa fa-list" aria-hidden="true"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+                </div>
+                
+    <div id="share-options-bar" class="share-options-bar" data-behavior="5">
+        <i id="btn-close-shareoptions" class="fa fa-times"></i>
+        <ul class="share-options">
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://www.facebook.com/sharer/sharer.php?u=https://codexdawn.github.io/2021/07/13/kotlin-basic-1/"
+                        aria-label="Share on Facebook"
+                    >
+                        <i class="fab fa-facebook" aria-hidden="true"></i><span>Share on Facebook</span>
+                    </a>
+                </li>
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://twitter.com/intent/tweet?text=https://codexdawn.github.io/2021/07/13/kotlin-basic-1/"
+                        aria-label="Share on Twitter"
+                    >
+                        <i class="fab fa-twitter" aria-hidden="true"></i><span>Share on Twitter</span>
+                    </a>
+                </li>
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://plus.google.com/share?url=https://codexdawn.github.io/2021/07/13/kotlin-basic-1/"
+                        aria-label="Share on Google+"
+                    >
+                        <i class="fab fa-google-plus" aria-hidden="true"></i><span>Share on Google+</span>
+                    </a>
+                </li>
+            
+        </ul>
+    </div>
+
+
             
         </div>
         
@@ -551,6 +664,8 @@
 
 <!--SCRIPTS END-->
 
+
+    
 
 
 
