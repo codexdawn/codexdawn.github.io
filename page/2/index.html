@@ -246,6 +246,107 @@
                     
                         <a
                             class="link-unstyled"
+                            href="/2021/05/20/jpa-obj-query-3/"
+                            aria-label=": jpa-obj-query-3"
+                        >
+                            jpa-obj-query-3
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2021-05-20T10:59:56+00:00">
+	
+		    May 20, 2021
+    	
+    </time>
+    
+        <span>in </span>
+        
+    <a class="category-link" href="/categories/Study/">Study</a>, <a class="category-link" href="/categories/%EA%B0%9D%EC%B2%B4%EC%A7%80%ED%96%A5%EC%BF%BC%EB%A6%AC%EC%96%B8%EC%96%B4/">객체지향쿼리언어</a>, <a class="category-link" href="/categories/%EC%9E%90%EB%B0%94ORM%ED%91%9C%EC%A4%80JPA%ED%94%84%EB%A1%9C%EA%B7%B8%EB%9E%98%EB%B0%8D/">자바ORM표준JPA프로그래밍</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <h1 id="객체지향-쿼리-언어3"><a href="#객체지향-쿼리-언어3" class="headerlink" title="객체지향 쿼리 언어3"></a>객체지향 쿼리 언어3</h1><h2 id="1-Persistance-Context와-JPQL"><a href="#1-Persistance-Context와-JPQL" class="headerlink" title="1. Persistance Context와 JPQL"></a>1. Persistance Context와 JPQL</h2><h3 id="1-1-쿼리후-영속상태인-것과-아닌것"><a href="#1-1-쿼리후-영속상태인-것과-아닌것" class="headerlink" title="1-1. 쿼리후 영속상태인 것과 아닌것"></a>1-1. 쿼리후 영속상태인 것과 아닌것</h3><figure class="highlight java"><figcaption><span>영속상태구분</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">select m form Member m <span class="comment">//엔티티조회 (영속성 관리됨)</span></span><br><span class="line">select o.address from Order o <span class="comment">//임베디드타입 조회 (영속성 관리 안됨)</span></span><br><span class="line">select m.id, m.username from Member m <span class="comment">//단순 필드조회 (영속성 관리 안됨)</span></span><br></pre></td></tr></table></figure>
+
+<p>위 예제를 통해 알수있듯이, 조회한 엔티티만 영속성 컨텍스트에 관리가 됨. </p>
+<h3 id="1-2-JPQL로-조회한-엔티티와-영속성-컨텍스트"><a href="#1-2-JPQL로-조회한-엔티티와-영속성-컨텍스트" class="headerlink" title="1-2. JPQL로 조회한 엔티티와 영속성 컨텍스트"></a>1-2. JPQL로 조회한 엔티티와 영속성 컨텍스트</h3><figure class="highlight java"><figcaption><span>영속상태구분</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">em.find(Member.class,<span class="string">&quot;m1&quot;</span>); <span class="comment">//회원1 조회 </span></span><br><span class="line"></span><br><span class="line"><span class="comment">//엔티티 쿼리 조회 결과가 회원1, 회원2</span></span><br><span class="line">List&lt;Member&gt; resultList = em.createQuery(<span class="string">&quot;select m from Member m&quot;</span>, Member.class).getResultList(); </span><br></pre></td></tr></table></figure>
+
+<p>em.find로 회원1을 조회했는데, JPQL로 전체를 가져오는 List를 호출하였다. 그럼 위 조회 과정은 어떻게 될까?</p>
+<blockquote><p>em.find 호출뒤, List 조회 했을경우 </p>
+<ol>
+<li>JPQL을 사용해서 조회 요청</li>
+<li>JPQL은 SQL로 변환되어 DB에 조회 </li>
+<li>조회한 결과와 영속성 컨텍스트를 비교 (em.find로 조회된값 : m1 ,조회한값 :m1,m2)</li>
+<li>식별자 기준으로 m1은 이미 영속성관리에 있으므로 버리고, 기존에 영속성관리에 있던 m1이 반환대상이됨.</li>
+<li>식별자 기준으로 m2는 영속성 컨텍스트에 없으므로, 영속성컨텍스트에 추가 </li>
+<li>쿼리 결과인 m1,m2를 반환한다. 여기서 m1은 쿼리결과가 아니라 영속성 컨텍스트에 있던 엔티티임을 잊지말자! </li>
+</ol>
+</blockquote>
+
+<p>여기서 알수있는 2가지 사실이있다.</p>
+<ol>
+<li>JPQL로 조회한 엔티티는 영속상태다. </li>
+<li>영속성 컨텍스트에 이미 존재하는 엔티티가 있으면 기존 엔티티를 반환한다. </li>
+</ol>
+<p>영속성 컨텍스트는 영속상태인 엔티티의 동일성을 보장한다. em.find이든 JPQL로 조회하든 영속성 컨텍스트가 같으면 동일한 엔티티를 반환함. </p>
+<h3 id="1-3-find-VS-JPQL"><a href="#1-3-find-VS-JPQL" class="headerlink" title="1-3. find() VS JPQL"></a>1-3. find() VS JPQL</h3><h4 id="find"><a href="#find" class="headerlink" title="find()"></a>find()</h4><ul>
+<li>find 메서드는 엔티티를 영속성 컨텍스트에 먼저 찾고 없으면 DB에서 찾는다. 따라서 해당 엔티티가 영속성 컨텍스트에 존재하면 메모리에서 바로 찾으므로 성능상 이점이 있다. (그래서 1차캐시라 부름)</li>
+</ul>
+<h4 id="JPQL"><a href="#JPQL" class="headerlink" title="JPQL"></a>JPQL</h4><ul>
+<li>JPQL은 항상 디비를 조회한다.</li>
+<li>JPQL로 조회한 엔티티는 영속상태다. (왜냐 DB 조회후,영속성컨텍스트에 집어넣기때문 )</li>
+<li>영속성 컨텍스트에 이미 존재하는 엔티티가있으면 기존 엔티티를 반환함. </li>
+</ul>
+<h2 id="2-JPQL과-flush모드"><a href="#2-JPQL과-flush모드" class="headerlink" title="2. JPQL과 flush모드"></a>2. JPQL과 flush모드</h2><h3 id="2-1-쿼리와-플러시-모드"><a href="#2-1-쿼리와-플러시-모드" class="headerlink" title="2-1. 쿼리와 플러시 모드"></a>2-1. 쿼리와 플러시 모드</h3><ul>
+<li>JPQL은 영속성 컨텍스트 고려하지 않고, DB를 먼저 조회함. 따라서 JPQL을 실행하기전에 영속성 컨텍스트의 내용을 DB에 반영해야함. 그렇지 않으면 상이한결과가 발생할수있음. </li>
+<li>FlushMode는 두가지있음. AUTO,COMMIT 이다.<ul>
+<li>AUTO : FlushMode를 따로 지정하지 않으면 기본값임. AUTO는 JPQL가 수행되면 자동 FLUSH시켜버림. </li>
+<li>COMMIT : COMMIT모드면 말그대로 커밋시점에 FLUSH가 됨. 따라서 JPQL쿼리가 수행되도, FLUSH되지않음. </li>
+</ul>
+</li>
+<li>FlushMode.COMMIT은 왜 씀? <ul>
+<li>flush가 너무 빈번하게 일어나는 상황에서 이모드를 사용하면 쿼리시 발생하는 플러시 횟수를 줄여서 성능 최적화 가능함. </li>
+</ul>
+</li>
+<li>JPA를 사용하지않고, JDBC를 직접 사용해서 SQL을 실행할때도 플러시모드는 고민해야함. JPA를 통하지않고 JDBC로 직접 실행하면 JPA는 JDBC가 실행한 쿼리를 인식할 방법이 없음. 따라서 별도 JDBC호출은 플러시 모드를 AUTO로설정해도 무의미함. 이때는 JDBC로 쿼리를 실행하기전에 em.flush를 호출해서 영속성 컨텍스트의 내용을 디비에 동기화 하는게 안점함. </li>
+</ul>
+
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/2021/05/20/jpa-obj-query-3/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                Comment and share
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
                             href="/2021/05/15/coding-test-study-2/"
                             aria-label=": coding-test-study-2"
                         >
@@ -1279,79 +1380,6 @@
                         <p>
                             <a
                                 href="/2021/05/07/jpa-querydsl-1/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                Comment and share
-                            </a>
-                        </p>
-                    
-                </div>
-            
-        </div>
-        
-    </article>
-    
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/2021/05/07/spring-openfeign-1/"
-                            aria-label=": spring-openfeign-1"
-                        >
-                            spring-openfeign-1
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time datetime="2021-05-07T02:28:45+00:00">
-	
-		    May 07, 2021
-    	
-    </time>
-    
-        <span>in </span>
-        
-    <a class="category-link" href="/categories/Feign/">Feign</a>, <a class="category-link" href="/categories/Spring-Boot/">Spring Boot</a>, <a class="category-link" href="/categories/Spring-OpenFeign/">Spring OpenFeign</a>, <a class="category-link" href="/categories/%EC%9C%A0%EB%A0%88%EC%B9%B4or%EC%82%BD%EC%A7%88/">유레카or삽질</a>
-
-
-    
-</div>
-
-            </div>
-            
-                <div class="postShorten-content">
-                    <h1 id="Spring-OpenFeign-삽질기"><a href="#Spring-OpenFeign-삽질기" class="headerlink" title="Spring OpenFeign 삽질기"></a>Spring OpenFeign 삽질기</h1><p>사실 Spring OpenFeign을 먼저 공부하는것보다 Hystrix -&gt; Feign -&gt; Spring OpenFeign 순으로 스터디 하는것이 낫다라고 생각이 들긴하는데, 그냥 Spring OpenFeign부터 살펴보았다. </p>
-<p>Spring OpenFeign은 Netflix에서 개발한 Feign을 가지고 Spring 입맛에 맞게 개발한 부분으로 Feign에 비해서는 아직까지 덜 개발된 부분이 있는듯하나, 스프링 웹 MVC개발 경험을 그대로 사용가능하다는 장점과 좀 더 손쉬운 Fallback및 Client관리가 장점이라고 갠적으로 생각한다. </p>
-<h2 id="1-세팅"><a href="#1-세팅" class="headerlink" title="1. 세팅"></a>1. 세팅</h2><h3 id="1-1-build-gradle-의존성-추가"><a href="#1-1-build-gradle-의존성-추가" class="headerlink" title="1-1. build.gradle 의존성 추가"></a>1-1. build.gradle 의존성 추가</h3><p>[주의] spring openFeign은 spring cloud 그룹에 있기때문에 spring cloud가 먼저 의존성으로 추가되어있어야함. </p>
-<figure class="highlight plain"><figcaption><span>build.gradle</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">implementation(&#39;org.springframework.cloud:spring-cloud-starter-openfeign&#39;)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<h3 id="1-2-hystrix-설정"><a href="#1-2-hystrix-설정" class="headerlink" title="1-2. hystrix 설정"></a>1-2. hystrix 설정</h3><figure class="highlight plain"><figcaption><span>application.yml</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">feign:</span><br><span class="line">  hystrix:</span><br><span class="line">    enabled: true</span><br></pre></td></tr></table></figure>
-
-<h2 id="2-개발"><a href="#2-개발" class="headerlink" title="2. 개발"></a>2. 개발</h2><h3 id="2-1-Client-개발"><a href="#2-1-Client-개발" class="headerlink" title="2-1. Client 개발"></a>2-1. Client 개발</h3><figure class="highlight java"><figcaption><span>client</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.wemakeprice.v.ocs.domain.configuration.client;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> <span class="keyword">static</span> org.springframework.web.bind.annotation.RequestMethod.POST;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> com.wemakeprice.v.ocs.domain.model.legacy.mypage.CounselorOrderInfo;</span><br><span class="line"><span class="keyword">import</span> com.wemakeprice.v.ocs.domain.model.legacy.mypage.CounselorOrderParam;</span><br><span class="line"><span class="keyword">import</span> com.wemakeprice.v.ocs.domain.model.response.ResponseObject;</span><br><span class="line"><span class="keyword">import</span> com.wemakeprice.v.ocs.meta.WmpHeader;</span><br><span class="line"><span class="keyword">import</span> com.wemakeprice.v.ocs.meta.mypage.WmpAppType;</span><br><span class="line"><span class="keyword">import</span> org.springframework.cloud.openfeign.FeignClient;</span><br><span class="line"><span class="keyword">import</span> org.springframework.web.bind.annotation.RequestBody;</span><br><span class="line"><span class="keyword">import</span> org.springframework.web.bind.annotation.RequestHeader;</span><br><span class="line"><span class="keyword">import</span> org.springframework.web.bind.annotation.RequestMapping;</span><br><span class="line"></span><br><span class="line"><span class="meta">@FeignClient(name = &quot;api-feign-client&quot;</span></span><br><span class="line"><span class="meta">    , url = &quot;$&#123;v-ocs.api-hosts.shipping-api&#125;&quot;</span></span><br><span class="line"><span class="meta">    , fallbackFactory = ApiFeignClientFallbackFactory.class)</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">ApiFeignClient</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@RequestMapping(method = POST</span></span><br><span class="line"><span class="meta">        , value = &quot;/vertical/getCounselorOrder&quot;</span></span><br><span class="line"><span class="meta">        , produces = &quot;application/json&quot;)</span></span><br><span class="line">    <span class="function">ResponseObject&lt;CounselorOrderInfo&gt; <span class="title">getCounselorOrderFeign</span><span class="params">(<span class="meta">@RequestHeader(WmpHeader.WMP_APP_NAME)</span> WmpAppType wmpAppName</span></span></span><br><span class="line"><span class="function"><span class="params">        , <span class="meta">@RequestBody</span> CounselorOrderParam param)</span></span>;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>위 코드를 보면 알수있지만, 기존 Spring MVC에서 활용하던 네이밍들을 그대로 가져와서 사용가능하다는 장점이 있다. 그냥 Feign을 사용하면 저 애너테이션들은 사용하지 못하고 Feign에서 정의된 애너테이션으로 사용 해야함. </p>
-<h3 id="2-2-FallbackFactory-세팅"><a href="#2-2-FallbackFactory-세팅" class="headerlink" title="2-2. FallbackFactory 세팅"></a>2-2. FallbackFactory 세팅</h3><p>Spring OpenFeign은 fallback관리를 비교적 쉽게 할수있음. </p>
-<figure class="highlight java"><figcaption><span>fallback factory</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.wemakeprice.v.ocs.domain.configuration.client;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> com.wemakeprice.v.ocs.domain.model.legacy.mypage.CounselorOrderInfo;</span><br><span class="line"><span class="keyword">import</span> com.wemakeprice.v.ocs.domain.model.legacy.mypage.CounselorOrderParam;</span><br><span class="line"><span class="keyword">import</span> com.wemakeprice.v.ocs.domain.model.response.ResponseObject;</span><br><span class="line"><span class="keyword">import</span> com.wemakeprice.v.ocs.meta.mypage.WmpAppType;</span><br><span class="line"><span class="keyword">import</span> feign.hystrix.FallbackFactory;</span><br><span class="line"><span class="keyword">import</span> lombok.extern.slf4j.Slf4j;</span><br><span class="line"><span class="keyword">import</span> org.springframework.stereotype.Component;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="meta">@Slf4j</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ApiFeignClientFallbackFactory</span> <span class="keyword">implements</span> <span class="title">FallbackFactory</span>&lt;<span class="title">ApiFeignClient</span>&gt; </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> ApiFeignClient <span class="title">create</span><span class="params">(Throwable cause)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> ApiFeignClient() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> ResponseObject&lt;CounselorOrderInfo&gt; <span class="title">getCounselorOrderFeign</span><span class="params">(WmpAppType wmpAppName, CounselorOrderParam param)</span> </span>&#123;</span><br><span class="line">                log.error(<span class="string">&quot;error message : &#123;&#125;&quot;</span>, cause.getMessage());</span><br><span class="line">                ResponseObject&lt;CounselorOrderInfo&gt; responseObject = <span class="keyword">new</span> ResponseObject&lt;&gt;();</span><br><span class="line">                responseObject.setData(CounselorOrderInfo.EMPTY);</span><br><span class="line">                <span class="keyword">return</span> responseObject;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>위 코드를 정의한뒤, Client에서 @FeignClient 정의할때 fallbackFactory에 정의해주면 됨.<br>@FeignClient에 그냥 fallback도 있는데, 개인적으로 생각하는 차이점은 fallbackFactory는 Throwable을 받을수있어서 에러의 상세를 알수가 있지만,<br>그냥 fallback은 단순 fallback처리만 지원되는것으로 알고있음. (깊게 공부 안함.)</p>
-<h2 id="3-정리"><a href="#3-정리" class="headerlink" title="3. 정리"></a>3. 정리</h2><p>위 와 같이 설정하면 가장 기본적인 Spring OpenFeign 설정 및 개발방법은 끝이다. 너무 간단스하지만, 여기서 개인적인 생각은 기존 Feign은 여러가지 확장성있는 개발이 가능하다. 예를들면 client를 OkHttp로 세팅하거나, Http2Client같은 http2설정도 가능하고, 기타 정말 많은 부분을 확장해서 사용이 가능한걸로 알고있는데, Spring OpenFeign은 그에 반해 기능이 꽤나 한정적인걸로 확인되어진다. 그리고 아직까지는 reactive가 지원되지 않기도해서, 개별적인 라이브러리를 받아서 해야하는것으로 알고있음. 따라서, 단순 httpClient 빠르게 개발하고, hystrix까지 덤으로 같이 사용하고자할때는 Spring OpenFeign만큼 생산성있게 빠르게 개발할수있는건 없는듯하다. 아직 깊게 공부하지는 못했지만, 좀 더 깊게 공부하고 싶다면 아래 링크 사이트로 공부하도록 해보자! </p>
-<p>[필수참고 사이트]<br><a target="_blank" rel="noopener" href="https://cloud.spring.io/spring-cloud-openfeign/reference/html/#reactive-support">Spring OpenFeign 공식 사이트</a><br><a target="_blank" rel="noopener" href="https://github.com/OpenFeign/feign/#basics">OpenFeign 사이트</a></p>
-
-                    
-                        
-
-
-                    
-                    
-                        <p>
-                            <a
-                                href="/2021/05/07/spring-openfeign-1/#post-footer"
                                 class="postShorten-excerpt_link link"
                                 aria-label=""
                             >
