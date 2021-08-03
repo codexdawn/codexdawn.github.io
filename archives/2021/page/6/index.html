@@ -247,6 +247,70 @@
                     
                         <a
                             class="link-unstyled"
+                            href="/2021/01/18/java-effective-4/"
+                            aria-label=": java-effective-4"
+                        >
+                            java-effective-4
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2021-01-18T05:23:31+00:00">
+	
+		    Jan 18, 2021
+    	
+    </time>
+    
+        <span>in </span>
+        
+    <a class="category-link" href="/categories/Effective-Java/">Effective Java</a>, <a class="category-link" href="/categories/Study/">Study</a>, <a class="category-link" href="/categories/%EA%B0%9D%EC%B2%B4-%EC%83%9D%EC%84%B1%EA%B3%BC-%ED%8C%8C%EA%B4%B4/">객체 생성과 파괴</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <p>단순히 정적 메서드와 정적 필드만을 담은 클래스로 만들고 싶을 때가 있다. 예컨데, <code>java.lang.Math</code>와 <code>java.ulti.Arrays</code> 처럼 기본 타입이 값이나 배열 관련 메서드들을 모아놓을수도 있으며,     <code>java.util.Collections</code> 처럼 특정 인터페이스를 구현하는 객체를 생성해주는 정적 팩터리 메서드를 모아 놓을수도 있다.(java8 부터는 이런 메서드를 인터페이스에 넣을 수 있다.) 마지막으로, final 클래스와 관련한 메서드들을 모아놓을 때도 사용한다. (final 클래스를 상속해서 하위 클래스에 메서드를 넣는 건 불가능하기 때문)</p>
+<h2 id="아이템4-인스턴스화를-막으려거든-private-생성자를-사용하라"><a href="#아이템4-인스턴스화를-막으려거든-private-생성자를-사용하라" class="headerlink" title="아이템4. 인스턴스화를 막으려거든 private 생성자를 사용하라."></a>아이템4. 인스턴스화를 막으려거든 private 생성자를 사용하라.</h2><p>정적 멤버만 담은 유틸리티 클래스는 인스턴스로 만들어 쓰려고 설계한 게 아니다. 하지만 생성자를 명시하지 않으면 컴파일러가 자동으로 기본생성자를 만들어준다. (public생성자 자동생성) </p>
+<p><strong>추상 클래스로 만드는 것으로는 인스턴스화를 막을 수 없다.</strong>  왜냐하면 하위클래스를 만들어서 인스턴스 생성하면 그만이기때문이다. 그리고 이를 본 사용자들은 상속해서 쓰라는 뜻으로 오해할 수 있어서 더 큰 문제를 야기 시킬수 있다. 다행히도 인스턴스화를 막는 방법은 아주 간단한다. </p>
+<p><strong>private 생성자를 추가하면 클래스의 인스턴스화를 막을수 있다.</strong> </p>
+<figure class="highlight java"><figcaption><span>인스턴스를 만들수없는 유틸클래스</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">UtilityClass</span> </span>&#123;</span><br><span class="line">	<span class="comment">//기본 생성자가 만들어지는 것을 막는다 (인스턴스화 방지용)</span></span><br><span class="line">	<span class="function"><span class="keyword">private</span> <span class="title">UtilityClass</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">throw</span> <span class="keyword">new</span> AssertionError(); </span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>위 와같이 private 생성자를 만들어두면, 인스턴스화가 안되며, 위 예시처럼 꼭 예외를 던질필요는 없으나, 개발자가 실수하지 않도록 명시를 해주는 편이 나쁘지는 않다. 또한 저자는 private생성자로 인스턴스 생성을 막았으면, 가독성을 위해서 위 예시처럼 주석을 달아두라고 권고하고있다. 그리고 이 방식은 상속을 불가능하게 하는 효과도 있다. 모든 생성자는 명시적인든 묵시적이든 상위 클래스의 생성자를 호출하게 되는데, 이를 private으로 선언했으니, 하위 클래스가 상위 클래스의 생성자에 접근할 길이 막혀버린다. </p>
+
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/2021/01/18/java-effective-4/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                Comment and share
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
                             href="/2021/01/18/java-effective-3/"
                             aria-label=": java-effective-3"
                         >
