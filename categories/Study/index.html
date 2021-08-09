@@ -247,6 +247,148 @@
                     
                         <a
                             class="link-unstyled"
+                            href="/2021/08/05/kotlin-basic-4/"
+                            aria-label=": kotlin-basic-4"
+                        >
+                            kotlin-basic-4
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2021-08-05T07:59:46+00:00">
+	
+		    Aug 05, 2021
+    	
+    </time>
+    
+        <span>in </span>
+        
+    <a class="category-link" href="/categories/KotlinInAction/">KotlinInAction</a>, <a class="category-link" href="/categories/Study/">Study</a>, <a class="category-link" href="/categories/%EC%BD%94%ED%8B%80%EB%A6%B0%EB%AC%B8%EB%B2%95-%EA%B8%B0%EC%B4%88/">코틀린문법&기초</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <h1 id="코틀린-타입-시스템"><a href="#코틀린-타입-시스템" class="headerlink" title="코틀린 타입 시스템"></a>코틀린 타입 시스템</h1><blockquote><ul>
+<li>null 이 될수있는 타입과 null을 처리하는 구문의 문법 </li>
+<li>코틀린 원시 타입 소개와 자바 타입과 코틀린 원시 타입의 관계 </li>
+<li>코틀린 컬렉션 소개와 자바 컬렉션과 코틀린 컬렉션의 관계</li>
+</ul>
+</blockquote>
+
+<h2 id="Null-가능성"><a href="#Null-가능성" class="headerlink" title="Null 가능성"></a>Null 가능성</h2><h3 id="Null이-될수있는-타입"><a href="#Null이-될수있는-타입" class="headerlink" title="Null이 될수있는 타입"></a>Null이 될수있는 타입</h3><ul>
+<li>기본적으로 모든 타입은 null 허용이 안됨.</li>
+<li>타입에 null을 허용하려면 ? 를 타입뒤에 붙여야함. (ex&gt; val x:String? = null) </li>
+</ul>
+<h3 id="안전한-호출-연산자"><a href="#안전한-호출-연산자" class="headerlink" title="안전한 호출 연산자: ?"></a>안전한 호출 연산자: ?</h3><ul>
+<li>?. 연산자는 null검사와 메소드 호출을 한번의 연산으로 수행한다. (ex&gt; s?.toUpperCase() =&gt; if(s != null) s.toUpperCase() else null)</li>
+<li>값이 존재하면 값을 리턴하고, 없으면 Null을 리턴해준다. </li>
+<li>?. 연산자를 사용하면 반환타입은 ?로 반환해야함. (ex&gt; val allCaps: String? = s?.toUpperCase())</li>
+</ul>
+<h3 id="엘비스-연산자"><a href="#엘비스-연산자" class="headerlink" title="엘비스 연산자 : ?:"></a>엘비스 연산자 : ?:</h3><ul>
+<li>?:(엘비스연산자)는 null대신 사용할 디폴트값을 지정할때 편리하게 사용하는 연산자</li>
+</ul>
+<figure class="highlight kotlin"><figcaption><span>evis</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">foo</span><span class="params">(s:<span class="type">String</span>?)</span></span> &#123;</span><br><span class="line">	<span class="keyword">val</span> t:String = s ?: <span class="string">&quot;&quot;</span> </span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">strLenSafe</span><span class="params">(s:<span class="type">String</span>?)</span></span>: <span class="built_in">Int</span> = s?.length ?: <span class="number">0</span></span><br></pre></td></tr></table></figure>
+
+
+<figure class="highlight kotlin"><figcaption><span>evis-throw</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Address</span></span>(<span class="keyword">val</span> streetAddress:String, <span class="keyword">val</span> zipCode:<span class="built_in">Int</span>, <span class="keyword">val</span> city:String, <span class="keyword">val</span> country:String) </span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Company</span></span>(<span class="keyword">val</span> name:String, <span class="keyword">val</span> address:Address?)</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Person</span></span>(<span class="keyword">val</span> name:String, <span class="keyword">val</span> company:Company?)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">printShippingLabel</span><span class="params">(person:<span class="type">Person</span>)</span></span> &#123;</span><br><span class="line">	<span class="keyword">val</span> address = person.company?.address ?: <span class="keyword">throw</span> IlleagalArgumentException(<span class="string">&quot;No Address&quot;</span>)</span><br><span class="line">	with (address) &#123;</span><br><span class="line">		println(streetAddress)</span><br><span class="line">		println(<span class="string">&quot;<span class="variable">$zipcode</span> <span class="variable">$city</span>, <span class="variable">$country</span>&quot;</span>)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&gt;&gt; <span class="keyword">val</span> address = Address(<span class="string">&quot;ElvisStreet&quot;</span>, <span class="number">110</span>, <span class="string">&quot;Sanfrancico&quot;</span>, <span class="string">&quot;USA&quot;</span>)</span><br><span class="line">&gt;&gt; <span class="keyword">val</span> company = Company(<span class="string">&quot;Algo&quot;</span>, address)</span><br><span class="line">&gt;&gt; <span class="keyword">val</span> person = Person(<span class="string">&quot;Dawn&quot;</span>, company)</span><br><span class="line"></span><br><span class="line">&gt;&gt; printShippingLabel(person)</span><br><span class="line">&gt;&gt;&gt; ElvisStreet </span><br><span class="line">&gt;&gt;&gt; <span class="number">110</span> Sanfrancico, USA</span><br><span class="line"></span><br><span class="line">&gt;&gt;&gt; printShippingLabel(Person(<span class="string">&quot;Zero&quot;</span>,<span class="literal">null</span>))</span><br><span class="line">&gt;&gt;&gt; java.lang.IlleagalArgumentException: No Adress </span><br></pre></td></tr></table></figure>
+
+<h3 id="안전한-캐스트-as"><a href="#안전한-캐스트-as" class="headerlink" title="안전한 캐스트: as?"></a>안전한 캐스트: as?</h3><ul>
+<li>as는 타입캐스트를 시켜주는 연산자이다. as?는 ?연산자 처럼 타입이 존재하지 않으면 null을 리턴해줌. </li>
+<li>val otherPerson = o as? Person ?: return false</li>
+</ul>
+<h3 id="Null-아님을-단언"><a href="#Null-아님을-단언" class="headerlink" title="Null 아님을 단언: !!"></a>Null 아님을 단언: !!</h3><ul>
+<li>해당 타입 뒤에 !! 연산자를 붙이면 null이 들어오면 안된다는 소리다. 들어오면 NullPointerException 예외발생 </li>
+<li>val sNotNull:String = s!! //null 들어오면 예외발생 </li>
+<li>!! 연산자를 한줄에 여러 단언문을 사용하는 부분은 피하라 (어디서 예외가 발생했는지 알길이 없다.) (ex&gt; person.company!!.address!!.country -&gt; 이런거하면 어디서 null예외가 떨어졌는지 모른다.)</li>
+</ul>
+<h3 id="let-함수"><a href="#let-함수" class="headerlink" title="let 함수"></a>let 함수</h3><ul>
+<li>let 은 해당 값이 null이아니면 수행, 아니면 미수행 처리해주는 역할을 한다.</li>
+<li>여러값이 null인지를 검사해야한다면, let호출을 중첩시킬수있다. 하지만 코드가 클린하지 못하기때문에, 그럴땐 if를 사용해서 모든값을 한꺼번에 검사하는편이 좋다. </li>
+</ul>
+<figure class="highlight kotlin"><figcaption><span>let</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">sendToEmail</span><span class="params">(email: <span class="type">String</span>)</span></span> &#123;</span><br><span class="line">	println(<span class="string">&quot;Sending email to <span class="variable">$email</span>&quot;</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&gt;&gt; <span class="keyword">var</span> email: String? = <span class="string">&quot;yolo@ex.com&quot;</span></span><br><span class="line">&gt;&gt; email?.let &#123; sendToEmail(it)&#125;</span><br><span class="line">&gt;&gt;&gt; Sending email to <span class="symbol">yolo@</span>ex.com</span><br><span class="line"></span><br><span class="line">&gt;&gt; email = <span class="literal">null</span></span><br><span class="line">&gt;&gt; email?.let&#123;sendToEmail(it)&#125;</span><br><span class="line">&gt;&gt;&gt; 아무실행없음</span><br><span class="line"></span><br><span class="line"><span class="comment">//let 사용안한예 </span></span><br><span class="line"><span class="keyword">val</span> person:Person? = getTheBestPersonInTheWorld()</span><br><span class="line"><span class="keyword">if</span>(persion != <span class="literal">null</span>) sendToEmail(person.email)</span><br><span class="line"></span><br><span class="line"><span class="comment">//let 사용예</span></span><br><span class="line">getTheBestPersonInTheWorld()?.let&#123;sendEmailTo(it.email)&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//위함수가 null을 반환한다면? 아무일도 일어나지 않는다.</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="나중에-초기화할-프로퍼티-lateinit"><a href="#나중에-초기화할-프로퍼티-lateinit" class="headerlink" title="나중에 초기화할 프로퍼티 : lateinit"></a>나중에 초기화할 프로퍼티 : lateinit</h3><ul>
+<li>lateinit을 사용시 반드시 var로 사용해야함. val로 사용시 final 필드로 컴파일되어 반드시 초기값을 요구하게됨. </li>
+<li>프로퍼티를 초기화하기전에 lateinit변수에 접근하면 lateinit property myService has not been initialized 라는 예외가 발생함 </li>
+<li>lateinit은 의존관계주입 (DI) 프레임워크와 함께 사용하는 경우가 많음. </li>
+</ul>
+<figure class="highlight kotlin"><figcaption><span>lateinit</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MyService</span> </span>&#123;</span><br><span class="line">	<span class="function"><span class="keyword">fun</span> <span class="title">performAction</span><span class="params">()</span></span>: String = <span class="string">&quot;foo&quot;</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MyTest</span> </span>&#123;</span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">lateinit</span> <span class="keyword">var</span> myService:MyService</span><br><span class="line">	</span><br><span class="line">	<span class="meta">@Before</span> <span class="function"><span class="keyword">fun</span> <span class="title">setUp</span><span class="params">()</span></span> &#123;</span><br><span class="line">		myService = MyService()</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="meta">@Test</span> <span class="function"><span class="keyword">fun</span> <span class="title">testAction</span><span class="params">()</span></span> &#123;</span><br><span class="line">		Assert.assertEquals(<span class="string">&quot;foo&quot;</span>, myService.performAction())</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="null이-될수있는-타입-확장"><a href="#null이-될수있는-타입-확장" class="headerlink" title="null이 될수있는 타입 확장"></a>null이 될수있는 타입 확장</h3><ul>
+<li>null이 될수있는 확장함수는 안전한 호출(? 연산자) 없이 호출 가능 </li>
+<li>null이 허용된 변수에 대한 안전한 호출 없이 let 을 호출하면 람다의 인자는 null이 될수있는 타입으로 추론됨. 따라서 안전한 호출을 위해 ?연산자를 반드시 사용해야함. </li>
+</ul>
+<h3 id="타입-파라미터의-null가능성"><a href="#타입-파라미터의-null가능성" class="headerlink" title="타입 파라미터의 null가능성"></a>타입 파라미터의 null가능성</h3><ul>
+<li>제네릭타입 (타입 파라미터) 를 사용하게 되면 타입명끝에 ?가 없더라도 T가 null이 될수 있는 타입이다. </li>
+</ul>
+<figure class="highlight kotlin"><figcaption><span>generic</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="type">&lt;T&gt;</span> <span class="title">printHashCode</span><span class="params">(t:<span class="type">T</span>)</span></span> &#123;</span><br><span class="line">	println(t?.hashCode()) <span class="comment">//타입 파라미터 t는 무조건 안전한 호출을 통해서만 가져와야함.T의 타입은 Any?로 반드시 추론됨. </span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&gt;&gt; printHashCode(<span class="literal">null</span>)</span><br><span class="line">&gt;&gt;&gt; <span class="literal">null</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="코틀린의-원시타입"><a href="#코틀린의-원시타입" class="headerlink" title="코틀린의 원시타입"></a>코틀린의 원시타입</h2><h3 id="원시타입-Int-Boolean-등"><a href="#원시타입-Int-Boolean-등" class="headerlink" title="원시타입 : Int, Boolean 등.."></a>원시타입 : Int, Boolean 등..</h3><ul>
+<li>자바에서는 원시타입 , 참조타입으로 사용하지만 코틀린은 하나의 타입으로만 사용함 </li>
+<li>코틀린은 하나의 타입으로만 사용하기때문에 늘 객체로 타입을 받지않고, 케바케로 자바로 컴파일시 원시타입 으로 줄지 참조타입으로 줄지 구분 해서 반환하게됨. (컬렉션과 같은 제네릭을 사용할경우는 객체로 나머지는 원시타입으로 저장)</li>
+<li>코틀린에서는 오토박싱 처리 되는 부분이 불가능하다. 예를들면 Int형타입의 변수를 Long으로 변경하는것 처럼 자바에서는 되는 부분이 코틀린에서는 불가능하다. 이유는 타입안정성때문. 따라서 Int형타입을 Long으로 변경후 사용해야함.</li>
+</ul>
+<h3 id="Any-Any-최상위타입-Object"><a href="#Any-Any-최상위타입-Object" class="headerlink" title="Any,Any? : 최상위타입 (Object)"></a>Any,Any? : 최상위타입 (Object)</h3><ul>
+<li>Any는 자바에서 Object타입이라 생각하면 됨. </li>
+</ul>
+<h3 id="Unit타입-코틀린의-void"><a href="#Unit타입-코틀린의-void" class="headerlink" title="Unit타입 : 코틀린의 void"></a>Unit타입 : 코틀린의 void</h3><ul>
+<li>Unit타입은 자바의 void와 흡사한 기능을한다. </li>
+<li>Unit과 void는 뭔차이인가? Unit은 void와 달리 타입 인자로 사용가능. (제네릭파라미터를 반환하는 함수를 오버라이드하면서 반환타입으러 Unit을 쓸때 유용함. )</li>
+</ul>
+<figure class="highlight kotlin"><figcaption><span>Unit</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">Processor</span>&lt;<span class="type">T</span>&gt; </span>&#123;</span><br><span class="line">	<span class="function"><span class="keyword">fun</span> <span class="title">process</span><span class="params">()</span></span>:T</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">NoResultProcessor</span>: <span class="type">Processor</span>&lt;<span class="type">Unit</span>&gt; </span>&#123;</span><br><span class="line">	<span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">process</span><span class="params">()</span></span> &#123;</span><br><span class="line">		<span class="comment">// process code </span></span><br><span class="line">		<span class="comment">// Unit이기때문에 return 없음. </span></span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="Nothing-타입-이-함수는-결코-정상적으로-끝나지-않는다"><a href="#Nothing-타입-이-함수는-결코-정상적으로-끝나지-않는다" class="headerlink" title="Nothing 타입: 이 함수는 결코 정상적으로 끝나지 않는다.."></a>Nothing 타입: 이 함수는 결코 정상적으로 끝나지 않는다..</h3><ul>
+<li>Nothing은 기본적으로 아무것도 포함하지 않음. 따라서 Nothing은 함수의 반환타입이나 반환타입으로 쓰일 타입 파라미터로만 쓸수있음. </li>
+<li>Nothing을 반환하는 함수를 엘비스 연산자의 우항에 사용해서 전제조건을 검사할수있음. </li>
+</ul>
+<h2 id="컬렉션과-배열"><a href="#컬렉션과-배열" class="headerlink" title="컬렉션과 배열"></a>컬렉션과 배열</h2><h3 id="컬렉션"><a href="#컬렉션" class="headerlink" title="컬렉션"></a>컬렉션</h3><ul>
+<li>코틀린에서 컬렉션은 읽기전용 컬렉션 과 변경가능한 컬렉션 두가지를 나눠서 사용가능</li>
+<li>코틀린에서는 가능하면 읽기전용 컬렉션을 디폴트로 사용하길 권장함. (일반적인 규약으로 지침함) 컬렉션을 변경해야할때만 변경가능한 버전을 사용하길 권장 </li>
+<li>읽기전용 컬렉션이 항상 스레드 안전하지는 않다. 따라서 다중 스레드 환경에서는 데이터를 다루는경우, 그 데잍러를 적절히 동기화 하거나 동시 접근을 허용하는 데이터 구조를 활용해야함. </li>
+</ul>
+<h3 id="배열"><a href="#배열" class="headerlink" title="배열"></a>배열</h3><ul>
+<li>배열상태에서 람다로 연산 수행 가능 (ex&gt; val squres = IntArray(5) {i -&gt; (i+1) * (i+1)})</li>
+<li>filter,map 등의 처리도 가능함. </li>
+<li>배열에도 똑같이 확장함수를 사용할수잇다. 다만 이런 함수가 반환하는 값은 배열이 아니라 리스트로 변환됨. </li>
+<li>원시타입 배열 (int/long등) 도 제공함 </li>
+<li>코들린의 Array는 자바 배열로 컴파일됨 </li>
+</ul>
+
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/2021/08/05/kotlin-basic-4/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                Comment and share
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
                             href="/2021/07/24/kotlin-basic-3/"
                             aria-label=": kotlin-basic-3"
                         >
@@ -1465,105 +1607,6 @@
                         <p>
                             <a
                                 href="/2021/05/20/jpa-obj-query-3/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                Comment and share
-                            </a>
-                        </p>
-                    
-                </div>
-            
-        </div>
-        
-    </article>
-    
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/2021/05/08/java8-chaptor2/"
-                            aria-label=": java8-chaptor2"
-                        >
-                            java8-chaptor2
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time datetime="2021-05-08T08:18:24+00:00">
-	
-		    May 08, 2021
-    	
-    </time>
-    
-        <span>in </span>
-        
-    <a class="category-link" href="/categories/Java8InAction/">Java8InAction</a>, <a class="category-link" href="/categories/Study/">Study</a>
-
-
-    
-</div>
-
-            </div>
-            
-                <div class="postShorten-content">
-                    <h1 id="Chapter-2-동작파라미터화-코드-전달하기"><a href="#Chapter-2-동작파라미터화-코드-전달하기" class="headerlink" title="Chapter 2. 동작파라미터화 코드 전달하기"></a>Chapter 2. 동작파라미터화 코드 전달하기</h1><h2 id="목차"><a href="#목차" class="headerlink" title="목차"></a>목차</h2><p><a href="#1.%EB%B3%80%ED%99%94%ED%95%98%EB%8A%94-%EC%9A%94%EA%B5%AC%EC%82%AC%ED%95%AD%EC%97%90-%EB%8C%80%EC%9D%91">1.변화하는 요구사항에 대응</a><br><a href="#2.%EB%8F%99%EC%9E%91%ED%8C%8C%EB%9D%BC%EB%AF%B8%ED%84%B0%ED%99%94">2.동작파라미터화</a><br><a href="#3.%EC%9D%B5%EB%AA%85%ED%81%B4%EB%9E%98%EC%8A%A4">3.익명클래스</a><br><a href="#4.%EB%9E%8C%EB%8B%A4-%ED%91%9C%ED%98%84%EC%8B%9D-%EB%AF%B8%EB%A6%AC%EB%B3%B4%EA%B8%B0">4.람다 표현식 미리보기</a><br><a href="#5.%EC%8B%A4%EC%A0%84%EC%98%88%EC%A0%9C:-Comparator,Runnable,GUI">5.실전예제: Comparator,Runnable,GUI</a></p>
-<hr>
-<h2 id="1-변화하는-요구사항에-대응"><a href="#1-변화하는-요구사항에-대응" class="headerlink" title="1.변화하는 요구사항에 대응"></a>1.변화하는 요구사항에 대응</h2><ul>
-<li>우리가 어떤 상황에서 일을 하든 소비자 요구사항은 항상 바뀐다. 변화하는 요구사항은 소프트웨어 엔지니어링에서 피할수 없는 문제다. </li>
-<li>동작 파라미터화(behavior parameterization) 을 활용하면 자주 바뀌는 요구사항에 효과적으로 대응 할수 있다. </li>
-<li>동작 파라미터란? 아직은 어떻게 실행할 것인지 결정하지 않은 코드 블록을 의미함. 이 코드 블록은 나중에 프로그램에서 호출한다. 즉, 코드블록의 실행은 나중으로 미뤄진다. </li>
-</ul>
-<h3 id="1-1-첫번째시도-녹색사과-필터링"><a href="#1-1-첫번째시도-녹색사과-필터링" class="headerlink" title="1-1. 첫번째시도:녹색사과 필터링"></a>1-1. 첫번째시도:녹색사과 필터링</h3><figure class="highlight java"><figcaption><span>filterGreenApples</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"> </span><br><span class="line"><span class="class"><span class="keyword">enum</span> <span class="title">Color</span> </span>&#123; RED, GREEN &#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> List&lt;Apple&gt; <span class="title">filterGreenApples</span><span class="params">(List&lt;Apple&gt; inventory)</span> </span>&#123;</span><br><span class="line">    List&lt;Apple&gt; result = <span class="keyword">new</span> ArrayList&lt;&gt;();                          <span class="number">1.</span>사과 누적리스트</span><br><span class="line">    <span class="keyword">for</span>(Apple apple: inventory)&#123;</span><br><span class="line">        <span class="keyword">if</span>( GREEN.equals(apple.getColor() ) &#123;                        <span class="number">2.</span>녹색사과 필터 </span><br><span class="line">            result.add(apple);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> result;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h4 id="1-2-두번째시도-색을-파라미터화"><a href="#1-2-두번째시도-색을-파라미터화" class="headerlink" title="1-2. 두번째시도:색을 파라미터화"></a>1-2. 두번째시도:색을 파라미터화</h4><figure class="highlight java"><figcaption><span>filterGreenApples</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"> </span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> List&lt;Apple&gt; <span class="title">filterApplesByColor</span><span class="params">(List&lt;Apple&gt; inventory,</span></span></span><br><span class="line"><span class="function"><span class="params">Color color)</span> </span>&#123;</span><br><span class="line">    List&lt;Apple&gt; result = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">    <span class="keyword">for</span> (Apple apple: inventory) &#123;</span><br><span class="line">        <span class="keyword">if</span> ( apple.getColor().equals(color) ) &#123;</span><br><span class="line">            result.add(apple);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> result;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">List&lt;Apple&gt; greenApples = filterApplesByColor(inventory, GREEN);</span><br><span class="line">List&lt;Apple&gt; redApples = filterApplesByColor(inventory, RED);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 농부의 다양한 요구사항을 들어보니 색과 마찬가지로 앞으로 무게의 기준도 얼마든지 바뀔수있다는걸 알게됫음.</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> List&lt;Apple&gt; <span class="title">filterApplesByWeight</span><span class="params">(List&lt;Apple&gt; inventory,</span></span></span><br><span class="line"><span class="function"><span class="params"><span class="keyword">int</span> weight)</span> </span>&#123;</span><br><span class="line">    List&lt;Apple&gt; result = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">    For (Apple apple: inventory)&#123;</span><br><span class="line">        <span class="keyword">if</span> ( apple.getWeight() &gt; weight ) &#123;</span><br><span class="line">            result.add(apple);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> result;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>주로 내가 현업에서 개발하던 스타일이며 자주 보던 스타일이다. 코드 자체가 저렇게 필터링 되는 조건만 달라지고 나머지는 거의 동일한 로직으로 처리되는 로직들을 종종 볼수있었다. 그렇다보니 최악의 코드이며 가장 더러운 방식까지 내려가던일도 진짜 가끔있었다. 세번째 시도를 한번 보자.</p>
-<h4 id="1-3-세번째-시도-가능한-모든-속성으로-필터링"><a href="#1-3-세번째-시도-가능한-모든-속성으로-필터링" class="headerlink" title="1-3. 세번째 시도: 가능한 모든 속성으로 필터링"></a>1-3. 세번째 시도: 가능한 모든 속성으로 필터링</h4><figure class="highlight java"><figcaption><span>filterApples</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"> </span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> List&lt;Apple&gt; <span class="title">filterApples</span><span class="params">(List&lt;Apple&gt; inventory, Color color,</span></span></span><br><span class="line"><span class="function"><span class="params">                                       <span class="keyword">int</span> weight, <span class="keyword">boolean</span> flag)</span> </span>&#123;</span><br><span class="line">    List&lt;Apple&gt; result = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">    <span class="keyword">for</span> (Apple apple: inventory) &#123;</span><br><span class="line">        <span class="keyword">if</span> ( (flag &amp;&amp; apple.getColor().equals(color)) ||</span><br><span class="line">             (!flag &amp;&amp; apple.getWeight() &gt; weight) )&#123;          <span class="number">1.</span> 정말 더럽다. 코드가..-_-; flag의 용도는 대체 뭐임? </span><br><span class="line">            result.add(apple);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> result;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>위 코드를 보자하니, 정말 답이없다. 우선 flag의 용도는 뭘까? 하나의 공통 코드로 만들어보려다가 오히려 똥 만들어놨다. 부끄럽지만 나도 저렇게 짜려고 했던적이 있던것 같다. 이제부터 동작 파라미터화를 하는 방법에 대해서 확인해보자! </p>
-<hr>
-<h2 id="2-동작파라미터화"><a href="#2-동작파라미터화" class="headerlink" title="2.동작파라미터화"></a>2.동작파라미터화</h2><h3 id="2-1-네번째시도-추상적조건으로-필터링"><a href="#2-1-네번째시도-추상적조건으로-필터링" class="headerlink" title="2-1. 네번째시도: 추상적조건으로 필터링"></a>2-1. 네번째시도: 추상적조건으로 필터링</h3><figure class="highlight java"><figcaption><span>predicate</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"> </span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">ApplePredicate</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">boolean</span> <span class="title">test</span> <span class="params">(Apple apple)</span></span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">AppleHeavyWeightPredicate</span> <span class="keyword">implements</span> <span class="title">ApplePredicate</span> </span>&#123;   <span class="number">1.</span> 무게 <span class="number">150</span>이상</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">test</span><span class="params">(Apple apple)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> apple.getWeight() &gt; <span class="number">150</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">AppleGreenColorPredicate</span> <span class="keyword">implements</span> <span class="title">ApplePredicate</span> </span>&#123;    <span class="number">2.</span> 녹색사과만 </span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">test</span><span class="params">(Apple apple)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> GREEN.equals(apple.getColor());</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">AppleRedAndHeavyPredicate</span> <span class="keyword">implements</span> <span class="title">ApplePredicate</span> </span>&#123;</span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">test</span><span class="params">(Apple apple)</span></span>&#123;</span><br><span class="line">                <span class="keyword">return</span> RED.equals(apple.getColor())</span><br><span class="line">                       &amp;&amp; apple.getWeight() &gt; <span class="number">150</span>;</span><br><span class="line">        &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> List&lt;Apple&gt; <span class="title">filterApples</span><span class="params">(List&lt;Apple&gt; inventory,</span></span></span><br><span class="line"><span class="function"><span class="params">                                       ApplePredicate p)</span> </span>&#123;</span><br><span class="line">    List&lt;Apple&gt; result = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">    <span class="keyword">for</span>(Apple apple: inventory) &#123;</span><br><span class="line">        <span class="keyword">if</span>(p.test(apple)) &#123;                       <span class="number">1.</span> predicate객체로 사과 검사 조건 캡슐화</span><br><span class="line">            result.add(apple);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> result;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">List&lt;Apple&gt; redAndHeavyApples =</span><br><span class="line">    filterApples(inventory, <span class="keyword">new</span> AppleRedAndHeavyPredicate());</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p><img src="/images/java8/java-1.png" alt="사과를 선택하는 다양한 전략"></p>
-<p>위 그림처럼 전략패턴을 활용해서 사과의 필터조건을 결정하도록 개발하게되었다. 이렇게되면 각 구체 클래스에서 정의한 조건을 ApplePredicate 에 파라미터화 시키면 된다. 확실히 더러웠던 3번째시도 보다는 아주 스마트하고 깔끔해졌다. 역시 이래서 디자인패턴을 활용해야하나 보다. </p>
-<hr>
-<h2 id="3-익명클래스"><a href="#3-익명클래스" class="headerlink" title="3.익명클래스"></a>3.익명클래스</h2><ul>
-<li>익명 클래스는 자바의 지역클래스(블록 내부에 설정된 클래스)와 비슷한개념이다.</li>
-<li>익명 클래스를 이용하면 클래스 선언과 인스턴스화를 동시에 할 수 있다.</li>
-</ul>
-<h3 id="3-1-다섯번째-시도-익명클래스-사용"><a href="#3-1-다섯번째-시도-익명클래스-사용" class="headerlink" title="3-1. 다섯번째 시도: 익명클래스 사용"></a>3-1. 다섯번째 시도: 익명클래스 사용</h3><figure class="highlight java"><figcaption><span>filterApples</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"> </span><br><span class="line">List&lt;Apple&gt; redApples = filterApples(inventory, <span class="keyword">new</span> ApplePredicate() &#123;     <span class="number">1.</span>메서드를 파라미터화 시켰음. </span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">test</span><span class="params">(Apple apple)</span></span>&#123;</span><br><span class="line">        <span class="keyword">return</span> RED.equals(apple.getColor());</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
-
-<p>위 처럼 메서드를 파라미터화 시켜서 익명클래스를 적용은 시켰지만 여전히 빨간사과를 필터링하는 조건이 이외에 코드들이 너무 장황하다. 이런 익명클래스는 람다식을 통해 코드량을 단축시킬수있다. </p>
-<hr>
-<h2 id="4-람다-표현식-미리보기"><a href="#4-람다-표현식-미리보기" class="headerlink" title="4.람다 표현식 미리보기"></a>4.람다 표현식 미리보기</h2><h3 id="4-1-여섯번째-시도-람다-표현식-사용"><a href="#4-1-여섯번째-시도-람다-표현식-사용" class="headerlink" title="4-1. 여섯번째 시도: 람다 표현식 사용"></a>4-1. 여섯번째 시도: 람다 표현식 사용</h3><figure class="highlight java"><figcaption><span>filterApples</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"> </span><br><span class="line">List&lt;Apple&gt; result =</span><br><span class="line">  filterApples(inventory, (Apple apple) -&gt; RED.equals(apple.getColor()));</span><br></pre></td></tr></table></figure>
-
-<p>이렇게 람다 표현식을 사용하면 코드를 더 심플하게 작성이 가능하다. </p>
-<h3 id="4-2-일곱번째-시도-리스트형식-추상화"><a href="#4-2-일곱번째-시도-리스트형식-추상화" class="headerlink" title="4-2. 일곱번째 시도: 리스트형식 추상화"></a>4-2. 일곱번째 시도: 리스트형식 추상화</h3><figure class="highlight java"><figcaption><span>filterApples:generic</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"> </span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">Predicate</span>&lt;<span class="title">T</span>&gt; </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">boolean</span> <span class="title">test</span><span class="params">(T t)</span></span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> &lt;T&gt; <span class="function">List&lt;T&gt; <span class="title">filter</span><span class="params">(List&lt;T&gt; list, Predicate&lt;T&gt; p)</span> </span>&#123;     <span class="number">1</span></span><br><span class="line">    List&lt;T&gt; result = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">    <span class="keyword">for</span>(T e: list) &#123;</span><br><span class="line">        <span class="keyword">if</span>(p.test(e)) &#123;</span><br><span class="line">            result.add(e);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> result;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>앞으로 이렇게 추상화 시켜서, 공통 모듈로 만드는 습관이 필요하다. 모든 개발할때 저런 추상화를 늘 고려해서 개발하는 경지에 이르렀으면 좋겠다. </p>
-<hr>
-<h2 id="5-실전예제-Comparator-Runnable-GUI"><a href="#5-실전예제-Comparator-Runnable-GUI" class="headerlink" title="5.실전예제: Comparator,Runnable,GUI"></a>5.실전예제: Comparator,Runnable,GUI</h2><h3 id="5-1-Comparator로-정렬하기"><a href="#5-1-Comparator로-정렬하기" class="headerlink" title="5-1. Comparator로 정렬하기"></a>5-1. Comparator로 정렬하기</h3><figure class="highlight java"><figcaption><span>Comparator정렬</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"> </span><br><span class="line">inventory.sort(<span class="keyword">new</span> Comparator&lt;Apple&gt;() &#123;</span><br><span class="line">		<span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">compare</span><span class="params">(Apple a1, Apple a2)</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> a1.getWeight().compareTo(a2.getWeight());</span><br><span class="line">	&#125;</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">inventory.sort(</span><br><span class="line">  (Apple a1, Apple a2) -&gt; a1.getWeight().compareTo(a2.getWeight()));</span><br><span class="line">  </span><br></pre></td></tr></table></figure>
-
-
-<h3 id="5-2-Runnable"><a href="#5-2-Runnable" class="headerlink" title="5-2. Runnable"></a>5-2. Runnable</h3><figure class="highlight java"><figcaption><span>Runnable</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"> </span><br><span class="line"><span class="comment">// java.lang.Runnable 인터페이스</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">Runnable</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">run</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//익명클래스 표현</span></span><br><span class="line">Thread t = <span class="keyword">new</span> Thread(<span class="keyword">new</span> Runnable() &#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;Hello world&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"><span class="comment">//람다식표현</span></span><br><span class="line">Thread t = <span class="keyword">new</span> Thread(() -&gt; System.out.println(<span class="string">&quot;Hello world&quot;</span>));</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">// java.util.concurrent.Callable</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">Callable</span>&lt;<span class="title">V</span>&gt; </span>&#123;</span><br><span class="line">    <span class="function">V <span class="title">call</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">ExecutorService executorService = Executors.newCachedThreadPool();</span><br><span class="line">Future&lt;String&gt; threadName = executorService.submit(<span class="keyword">new</span> Callable&lt;String&gt;() &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">call</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> Thread.currentThread().getName();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">Future&lt;String&gt; threadName = executorService.submit(</span><br><span class="line">                     () -&gt; Thread.currentThread().getName());</span><br></pre></td></tr></table></figure>
-
-
-<h3 id="5-3-GUI-이벤트-처리하기"><a href="#5-3-GUI-이벤트-처리하기" class="headerlink" title="5-3. GUI 이벤트 처리하기"></a>5-3. GUI 이벤트 처리하기</h3><figure class="highlight java"><figcaption><span>GUI</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"> </span><br><span class="line">Button button = <span class="keyword">new</span> Button(<span class="string">&quot;Send&quot;</span>);</span><br><span class="line">button.setOnAction(<span class="keyword">new</span> EventHandler&lt;ActionEvent&gt;() &#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">handle</span><span class="params">(ActionEvent event)</span> </span>&#123;</span><br><span class="line">        label.setText(<span class="string">&quot;Sent!!&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">button.setOnAction((ActionEvent event) -&gt; label.setText(<span class="string">&quot;Sent!!&quot;</span>));</span><br><span class="line">  </span><br></pre></td></tr></table></figure>
-                    
-                        
-
-
-                    
-                    
-                        <p>
-                            <a
-                                href="/2021/05/08/java8-chaptor2/#post-footer"
                                 class="postShorten-excerpt_link link"
                                 aria-label=""
                             >

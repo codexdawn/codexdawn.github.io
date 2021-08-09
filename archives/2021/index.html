@@ -247,6 +247,148 @@
                     
                         <a
                             class="link-unstyled"
+                            href="/2021/08/05/kotlin-basic-4/"
+                            aria-label=": kotlin-basic-4"
+                        >
+                            kotlin-basic-4
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2021-08-05T07:59:46+00:00">
+	
+		    Aug 05, 2021
+    	
+    </time>
+    
+        <span>in </span>
+        
+    <a class="category-link" href="/categories/KotlinInAction/">KotlinInAction</a>, <a class="category-link" href="/categories/Study/">Study</a>, <a class="category-link" href="/categories/%EC%BD%94%ED%8B%80%EB%A6%B0%EB%AC%B8%EB%B2%95-%EA%B8%B0%EC%B4%88/">코틀린문법&기초</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <h1 id="코틀린-타입-시스템"><a href="#코틀린-타입-시스템" class="headerlink" title="코틀린 타입 시스템"></a>코틀린 타입 시스템</h1><blockquote><ul>
+<li>null 이 될수있는 타입과 null을 처리하는 구문의 문법 </li>
+<li>코틀린 원시 타입 소개와 자바 타입과 코틀린 원시 타입의 관계 </li>
+<li>코틀린 컬렉션 소개와 자바 컬렉션과 코틀린 컬렉션의 관계</li>
+</ul>
+</blockquote>
+
+<h2 id="Null-가능성"><a href="#Null-가능성" class="headerlink" title="Null 가능성"></a>Null 가능성</h2><h3 id="Null이-될수있는-타입"><a href="#Null이-될수있는-타입" class="headerlink" title="Null이 될수있는 타입"></a>Null이 될수있는 타입</h3><ul>
+<li>기본적으로 모든 타입은 null 허용이 안됨.</li>
+<li>타입에 null을 허용하려면 ? 를 타입뒤에 붙여야함. (ex&gt; val x:String? = null) </li>
+</ul>
+<h3 id="안전한-호출-연산자"><a href="#안전한-호출-연산자" class="headerlink" title="안전한 호출 연산자: ?"></a>안전한 호출 연산자: ?</h3><ul>
+<li>?. 연산자는 null검사와 메소드 호출을 한번의 연산으로 수행한다. (ex&gt; s?.toUpperCase() =&gt; if(s != null) s.toUpperCase() else null)</li>
+<li>값이 존재하면 값을 리턴하고, 없으면 Null을 리턴해준다. </li>
+<li>?. 연산자를 사용하면 반환타입은 ?로 반환해야함. (ex&gt; val allCaps: String? = s?.toUpperCase())</li>
+</ul>
+<h3 id="엘비스-연산자"><a href="#엘비스-연산자" class="headerlink" title="엘비스 연산자 : ?:"></a>엘비스 연산자 : ?:</h3><ul>
+<li>?:(엘비스연산자)는 null대신 사용할 디폴트값을 지정할때 편리하게 사용하는 연산자</li>
+</ul>
+<figure class="highlight kotlin"><figcaption><span>evis</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">foo</span><span class="params">(s:<span class="type">String</span>?)</span></span> &#123;</span><br><span class="line">	<span class="keyword">val</span> t:String = s ?: <span class="string">&quot;&quot;</span> </span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">strLenSafe</span><span class="params">(s:<span class="type">String</span>?)</span></span>: <span class="built_in">Int</span> = s?.length ?: <span class="number">0</span></span><br></pre></td></tr></table></figure>
+
+
+<figure class="highlight kotlin"><figcaption><span>evis-throw</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Address</span></span>(<span class="keyword">val</span> streetAddress:String, <span class="keyword">val</span> zipCode:<span class="built_in">Int</span>, <span class="keyword">val</span> city:String, <span class="keyword">val</span> country:String) </span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Company</span></span>(<span class="keyword">val</span> name:String, <span class="keyword">val</span> address:Address?)</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Person</span></span>(<span class="keyword">val</span> name:String, <span class="keyword">val</span> company:Company?)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">printShippingLabel</span><span class="params">(person:<span class="type">Person</span>)</span></span> &#123;</span><br><span class="line">	<span class="keyword">val</span> address = person.company?.address ?: <span class="keyword">throw</span> IlleagalArgumentException(<span class="string">&quot;No Address&quot;</span>)</span><br><span class="line">	with (address) &#123;</span><br><span class="line">		println(streetAddress)</span><br><span class="line">		println(<span class="string">&quot;<span class="variable">$zipcode</span> <span class="variable">$city</span>, <span class="variable">$country</span>&quot;</span>)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&gt;&gt; <span class="keyword">val</span> address = Address(<span class="string">&quot;ElvisStreet&quot;</span>, <span class="number">110</span>, <span class="string">&quot;Sanfrancico&quot;</span>, <span class="string">&quot;USA&quot;</span>)</span><br><span class="line">&gt;&gt; <span class="keyword">val</span> company = Company(<span class="string">&quot;Algo&quot;</span>, address)</span><br><span class="line">&gt;&gt; <span class="keyword">val</span> person = Person(<span class="string">&quot;Dawn&quot;</span>, company)</span><br><span class="line"></span><br><span class="line">&gt;&gt; printShippingLabel(person)</span><br><span class="line">&gt;&gt;&gt; ElvisStreet </span><br><span class="line">&gt;&gt;&gt; <span class="number">110</span> Sanfrancico, USA</span><br><span class="line"></span><br><span class="line">&gt;&gt;&gt; printShippingLabel(Person(<span class="string">&quot;Zero&quot;</span>,<span class="literal">null</span>))</span><br><span class="line">&gt;&gt;&gt; java.lang.IlleagalArgumentException: No Adress </span><br></pre></td></tr></table></figure>
+
+<h3 id="안전한-캐스트-as"><a href="#안전한-캐스트-as" class="headerlink" title="안전한 캐스트: as?"></a>안전한 캐스트: as?</h3><ul>
+<li>as는 타입캐스트를 시켜주는 연산자이다. as?는 ?연산자 처럼 타입이 존재하지 않으면 null을 리턴해줌. </li>
+<li>val otherPerson = o as? Person ?: return false</li>
+</ul>
+<h3 id="Null-아님을-단언"><a href="#Null-아님을-단언" class="headerlink" title="Null 아님을 단언: !!"></a>Null 아님을 단언: !!</h3><ul>
+<li>해당 타입 뒤에 !! 연산자를 붙이면 null이 들어오면 안된다는 소리다. 들어오면 NullPointerException 예외발생 </li>
+<li>val sNotNull:String = s!! //null 들어오면 예외발생 </li>
+<li>!! 연산자를 한줄에 여러 단언문을 사용하는 부분은 피하라 (어디서 예외가 발생했는지 알길이 없다.) (ex&gt; person.company!!.address!!.country -&gt; 이런거하면 어디서 null예외가 떨어졌는지 모른다.)</li>
+</ul>
+<h3 id="let-함수"><a href="#let-함수" class="headerlink" title="let 함수"></a>let 함수</h3><ul>
+<li>let 은 해당 값이 null이아니면 수행, 아니면 미수행 처리해주는 역할을 한다.</li>
+<li>여러값이 null인지를 검사해야한다면, let호출을 중첩시킬수있다. 하지만 코드가 클린하지 못하기때문에, 그럴땐 if를 사용해서 모든값을 한꺼번에 검사하는편이 좋다. </li>
+</ul>
+<figure class="highlight kotlin"><figcaption><span>let</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">sendToEmail</span><span class="params">(email: <span class="type">String</span>)</span></span> &#123;</span><br><span class="line">	println(<span class="string">&quot;Sending email to <span class="variable">$email</span>&quot;</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&gt;&gt; <span class="keyword">var</span> email: String? = <span class="string">&quot;yolo@ex.com&quot;</span></span><br><span class="line">&gt;&gt; email?.let &#123; sendToEmail(it)&#125;</span><br><span class="line">&gt;&gt;&gt; Sending email to <span class="symbol">yolo@</span>ex.com</span><br><span class="line"></span><br><span class="line">&gt;&gt; email = <span class="literal">null</span></span><br><span class="line">&gt;&gt; email?.let&#123;sendToEmail(it)&#125;</span><br><span class="line">&gt;&gt;&gt; 아무실행없음</span><br><span class="line"></span><br><span class="line"><span class="comment">//let 사용안한예 </span></span><br><span class="line"><span class="keyword">val</span> person:Person? = getTheBestPersonInTheWorld()</span><br><span class="line"><span class="keyword">if</span>(persion != <span class="literal">null</span>) sendToEmail(person.email)</span><br><span class="line"></span><br><span class="line"><span class="comment">//let 사용예</span></span><br><span class="line">getTheBestPersonInTheWorld()?.let&#123;sendEmailTo(it.email)&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//위함수가 null을 반환한다면? 아무일도 일어나지 않는다.</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="나중에-초기화할-프로퍼티-lateinit"><a href="#나중에-초기화할-프로퍼티-lateinit" class="headerlink" title="나중에 초기화할 프로퍼티 : lateinit"></a>나중에 초기화할 프로퍼티 : lateinit</h3><ul>
+<li>lateinit을 사용시 반드시 var로 사용해야함. val로 사용시 final 필드로 컴파일되어 반드시 초기값을 요구하게됨. </li>
+<li>프로퍼티를 초기화하기전에 lateinit변수에 접근하면 lateinit property myService has not been initialized 라는 예외가 발생함 </li>
+<li>lateinit은 의존관계주입 (DI) 프레임워크와 함께 사용하는 경우가 많음. </li>
+</ul>
+<figure class="highlight kotlin"><figcaption><span>lateinit</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MyService</span> </span>&#123;</span><br><span class="line">	<span class="function"><span class="keyword">fun</span> <span class="title">performAction</span><span class="params">()</span></span>: String = <span class="string">&quot;foo&quot;</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MyTest</span> </span>&#123;</span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">lateinit</span> <span class="keyword">var</span> myService:MyService</span><br><span class="line">	</span><br><span class="line">	<span class="meta">@Before</span> <span class="function"><span class="keyword">fun</span> <span class="title">setUp</span><span class="params">()</span></span> &#123;</span><br><span class="line">		myService = MyService()</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="meta">@Test</span> <span class="function"><span class="keyword">fun</span> <span class="title">testAction</span><span class="params">()</span></span> &#123;</span><br><span class="line">		Assert.assertEquals(<span class="string">&quot;foo&quot;</span>, myService.performAction())</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="null이-될수있는-타입-확장"><a href="#null이-될수있는-타입-확장" class="headerlink" title="null이 될수있는 타입 확장"></a>null이 될수있는 타입 확장</h3><ul>
+<li>null이 될수있는 확장함수는 안전한 호출(? 연산자) 없이 호출 가능 </li>
+<li>null이 허용된 변수에 대한 안전한 호출 없이 let 을 호출하면 람다의 인자는 null이 될수있는 타입으로 추론됨. 따라서 안전한 호출을 위해 ?연산자를 반드시 사용해야함. </li>
+</ul>
+<h3 id="타입-파라미터의-null가능성"><a href="#타입-파라미터의-null가능성" class="headerlink" title="타입 파라미터의 null가능성"></a>타입 파라미터의 null가능성</h3><ul>
+<li>제네릭타입 (타입 파라미터) 를 사용하게 되면 타입명끝에 ?가 없더라도 T가 null이 될수 있는 타입이다. </li>
+</ul>
+<figure class="highlight kotlin"><figcaption><span>generic</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="type">&lt;T&gt;</span> <span class="title">printHashCode</span><span class="params">(t:<span class="type">T</span>)</span></span> &#123;</span><br><span class="line">	println(t?.hashCode()) <span class="comment">//타입 파라미터 t는 무조건 안전한 호출을 통해서만 가져와야함.T의 타입은 Any?로 반드시 추론됨. </span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&gt;&gt; printHashCode(<span class="literal">null</span>)</span><br><span class="line">&gt;&gt;&gt; <span class="literal">null</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="코틀린의-원시타입"><a href="#코틀린의-원시타입" class="headerlink" title="코틀린의 원시타입"></a>코틀린의 원시타입</h2><h3 id="원시타입-Int-Boolean-등"><a href="#원시타입-Int-Boolean-등" class="headerlink" title="원시타입 : Int, Boolean 등.."></a>원시타입 : Int, Boolean 등..</h3><ul>
+<li>자바에서는 원시타입 , 참조타입으로 사용하지만 코틀린은 하나의 타입으로만 사용함 </li>
+<li>코틀린은 하나의 타입으로만 사용하기때문에 늘 객체로 타입을 받지않고, 케바케로 자바로 컴파일시 원시타입 으로 줄지 참조타입으로 줄지 구분 해서 반환하게됨. (컬렉션과 같은 제네릭을 사용할경우는 객체로 나머지는 원시타입으로 저장)</li>
+<li>코틀린에서는 오토박싱 처리 되는 부분이 불가능하다. 예를들면 Int형타입의 변수를 Long으로 변경하는것 처럼 자바에서는 되는 부분이 코틀린에서는 불가능하다. 이유는 타입안정성때문. 따라서 Int형타입을 Long으로 변경후 사용해야함.</li>
+</ul>
+<h3 id="Any-Any-최상위타입-Object"><a href="#Any-Any-최상위타입-Object" class="headerlink" title="Any,Any? : 최상위타입 (Object)"></a>Any,Any? : 최상위타입 (Object)</h3><ul>
+<li>Any는 자바에서 Object타입이라 생각하면 됨. </li>
+</ul>
+<h3 id="Unit타입-코틀린의-void"><a href="#Unit타입-코틀린의-void" class="headerlink" title="Unit타입 : 코틀린의 void"></a>Unit타입 : 코틀린의 void</h3><ul>
+<li>Unit타입은 자바의 void와 흡사한 기능을한다. </li>
+<li>Unit과 void는 뭔차이인가? Unit은 void와 달리 타입 인자로 사용가능. (제네릭파라미터를 반환하는 함수를 오버라이드하면서 반환타입으러 Unit을 쓸때 유용함. )</li>
+</ul>
+<figure class="highlight kotlin"><figcaption><span>Unit</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">Processor</span>&lt;<span class="type">T</span>&gt; </span>&#123;</span><br><span class="line">	<span class="function"><span class="keyword">fun</span> <span class="title">process</span><span class="params">()</span></span>:T</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">NoResultProcessor</span>: <span class="type">Processor</span>&lt;<span class="type">Unit</span>&gt; </span>&#123;</span><br><span class="line">	<span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">process</span><span class="params">()</span></span> &#123;</span><br><span class="line">		<span class="comment">// process code </span></span><br><span class="line">		<span class="comment">// Unit이기때문에 return 없음. </span></span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="Nothing-타입-이-함수는-결코-정상적으로-끝나지-않는다"><a href="#Nothing-타입-이-함수는-결코-정상적으로-끝나지-않는다" class="headerlink" title="Nothing 타입: 이 함수는 결코 정상적으로 끝나지 않는다.."></a>Nothing 타입: 이 함수는 결코 정상적으로 끝나지 않는다..</h3><ul>
+<li>Nothing은 기본적으로 아무것도 포함하지 않음. 따라서 Nothing은 함수의 반환타입이나 반환타입으로 쓰일 타입 파라미터로만 쓸수있음. </li>
+<li>Nothing을 반환하는 함수를 엘비스 연산자의 우항에 사용해서 전제조건을 검사할수있음. </li>
+</ul>
+<h2 id="컬렉션과-배열"><a href="#컬렉션과-배열" class="headerlink" title="컬렉션과 배열"></a>컬렉션과 배열</h2><h3 id="컬렉션"><a href="#컬렉션" class="headerlink" title="컬렉션"></a>컬렉션</h3><ul>
+<li>코틀린에서 컬렉션은 읽기전용 컬렉션 과 변경가능한 컬렉션 두가지를 나눠서 사용가능</li>
+<li>코틀린에서는 가능하면 읽기전용 컬렉션을 디폴트로 사용하길 권장함. (일반적인 규약으로 지침함) 컬렉션을 변경해야할때만 변경가능한 버전을 사용하길 권장 </li>
+<li>읽기전용 컬렉션이 항상 스레드 안전하지는 않다. 따라서 다중 스레드 환경에서는 데이터를 다루는경우, 그 데잍러를 적절히 동기화 하거나 동시 접근을 허용하는 데이터 구조를 활용해야함. </li>
+</ul>
+<h3 id="배열"><a href="#배열" class="headerlink" title="배열"></a>배열</h3><ul>
+<li>배열상태에서 람다로 연산 수행 가능 (ex&gt; val squres = IntArray(5) {i -&gt; (i+1) * (i+1)})</li>
+<li>filter,map 등의 처리도 가능함. </li>
+<li>배열에도 똑같이 확장함수를 사용할수잇다. 다만 이런 함수가 반환하는 값은 배열이 아니라 리스트로 변환됨. </li>
+<li>원시타입 배열 (int/long등) 도 제공함 </li>
+<li>코들린의 Array는 자바 배열로 컴파일됨 </li>
+</ul>
+
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/2021/08/05/kotlin-basic-4/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                Comment and share
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
                             href="/2021/07/24/kotlin-basic-3/"
                             aria-label=": kotlin-basic-3"
                         >
@@ -1435,77 +1577,6 @@
                         <p>
                             <a
                                 href="/2021/06/05/jpa-webapp-persistence/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                Comment and share
-                            </a>
-                        </p>
-                    
-                </div>
-            
-        </div>
-        
-    </article>
-    
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/2021/06/02/jpa-query-custom-repository/"
-                            aria-label=": jpa-query-custom-repository"
-                        >
-                            jpa-query-custom-repository
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time datetime="2021-06-02T11:44:52+00:00">
-	
-		    Jun 02, 2021
-    	
-    </time>
-    
-        <span>in </span>
-        
-    <a class="category-link" href="/categories/QueryDSL/">QueryDSL</a>, <a class="category-link" href="/categories/Spring-Boot/">Spring Boot</a>, <a class="category-link" href="/categories/Spring-Data-JPA/">Spring Data JPA</a>, <a class="category-link" href="/categories/%EC%9C%A0%EB%A0%88%EC%B9%B4or%EC%82%BD%EC%A7%88/">유레카or삽질</a>
-
-
-    
-</div>
-
-            </div>
-            
-                <div class="postShorten-content">
-                    <h1 id="QueryDSL-삽질기-Custom-CustomImpl-Repository-설정-삽질"><a href="#QueryDSL-삽질기-Custom-CustomImpl-Repository-설정-삽질" class="headerlink" title="QueryDSL 삽질기! (Custom / CustomImpl Repository 설정 삽질)"></a>QueryDSL 삽질기! (Custom / CustomImpl Repository 설정 삽질)</h1><h2 id="사건의-발단"><a href="#사건의-발단" class="headerlink" title="사건의 발단"></a>사건의 발단</h2><p>오늘 근무하다가 동료가 QueryDSL관련 오류가 있다고해서 같이 확인하게되었는데, 결국 동료가 발견하게되었다.<br>사건의 발단은 QueryDSL과 Spring Data JPA를 같이 사용하기 위해서는 사용하는 interface/구체클래스에 Custom/CustomImpl 네이밍을 맞추는것을 국룰로 정해놨다. 근데 동료분께서 Impl쪽 구체클래스에 xxxxCustomsImpl로 s를 붙여넣고 말았다. 근데 문제는 쿼리가 의도한 쿼리가 안나가고 Spring Data JPA쿼리로 나가버리는것이었다. </p>
-<h2 id="원인"><a href="#원인" class="headerlink" title="원인"></a>원인</h2><ul>
-<li>Custom/CustomImpl은 Spring DATA JPA 네이밍 쿼리가 먹도록 설계되어있다. 그래서 국룰로 정하라는것이었다. </li>
-<li>네이밍이 안맞아서 interface의 정의한 쿼리 네이밍을 가져와서 쿼리로 작성한것으로 판단되었다. 근데 네이밍을 좀 이상하게 지어도 나가는것보면, 그냥 기본쿼리로 나가는것으로 확인되어진다. </li>
-</ul>
-<p><a target="_blank" rel="noopener" href="https://jojoldu.tistory.com/372">jojoldu JPA 정리</a><br><a target="_blank" rel="noopener" href="https://docs.spring.io/spring-data/jpa/docs/2.1.3.RELEASE/reference/html/#repositories.custom-implementations">Spring Data JPA 공식문서</a></p>
-<h2 id="해결방법"><a href="#해결방법" class="headerlink" title="해결방법"></a>해결방법</h2><ul>
-<li>절대로 QueryDSL 에서 Custom/CustomImpl의 클래스 네이밍은 오타 내지말자! (삽질의 시작이 될수 있음.)</li>
-</ul>
-<h2 id="정리"><a href="#정리" class="headerlink" title="정리"></a>정리</h2><ul>
-<li>Custom/CustomImpl 도 Spring Data JPA 네임드쿼리가 적용됨.(repository interface만 되는줄 알았음.)</li>
-<li>Custom/CustomImpl 의 클래스 네이밍은 절대로 오타내지말자! </li>
-<li>CustomImpl의 오타가 났음에도 불구하고 기본 조회 쿼리가 나간것 확인해보면 interface정의한 부분에서 메서드 네임을 인식한것으로 확인되어짐. (조금 이상하게 날려도 나가긴 나갔음. 하지만 아예 이상하게 날리면 Spring DATA Jpa에서 네임드 쿼리 인식이 안된다고 오류 밷어냄.)</li>
-</ul>
-
-                    
-                        
-
-
-                    
-                    
-                        <p>
-                            <a
-                                href="/2021/06/02/jpa-query-custom-repository/#post-footer"
                                 class="postShorten-excerpt_link link"
                                 aria-label=""
                             >
