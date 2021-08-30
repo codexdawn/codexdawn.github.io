@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="generator" content="codexdawn">
-    <title>Archives: 2021/8 - codexdawn</title>
+    <title>kotlin-basic-5 - codexdawn</title>
     <meta name="author" content="codexdawn">
     
     
@@ -15,13 +15,21 @@
             <link rel="alternate" type="application/atom+xml" title="RSS" href="/atom.xml">
         
     
-    <script type="application/ld+json">{}</script>
-    <meta property="og:type" content="blog">
-<meta property="og:title" content="codexdawn">
-<meta property="og:url" content="https://codexdawn.github.io/archives/2021/08/index.html">
+    <script type="application/ld+json">{"@context":"http://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"codexdawn","sameAs":["https://github.com/codexdawn","https://www.facebook.com/beherzt.dev","https://www.linkedin.com/in/sim-jisung-3048872a/","mailto:cloudkaiser@gmail.com"],"image":"https://www.gravatar.com/avatar/d97fd4b94c429915f1cb55eb27e7d4d9"},"articleBody":"연산자 오버로딩과 기타 관례산술 연산자 오버로딩이항 산술 연산 오버로딩\n연산자 오버로딩 할때는 반드시 operator 키워드를 붙여줘야함. \n연산자를 멤버함수로 만드는대신 확장함수로도 정의가능 \n오버로딩 가능한 산술연산자 -&gt; a * b =&gt; times , a / b =&gt; div , a % b =&gt; mod (1.1 부터 rem) , a + b =&gt; plus , a - b =&gt; minus \n연산자를 정의할때 두 피연산자는 같을 필요가 없다. \n연산자 함수의 반환타입이 꼭 두 피연산자 중 하나와 일치해야하는것도 아님 \n\n이항산술연산 오버로딩 예제12345678910111213141516171819202122232425262728data class Point(val x:Int, val y:Int) &#123;\toperator fun plus(other:Point) : Point &#123;\t\treturn Point(x + other.x, y + other.y)\t&#125;&#125;&gt;&gt; val p1 = Point(10,20)&gt;&gt; val p2 = Point(30,40)&gt;&gt; println(p1 + p2)&gt;&gt;&gt; Point(x=40,y=60)operator fun Point.times(scale:Double): Point &#123;\treturn Point((x * scale).toInt(), (y * scale).toInt())&#125;&gt;&gt; val p1 = Point(10,20)&gt;&gt; println(p1 * 1.5)&gt;&gt;&gt; Point(x=15,y=30)operator fun Char.times(count:Int): String &#123;\treturn toString().repeat(count)&#125;&gt;&gt; println(&#x27;a&#x27; * 3)&gt;&gt;&gt; aaa \n\n복합 대입 연산자 오버로딩복합대입연산자 오버로딩 예제123456789101112operator fun &lt;T&gt; MutableCollection&lt;T&gt;.plusAssign(element:T) &#123;\tthis.add(element)&#125;&gt;&gt; val list = arrayListOf(1,2)&gt;&gt; list += 3 // list 엘리먼트 추가 &gt;&gt; val newList = list + listOf(4,5) // 두 리스트를 합쳐서 새로운 리스트로 반환 &gt;&gt; println(list)&gt;&gt;&gt; [1,2,3]&gt;&gt; println(newList)&gt;&gt;&gt; [1,2,3,4,5]\n\n단항 연산자 오버로딩\n+a =&gt; unaryPlus, -a =&gt; unaryMinus, !a =&gt; not, ++a,a++ =&gt; inc, –a,a– =&gt; dec \n\n단항 연산자 오버로딩 예제123456789101112131415operator fun Point.unaryMinus(): Point &#123;\treturn Point(-x,-y)&#125;&gt;&gt; val p = Point(10,20)&gt;&gt; println(-p)&gt;&gt;&gt; Point(x= -10, y= -20)operator fun BigDecimal.inc() = this + BigDecimal.ONE&gt;&gt; var bd = BigDecimal.ZERO&gt;&gt; println(bd++)&gt;&gt;&gt; 0&gt;&gt; println(++bd)&gt;&gt;&gt; 2 \n\n비교 연산자 오버로딩동등성 연산자: equals\n코틀린에서 ==, != 연산자는 자바로 컴파일시 equals로 컴파일된다. \n코틀린의 ==, != 내부로직에서는 인자가 널인지 검사하므로 다른 연산과 달리 널이 될수있는 값에도 적용가능. \n코틀린에서의 ===는 자바의 ==와 동일하다 \n\n순서 연산자 : compareTo\n코틀린은 비교연산자(&lt;,&gt;,&gt;=,&lt;=)는 자바의 compareTo로 호출하여 컴파일함 \nequals와 마찬가지로 operator 변경자가 붙어있어서 하위 클래스의 오버라이딩 함수에 operator를 붙일필요는 없음 \n\n컬렉션과 범위에 대해 쓸 수 있는 관례인덱스로 원소에 접근: get 과 setPoint get / set 관례 구현1234567891011121314151617181920212223242526operator fun Point.get(index: Int): Int &#123;\treturn when(index) &#123;\t\t0 -&gt; x\t\t1 -&gt; y \t\telse -&gt; \t\t\tthrow IndexOutOfBoundsException(&quot;Invalid coordinnate $index&quot;)\t&#125;&#125;&gt;&gt; val p = Point(10,20);&gt;&gt; println(p[1])&gt;&gt;&gt; 20 operator fun MutablePoint.set(index:Int, value:Int) &#123;\twhen(index) &#123;\t\t0 -&gt; x = value \t\t1 -&gt; y = value\t\telse -&gt; \t\t    throw IndexOutOfBoundsException(&quot;Invalid coordinnate $index&quot;)\t&#125;&#125;&gt;&gt; val p = MutablePoint(10,20)&gt;&gt; p[1] = 42&gt;&gt;println(p)&gt;&gt;&gt; MutablePoint(x=10,y=42)\n\nin 관례in 관례 구현1234567891011data class Rectangle(val upperLeft:Point, val lowerRight:Point)operator fun Rectangle.contains(p: Point): Boolean &#123;\treturn p.x in upperLeft.x until lowerRight.x &amp;&amp; p.y in upperLeft.y until lowerRight.y &#125;&gt;&gt; val rect = Rectangle(Point(10,20), Point(50,50))&gt;&gt; println(Point(20,30) in rect)&gt;&gt;&gt; true &gt;&gt; println(Point(5,5) in rect)&gt;&gt;&gt; false \n\n\n열린범위는 끝값을 포함하지 않는 범위 닫힌범위는 끝값을 포함한 범위 \n10 until 20 은 10-19까지를 의미\n\nrangeTo 관례\n코틀린에서는 rangeTo는 ‘..’으로 이미 정의되어있음 (따로 operator로 개별구현 필요없음)\nrangeTo연산자는 다른 산술 연산자 보다 우선순위가 낮다. 하지만 혼선을 피하기 위해 괄호는 꼭 붙여주자 \nrangeTo는 forEach 호출가능함 (0..n).forEach{ println(it)}\n\nfor 루프를 위한 iterator 관례\n코틀린의 for루프는 범위검사 in 연산자 사용 하지만 for루프의 in절은 iterator를 호출해서 자바와 마찬가지로 hasNext, next 호출을 반복하는 식으로 변환된다. 하지만 코틀린에서는 이 또한 관례이므로 iterator 메소드를 확장 함수로 정의 할 수 있다. \n\n날짜범위에 대한 iterator구현123456789101112operator fun CloseRange&lt;LocalDate&gt;.iterator(): Iterator&lt;LocalDate&gt; = object: Iterator&lt;LocalDate&gt; &#123;\tvar current = start\toverride fun hasNext() = current &lt;= endInclusive \toverride fun next() = current.apply&#123;\t\tcurrent = plusDays(1)\t&#125; &#125;&gt;&gt; val newYear = LocalDate.ofYearDay(2017,1)&gt;&gt; val daysOff = newYear.minusDays(1)..newYear&gt;&gt; for (dayOff in daysOff) &#123;println(dayOff)&#125;&gt;&gt;&gt; 2016-12-31&gt;&gt;&gt; 2017-01-01\n\n구조 분해 선언과 component 함수\n구조 분해 선언은 복합적인 값을 분해해서 여러 다른 변수를 한꺼번에 초기화 할 수 있다. \n구조 분해 선언12345678910111213141516171819202122232425data class NameComponents(val name:String, val extension:String)fun splitFilename(fullName:String):NameComponents &#123;\tval result = fullName.split(&#x27;.&#x27;,limit=2)\treturn NameComponents(result[0],result[1])&#125;&gt;&gt; val (name,ext) = splitFilename(&quot;example.kt&quot;)&gt;&gt; println(name)&gt;&gt;&gt; example&gt;&gt; println(ext)&gt;&gt;&gt; kt //구조 분해 선언과 루프 fun printEntries(map: Map&lt;String,String&gt;) &#123;\tfor ((key,value) in map) &#123;\t\tprintln(&quot;$key -&gt; $value&quot;)\t&#125;&#125;&gt;&gt; val map = mapOf(&quot;Oracle&quot; to &quot;Java&quot;, &quot;JetBrains&quot; to &quot;Kotlin&quot;)&gt;&gt; printEntries(map)&gt;&gt;&gt; Oracle -&gt; Java &gt;&gt;&gt; JetBrains -&gt; Kotlin\n\n구조분해선언은 data클래스의 주 생성자에 들어있는 프로퍼티에 대해서 컴파일러가 자동으로 componentN 함수를 만들어준다. \n\n구조분해선언은 함수에서 여러값을 반환할때 유용함 \n\n구조분해선언은 data클래스로 정의해둬야함\n\n이와 비슷한 Pair/Triple 도 존재하지만, 이는 그 안에 담겨있는 원소의 의미를 말해주지 않으므로 경우에 따라 가독성이 떨어질때도 있음. 하지만 직접 클래스를 작성할 필요는 없어서 코드는 더 단순해짐 \n\n\n프로퍼티 접근자 로직 재활용 : 위임 프로퍼티\n위임프로퍼티 : 위임프로퍼티를 사용하면 접근자 로직을 매번 재구현 할 필요가없음. 예를들어 프로퍼티는 위임을 사용해 자신의 값을 필드가 아니라 데이터베이스, 테이블이나 브라우져 세션, 맵 등에 저장할수있음. \n위임 : 위임은 객체가 직접 작업을 수행하지 않고, 다른 도우미 객체가 그 작업을 처리하게 맡기는 디자인 패턴이다. 이때 작업을 처리하는 도무미 객체를 위임객체 라고 부른다. \n\n위임프로퍼티 소개위임프로퍼티 소개123456789101112131415161718192021class Foo &#123;\tvar p: Type by Delegate() &#125;//위 Foo클래스를 컴파일하면 아래와 같이 구성됨 class Foo &#123;\tprivate val delegate = Delegate() //컴파일러가 생성한 도우미 프로퍼티 \tvar p:Type // p 프로퍼티를 위해 컴파일러가 생성한 접근자는 delegate의 getValue/setValue 메소드를 호출함.\tset(value: Type) = delegate.setValue(..., value)\tget() = delegate.getValue(...)\t&#125;class Delegate &#123;\toperator fun getValue(...) &#123;...&#125;\toperator fun setValue(...,value:Type) &#123;...&#125;&#125;&gt;&gt; val foo = Foo()&gt;&gt; val oldValue = foo.p &gt;&gt; foo.p = newValue \n\n위임 프로퍼티 사용: by lazy()를 사용한 프로퍼티 초기화 지연\n지연 초기화는 객체의 일부분을 초기화 하지 않고 남겨뒀다가 실제로 그 부분의 값이 필요할 경우 초기화 할때 흔히 쓰이는 패턴 \n위임프로퍼티 by lazy() 소개123class Person(val name:String) &#123;\tval emails by lazy &#123; loadEmails(this)&#125;&#125;\n\nlazy함수는 코틀린 관례에 맞는 시그니처의 getValue메소드가 들어있는 객체를 반환함 따라서 lazy를 by 키워드와 함께 사용해 위임 프로퍼티를 만들수있음  lazy 함수의 인자는 값을 초기화 할때 호출할 람다다. \n\nlazy함수는 기본적으로 thread-safe하지만, 필요에 따라 동기화에 사용할 락을 lazy함수에 전달할수도있고, 다중 스레드환경에서 사용하지 않을 프로퍼티를 위해 lazy함수가 동기화를 하지 못하게 막을수도있음 \n\n\n위임 프로퍼티 구현위임프로퍼티 구현 (노가다 버전)123456789101112131415161718192021222324252627282930313233343536373839//PropertyChangeSupport를 사용하기 위한 도우미클래스 open class PropertyChangeAware &#123;\tprotected val changeSupport = PropertyChangeSupport(this)\tfun addPropertyChangeListener(listener: PropertyChangeListener) &#123;\t\tchangeSupport.addPropertyChangeListener(listener)\t&#125;\t\tfun removePropertyChangeListener(listener:PropertyChangeListener) &#123;\t\tchangeSupport.removePropertyChangeListener(listener)\t&#125;&#125;//프로퍼티 변경 통지를 직접 구현하기 class Person(val name:String, age:Int, salary:Int): PropertyChangeAware() &#123;\tvar age:Int = age \t\tset(newValue) &#123;\t\t\tval oldValue = field\t\t\tfield = newValue\t\t\tchangeSupport.firePropertyChange(&quot;age&quot;, oldValue, newValue)\t\t&#125;\tvar salary:Int = salary \t\tset(newValue) &#123;\t\t\tval oldValue = field\t\t\tfield = newValue\t\t\tchangeSupport.firePropertyChange(&quot;salary&quot;,oldValue,newValue)\t\t&#125;&#125;&gt;&gt; val p = Person(&quot;Dmitry&quot;, 34, 2000)&gt;&gt; p.addPropertyChangeListener( \t\tPropertyChangeListener &#123;event -&gt; \t\t\tprintln(&quot;Property $&#123;event.propertyName&#125; changed from $&#123;event.oldValue&#125; to $&#123;event.newValue&#125;&quot;)\t\t&#125;\t)&gt;&gt; p.age = 35 &gt;&gt;&gt; Property age changed from 34 to 35 &gt;&gt; p.salary = 2100&gt;&gt;&gt; Property salary changed from 2000 to 2100\n\n위임프로퍼티 구현 (프로퍼티 리팩토링)12345678910111213141516171819class ObservableProperty(val propName:String, var propValue:Int, val changeSupport:PropertyChangeSupport) &#123;\tfun getValue(): Int = propValue \tfun setValue(newValue:Int) &#123;\t\tval oldValue = propValue\t\tpropValue = newValue\t\tchangeSupport.firePropertyChange(propName,oldValue,newValue)\t&#125;&#125;class Person(val name:String,age:Int,salary:Int) &#123;\tval _age = ObservableProperty(&quot;age&quot;, age, changeSupport)\tvar age: Int \t\tget() = _age.getValue()\t\tset(value) &#123;_age.setValue(value)&#125;\tval _salary:Int \t\tget() = _salary.getValue()\t\tset(value) &#123;_salary.setValue(value)&#125;&#125;\n\n위임프로퍼티 구현 (위임할수있도록 재구성)12345678910111213class ObservableProperty(var propValue:Int, val changeSupport:PropertyChangeSupport) &#123;\toperator fun getValue(p:Person, prop:KProperty&lt;*&gt;): Int = propValue \toperator fun setValue(p:Person, prop:KProperty&lt;*&gt;, newValue:Int) &#123;\t\tval oldValue = propValue\t\tpropValue = newValue\t\tchangeSupport.firePropertyChange(propName,oldValue,newValue)\t&#125;&#125;class Person(val name:String,age:Int,salary:Int): PropertyChangeAware() &#123;\tvar age:Int by ObservableProperty(age,changeSupport)\tvar salary:Int by ObservableProperty(salary,changeSupport)&#125;\n\n어떤 부분이 재구성되었는가?\n\n관례에 사용되는 getValue/setValue에 operator가 붙었음\nKProperty사용됨. (KProperty.name을 통해 메소드가 처리할 프로퍼티 이름을 알수있음)\n주생성자의 propName이 빠졌음 (KProperty사용으로인함)\n\n위임프로퍼티 구현 (Delgate.observable을 사용해 프로퍼티 변경구현)123456789class Person(val name:String,age:Int,salary:Int) : PropertyChangeAware &#123;\tprivate val observer = &#123;\t\tprop: KProperty&lt;*&gt;, oldValue:Int, newValue:Int -&gt; \t\tchangeSupport.firePropertyChange(prop.name, oldValue,newValue)\t&#125;\t\tvar age:Int by Delegates.observable(age,observer)\tvar salary:Int by Delegates.observable(salary,observer)&#125;\n\n위임프로퍼티 컴파일 규칙컴파일 규칙123456789101112class C &#123;\tvar prop:Type by MyDelegate()&#125;val c = C()//컴파일 시 class C &#123;\tprivate val &lt;delegate&gt; = MyDelegate()\tvar prop:Type \tget() = &lt;delegate&gt;.getValue(this,&lt;property&gt;)\tset(value:Type) = &lt;delegate&gt;.setValue(this,&lt;property&gt;,value)&#125;\n\n\n맨처음 설명 그대로 참조하자\n\n프로퍼티 값을 맵에 저장\n확장가능객체 : 자신의 프로퍼티를 동적으로 정의할 수 있는 객체를 만들때 위임 프로퍼티를 활용하는객체 \n\n값을 맵에 저장하는 프로퍼티 정의123456789101112131415161718192021class Person &#123;\tprivate val _attributes = hashMapOf&lt;String,String&gt;()\tfun setAttribute(attrName:String,value:String) &#123;\t\t_attributes[attrName] = value\t&#125;\t\t//필수정보 \tval name:String \t\tget() = _attributes[&quot;name&quot;]!! //수동으로 맵에서 꺼냄 &#125;//위임사용class Person &#123;\tprivate val _attributes = hashMapOf()\t\tfun setAttribute(attrName:String, value:String) &#123;\t\t_attributes[attrName] = value \t&#125;\t\tval name:String by _attributes&#125;\n\n\nMap과 MutableMap 인터페이스에 대해 getValue/setValue 확장함수를 제공하기 때문에 위 부분이 동작하게됨.\ngetValue에서 맵에 프로퍼티값을 저장할때는 자동으로 프로퍼티 이름을 키로 활용함. \n\n프레임워크에서 위임 프로퍼티 활용위임프로퍼티를 활용해 DB컬럼 접근123456789object Users: IdTable() &#123;\tval name = varchar(&quot;name&quot;, length=50,).index()\tval age = integer(&quot;age&quot;)&#125;class User(id:EntityID): Entity(id) &#123;\tvar name:String by Users.name //사용자 이름은 디비 name컬럼에 들어있음 \tvar age:Int by Users.age &#125; \n\n\nUsers는 디비 전체에서 단 하나만 존재하므로 object(싱글턴객체)로 정의 \n당연한 말이지만 위임을 사용가능한 이유는 getValue/setValue가 Coloumn 클래스내 정의되어있어서 위임이 가능했다. \n위 디비 orm프레임워크는 Exposed프레임워크이다. \n\n","dateCreated":"2021-08-10T06:44:53+00:00","dateModified":"2021-08-30T09:25:51+00:00","datePublished":"2021-08-10T06:44:53+00:00","description":"","headline":"kotlin-basic-5","image":[],"mainEntityOfPage":{"@type":"WebPage","@id":"https://codexdawn.github.io/2021/08/10/kotlin-basic-5/"},"publisher":{"@type":"Organization","name":"codexdawn","sameAs":["https://github.com/codexdawn","https://www.facebook.com/beherzt.dev","https://www.linkedin.com/in/sim-jisung-3048872a/","mailto:cloudkaiser@gmail.com"],"image":"https://www.gravatar.com/avatar/d97fd4b94c429915f1cb55eb27e7d4d9","logo":{"@type":"ImageObject","url":"https://www.gravatar.com/avatar/d97fd4b94c429915f1cb55eb27e7d4d9"}},"url":"https://codexdawn.github.io/2021/08/10/kotlin-basic-5/","keywords":"kotlin, kotlininaction, kotlin문법, 연산자 오버로딩과 기타 관례"}</script>
+    <meta name="description" content="연산자 오버로딩과 기타 관례산술 연산자 오버로딩이항 산술 연산 오버로딩 연산자 오버로딩 할때는 반드시 operator 키워드를 붙여줘야함.  연산자를 멤버함수로 만드는대신 확장함수로도 정의가능  오버로딩 가능한 산술연산자 -&gt; a * b &#x3D;&gt; times , a &#x2F; b &#x3D;&gt; div , a % b &#x3D;&gt; mod (1.1 부터 rem) , a">
+<meta property="og:type" content="blog">
+<meta property="og:title" content="kotlin-basic-5">
+<meta property="og:url" content="https://codexdawn.github.io/2021/08/10/kotlin-basic-5/index.html">
 <meta property="og:site_name" content="codexdawn">
+<meta property="og:description" content="연산자 오버로딩과 기타 관례산술 연산자 오버로딩이항 산술 연산 오버로딩 연산자 오버로딩 할때는 반드시 operator 키워드를 붙여줘야함.  연산자를 멤버함수로 만드는대신 확장함수로도 정의가능  오버로딩 가능한 산술연산자 -&gt; a * b &#x3D;&gt; times , a &#x2F; b &#x3D;&gt; div , a % b &#x3D;&gt; mod (1.1 부터 rem) , a">
 <meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2021-08-10T06:44:53.000Z">
+<meta property="article:modified_time" content="2021-08-30T09:25:51.412Z">
 <meta property="article:author" content="codexdawn">
+<meta property="article:tag" content="kotlin">
+<meta property="article:tag" content="kotlininaction">
+<meta property="article:tag" content="kotlin문법">
+<meta property="article:tag" content="연산자 오버로딩과 기타 관례">
 <meta name="twitter:card" content="summary">
     
     
@@ -41,6 +49,8 @@
     
 
     
+        
+    
 </head>
 
     <body>
@@ -50,7 +60,7 @@
 
     
 
-<header id="header" data-behavior="2">
+<header id="header" data-behavior="5">
     <i id="btn-open-sidebar" class="fa fa-lg fa-bars"></i>
     <div class="header-title">
         <a
@@ -77,7 +87,7 @@
             <!-- Define author's picture -->
 
 
-<nav id="sidebar" data-behavior="2">
+<nav id="sidebar" data-behavior="5">
     <div class="sidebar-container">
         
         
@@ -231,30 +241,22 @@
 </nav>
 
             
-            <div id="main" data-behavior="2"
+            <div id="main" data-behavior="5"
                  class="
                         hasCoverMetaIn
                         ">
                 
-    <section class="postShorten-group main-content-wrap">
+<article class="post">
     
     
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/2021/08/10/kotlin-basic-5/"
-                            aria-label=": kotlin-basic-5"
-                        >
-                            kotlin-basic-5
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
+        <div class="post-header main-content-wrap text-left">
+    
+        <h1 class="post-title">
+            kotlin-basic-5
+        </h1>
+    
+    
+        <div class="post-meta">
     <time datetime="2021-08-10T06:44:53+00:00">
 	
 		    Aug 10, 2021
@@ -269,10 +271,13 @@
     
 </div>
 
-            </div>
-            
-                <div class="postShorten-content">
-                    <h1 id="연산자-오버로딩과-기타-관례"><a href="#연산자-오버로딩과-기타-관례" class="headerlink" title="연산자 오버로딩과 기타 관례"></a>연산자 오버로딩과 기타 관례</h1><h2 id="산술-연산자-오버로딩"><a href="#산술-연산자-오버로딩" class="headerlink" title="산술 연산자 오버로딩"></a>산술 연산자 오버로딩</h2><h3 id="이항-산술-연산-오버로딩"><a href="#이항-산술-연산-오버로딩" class="headerlink" title="이항 산술 연산 오버로딩"></a>이항 산술 연산 오버로딩</h3><ul>
+    
+</div>
+
+    
+    <div class="post-content markdown">
+        <div class="main-content-wrap">
+            <h1 id="연산자-오버로딩과-기타-관례"><a href="#연산자-오버로딩과-기타-관례" class="headerlink" title="연산자 오버로딩과 기타 관례"></a>연산자 오버로딩과 기타 관례</h1><h2 id="산술-연산자-오버로딩"><a href="#산술-연산자-오버로딩" class="headerlink" title="산술 연산자 오버로딩"></a>산술 연산자 오버로딩</h2><h3 id="이항-산술-연산-오버로딩"><a href="#이항-산술-연산-오버로딩" class="headerlink" title="이항 산술 연산 오버로딩"></a>이항 산술 연산 오버로딩</h3><ul>
 <li>연산자 오버로딩 할때는 반드시 <strong>operator</strong> 키워드를 붙여줘야함. </li>
 <li>연산자를 멤버함수로 만드는대신 확장함수로도 정의가능 </li>
 <li>오버로딩 가능한 산술연산자 -&gt; a * b =&gt; times , a / b =&gt; div , a % b =&gt; mod (1.1 부터 rem) , a + b =&gt; plus , a - b =&gt; minus </li>
@@ -379,179 +384,121 @@
 <li>위 디비 orm프레임워크는 Exposed프레임워크이다. </li>
 </ul>
 
-                    
-                        
-
-
-                    
-                    
-                        <p>
-                            <a
-                                href="/2021/08/10/kotlin-basic-5/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                Comment and share
-                            </a>
-                        </p>
-                    
-                </div>
             
+
+
         </div>
+    </div>
+    <div id="post-footer" class="post-footer main-content-wrap">
         
-    </article>
-    
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/2021/08/05/kotlin-basic-4/"
-                            aria-label=": kotlin-basic-4"
-                        >
-                            kotlin-basic-4
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time datetime="2021-08-05T07:59:46+00:00">
-	
-		    Aug 05, 2021
-    	
-    </time>
-    
-        <span>in </span>
-        
-    <a class="category-link" href="/categories/KotlinInAction/">KotlinInAction</a>, <a class="category-link" href="/categories/Study/">Study</a>, <a class="category-link" href="/categories/%EC%BD%94%ED%8B%80%EB%A6%B0%EB%AC%B8%EB%B2%95-%EA%B8%B0%EC%B4%88/">코틀린문법&기초</a>
-
-
-    
-</div>
+            <div class="post-footer-tags">
+                <span class="text-color-light text-small">TAGGED IN</span><br/>
+                
+    <a class="tag tag--primary tag--small t-none-link" href="/tags/kotlin/" rel="tag">kotlin</a> <a class="tag tag--primary tag--small t-none-link" href="/tags/kotlininaction/" rel="tag">kotlininaction</a> <a class="tag tag--primary tag--small t-none-link" href="/tags/kotlin%EB%AC%B8%EB%B2%95/" rel="tag">kotlin문법</a> <a class="tag tag--primary tag--small t-none-link" href="/tags/%EC%97%B0%EC%82%B0%EC%9E%90-%EC%98%A4%EB%B2%84%EB%A1%9C%EB%94%A9%EA%B3%BC-%EA%B8%B0%ED%83%80-%EA%B4%80%EB%A1%80/" rel="tag">연산자 오버로딩과 기타 관례</a>
 
             </div>
-            
-                <div class="postShorten-content">
-                    <h1 id="코틀린-타입-시스템"><a href="#코틀린-타입-시스템" class="headerlink" title="코틀린 타입 시스템"></a>코틀린 타입 시스템</h1><blockquote><ul>
-<li>null 이 될수있는 타입과 null을 처리하는 구문의 문법 </li>
-<li>코틀린 원시 타입 소개와 자바 타입과 코틀린 원시 타입의 관계 </li>
-<li>코틀린 컬렉션 소개와 자바 컬렉션과 코틀린 컬렉션의 관계</li>
-</ul>
-</blockquote>
-
-<h2 id="Null-가능성"><a href="#Null-가능성" class="headerlink" title="Null 가능성"></a>Null 가능성</h2><h3 id="Null이-될수있는-타입"><a href="#Null이-될수있는-타입" class="headerlink" title="Null이 될수있는 타입"></a>Null이 될수있는 타입</h3><ul>
-<li>기본적으로 모든 타입은 null 허용이 안됨.</li>
-<li>타입에 null을 허용하려면 ? 를 타입뒤에 붙여야함. (ex&gt; val x:String? = null) </li>
-</ul>
-<h3 id="안전한-호출-연산자"><a href="#안전한-호출-연산자" class="headerlink" title="안전한 호출 연산자: ?"></a>안전한 호출 연산자: ?</h3><ul>
-<li>?. 연산자는 null검사와 메소드 호출을 한번의 연산으로 수행한다. (ex&gt; s?.toUpperCase() =&gt; if(s != null) s.toUpperCase() else null)</li>
-<li>값이 존재하면 값을 리턴하고, 없으면 Null을 리턴해준다. </li>
-<li>?. 연산자를 사용하면 반환타입은 ?로 반환해야함. (ex&gt; val allCaps: String? = s?.toUpperCase())</li>
-</ul>
-<h3 id="엘비스-연산자"><a href="#엘비스-연산자" class="headerlink" title="엘비스 연산자 : ?:"></a>엘비스 연산자 : ?:</h3><ul>
-<li>?:(엘비스연산자)는 null대신 사용할 디폴트값을 지정할때 편리하게 사용하는 연산자</li>
-</ul>
-<figure class="highlight kotlin"><figcaption><span>evis</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">foo</span><span class="params">(s:<span class="type">String</span>?)</span></span> &#123;</span><br><span class="line">	<span class="keyword">val</span> t:String = s ?: <span class="string">&quot;&quot;</span> </span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">strLenSafe</span><span class="params">(s:<span class="type">String</span>?)</span></span>: <span class="built_in">Int</span> = s?.length ?: <span class="number">0</span></span><br></pre></td></tr></table></figure>
-
-
-<figure class="highlight kotlin"><figcaption><span>evis-throw</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Address</span></span>(<span class="keyword">val</span> streetAddress:String, <span class="keyword">val</span> zipCode:<span class="built_in">Int</span>, <span class="keyword">val</span> city:String, <span class="keyword">val</span> country:String) </span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Company</span></span>(<span class="keyword">val</span> name:String, <span class="keyword">val</span> address:Address?)</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Person</span></span>(<span class="keyword">val</span> name:String, <span class="keyword">val</span> company:Company?)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">printShippingLabel</span><span class="params">(person:<span class="type">Person</span>)</span></span> &#123;</span><br><span class="line">	<span class="keyword">val</span> address = person.company?.address ?: <span class="keyword">throw</span> IlleagalArgumentException(<span class="string">&quot;No Address&quot;</span>)</span><br><span class="line">	with (address) &#123;</span><br><span class="line">		println(streetAddress)</span><br><span class="line">		println(<span class="string">&quot;<span class="variable">$zipcode</span> <span class="variable">$city</span>, <span class="variable">$country</span>&quot;</span>)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&gt;&gt; <span class="keyword">val</span> address = Address(<span class="string">&quot;ElvisStreet&quot;</span>, <span class="number">110</span>, <span class="string">&quot;Sanfrancico&quot;</span>, <span class="string">&quot;USA&quot;</span>)</span><br><span class="line">&gt;&gt; <span class="keyword">val</span> company = Company(<span class="string">&quot;Algo&quot;</span>, address)</span><br><span class="line">&gt;&gt; <span class="keyword">val</span> person = Person(<span class="string">&quot;Dawn&quot;</span>, company)</span><br><span class="line"></span><br><span class="line">&gt;&gt; printShippingLabel(person)</span><br><span class="line">&gt;&gt;&gt; ElvisStreet </span><br><span class="line">&gt;&gt;&gt; <span class="number">110</span> Sanfrancico, USA</span><br><span class="line"></span><br><span class="line">&gt;&gt;&gt; printShippingLabel(Person(<span class="string">&quot;Zero&quot;</span>,<span class="literal">null</span>))</span><br><span class="line">&gt;&gt;&gt; java.lang.IlleagalArgumentException: No Adress </span><br></pre></td></tr></table></figure>
-
-<h3 id="안전한-캐스트-as"><a href="#안전한-캐스트-as" class="headerlink" title="안전한 캐스트: as?"></a>안전한 캐스트: as?</h3><ul>
-<li>as는 타입캐스트를 시켜주는 연산자이다. as?는 ?연산자 처럼 타입이 존재하지 않으면 null을 리턴해줌. </li>
-<li>val otherPerson = o as? Person ?: return false</li>
-</ul>
-<h3 id="Null-아님을-단언"><a href="#Null-아님을-단언" class="headerlink" title="Null 아님을 단언: !!"></a>Null 아님을 단언: !!</h3><ul>
-<li>해당 타입 뒤에 !! 연산자를 붙이면 null이 들어오면 안된다는 소리다. 들어오면 NullPointerException 예외발생 </li>
-<li>val sNotNull:String = s!! //null 들어오면 예외발생 </li>
-<li>!! 연산자를 한줄에 여러 단언문을 사용하는 부분은 피하라 (어디서 예외가 발생했는지 알길이 없다.) (ex&gt; person.company!!.address!!.country -&gt; 이런거하면 어디서 null예외가 떨어졌는지 모른다.)</li>
-</ul>
-<h3 id="let-함수"><a href="#let-함수" class="headerlink" title="let 함수"></a>let 함수</h3><ul>
-<li>let 은 해당 값이 null이아니면 수행, 아니면 미수행 처리해주는 역할을 한다.</li>
-<li>여러값이 null인지를 검사해야한다면, let호출을 중첩시킬수있다. 하지만 코드가 클린하지 못하기때문에, 그럴땐 if를 사용해서 모든값을 한꺼번에 검사하는편이 좋다. </li>
-</ul>
-<figure class="highlight kotlin"><figcaption><span>let</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">sendToEmail</span><span class="params">(email: <span class="type">String</span>)</span></span> &#123;</span><br><span class="line">	println(<span class="string">&quot;Sending email to <span class="variable">$email</span>&quot;</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&gt;&gt; <span class="keyword">var</span> email: String? = <span class="string">&quot;yolo@ex.com&quot;</span></span><br><span class="line">&gt;&gt; email?.let &#123; sendToEmail(it)&#125;</span><br><span class="line">&gt;&gt;&gt; Sending email to <span class="symbol">yolo@</span>ex.com</span><br><span class="line"></span><br><span class="line">&gt;&gt; email = <span class="literal">null</span></span><br><span class="line">&gt;&gt; email?.let&#123;sendToEmail(it)&#125;</span><br><span class="line">&gt;&gt;&gt; 아무실행없음</span><br><span class="line"></span><br><span class="line"><span class="comment">//let 사용안한예 </span></span><br><span class="line"><span class="keyword">val</span> person:Person? = getTheBestPersonInTheWorld()</span><br><span class="line"><span class="keyword">if</span>(persion != <span class="literal">null</span>) sendToEmail(person.email)</span><br><span class="line"></span><br><span class="line"><span class="comment">//let 사용예</span></span><br><span class="line">getTheBestPersonInTheWorld()?.let&#123;sendEmailTo(it.email)&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//위함수가 null을 반환한다면? 아무일도 일어나지 않는다.</span></span><br></pre></td></tr></table></figure>
-
-<h3 id="나중에-초기화할-프로퍼티-lateinit"><a href="#나중에-초기화할-프로퍼티-lateinit" class="headerlink" title="나중에 초기화할 프로퍼티 : lateinit"></a>나중에 초기화할 프로퍼티 : lateinit</h3><ul>
-<li>lateinit을 사용시 반드시 var로 사용해야함. val로 사용시 final 필드로 컴파일되어 반드시 초기값을 요구하게됨. </li>
-<li>프로퍼티를 초기화하기전에 lateinit변수에 접근하면 lateinit property myService has not been initialized 라는 예외가 발생함 </li>
-<li>lateinit은 의존관계주입 (DI) 프레임워크와 함께 사용하는 경우가 많음. </li>
-</ul>
-<figure class="highlight kotlin"><figcaption><span>lateinit</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MyService</span> </span>&#123;</span><br><span class="line">	<span class="function"><span class="keyword">fun</span> <span class="title">performAction</span><span class="params">()</span></span>: String = <span class="string">&quot;foo&quot;</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MyTest</span> </span>&#123;</span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">lateinit</span> <span class="keyword">var</span> myService:MyService</span><br><span class="line">	</span><br><span class="line">	<span class="meta">@Before</span> <span class="function"><span class="keyword">fun</span> <span class="title">setUp</span><span class="params">()</span></span> &#123;</span><br><span class="line">		myService = MyService()</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="meta">@Test</span> <span class="function"><span class="keyword">fun</span> <span class="title">testAction</span><span class="params">()</span></span> &#123;</span><br><span class="line">		Assert.assertEquals(<span class="string">&quot;foo&quot;</span>, myService.performAction())</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h3 id="null이-될수있는-타입-확장"><a href="#null이-될수있는-타입-확장" class="headerlink" title="null이 될수있는 타입 확장"></a>null이 될수있는 타입 확장</h3><ul>
-<li>null이 될수있는 확장함수는 안전한 호출(? 연산자) 없이 호출 가능 </li>
-<li>null이 허용된 변수에 대한 안전한 호출 없이 let 을 호출하면 람다의 인자는 null이 될수있는 타입으로 추론됨. 따라서 안전한 호출을 위해 ?연산자를 반드시 사용해야함. </li>
-</ul>
-<h3 id="타입-파라미터의-null가능성"><a href="#타입-파라미터의-null가능성" class="headerlink" title="타입 파라미터의 null가능성"></a>타입 파라미터의 null가능성</h3><ul>
-<li>제네릭타입 (타입 파라미터) 를 사용하게 되면 타입명끝에 ?가 없더라도 T가 null이 될수 있는 타입이다. </li>
-</ul>
-<figure class="highlight kotlin"><figcaption><span>generic</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="type">&lt;T&gt;</span> <span class="title">printHashCode</span><span class="params">(t:<span class="type">T</span>)</span></span> &#123;</span><br><span class="line">	println(t?.hashCode()) <span class="comment">//타입 파라미터 t는 무조건 안전한 호출을 통해서만 가져와야함.T의 타입은 Any?로 반드시 추론됨. </span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&gt;&gt; printHashCode(<span class="literal">null</span>)</span><br><span class="line">&gt;&gt;&gt; <span class="literal">null</span></span><br></pre></td></tr></table></figure>
-
-<h2 id="코틀린의-원시타입"><a href="#코틀린의-원시타입" class="headerlink" title="코틀린의 원시타입"></a>코틀린의 원시타입</h2><h3 id="원시타입-Int-Boolean-등"><a href="#원시타입-Int-Boolean-등" class="headerlink" title="원시타입 : Int, Boolean 등.."></a>원시타입 : Int, Boolean 등..</h3><ul>
-<li>자바에서는 원시타입 , 참조타입으로 사용하지만 코틀린은 하나의 타입으로만 사용함 </li>
-<li>코틀린은 하나의 타입으로만 사용하기때문에 늘 객체로 타입을 받지않고, 케바케로 자바로 컴파일시 원시타입 으로 줄지 참조타입으로 줄지 구분 해서 반환하게됨. (컬렉션과 같은 제네릭을 사용할경우는 객체로 나머지는 원시타입으로 저장)</li>
-<li>코틀린에서는 오토박싱 처리 되는 부분이 불가능하다. 예를들면 Int형타입의 변수를 Long으로 변경하는것 처럼 자바에서는 되는 부분이 코틀린에서는 불가능하다. 이유는 타입안정성때문. 따라서 Int형타입을 Long으로 변경후 사용해야함.</li>
-</ul>
-<h3 id="Any-Any-최상위타입-Object"><a href="#Any-Any-최상위타입-Object" class="headerlink" title="Any,Any? : 최상위타입 (Object)"></a>Any,Any? : 최상위타입 (Object)</h3><ul>
-<li>Any는 자바에서 Object타입이라 생각하면 됨. </li>
-</ul>
-<h3 id="Unit타입-코틀린의-void"><a href="#Unit타입-코틀린의-void" class="headerlink" title="Unit타입 : 코틀린의 void"></a>Unit타입 : 코틀린의 void</h3><ul>
-<li>Unit타입은 자바의 void와 흡사한 기능을한다. </li>
-<li>Unit과 void는 뭔차이인가? Unit은 void와 달리 타입 인자로 사용가능. (제네릭파라미터를 반환하는 함수를 오버라이드하면서 반환타입으러 Unit을 쓸때 유용함. )</li>
-</ul>
-<figure class="highlight kotlin"><figcaption><span>Unit</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">Processor</span>&lt;<span class="type">T</span>&gt; </span>&#123;</span><br><span class="line">	<span class="function"><span class="keyword">fun</span> <span class="title">process</span><span class="params">()</span></span>:T</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">NoResultProcessor</span>: <span class="type">Processor</span>&lt;<span class="type">Unit</span>&gt; </span>&#123;</span><br><span class="line">	<span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">process</span><span class="params">()</span></span> &#123;</span><br><span class="line">		<span class="comment">// process code </span></span><br><span class="line">		<span class="comment">// Unit이기때문에 return 없음. </span></span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h3 id="Nothing-타입-이-함수는-결코-정상적으로-끝나지-않는다"><a href="#Nothing-타입-이-함수는-결코-정상적으로-끝나지-않는다" class="headerlink" title="Nothing 타입: 이 함수는 결코 정상적으로 끝나지 않는다.."></a>Nothing 타입: 이 함수는 결코 정상적으로 끝나지 않는다..</h3><ul>
-<li>Nothing은 기본적으로 아무것도 포함하지 않음. 따라서 Nothing은 함수의 반환타입이나 반환타입으로 쓰일 타입 파라미터로만 쓸수있음. </li>
-<li>Nothing을 반환하는 함수를 엘비스 연산자의 우항에 사용해서 전제조건을 검사할수있음. </li>
-</ul>
-<h2 id="컬렉션과-배열"><a href="#컬렉션과-배열" class="headerlink" title="컬렉션과 배열"></a>컬렉션과 배열</h2><h3 id="컬렉션"><a href="#컬렉션" class="headerlink" title="컬렉션"></a>컬렉션</h3><ul>
-<li>코틀린에서 컬렉션은 읽기전용 컬렉션 과 변경가능한 컬렉션 두가지를 나눠서 사용가능</li>
-<li>코틀린에서는 가능하면 읽기전용 컬렉션을 디폴트로 사용하길 권장함. (일반적인 규약으로 지침함) 컬렉션을 변경해야할때만 변경가능한 버전을 사용하길 권장 </li>
-<li>읽기전용 컬렉션이 항상 스레드 안전하지는 않다. 따라서 다중 스레드 환경에서는 데이터를 다루는경우, 그 데잍러를 적절히 동기화 하거나 동시 접근을 허용하는 데이터 구조를 활용해야함. </li>
-</ul>
-<h3 id="배열"><a href="#배열" class="headerlink" title="배열"></a>배열</h3><ul>
-<li>배열상태에서 람다로 연산 수행 가능 (ex&gt; val squres = IntArray(5) {i -&gt; (i+1) * (i+1)})</li>
-<li>filter,map 등의 처리도 가능함. </li>
-<li>배열에도 똑같이 확장함수를 사용할수잇다. 다만 이런 함수가 반환하는 값은 배열이 아니라 리스트로 변환됨. </li>
-<li>원시타입 배열 (int/long등) 도 제공함 </li>
-<li>코들린의 Array는 자바 배열로 컴파일됨 </li>
-</ul>
-
-                    
+        
+        
+            <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    <a
+                        class="post-action-btn btn btn--disabled"
+                        aria-hidden="true"
+                    >
                         
-
-
+                        <i class="fa fa-angle-left" aria-hidden="true"></i>
+                        <span class="hide-xs hide-sm text-small icon-ml">PREVIOUS</span>
+                    </a>
+            </li>
+            <li class="post-action">
+                
                     
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/2021/08/05/kotlin-basic-4/"
+                    data-tooltip="kotlin-basic-4"
+                    aria-label="NEXT: kotlin-basic-4"
+                >
                     
-                        <p>
-                            <a
-                                href="/2021/08/05/kotlin-basic-4/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                Comment and share
-                            </a>
-                        </p>
-                    
-                </div>
+                        <span class="hide-xs hide-sm text-small icon-mr">NEXT</span>
+                        <i class="fa fa-angle-right" aria-hidden="true"></i>
+                    </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a
+                class="post-action-btn btn btn--default btn-open-shareoptions"
+                href="#btn-open-shareoptions"
+                aria-label="Share this post"
+            >
+                <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </a>
+        </li>
+        
             
-        </div>
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://codexdawn.github.io/2021/08/10/kotlin-basic-5/"
+                    title="Share on Facebook"
+                    aria-label="Share on Facebook"
+                >
+                    <i class="fab fa-facebook" aria-hidden="true"></i>
+                </a>
+            </li>
         
-    </article>
-    
-    <div class="pagination-bar">
-    <ul class="pagination">
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://twitter.com/intent/tweet?text=https://codexdawn.github.io/2021/08/10/kotlin-basic-5/"
+                    title="Share on Twitter"
+                    aria-label="Share on Twitter"
+                >
+                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://plus.google.com/share?url=https://codexdawn.github.io/2021/08/10/kotlin-basic-5/"
+                    title="Share on Google+"
+                    aria-label="Share on Google+"
+                >
+                    <i class="fab fa-google-plus" aria-hidden="true"></i>
+                </a>
+            </li>
         
         
-        <li class="pagination-number">page 1 of 1</li>
+            
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#" aria-label="Back to top">
+            
+                <i class="fa fa-list" aria-hidden="true"></i>
+            </a>
+        </li>
     </ul>
 </div>
 
-</section>
+
+        
+        
+            
+        
+    </div>
+</article>
 
 
 
@@ -562,6 +509,151 @@
 </footer>
 
             </div>
+            
+                <div id="bottom-bar" class="post-bottom-bar" data-behavior="5">
+                    <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    <a
+                        class="post-action-btn btn btn--disabled"
+                        aria-hidden="true"
+                    >
+                        
+                        <i class="fa fa-angle-left" aria-hidden="true"></i>
+                        <span class="hide-xs hide-sm text-small icon-ml">PREVIOUS</span>
+                    </a>
+            </li>
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/2021/08/05/kotlin-basic-4/"
+                    data-tooltip="kotlin-basic-4"
+                    aria-label="NEXT: kotlin-basic-4"
+                >
+                    
+                        <span class="hide-xs hide-sm text-small icon-mr">NEXT</span>
+                        <i class="fa fa-angle-right" aria-hidden="true"></i>
+                    </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a
+                class="post-action-btn btn btn--default btn-open-shareoptions"
+                href="#btn-open-shareoptions"
+                aria-label="Share this post"
+            >
+                <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </a>
+        </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://codexdawn.github.io/2021/08/10/kotlin-basic-5/"
+                    title="Share on Facebook"
+                    aria-label="Share on Facebook"
+                >
+                    <i class="fab fa-facebook" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://twitter.com/intent/tweet?text=https://codexdawn.github.io/2021/08/10/kotlin-basic-5/"
+                    title="Share on Twitter"
+                    aria-label="Share on Twitter"
+                >
+                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://plus.google.com/share?url=https://codexdawn.github.io/2021/08/10/kotlin-basic-5/"
+                    title="Share on Google+"
+                    aria-label="Share on Google+"
+                >
+                    <i class="fab fa-google-plus" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+        
+            
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#" aria-label="Back to top">
+            
+                <i class="fa fa-list" aria-hidden="true"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+                </div>
+                
+    <div id="share-options-bar" class="share-options-bar" data-behavior="5">
+        <i id="btn-close-shareoptions" class="fa fa-times"></i>
+        <ul class="share-options">
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://www.facebook.com/sharer/sharer.php?u=https://codexdawn.github.io/2021/08/10/kotlin-basic-5/"
+                        aria-label="Share on Facebook"
+                    >
+                        <i class="fab fa-facebook" aria-hidden="true"></i><span>Share on Facebook</span>
+                    </a>
+                </li>
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://twitter.com/intent/tweet?text=https://codexdawn.github.io/2021/08/10/kotlin-basic-5/"
+                        aria-label="Share on Twitter"
+                    >
+                        <i class="fab fa-twitter" aria-hidden="true"></i><span>Share on Twitter</span>
+                    </a>
+                </li>
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://plus.google.com/share?url=https://codexdawn.github.io/2021/08/10/kotlin-basic-5/"
+                        aria-label="Share on Google+"
+                    >
+                        <i class="fab fa-google-plus" aria-hidden="true"></i><span>Share on Google+</span>
+                    </a>
+                </li>
+            
+        </ul>
+    </div>
+
+
             
         </div>
         
@@ -599,6 +691,8 @@
 
 <!--SCRIPTS END-->
 
+
+    
 
 
 
