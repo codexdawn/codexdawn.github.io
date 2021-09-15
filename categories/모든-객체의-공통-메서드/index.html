@@ -247,6 +247,87 @@
                     
                         <a
                             class="link-unstyled"
+                            href="/2021/09/15/java-effective-11/"
+                            aria-label=": java-effective-11"
+                        >
+                            java-effective-11
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2021-09-15T07:42:17+00:00">
+	
+		    Sep 15, 2021
+    	
+    </time>
+    
+        <span>in </span>
+        
+    <a class="category-link" href="/categories/Effective-Java/">Effective Java</a>, <a class="category-link" href="/categories/Study/">Study</a>, <a class="category-link" href="/categories/%EB%AA%A8%EB%93%A0-%EA%B0%9D%EC%B2%B4%EC%9D%98-%EA%B3%B5%ED%86%B5-%EB%A9%94%EC%84%9C%EB%93%9C/">모든 객체의 공통 메서드</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <h1 id="equals를-재정의하려거든-hashCode도-재정의하라"><a href="#equals를-재정의하려거든-hashCode도-재정의하라" class="headerlink" title="equals를 재정의하려거든 hashCode도 재정의하라"></a>equals를 재정의하려거든 hashCode도 재정의하라</h1><p>equals를 재정의하고 hashCode를 재정의 하지 않으면 어떻게됨? </p>
+<ul>
+<li>응. 사용못해.. 문제 발생해서 (Hash계열 컬렉션들은 모두 안됨 HashMap,HashSet.. )</li>
+<li>hash 계열은 키값을 기준으로 탐색하기 때문에, equals할때 해당 key에 해당하는 value를 찾고자 할텐데,이때 동일한 key값 여부를 찾게됨. 하지만 equals만 정의해버리면 hash가 재정의 되어있지않기때문에 nullPointerException이 발생하게 됨.(즉, 논리적인 같은 객체는 같은 해시코드를 반환해야한다.) </li>
+<li>가급적이면 IDE 혹은 AutoValue라이브러리 등 에서 정의해주는 부분을 그대로 사용하는것이 좋을듯함 </li>
+</ul>
+<figure class="highlight java"><figcaption><span>최악의 해시코드 - 잘되긴하지만 하지말자</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span> </span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">hashCode</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	<span class="keyword">return</span> <span class="number">42</span>; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>위 해시코드로 정의하는것이 최악의 로직인 이유는? </p>
+<ul>
+<li>모든 객체에게 똑같은 값만 내어주기떄문에 모든 객체가 해시테이블의 버킷 하나에 담겨 마치 연결 리스트 처럼 동작하게됨. 그 결과 평균시간이 O(1) 에서 O(N)으로 느려져서 객체가 많아지면 성능이 최악이됨 </li>
+</ul>
+<figure class="highlight java"><figcaption><span>전형적인 해시코드 - PhoneNumber객체기준</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span> </span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">hashCode</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	<span class="keyword">int</span> result = Short.hashCode(areaCode);</span><br><span class="line">	result = <span class="number">31</span> * result + Short.hashCode(prefix);</span><br><span class="line">	result = <span class="number">31</span> * result + Short.hashCOde(lineNum);</span><br><span class="line">	<span class="keyword">return</span> result; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>위 코드에서 31을 곱하는 이유는 31이 홀수이면서 소수(Prime)이기때문인데, 짝수이면 오버플로우가 발생하면 정보를 잃게됨 </li>
+<li>성능 높인다 치고 해시 코드를 계산할때 필수필드를 생략해서는 절대로 안된다. 속도는 빨라질지 몰라도 나중에 해시테이블 성능을 급격하게 안좋게 할수있다. 특정 필드만 키값이 몰리는 현상을 고루 분포해서 해시테이블을 관리할수도있기때문에 가급적 필수 필드들은 왠만하면 다 정의해주자. </li>
+</ul>
+<figure class="highlight java"><figcaption><span>해시코드 지연초기화 - 스레드 안정성 고려</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">int</span> hashCode; </span><br><span class="line"></span><br><span class="line"><span class="meta">@Override</span> </span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">hashCode</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	<span class="keyword">if</span>(result == <span class="number">0</span>) &#123;</span><br><span class="line">		result = Short.hashCode(areaCode);</span><br><span class="line">		result = <span class="number">31</span> * result + Short.hashCode(prefix);</span><br><span class="line">		result = <span class="number">31</span> * result + Short.hashCOde(lineNum);</span><br><span class="line">		<span class="keyword">return</span> result;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>클래스가 불변이고, 해시코드를 계산하는 비용이 크다면 매번 새로 계산하기보다 캐싱하는 방식을 고려하는게 좋은데 이럴때 hashCode를 지연초기화 하면 좋다. </li>
+<li>필드를 지연 초기화 하려면 스레드 안전하도록 만들어주도록 신경써야함 </li>
+</ul>
+
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/2021/09/15/java-effective-11/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                Comment and share
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
                             href="/2021/02/24/java-effective-10/"
                             aria-label=": java-effective-10"
                         >

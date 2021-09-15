@@ -247,6 +247,87 @@
                     
                         <a
                             class="link-unstyled"
+                            href="/2021/09/15/java-effective-11/"
+                            aria-label=": java-effective-11"
+                        >
+                            java-effective-11
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2021-09-15T07:42:17+00:00">
+	
+		    Sep 15, 2021
+    	
+    </time>
+    
+        <span>in </span>
+        
+    <a class="category-link" href="/categories/Effective-Java/">Effective Java</a>, <a class="category-link" href="/categories/Study/">Study</a>, <a class="category-link" href="/categories/%EB%AA%A8%EB%93%A0-%EA%B0%9D%EC%B2%B4%EC%9D%98-%EA%B3%B5%ED%86%B5-%EB%A9%94%EC%84%9C%EB%93%9C/">모든 객체의 공통 메서드</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <h1 id="equals를-재정의하려거든-hashCode도-재정의하라"><a href="#equals를-재정의하려거든-hashCode도-재정의하라" class="headerlink" title="equals를 재정의하려거든 hashCode도 재정의하라"></a>equals를 재정의하려거든 hashCode도 재정의하라</h1><p>equals를 재정의하고 hashCode를 재정의 하지 않으면 어떻게됨? </p>
+<ul>
+<li>응. 사용못해.. 문제 발생해서 (Hash계열 컬렉션들은 모두 안됨 HashMap,HashSet.. )</li>
+<li>hash 계열은 키값을 기준으로 탐색하기 때문에, equals할때 해당 key에 해당하는 value를 찾고자 할텐데,이때 동일한 key값 여부를 찾게됨. 하지만 equals만 정의해버리면 hash가 재정의 되어있지않기때문에 nullPointerException이 발생하게 됨.(즉, 논리적인 같은 객체는 같은 해시코드를 반환해야한다.) </li>
+<li>가급적이면 IDE 혹은 AutoValue라이브러리 등 에서 정의해주는 부분을 그대로 사용하는것이 좋을듯함 </li>
+</ul>
+<figure class="highlight java"><figcaption><span>최악의 해시코드 - 잘되긴하지만 하지말자</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span> </span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">hashCode</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	<span class="keyword">return</span> <span class="number">42</span>; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>위 해시코드로 정의하는것이 최악의 로직인 이유는? </p>
+<ul>
+<li>모든 객체에게 똑같은 값만 내어주기떄문에 모든 객체가 해시테이블의 버킷 하나에 담겨 마치 연결 리스트 처럼 동작하게됨. 그 결과 평균시간이 O(1) 에서 O(N)으로 느려져서 객체가 많아지면 성능이 최악이됨 </li>
+</ul>
+<figure class="highlight java"><figcaption><span>전형적인 해시코드 - PhoneNumber객체기준</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span> </span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">hashCode</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	<span class="keyword">int</span> result = Short.hashCode(areaCode);</span><br><span class="line">	result = <span class="number">31</span> * result + Short.hashCode(prefix);</span><br><span class="line">	result = <span class="number">31</span> * result + Short.hashCOde(lineNum);</span><br><span class="line">	<span class="keyword">return</span> result; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>위 코드에서 31을 곱하는 이유는 31이 홀수이면서 소수(Prime)이기때문인데, 짝수이면 오버플로우가 발생하면 정보를 잃게됨 </li>
+<li>성능 높인다 치고 해시 코드를 계산할때 필수필드를 생략해서는 절대로 안된다. 속도는 빨라질지 몰라도 나중에 해시테이블 성능을 급격하게 안좋게 할수있다. 특정 필드만 키값이 몰리는 현상을 고루 분포해서 해시테이블을 관리할수도있기때문에 가급적 필수 필드들은 왠만하면 다 정의해주자. </li>
+</ul>
+<figure class="highlight java"><figcaption><span>해시코드 지연초기화 - 스레드 안정성 고려</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">int</span> hashCode; </span><br><span class="line"></span><br><span class="line"><span class="meta">@Override</span> </span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">hashCode</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	<span class="keyword">if</span>(result == <span class="number">0</span>) &#123;</span><br><span class="line">		result = Short.hashCode(areaCode);</span><br><span class="line">		result = <span class="number">31</span> * result + Short.hashCode(prefix);</span><br><span class="line">		result = <span class="number">31</span> * result + Short.hashCOde(lineNum);</span><br><span class="line">		<span class="keyword">return</span> result;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>클래스가 불변이고, 해시코드를 계산하는 비용이 크다면 매번 새로 계산하기보다 캐싱하는 방식을 고려하는게 좋은데 이럴때 hashCode를 지연초기화 하면 좋다. </li>
+<li>필드를 지연 초기화 하려면 스레드 안전하도록 만들어주도록 신경써야함 </li>
+</ul>
+
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/2021/09/15/java-effective-11/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                Comment and share
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
                             href="/2021/09/06/kotlin-basic-7/"
                             aria-label=": kotlin-basic-7"
                         >
@@ -1423,208 +1504,6 @@
                         <p>
                             <a
                                 href="/2021/06/22/jpa-work-1/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                Comment and share
-                            </a>
-                        </p>
-                    
-                </div>
-            
-        </div>
-        
-    </article>
-    
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/2021/06/13/jpa-transaction-second-cache/"
-                            aria-label=": jpa-transaction-second-cache"
-                        >
-                            jpa-transaction-second-cache
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time datetime="2021-06-13T11:56:54+00:00">
-	
-		    Jun 13, 2021
-    	
-    </time>
-    
-        <span>in </span>
-        
-    <a class="category-link" href="/categories/Study/">Study</a>, <a class="category-link" href="/categories/%EC%9E%90%EB%B0%94ORM%ED%91%9C%EC%A4%80JPA%ED%94%84%EB%A1%9C%EA%B7%B8%EB%9E%98%EB%B0%8D/">자바ORM표준JPA프로그래밍</a>, <a class="category-link" href="/categories/%ED%8A%B8%EB%9E%9C%EC%9E%AD%EC%85%98%EA%B3%BC-2%EC%B0%A8%EC%BA%90%EC%8B%9C/">트랜잭션과 2차캐시</a>
-
-
-    
-</div>
-
-            </div>
-            
-                <div class="postShorten-content">
-                    <h1 id="트랜잭션과-2차캐시"><a href="#트랜잭션과-2차캐시" class="headerlink" title="트랜잭션과 2차캐시"></a>트랜잭션과 2차캐시</h1><h2 id="1-트랜잭션과-락"><a href="#1-트랜잭션과-락" class="headerlink" title="1.트랜잭션과 락"></a>1.트랜잭션과 락</h2><h3 id="트랜잭션과-격리수준"><a href="#트랜잭션과-격리수준" class="headerlink" title="트랜잭션과 격리수준"></a>트랜잭션과 격리수준</h3><p>트랜잭션은 ACID라 하는 원자성,일관성,격리성,지속성을 보장해야한다.</p>
-<blockquote><ul>
-<li>원자성 : 트랜잭션내에서 실행한 작업들은 마치 하나의 작업인것처럼 모두 성공하든가 모두 실패해야함.</li>
-<li>일관성 : 모든 트랜잭션은 일관성있는 데이터베이스 상태를 유지해야함. 예를들어 데이터베이스에서 정한 무결성 제약조건을 항상 만족해야함.</li>
-<li>격리성 : 동시에 실행되는 트랜잭션들이 서로 영향을 미치지 않도록 격리한다. 예를들어 동시에 같은 데이터를 수정하지 못하도록 해야한다. 격리성은 동시성과 관련된 성능 이슈로 인해 격리수준을 선택할수 있다.</li>
-<li>지속성 : 트랜잭션을 성공적으로 끝내면 그 결과가 항상 기록되어야한다. 중간에 시스템에 문제가 발생해도 데이터베이스 로그등을 사용해서 성공한 트랜잭션 내용을 복구해야한다. </li>
-</ul>
-</blockquote>
-
-<p>트랜잭션은 원자성,일관성,지속성을 보장한다. 문제는 격리성인데 트랜잭션간에 격리성을 완벽히 보장하려면 트랜잭션을 거의 차례대로 실행해야한다. 이렇게 하면 동시성 처리 성능이 매주 나빠진다. 이런문제로 ANSI표준은 트랜잭션의 격리수준을 4단계로 나누어 정의했다. </p>
-<blockquote><p>트랜잭션 격리수준 4가지 종류와 발생되는 문제점 </p>
-<ul>
-<li>READ UNCOMMITED(커밋되지 않은 읽기)<ul>
-<li>DIRTY READ : 트랜잭션1이 데이터를 수정하고있는데, 커밋하지 않아도 트랜잭션2가 수정중인 데이터를 조회할수있다. 트랜잭션2가 DIRTY READ한 데이터를 사용하는데 트랜잭션1을 롤백하면 데이터 정합성에 심각한 문제가 발생할수있음.</li>
-<li>NON-REPEATABLE READ : 트랜잭션1이 회원A를 조회중인데, 갑자기 트랜잭션2가 회원A를 수정하고 커밋하면 트랜잭션1이 다시 회원A를 조회했을때 수정된 데이터가 조회된다. </li>
-<li>PHANTOM READ : 트랜잭션1이 10살이하의 회원을 조회했는데, 트랜잭션2가 5살 회원을 추가하고 커밋하면 트랜잭션1이 다시 10살 이하의 회원을 조회했을때 회원하나가 추가된 상태로 조회됨. 이처럼 반복조회시 결과 집합이 달라지는부분이 PHANTOM READ이다. </li>
-</ul>
-</li>
-<li>READ COMMITED (컷밋된 읽기)<ul>
-<li>NON-REPEATABLE READ</li>
-<li>PHANTOM READ</li>
-</ul>
-</li>
-<li>REPEATABLE READ (반복 가능한 읽기)<ul>
-<li>PHANTOM READ</li>
-</ul>
-</li>
-<li>SERIALIZABLE (직렬화 가능)</li>
-</ul>
-</blockquote>
-
-<h3 id="낙관적-락과-비관적-락-기초"><a href="#낙관적-락과-비관적-락-기초" class="headerlink" title="낙관적 락과 비관적 락 기초"></a>낙관적 락과 비관적 락 기초</h3><h4 id="낙관적-락"><a href="#낙관적-락" class="headerlink" title="낙관적 락"></a>낙관적 락</h4><ul>
-<li>이름그대로 트랜잭션 대부분은 충돌이 발생하지 않는다는 가정하는방법 </li>
-<li>DB에서 제공하는 락기능을 사용하는게 아니라, JPA가 제공하는 버전관리 기능을 사용한다. (쉽게말해 애플리케이션이 제공하는 락 임.)</li>
-<li>트랜잭션을 커밋하기 전까지는 트랜잭션 충돌을 알수없다. </li>
-</ul>
-<h4 id="비관적-락"><a href="#비관적-락" class="headerlink" title="비관적 락"></a>비관적 락</h4><ul>
-<li>이름그대로 트랜잭션의 충돌이 발생한다고 가정하고 우선 락을 걸고 보는것. </li>
-<li>이것은 데이터베이스 락기능을 사용함.</li>
-<li>select for update구문이 대표적임.</li>
-</ul>
-<h4 id="두번의-갱신-분실-문제"><a href="#두번의-갱신-분실-문제" class="headerlink" title="두번의 갱신 분실 문제"></a>두번의 갱신 분실 문제</h4><p>A와B가 같은 콘텐츠를 수정한다고 가정하자. 둘이 동시에 제목이 같은 콘텐츠를 수정하는중에 A가 먼저 수정완료 버튼을 눌렀다. 잠시후 사용자 B가 수정완료 버튼을 눌렀다. 결과적으로 먼저 완료한 사용자A의 수정사항은 사라지고 나중에 완료한 사용자B의 수정사항만 남게된다. 이것이 두번의 갱신 분실 문제라 한다.<br>두번의 갱신 분실문제는 데이터베이스 트랜잭션의 범위를 넘어선다. 따라서 3가지 선택방법이 있다.</p>
-<ol>
-<li>마지막 커밋만 인정하기 <ul>
-<li>사용자 A의 내용은 무시, 마지막 커밋한 B만 인정 </li>
-</ul>
-</li>
-<li>최초 커밋만 인정하기<ul>
-<li>A가 먼저 수정완료했기때문에, B가 수정완료하면 오류발생시킴</li>
-</ul>
-</li>
-<li>충돌하는 갱신 내용 병합하기 <ul>
-<li>A,B의 수정사항을 병합시킴 </li>
-</ul>
-</li>
-</ol>
-<p>기본은 보통 <strong>마지막 커밋만 인정하기</strong> 가 주로 사용됨. </p>
-<h3 id="Version"><a href="#Version" class="headerlink" title="@Version"></a>@Version</h3><p>낙관적 락을 사용하려면 @Version 을 사용해서 버전관리기능을 추가해야함. </p>
-<h4 id="Version의-적용가능-타입"><a href="#Version의-적용가능-타입" class="headerlink" title="@Version의 적용가능 타입"></a>@Version의 적용가능 타입</h4><ul>
-<li>Long(long)</li>
-<li>Integer(int)</li>
-<li>Short(short)</li>
-<li>TimeStamp</li>
-</ul>
-<h4 id="Version-의-특징"><a href="#Version-의-특징" class="headerlink" title="@Version 의 특징"></a>@Version 의 특징</h4><ul>
-<li>@Version을 사용하면 <strong>최초커밋만 인정</strong> 하기가 적용됨. </li>
-<li>엔티티의 값을 변경하면 무조건 증가됨. (단, 연관관계 필드는 외래 키를 관리하는 연관관계 주인필드를 수정할때만 버전이 증가됨.)</li>
-<li>@Version으로 추가한 버전관리 필드는 JPA가 직접관리하므로 개발자가 임의로 수정한면 안됨. (벌크연산제외) 만약 버전 값을 강제로 증가하려면 특별한 락 옵션을 선택하면 됨.</li>
-<li>벌크연산은 버전 증가를 무시함. 버전을 강제로 증가시키려면 강제로 version+1을 시켜야함.(수기 업데이트)</li>
-</ul>
-<h3 id="JPA락-사용"><a href="#JPA락-사용" class="headerlink" title="JPA락 사용"></a>JPA락 사용</h3><p>JPA를 사용할때 추천하는 전략은 READ COMMITED트랜잭션 격리수준 + 낙관적 버전 관리다. </p>
-<h4 id="낙관적-락-1"><a href="#낙관적-락-1" class="headerlink" title="낙관적 락"></a>낙관적 락</h4><ol>
-<li><p>NONE<br>@Version만 사용했을때 </p>
-<ul>
-<li>용도 : 조회한 엔티티를 수정할때 다른트랜잭션에 의해 변경되지 않아야함. 조회시점~수정시점까지 보장 </li>
-<li>동작 : 엔티티를 수정할때 버전을 체크하면서 버전을 증가한다. 이때 디비의 버전값이 현재버전이 아니면 예외발생 </li>
-<li>이점 : 두번의 갱신 분실 문제를 예방가능  </li>
-</ul>
-</li>
-<li><p>OPTIMISTIC<br>@Version만사용했을때와 달리, 이옵션을 사용하면 한번 조회한 엔티티는 트랜잭션 종료시까지 다른 트랜잭션에서 변경하지 않음을 보장해줌. </p>
-<ul>
-<li>용도 : 조회시점~트랜잭션이 끝날때까지 조회한 엔티티가 변경되지않음을 보장 시켜줌</li>
-<li>동작 : 트랜잭션을 커밋할때 버전정보 조회해서 현재 엔티티 버전과 같은지 검증해줌. 같지않으면 예외</li>
-<li>이점 : 이 옵션은 DIRTY READ 와 NON-REPEATABLE READ가 방지됨 </li>
-</ul>
-</li>
-</ol>
-<p>EX&gt; Board board = em.find(Board.class, id, LockModeType.OPTIMISTIC); </p>
-<ol start="3">
-<li><p>OPTIMISTIC_FORCE_INCREMENT<br>낙관적 락을 사용하면서 버전정보를 강제로 증가 시킴 </p>
-<ul>
-<li>용도 : 논리적 단위의 엔티티 묶음을 관리 할 수 있다. 게시물의 첨부파일만 추가했을때 게시물의 버전은 증가하지 않는다. 해당 게시물은 물리적으로 변경되지 않았지만, 논리적으로 변경되었기때문에, 게시물 버전도 강제로 증가시키려면, 이옵션 사용하면됨. </li>
-<li>동작 : 엔티티를 수정하지 않아도 트랜잭션을 커밋할때 버전정보 강제 증가 이때 데이터베이스의 버전이 엔티티버전과 다르면 예외가 발생. 추가로 엔티티를 수정하면 수정시 버전 업데이트가 발생한다. 따라서 총 2번의 버전증가가 될수있음.</li>
-<li>이점 : 강제로 버전을 증가해서 논리적인 단위의 엔티티 묶음을 버전관리 할수있음. </li>
-</ul>
-</li>
-</ol>
-<h4 id="비관적-락-1"><a href="#비관적-락-1" class="headerlink" title="비관적 락"></a>비관적 락</h4><p>비관적 락의 특징 </p>
-<ul>
-<li>엔티티가 아닌 스칼라 타입을 조회해도 사용가능</li>
-<li>데이터를 수정하는 즉시 트랜잭션 충돌을 감지 가능 </li>
-</ul>
-<p>비관적 락에서 발생하는 예외 </p>
-<ul>
-<li>javax.persistence.PessimisticLockException(JPA 예외)</li>
-<li>org.springframework.dao.PessimisticLockingFailureException(스프링 예외 추상화)</li>
-</ul>
-<ol>
-<li><p>PESSIMISTIC_WRITE<br>비관적 락이라면 보통 이 옵션을 뜻함. </p>
-<ul>
-<li>용도 : 디비에 쓰기락을 건다.</li>
-<li>동작 : 디비에 select for update 를 사용해서 락건다.</li>
-<li>이점 : NON-REPEATABLE READ를 방지. 락이 걸린 로우는 다른 트랜잭션이 수정못함</li>
-</ul>
-</li>
-<li><p>PESSIMISTIC_READ<br>데이터를 반복 읽기만 하고 수정하지 않는 용도로 락을 걸때 사용 일반적으로 잘 사용안함. 대부분은 디비 방언에 의해 PESSIMISTIC_WRITE 옵션으로 동작</p>
-<ul>
-<li>MySQL : lock in share mode</li>
-<li>PostgreSQL : for share </li>
-</ul>
-</li>
-<li><p>PESSIMISTIC_FORCE_INCREMENT<br>비관적 락중에 유일하게 버전 정보 사용함. 비관적 락이지만 버전 정보를 강제로 증가 시킴. 하이버네이트는 nowait 를 지원하는 디비에 대해서 for update nowait 옵션을 적용</p>
-<ul>
-<li>오라클 : for update nowait </li>
-<li>PostgreSQL : for update nowait</li>
-<li>nowait를 지원하지 않으면 for update가 사용됨</li>
-</ul>
-</li>
-</ol>
-<h4 id="비관적-락과-타임아웃"><a href="#비관적-락과-타임아웃" class="headerlink" title="비관적 락과 타임아웃"></a>비관적 락과 타임아웃</h4><ul>
-<li>비관적 락을 사용하면 락을 획득하기까지 트랜잭션이 무한정 기다림. 무한정 기다릴수없기에 타임아웃 시간을 줘서 적절하게 끊을수있음. 응답없으면 javax.persistence.LockTimeoutExcpetion발생함. </li>
-</ul>
-<p>EX&gt; properties.put(“javax.persistence.lock.timeout”, 10000); //HashMap으로사용. 10초 까지 대기 설정 </p>
-<h2 id="2-2차-캐시"><a href="#2-2차-캐시" class="headerlink" title="2. 2차 캐시"></a>2. 2차 캐시</h2><h3 id="1차-캐시와-2차-캐시"><a href="#1차-캐시와-2차-캐시" class="headerlink" title="1차 캐시와 2차 캐시"></a>1차 캐시와 2차 캐시</h3><h5 id="1차캐시-특징"><a href="#1차캐시-특징" class="headerlink" title="1차캐시 특징"></a>1차캐시 특징</h5><ul>
-<li>1차캐시는 같은 엔티티가 있으면 해당 엔티티를 그대로 반환함.따라서 1차캐시는 객체 동일성 (a == b)가 보장됨</li>
-<li>1차캐시는 기본적으로 영속성 컨텍스트 범위의 캐시(컨테이너환경에서는 트랜잭션 범위의 캐시, OSIV를 적용하면 요청범위의 캐시.)</li>
-</ul>
-<h5 id="2차캐시-특징"><a href="#2차캐시-특징" class="headerlink" title="2차캐시 특징"></a>2차캐시 특징</h5><ul>
-<li>2차캐시는 어플리케이션 범위의 캐시다. 따라서 어플리케이션이 종료될때까지 캐시가 유지됨. </li>
-<li>2자캐시를 적용하면 엔티티 매니저를 통해 데이터를 조회할때 우선 2차캐시에서 찾고 없으면 디비를 뒤짐. (적절하게 사용하면 디비 조회를 획기적으로 줄임가능)</li>
-<li>2차캐시는 영속성 유닛 범위의 캐시</li>
-<li>2차캐시는 조회한 객체를 그대로 반환하지 않고, 복사본을 만들어서 반환</li>
-<li>2차캐시는 디비 기본키를 기준으로 캐시하지만 영속성 컨텍스트가 다르면 객체 동일성(a == b)를 보장하지 않음. (이건 1차캐시도 동일한 사항)</li>
-</ul>
-<p>[참고]<br>김영한님 책에 1차캐시,2차캐시 동작방식에 대한 그림 있는데 햇깔리면 책 열어서 다시 보자! 그리고 실제로 적용하는 부분은 기록하지않았다. 나중에 필요할때 책을 참고하든지 구글링을해서 필요할때 참고하자.<br><a target="_blank" rel="noopener" href="https://www.baeldung.com/hibernate-second-level-cache">baeldung 2차캐시 ehcache적용방법</a></p>
-
-                    
-                        
-
-
-                    
-                    
-                        <p>
-                            <a
-                                href="/2021/06/13/jpa-transaction-second-cache/#post-footer"
                                 class="postShorten-excerpt_link link"
                                 aria-label=""
                             >

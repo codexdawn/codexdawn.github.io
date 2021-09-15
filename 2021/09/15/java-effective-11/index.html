@@ -1,0 +1,616 @@
+
+<!DOCTYPE html>
+<html lang="en">
+    
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="generator" content="codexdawn">
+    <title>java-effective-11 - codexdawn</title>
+    <meta name="author" content="codexdawn">
+    
+    
+    
+        
+            <link rel="alternate" type="application/atom+xml" title="RSS" href="/atom.xml">
+        
+    
+    <script type="application/ld+json">{"@context":"http://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"codexdawn","sameAs":["https://github.com/codexdawn","https://www.facebook.com/beherzt.dev","https://www.linkedin.com/in/sim-jisung-3048872a/","mailto:cloudkaiser@gmail.com"],"image":"https://www.gravatar.com/avatar/d97fd4b94c429915f1cb55eb27e7d4d9"},"articleBody":"equals를 재정의하려거든 hashCode도 재정의하라equals를 재정의하고 hashCode를 재정의 하지 않으면 어떻게됨? \n\n응. 사용못해.. 문제 발생해서 (Hash계열 컬렉션들은 모두 안됨 HashMap,HashSet.. )\nhash 계열은 키값을 기준으로 탐색하기 때문에, equals할때 해당 key에 해당하는 value를 찾고자 할텐데,이때 동일한 key값 여부를 찾게됨. 하지만 equals만 정의해버리면 hash가 재정의 되어있지않기때문에 nullPointerException이 발생하게 됨.(즉, 논리적인 같은 객체는 같은 해시코드를 반환해야한다.) \n가급적이면 IDE 혹은 AutoValue라이브러리 등 에서 정의해주는 부분을 그대로 사용하는것이 좋을듯함 \n\n최악의 해시코드 - 잘되긴하지만 하지말자1234@Override public int hashCode() &#123;\treturn 42; &#125;\n\n위 해시코드로 정의하는것이 최악의 로직인 이유는? \n\n모든 객체에게 똑같은 값만 내어주기떄문에 모든 객체가 해시테이블의 버킷 하나에 담겨 마치 연결 리스트 처럼 동작하게됨. 그 결과 평균시간이 O(1) 에서 O(N)으로 느려져서 객체가 많아지면 성능이 최악이됨 \n\n전형적인 해시코드 - PhoneNumber객체기준1234567@Override public int hashCode() &#123;\tint result = Short.hashCode(areaCode);\tresult = 31 * result + Short.hashCode(prefix);\tresult = 31 * result + Short.hashCOde(lineNum);\treturn result; &#125;\n\n\n위 코드에서 31을 곱하는 이유는 31이 홀수이면서 소수(Prime)이기때문인데, 짝수이면 오버플로우가 발생하면 정보를 잃게됨 \n성능 높인다 치고 해시 코드를 계산할때 필수필드를 생략해서는 절대로 안된다. 속도는 빨라질지 몰라도 나중에 해시테이블 성능을 급격하게 안좋게 할수있다. 특정 필드만 키값이 몰리는 현상을 고루 분포해서 해시테이블을 관리할수도있기때문에 가급적 필수 필드들은 왠만하면 다 정의해주자. \n\n해시코드 지연초기화 - 스레드 안정성 고려1234567891011private int hashCode; @Override public int hashCode() &#123;\tif(result == 0) &#123;\t\tresult = Short.hashCode(areaCode);\t\tresult = 31 * result + Short.hashCode(prefix);\t\tresult = 31 * result + Short.hashCOde(lineNum);\t\treturn result;\t&#125;&#125;\n\n\n클래스가 불변이고, 해시코드를 계산하는 비용이 크다면 매번 새로 계산하기보다 캐싱하는 방식을 고려하는게 좋은데 이럴때 hashCode를 지연초기화 하면 좋다. \n필드를 지연 초기화 하려면 스레드 안전하도록 만들어주도록 신경써야함 \n\n","dateCreated":"2021-09-15T07:42:17+00:00","dateModified":"2021-09-15T12:32:27+00:00","datePublished":"2021-09-15T07:42:17+00:00","description":"","headline":"java-effective-11","image":[],"mainEntityOfPage":{"@type":"WebPage","@id":"https://codexdawn.github.io/2021/09/15/java-effective-11/"},"publisher":{"@type":"Organization","name":"codexdawn","sameAs":["https://github.com/codexdawn","https://www.facebook.com/beherzt.dev","https://www.linkedin.com/in/sim-jisung-3048872a/","mailto:cloudkaiser@gmail.com"],"image":"https://www.gravatar.com/avatar/d97fd4b94c429915f1cb55eb27e7d4d9","logo":{"@type":"ImageObject","url":"https://www.gravatar.com/avatar/d97fd4b94c429915f1cb55eb27e7d4d9"}},"url":"https://codexdawn.github.io/2021/09/15/java-effective-11/","keywords":"Java,EffectiveJava"}</script>
+    <meta name="description" content="equals를 재정의하려거든 hashCode도 재정의하라equals를 재정의하고 hashCode를 재정의 하지 않으면 어떻게됨?   응. 사용못해.. 문제 발생해서 (Hash계열 컬렉션들은 모두 안됨 HashMap,HashSet.. ) hash 계열은 키값을 기준으로 탐색하기 때문에, equals할때 해당 key에 해당하는 value를 찾고자 할텐데,이때">
+<meta property="og:type" content="blog">
+<meta property="og:title" content="java-effective-11">
+<meta property="og:url" content="https://codexdawn.github.io/2021/09/15/java-effective-11/index.html">
+<meta property="og:site_name" content="codexdawn">
+<meta property="og:description" content="equals를 재정의하려거든 hashCode도 재정의하라equals를 재정의하고 hashCode를 재정의 하지 않으면 어떻게됨?   응. 사용못해.. 문제 발생해서 (Hash계열 컬렉션들은 모두 안됨 HashMap,HashSet.. ) hash 계열은 키값을 기준으로 탐색하기 때문에, equals할때 해당 key에 해당하는 value를 찾고자 할텐데,이때">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2021-09-15T07:42:17.000Z">
+<meta property="article:modified_time" content="2021-09-15T12:32:27.213Z">
+<meta property="article:author" content="codexdawn">
+<meta property="article:tag" content="Java,EffectiveJava">
+<meta name="twitter:card" content="summary">
+    
+    
+        
+    
+    
+    
+    
+    
+    <!--STYLES-->
+    
+<link rel="stylesheet" href="/assets/css/style-3sspfygaapf5d6tbrnqmyrhdcstv0iwwmi4wor2yeip9c44sowy9gbdzyyjm.min.css">
+
+    <!--STYLES END-->
+    
+
+    
+
+    
+        
+    
+</head>
+
+    <body>
+        <div id="blog">
+            <!-- Define author's picture -->
+
+
+    
+
+<header id="header" data-behavior="5">
+    <i id="btn-open-sidebar" class="fa fa-lg fa-bars"></i>
+    <div class="header-title">
+        <a
+            class="header-title-link"
+            href="/"
+            aria-label=""
+        >
+            codexdawn
+        </a>
+    </div>
+    
+        
+            <a
+                class="header-right-picture "
+                href="#about"
+                aria-label="Open the link: /#about"
+            >
+        
+        
+        </a>
+    
+</header>
+
+            <!-- Define author's picture -->
+
+
+<nav id="sidebar" data-behavior="5">
+    <div class="sidebar-container">
+        
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/"
+                            
+                            rel="noopener"
+                            title="Home"
+                        >
+                        <i class="sidebar-button-icon fa fa-home" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Home</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/all-categories"
+                            
+                            rel="noopener"
+                            title="Categories"
+                        >
+                        <i class="sidebar-button-icon fa fa-bookmark" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Categories</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/all-tags"
+                            
+                            rel="noopener"
+                            title="Tags"
+                        >
+                        <i class="sidebar-button-icon fa fa-tags" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Tags</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="#about"
+                            
+                            rel="noopener"
+                            title="About"
+                        >
+                        <i class="sidebar-button-icon fa fa-question" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">About</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="https://github.com/codexdawn"
+                            
+                                target="_blank"
+                            
+                            rel="noopener"
+                            title="GitHub"
+                        >
+                        <i class="sidebar-button-icon fab fa-github" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">GitHub</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="https://www.facebook.com/beherzt.dev"
+                            
+                                target="_blank"
+                            
+                            rel="noopener"
+                            title="Facebook"
+                        >
+                        <i class="sidebar-button-icon fab fa-facebook" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Facebook</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="https://www.linkedin.com/in/sim-jisung-3048872a/"
+                            
+                                target="_blank"
+                            
+                            rel="noopener"
+                            title="LinkedIn"
+                        >
+                        <i class="sidebar-button-icon fab fa-linkedin" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">LinkedIn</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="mailto:cloudkaiser@gmail.com"
+                            
+                                target="_blank"
+                            
+                            rel="noopener"
+                            title="Mail"
+                        >
+                        <i class="sidebar-button-icon fa fa-envelope" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Mail</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/atom.xml"
+                            
+                            rel="noopener"
+                            title="RSS"
+                        >
+                        <i class="sidebar-button-icon fa fa-rss" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">RSS</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+    </div>
+</nav>
+
+            
+            <div id="main" data-behavior="5"
+                 class="
+                        hasCoverMetaIn
+                        ">
+                
+<article class="post">
+    
+    
+        <div class="post-header main-content-wrap text-left">
+    
+        <h1 class="post-title">
+            java-effective-11
+        </h1>
+    
+    
+        <div class="post-meta">
+    <time datetime="2021-09-15T07:42:17+00:00">
+	
+		    Sep 15, 2021
+    	
+    </time>
+    
+        <span>in </span>
+        
+    <a class="category-link" href="/categories/Effective-Java/">Effective Java</a>, <a class="category-link" href="/categories/Study/">Study</a>, <a class="category-link" href="/categories/%EB%AA%A8%EB%93%A0-%EA%B0%9D%EC%B2%B4%EC%9D%98-%EA%B3%B5%ED%86%B5-%EB%A9%94%EC%84%9C%EB%93%9C/">모든 객체의 공통 메서드</a>
+
+
+    
+</div>
+
+    
+</div>
+
+    
+    <div class="post-content markdown">
+        <div class="main-content-wrap">
+            <h1 id="equals를-재정의하려거든-hashCode도-재정의하라"><a href="#equals를-재정의하려거든-hashCode도-재정의하라" class="headerlink" title="equals를 재정의하려거든 hashCode도 재정의하라"></a>equals를 재정의하려거든 hashCode도 재정의하라</h1><p>equals를 재정의하고 hashCode를 재정의 하지 않으면 어떻게됨? </p>
+<ul>
+<li>응. 사용못해.. 문제 발생해서 (Hash계열 컬렉션들은 모두 안됨 HashMap,HashSet.. )</li>
+<li>hash 계열은 키값을 기준으로 탐색하기 때문에, equals할때 해당 key에 해당하는 value를 찾고자 할텐데,이때 동일한 key값 여부를 찾게됨. 하지만 equals만 정의해버리면 hash가 재정의 되어있지않기때문에 nullPointerException이 발생하게 됨.(즉, 논리적인 같은 객체는 같은 해시코드를 반환해야한다.) </li>
+<li>가급적이면 IDE 혹은 AutoValue라이브러리 등 에서 정의해주는 부분을 그대로 사용하는것이 좋을듯함 </li>
+</ul>
+<figure class="highlight java"><figcaption><span>최악의 해시코드 - 잘되긴하지만 하지말자</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span> </span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">hashCode</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	<span class="keyword">return</span> <span class="number">42</span>; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>위 해시코드로 정의하는것이 최악의 로직인 이유는? </p>
+<ul>
+<li>모든 객체에게 똑같은 값만 내어주기떄문에 모든 객체가 해시테이블의 버킷 하나에 담겨 마치 연결 리스트 처럼 동작하게됨. 그 결과 평균시간이 O(1) 에서 O(N)으로 느려져서 객체가 많아지면 성능이 최악이됨 </li>
+</ul>
+<figure class="highlight java"><figcaption><span>전형적인 해시코드 - PhoneNumber객체기준</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span> </span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">hashCode</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	<span class="keyword">int</span> result = Short.hashCode(areaCode);</span><br><span class="line">	result = <span class="number">31</span> * result + Short.hashCode(prefix);</span><br><span class="line">	result = <span class="number">31</span> * result + Short.hashCOde(lineNum);</span><br><span class="line">	<span class="keyword">return</span> result; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>위 코드에서 31을 곱하는 이유는 31이 홀수이면서 소수(Prime)이기때문인데, 짝수이면 오버플로우가 발생하면 정보를 잃게됨 </li>
+<li>성능 높인다 치고 해시 코드를 계산할때 필수필드를 생략해서는 절대로 안된다. 속도는 빨라질지 몰라도 나중에 해시테이블 성능을 급격하게 안좋게 할수있다. 특정 필드만 키값이 몰리는 현상을 고루 분포해서 해시테이블을 관리할수도있기때문에 가급적 필수 필드들은 왠만하면 다 정의해주자. </li>
+</ul>
+<figure class="highlight java"><figcaption><span>해시코드 지연초기화 - 스레드 안정성 고려</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">int</span> hashCode; </span><br><span class="line"></span><br><span class="line"><span class="meta">@Override</span> </span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">hashCode</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	<span class="keyword">if</span>(result == <span class="number">0</span>) &#123;</span><br><span class="line">		result = Short.hashCode(areaCode);</span><br><span class="line">		result = <span class="number">31</span> * result + Short.hashCode(prefix);</span><br><span class="line">		result = <span class="number">31</span> * result + Short.hashCOde(lineNum);</span><br><span class="line">		<span class="keyword">return</span> result;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>클래스가 불변이고, 해시코드를 계산하는 비용이 크다면 매번 새로 계산하기보다 캐싱하는 방식을 고려하는게 좋은데 이럴때 hashCode를 지연초기화 하면 좋다. </li>
+<li>필드를 지연 초기화 하려면 스레드 안전하도록 만들어주도록 신경써야함 </li>
+</ul>
+
+            
+
+
+        </div>
+    </div>
+    <div id="post-footer" class="post-footer main-content-wrap">
+        
+            <div class="post-footer-tags">
+                <span class="text-color-light text-small">TAGGED IN</span><br/>
+                
+    <a class="tag tag--primary tag--small t-none-link" href="/tags/Java-EffectiveJava/" rel="tag">Java,EffectiveJava</a>
+
+            </div>
+        
+        
+            <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    <a
+                        class="post-action-btn btn btn--disabled"
+                        aria-hidden="true"
+                    >
+                        
+                        <i class="fa fa-angle-left" aria-hidden="true"></i>
+                        <span class="hide-xs hide-sm text-small icon-ml">PREVIOUS</span>
+                    </a>
+            </li>
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/2021/09/06/kotlin-basic-7/"
+                    data-tooltip="kotlin-basic-7"
+                    aria-label="NEXT: kotlin-basic-7"
+                >
+                    
+                        <span class="hide-xs hide-sm text-small icon-mr">NEXT</span>
+                        <i class="fa fa-angle-right" aria-hidden="true"></i>
+                    </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a
+                class="post-action-btn btn btn--default btn-open-shareoptions"
+                href="#btn-open-shareoptions"
+                aria-label="Share this post"
+            >
+                <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </a>
+        </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://codexdawn.github.io/2021/09/15/java-effective-11/"
+                    title="Share on Facebook"
+                    aria-label="Share on Facebook"
+                >
+                    <i class="fab fa-facebook" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://twitter.com/intent/tweet?text=https://codexdawn.github.io/2021/09/15/java-effective-11/"
+                    title="Share on Twitter"
+                    aria-label="Share on Twitter"
+                >
+                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://plus.google.com/share?url=https://codexdawn.github.io/2021/09/15/java-effective-11/"
+                    title="Share on Google+"
+                    aria-label="Share on Google+"
+                >
+                    <i class="fab fa-google-plus" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+        
+            
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#" aria-label="Back to top">
+            
+                <i class="fa fa-list" aria-hidden="true"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+        
+        
+            
+        
+    </div>
+</article>
+
+
+
+                <footer id="footer" class="main-content-wrap">
+    <span class="copyrights">
+        Copyrights &copy; 2021 codexdawn. All Rights Reserved.
+    </span>
+</footer>
+
+            </div>
+            
+                <div id="bottom-bar" class="post-bottom-bar" data-behavior="5">
+                    <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    <a
+                        class="post-action-btn btn btn--disabled"
+                        aria-hidden="true"
+                    >
+                        
+                        <i class="fa fa-angle-left" aria-hidden="true"></i>
+                        <span class="hide-xs hide-sm text-small icon-ml">PREVIOUS</span>
+                    </a>
+            </li>
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/2021/09/06/kotlin-basic-7/"
+                    data-tooltip="kotlin-basic-7"
+                    aria-label="NEXT: kotlin-basic-7"
+                >
+                    
+                        <span class="hide-xs hide-sm text-small icon-mr">NEXT</span>
+                        <i class="fa fa-angle-right" aria-hidden="true"></i>
+                    </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a
+                class="post-action-btn btn btn--default btn-open-shareoptions"
+                href="#btn-open-shareoptions"
+                aria-label="Share this post"
+            >
+                <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </a>
+        </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://codexdawn.github.io/2021/09/15/java-effective-11/"
+                    title="Share on Facebook"
+                    aria-label="Share on Facebook"
+                >
+                    <i class="fab fa-facebook" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://twitter.com/intent/tweet?text=https://codexdawn.github.io/2021/09/15/java-effective-11/"
+                    title="Share on Twitter"
+                    aria-label="Share on Twitter"
+                >
+                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://plus.google.com/share?url=https://codexdawn.github.io/2021/09/15/java-effective-11/"
+                    title="Share on Google+"
+                    aria-label="Share on Google+"
+                >
+                    <i class="fab fa-google-plus" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+        
+            
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#" aria-label="Back to top">
+            
+                <i class="fa fa-list" aria-hidden="true"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+                </div>
+                
+    <div id="share-options-bar" class="share-options-bar" data-behavior="5">
+        <i id="btn-close-shareoptions" class="fa fa-times"></i>
+        <ul class="share-options">
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://www.facebook.com/sharer/sharer.php?u=https://codexdawn.github.io/2021/09/15/java-effective-11/"
+                        aria-label="Share on Facebook"
+                    >
+                        <i class="fab fa-facebook" aria-hidden="true"></i><span>Share on Facebook</span>
+                    </a>
+                </li>
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://twitter.com/intent/tweet?text=https://codexdawn.github.io/2021/09/15/java-effective-11/"
+                        aria-label="Share on Twitter"
+                    >
+                        <i class="fab fa-twitter" aria-hidden="true"></i><span>Share on Twitter</span>
+                    </a>
+                </li>
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://plus.google.com/share?url=https://codexdawn.github.io/2021/09/15/java-effective-11/"
+                        aria-label="Share on Google+"
+                    >
+                        <i class="fab fa-google-plus" aria-hidden="true"></i><span>Share on Google+</span>
+                    </a>
+                </li>
+            
+        </ul>
+    </div>
+
+
+            
+        </div>
+        
+
+
+<div id="about">
+    <div id="about-card">
+        <div id="about-btn-close">
+            <i class="fa fa-times"></i>
+        </div>
+        
+            <h4 id="about-card-name">codexdawn</h4>
+        
+            <div id="about-card-bio"><p>author.bio</p>
+</div>
+        
+        
+            <div id="about-card-job">
+                <i class="fa fa-briefcase"></i>
+                <br/>
+                <p>author.job</p>
+
+            </div>
+        
+        
+    </div>
+</div>
+
+        
+        
+<div id="cover" style="background-image:url('/assets/images/cover-v1.2.0.jpg');"></div>
+        <!--SCRIPTS-->
+
+<script src="/assets/js/script-ikbi0v8fyzuu91xv5rmpcrnwb4qinfgborzd5kejmj8wr6ibfra8oaxqshyg.min.js"></script>
+
+<!--SCRIPTS END-->
+
+
+    
+
+
+
+
+    </body>
+</html>
