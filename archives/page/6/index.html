@@ -247,6 +247,357 @@
                     
                         <a
                             class="link-unstyled"
+                            href="/2021/02/15/clean-code-7/"
+                            aria-label=": clean-code-7"
+                        >
+                            clean-code-7
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2021-02-15T13:08:46+00:00">
+	
+		    Feb 15, 2021
+    	
+    </time>
+    
+        <span>in </span>
+        
+    <a class="category-link" href="/categories/Clean-Code/">Clean Code</a>, <a class="category-link" href="/categories/Study/">Study</a>, <a class="category-link" href="/categories/%EA%B2%BD%EA%B3%84/">경계</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <h1 id="경계"><a href="#경계" class="headerlink" title="경계"></a>경계</h1><h2 id="외부-코드-사용하기"><a href="#외부-코드-사용하기" class="headerlink" title="외부 코드 사용하기"></a>외부 코드 사용하기</h2><ul>
+<li>java.util.Map이 제공하는 기능성과 유연성은 확실히 유용하지만, 그만큼 위험도 크다. (ex&gt; clear(), 제네릭스가 없는 Map객체 -&gt; 사용자가 맘만 먹으면 어떤 객체 유형도 추가 가능)</li>
+</ul>
+<figure class="highlight java"><figcaption><span>Map사용 나쁜예1</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Map sensors = <span class="keyword">new</span> HashMap();</span><br><span class="line">Sensor s = (Sensor) sensors.get(sensorId); </span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>위 코드는 Map이 반환하는 Object를 올바른 유형으로 변환할 책임은 Map을 사용하는 클라이언트에 있다. (get(sensorId)) </li>
+<li>위 코드는 동작은 하지만, 깨끗한 코드라고 보기 어렵고, 의도도 분명히 드러나지 않는다. </li>
+</ul>
+<figure class="highlight java"><figcaption><span>Map사용 나쁜예2</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Map&lt;String,Sensor&gt; sensors = <span class="keyword">new</span> HashMap&lt;Sensor&gt;();</span><br><span class="line">Sensor s = sensors.get(sensorId); </span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>위 코드는 ‘나쁜예1’ 코드의 제네릭스로 조금 개선하여 코드 가독성을 높였지만, “Map&lt;String,Sensor&gt; 가 사용자에게 필요하지 않은 기능까지 제공한다” 라는 부분은 해결하지 못했다. </li>
+</ul>
+<figure class="highlight java"><figcaption><span>Map사용 개선예</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Sensors</span> </span>&#123;</span><br><span class="line">	<span class="keyword">private</span> Map sensors = <span class="keyword">new</span> HashMap(); </span><br><span class="line">	</span><br><span class="line">	<span class="function"><span class="keyword">public</span> Sensor <span class="title">getById</span><span class="params">(String id)</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> (Sensor) sensors.get(id); </span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>위 코드는 경계 인터페이스인 Map을 Sensors 안으로 숨겼다. (캡슐화) 따라서 Map 인터페이스가 변하더라도 나머지 프로그램에는 영향이 없음. </li>
+<li>제네릭스 사용하든 안하든 문제없음.</li>
+<li>Sensors 클래스는 프로그램에 필요한 인터페이스만 제공 (코드는 이해도 증가, 오용하기 어려움)</li>
+<li>Sensors 클래스는 설계 규칙과 비즈니스 규칙을 따르도록 강제할수있음.(인터페이스)</li>
+<li>저자는 Map과 같은 경계 인터페이스를 무조건 캡슐화 하라는것이 아니라, Map가지고 이용하는 클래스나 클래스 계열 밖으로 노출되지 않도록 주의해야함. </li>
+</ul>
+<h2 id="경계-살피고-익히기"><a href="#경계-살피고-익히기" class="headerlink" title="경계 살피고 익히기"></a>경계 살피고 익히기</h2><ul>
+<li>외부에서 가져온 라이브러리 혹은 패키지를 사용하고 싶다면, 곧바로 우리쪽 코드를 작성해 외부 코드를 호출하는 대신 먼저 간단한 테스트 케이스를 작성해 외부코드를 익히면 그나마 수월하다고 함. (학습 테스트)</li>
+</ul>
+<h2 id="log4j-익히기"><a href="#log4j-익히기" class="headerlink" title="log4j 익히기"></a>log4j 익히기</h2><ul>
+<li>‘경계 살피고 익히기’ 에서 소개한 ‘학습 테스트’를 log4j를 익히는 과정으로 ‘학습 테스트’를 설명하는 구간이다. </li>
+<li>log.info를 띄우는 방법을 차근차근 단위 테스트를 하면서, 사용법을 익히고 어느정도 숙달이 되면, 캡슐화를 통해 log4j라는 경계 인터페이스를 몰라도 되도록 만들면, 학습 테스트를 통해 경계 인터페이스를 잘 사용할수 있음. </li>
+</ul>
+<h2 id="학습-테스트는-공짜-이상이다"><a href="#학습-테스트는-공짜-이상이다" class="headerlink" title="학습 테스트는 공짜 이상이다"></a>학습 테스트는 공짜 이상이다</h2><ul>
+<li>학습 테스트는 비용이 없다. (API를 사용하려면 배워야하기 때문)</li>
+<li>투자하는 노력보다 얻는 성과가 크다. 패키지 새 버전이 나오면 학습 테스트를 돌려 차이가 있는지 확인 한다. </li>
+<li>학습테스트는 패키지가 예상대로 도는지 검증함. </li>
+<li>새 버전이 우리 코드와 호환되지않으면 학습 테스트가 이 사실을 곧바로 밝혀냄 </li>
+<li>학습테스트로 단위 테스트를 짤때, 실제 코드와 동일한 방식으로 인터페이스를 사용하는 테스트 케이스가 필요함. </li>
+</ul>
+<h2 id="아직-존재하지-않는-코드를-사용하기"><a href="#아직-존재하지-않는-코드를-사용하기" class="headerlink" title="아직 존재하지 않는 코드를 사용하기"></a>아직 존재하지 않는 코드를 사용하기</h2><ul>
+<li>경계와 관련해 또 다른 유형은 아는 코드와 모르는 코드를 분리하는 경계다. </li>
+<li>저자의 예제인 Transmitter는 Transmitter의 외부 라이브러리에 대한 지식이 전혀 없는 상태에서 차근차근 적용하는 과정을 설명한 부분이다. </li>
+</ul>
+<p><img src="https://nesoy.github.io/assets/posts/20180207/adapterPattern.png" alt="송신기 예측하기"></p>
+<ol>
+<li>자체적인 인터페이스 정의인 Transmitter 인터페이스를 만들어서, 실제로 개발해야하는 transmit 메서드를 정의함. (transmit는 주파수와 스트림을 입력으로 받음) -&gt; 인터페이스를 구현하면 전적으로 개발자가 통제한다는 장점이 생김. (가독성 증가)</li>
+<li>CommunicationController를 통해 사용될 로직만 정의함. </li>
+<li>상대팀이 송신기 API를 정의한후에, TransmitterAdoptor를 구현해 사용할 API를 캡슐화하여 API가 바뀔때 수정할 코드를 한곳으로 몰아넣음.</li>
+<li>FakeTransmitter클래스를 사용하여 실제 데이터가 없이도 Mock데이터로 기능구현 가능하도록 하였음.</li>
+<li>Transmitter API 인터페이스가 나온다음 경계 테스트 케이스를 생성해 API를 올바로 사용하는지 테스트 할 수 있음. </li>
+</ol>
+<h2 id="깨끗한-경계"><a href="#깨끗한-경계" class="headerlink" title="깨끗한 경계"></a>깨끗한 경계</h2><ul>
+<li>소프트웨어 설계가 우수하다면 변경하는데 많은 투자와 재작업이 필요없다. </li>
+<li>경계에 위치하는 코드는 깔끔히 분리한다. 또한 기대치를 정의하는 테스트 케이스도 작성한다. </li>
+<li>이쪽 코드에서 외부 패키지를 세세하게 알아야 할 필요없음. 통제가 불가능한 외부 패키지를 의존하지말고, 인터페이스로 분리해서 독자적인 패키지를 만들자.</li>
+<li>외부 패키지를 호출하는 코드를 가능한 줄여 경계를 관리하자. 예시로본 Map처럼 새로운 클래스로 경계를 감싸거나(캡슐화) Adaptor패턴을 이용해 우리가 원하는 인터페이스를 패키지가 제공하는 인터페이스로 변환하자. </li>
+</ul>
+<h2 id="Adaptor패턴"><a href="#Adaptor패턴" class="headerlink" title="Adaptor패턴"></a>Adaptor패턴</h2><ul>
+<li>Wrapper패턴으로 불리기도함. </li>
+<li>일반상품을 예쁜 포장지로 싸서 선물용 상품으로 만드는것 결국 무엇인가를 포장해 다른 용도로 사용할 수 있게 교환해 주는것이 wrapper이며 adaptor이다. </li>
+</ul>
+<ol>
+<li>상속 (inheritant)</li>
+</ol>
+<ul>
+<li>Print &lt;– PrintBanner -&gt; Banner </li>
+</ul>
+<ol start="2">
+<li>위임 (delegation)</li>
+</ol>
+<ul>
+<li>Print &lt;- PrintBanner &lt;&gt;-&gt; Banner</li>
+<li>delegation(위임)은 제어를 외부 컴포넌트를 통해 맡기는 부분. (DI와 유사함. IoC)</li>
+</ul>
+
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/2021/02/15/clean-code-7/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                Comment and share
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
+                            href="/2021/02/09/clean-code-6/"
+                            aria-label=": clean-code-6"
+                        >
+                            clean-code-6
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2021-02-09T10:24:13+00:00">
+	
+		    Feb 09, 2021
+    	
+    </time>
+    
+        <span>in </span>
+        
+    <a class="category-link" href="/categories/Clean-Code/">Clean Code</a>, <a class="category-link" href="/categories/Study/">Study</a>, <a class="category-link" href="/categories/%EC%98%A4%EB%A5%98%EC%B2%98%EB%A6%AC/">오류처리</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <h1 id="오류처리"><a href="#오류처리" class="headerlink" title="오류처리"></a>오류처리</h1><blockquote><p>뭔가 잘못될 가능성은 늘 존재한다. 뭔가 잘못되면 바로 잡을 책임은 바로 우리 프로그래머에 있다. </p>
+</blockquote>
+
+<h2 id="예외코드보다-예외를-사용하라"><a href="#예외코드보다-예외를-사용하라" class="headerlink" title="예외코드보다 예외를 사용하라"></a>예외코드보다 예외를 사용하라</h2><ul>
+<li>예외가 지원되지 않았을 시절에는 오류코드로 예외처리를 사용하였다. </li>
+<li>근래 언어들이 예외처리가 지원되면서, 오류가 발생하면 예외로 던지는걸 추천하고있음. </li>
+<li>함수 호출 즉시 오류를 확인해야하기 때문에 예외처리를 하는것을 권장 </li>
+</ul>
+<h2 id="try-catch-finally"><a href="#try-catch-finally" class="headerlink" title="try-catch-finally"></a>try-catch-finally</h2><ul>
+<li>코드를 작성할때 시작을 강제로 예외를 일으키는 테스트 케이스를 작성후 테스트를 통과하게 코드를 작성하는 방법을 권장 그러면 자연스럽게 try 블록의 트랜잭션 뻠위부터 구현하게 되므로 범위 내에서 트랜잭션 본질을 유지하기 쉽다. </li>
+</ul>
+<h2 id="미확인-unchecked-예외를-사용하라"><a href="#미확인-unchecked-예외를-사용하라" class="headerlink" title="미확인(unchecked) 예외를 사용하라"></a>미확인(unchecked) 예외를 사용하라</h2><ul>
+<li><p>checked 예외는 OCP를 위반한다. 메서드에서 확인된 예외를 던졌는데 catch 블록이 세 단계 위에 있다면 그 사이 메서드 모두가 선언부에 해당 예외를 정의해야한다. 즉, 하위 단계에서 코드를 변경하면 상위 단계 메서드 선언부를 전부 고쳐야 한다는 말이다. 모듈과 관련된 코드가 전혀 바뀌지 않았더라도 (선언부가 바뀌었으므로) 모듈을 다시 빌드한 다음 배포해야 한다는 말이다. </p>
+</li>
+<li><p>checked 예외는 사용하는 모든 함수를 강제적으로 예외를 처리하게 하기때문에, 캡슐화가 깨진다. 그렇다고 checked예외가 무조건 나쁜건 아니다. (중요한 라이브러리를 개발한다면 모든 예외를 강제 해야한다.)</p>
+</li>
+</ul>
+<h2 id="예외에-의미를-제공하라"><a href="#예외에-의미를-제공하라" class="headerlink" title="예외에 의미를 제공하라"></a>예외에 의미를 제공하라</h2><ul>
+<li>printStackTrace정보를 던지는것 보다 타 개발자가 직관적으로 알수 있도록 의미있는 문구로 예외처리 하도록 하자.</li>
+<li>예외를 잡을때 로그랑 같이 잡아서 좀 더 디테일한 예외상황에 대해서 알면 더 좋을듯하다. </li>
+</ul>
+<h2 id="호출자를-고려해-예외-클래스를-정의하라"><a href="#호출자를-고려해-예외-클래스를-정의하라" class="headerlink" title="호출자를 고려해 예외 클래스를 정의하라"></a>호출자를 고려해 예외 클래스를 정의하라</h2><ul>
+<li>외부라이브러리의 API를 활용할때는 Wrapper클래스로 감싸서 모듈화 하는 방식 (Component로 빼는방식도 좋겠다.) 을 고려하자. </li>
+<li>Wrapper클래스로 감싼 클래스를 가지고 그 라이브러리의 예외를 잡을 RuntimeException을 새로 정의해서 2-3 종류 이상 예외가 발생하는 라이브러리의 예외 의존도를 낮추도록 하게 하자.  </li>
+</ul>
+<h2 id="정상-흐름을-정의하라"><a href="#정상-흐름을-정의하라" class="headerlink" title="정상 흐름을 정의하라"></a>정상 흐름을 정의하라</h2><ul>
+<li>try-catch를 논리코드를 작성하는 부분은 하지 말자. 예외는 예외 답게 처리하자.(가끔 if-else문처럼 사용하는 경우가 있음.그건 하지 말자.) </li>
+<li>만약에 예외적인처리에서 뭔가 다른 액션을 처리해야한다면, 예외가 발생하는 로직을 분리해서 새로운 객체에 반환할 수 있도록 로직을 수정하는 사례가 있다. (특수사례 패턴 (Special Case Pattern) 참고 )</li>
+</ul>
+<h2 id="null을-반환하지-마라"><a href="#null을-반환하지-마라" class="headerlink" title="null을 반환하지 마라"></a>null을 반환하지 마라</h2><ul>
+<li>보통 개발하다보면, claimInfo != null 혹은 ObjectUtils.isEmpty(claimInfo) 처럼 null 객체를 체크하는 경우가 자주 있다. 사실 NullPointerException이 유발될까바 저렇게 체크하는건데, 호출하는 메서드에서 null자체를 반환하지 않도록 만들라고 추천한다. (예외적인 상황이 발생했을때 빈객체 혹은 Collections.emptyList같은 객체로 말이다.)</li>
+</ul>
+<h2 id="null을-전달하지-마라"><a href="#null을-전달하지-마라" class="headerlink" title="null을 전달하지 마라"></a>null을 전달하지 마라</h2><ul>
+<li>메서드에서 null을 반환하는것 보다 메서드로 Null을 전달하는건 더 나쁨.</li>
+<li>파라미터단에 null이 들어오는걸 방지하려면, 여러가지가 있지만 저자는 assert를 활용해서 체크하는 방식을 추천</li>
+<li>assert말고 Objects.requireNonNull로도 확인하기도함. 더러 Optional을 가지고 체크하기도하지만, 이부분은 비용이 많이 나가서 비추. </li>
+<li>대다수 프로그래밍 언어는 호출자가 실수로 넘기는 Null을 적절히 처리하는 방법이없다. 그렇다면 애초에 null을 넘기지 못하도록 금지하는 정책이 합리적이다. 즉, 인수로 null이 넘어온다는 자체가 문제라는 말이다. </li>
+</ul>
+
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/2021/02/09/clean-code-6/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                Comment and share
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
+                            href="/2021/02/08/clean-code-5/"
+                            aria-label=": clean-code-5"
+                        >
+                            clean-code-5
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2021-02-08T11:10:39+00:00">
+	
+		    Feb 08, 2021
+    	
+    </time>
+    
+        <span>in </span>
+        
+    <a class="category-link" href="/categories/Clean-Code/">Clean Code</a>, <a class="category-link" href="/categories/Study/">Study</a>, <a class="category-link" href="/categories/%EA%B0%9D%EC%B2%B4%EC%99%80-%EC%9E%90%EB%A3%8C%EA%B5%AC%EC%A1%B0/">객체와 자료구조</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <h1 id="객체와-자료구조"><a href="#객체와-자료구조" class="headerlink" title="객체와 자료구조"></a>객체와 자료구조</h1><blockquote><p>변수를 비공개로 정의하는 이유가 있다. 남들이 변수에 의존하지 않게 만들고 싶어서다. </p>
+</blockquote>
+
+<h2 id="자료-추상화"><a href="#자료-추상화" class="headerlink" title="자료 추상화"></a>자료 추상화</h2><figure class="highlight java"><figcaption><span>6-1. 구체적인 Point클래스</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Point</span> </span>&#123;</span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">double</span> x; </span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">double</span> y; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><figcaption><span>6-2. 추상적인 Point클래스</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">Point</span> </span>&#123;</span><br><span class="line">	<span class="function"><span class="keyword">double</span> <span class="title">getX</span><span class="params">()</span></span>;</span><br><span class="line">	<span class="function"><span class="keyword">double</span> <span class="title">getY</span><span class="params">()</span></span>;</span><br><span class="line">	<span class="function"><span class="keyword">double</span> <span class="title">setCartesian</span><span class="params">(<span class="keyword">double</span> x, <span class="keyword">double</span> y)</span></span>;</span><br><span class="line">	<span class="function"><span class="keyword">double</span> <span class="title">getR</span><span class="params">()</span></span>; </span><br><span class="line">	<span class="function"><span class="keyword">double</span> <span class="title">getTheta</span><span class="params">()</span></span>;</span><br><span class="line">	<span class="function"><span class="keyword">void</span> <span class="title">setPolar</span><span class="params">(<span class="keyword">double</span> r, <span class="keyword">double</span> theta)</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="1-6-1-VS-6-2-코드의-승자는"><a href="#1-6-1-VS-6-2-코드의-승자는" class="headerlink" title="1. 6-1 VS 6-2 코드의 승자는?"></a>1. 6-1 VS 6-2 코드의 승자는?</h3><ul>
+<li>6-1은 개별적으로 좌표값을 읽고 설정하게 강제함. </li>
+<li>6-1은 구현ㅇ르 노출한다. 설사, private으로 변수를 선언해도, 각 값마다 getter/setter 함수를 제공한다면 구현을 외부로 노출하는 셈이다. </li>
+<li>6-2는 자료 구조 이상을 표현한다. 클레스 메서드 마다 접근 정책을 강제한다. (무조건 구현하도록)</li>
+<li>6-2는 좌표를 읽을 때는 각 값을 개별적으로 읽어야 한다. 하지만 좌표를 설정할 때는 두 값을 한번에 설정해야 한다. </li>
+</ul>
+<p>위 두코드의 승자는 6-2! 이유는 변수 사이에 함수라는 계층을 넣는다고, 구현이 저절로 감춰지지는 않는다. 구현을 감추려면 추상화가 필수다! 그저 형식에 치우쳐 getter/setter함수로 변수를 다룬다고 클래스가 되는게 아니다. 그보다는 추상 인터페이스를 제공해 사용자가 구현을 모른 채 자료의 핵심을 조작할 수 있어야 진정한 의미의 클래스다! </p>
+<figure class="highlight java"><figcaption><span>6-3. 구체적인 Vehicle 클래스</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">Vehicle</span> </span>&#123;</span><br><span class="line">	<span class="function"><span class="keyword">double</span> <span class="title">getFuelTankCapacityInGallons</span><span class="params">()</span></span>;</span><br><span class="line">	<span class="function"><span class="keyword">double</span> <span class="title">getGallonsOfGasoline</span><span class="params">()</span></span>; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><figcaption><span>6-4. 추상적인 Vihicle클래스</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">Vihicle</span> </span>&#123;</span><br><span class="line">	<span class="function"><span class="keyword">double</span> <span class="title">getPercentFuelRemaining</span><span class="params">()</span></span>; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-6-3-VS-6-4-코드의-승자는"><a href="#2-6-3-VS-6-4-코드의-승자는" class="headerlink" title="2. 6-3 VS 6-4 코드의 승자는?"></a>2. 6-3 VS 6-4 코드의 승자는?</h3><ul>
+<li>6-3은 자동차 연료 상태를 구체적인 숫자 값으로 알려준다. </li>
+<li>6-4는 자동차 연료 상태를 백분율이라는 추상적인 개념으로 알려준다. </li>
+<li>6-3은 두 함수가 변수값을 읽어 반환할 뿐이라는 사실이 거의 확실함. </li>
+<li>6-4는 정보가 어디서 오는지 전혀 드러나지 않는다. </li>
+</ul>
+<p>위 두 코드의 승자는? 6-4! 그 이유는 자룔르 세세하게 공개하기 보다 추상적인 개념으로 표현하는 편이 더 좋다. 인터페이스나 getter/setter 함수 만으로 추상화가 이뤄지지 않는다. 개발자는 객체가 포함하는 자료를 표현할 가장 좋은ㅇ 방법을 심각하게 고민해야한다! </p>
+<h2 id="자료-객체-비대칭"><a href="#자료-객체-비대칭" class="headerlink" title="자료/객체 비대칭"></a>자료/객체 비대칭</h2><figure class="highlight java"><figcaption><span>6-5. 절차적인 도형 (절차지향)</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Square</span> </span>&#123;</span><br><span class="line">	<span class="keyword">public</span> Point topLeft; </span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">double</span> side; </span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Rectangle</span> </span>&#123;</span><br><span class="line">	<span class="keyword">public</span> Point topLeft; </span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">double</span> height; </span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">double</span> width; </span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Circle</span> </span>&#123;</span><br><span class="line">	<span class="keyword">public</span> Point center; </span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">double</span> radius; </span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Geomatry</span> </span>&#123;</span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">double</span> PI = <span class="number">3.14</span>;</span><br><span class="line">	</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">double</span> <span class="title">area</span><span class="params">(Object shape)</span> <span class="keyword">throws</span> NoSuchShapeException </span>&#123;</span><br><span class="line">		<span class="keyword">if</span>(shape <span class="keyword">instanceof</span> Square) &#123;</span><br><span class="line">			Square s = (Square) shape; </span><br><span class="line">			<span class="keyword">return</span> s.side * s.side; </span><br><span class="line">		&#125; <span class="keyword">else</span> <span class="keyword">if</span> (shape <span class="keyword">instanceof</span> Rectangle) &#123;</span><br><span class="line">			Rectangle r = (Rectangle) shape; </span><br><span class="line">			<span class="keyword">return</span> r.height * r.width; </span><br><span class="line">		&#125; <span class="keyword">else</span> <span class="keyword">if</span> (shape <span class="keyword">instanceof</span> Circle) &#123;</span><br><span class="line">			Circle c = (Circle) shape; </span><br><span class="line">			<span class="keyword">return</span> PI * c.radius * c.radius; </span><br><span class="line">		&#125; </span><br><span class="line">		<span class="keyword">throw</span> <span class="keyword">new</span> NoSuchShapeException();</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><figcaption><span>6-6. 다형적인 도형 (객체지향)</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Square</span> <span class="keyword">implements</span> <span class="title">Shape</span> </span>&#123;</span><br><span class="line">	<span class="keyword">private</span> Point topLeft; </span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">double</span> side; </span><br><span class="line">	</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">double</span> <span class="title">area</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> side * side; </span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Rectangle</span> <span class="keyword">implements</span> <span class="title">Shape</span> </span>&#123;</span><br><span class="line">	<span class="keyword">private</span> Point topLeft;</span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">double</span> height; </span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">double</span> width; </span><br><span class="line">	</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">double</span> <span class="title">area</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> height * width; </span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Circle</span> <span class="keyword">implements</span> <span class="title">Shape</span> </span>&#123;</span><br><span class="line">	<span class="keyword">private</span> Point center; </span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">double</span> radius; </span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">double</span> PI = <span class="number">3.14</span>; </span><br><span class="line">	</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">double</span> <span class="title">area</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> PI * radius * radius; </span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">Shape</span> </span>&#123;</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">double</span> <span class="title">area</span><span class="params">()</span></span>; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="6-5-VS-6-6-코드의-승자는"><a href="#6-5-VS-6-6-코드의-승자는" class="headerlink" title="6-5 VS 6-6 코드의 승자는?"></a>6-5 VS 6-6 코드의 승자는?</h3><ul>
+<li>6-5는 Geomatry 클래스 내부에 함수를 자유롭게 추가 할수 있다. </li>
+<li>6-5는 새 도형이 추가된다면 Geomatry클래스 내부에 있는 함수들을 모두 수정해줘야 할수도 있다. </li>
+<li>6-6은 6-5처럼 굳이 Geomatry클래스가 필요없고, 새 도형을 추가해도 기존 함수에 아무런 영향을 주지 않는다. </li>
+<li>6-6은 새 함수를 추가하면 모든 도형 클래스에 (Shape 인터페이스에 속한) 새 함수를 강제적으로 넣어줘야함.</li>
+</ul>
+<p>위 두 코드의 승자는? 결론은 무승부! </p>
+<ul>
+<li>절차적인 코드는 기존 자료구조를 변경하지 않으면서 새 함수를 추가하기 쉽다. 반면, 객체 지향 코드는 기존 함수를 변경하지 않으면서 새 클래스를 추가하기 쉽다. </li>
+<li>절차적인 코드는 새로운 자료 구조를 추가하기 어렵다. 그러려면 모든 함수를 고쳐야한다. 객체 지향 코드는 새로운 함수를 추가하기 어렵다. 그러려면 모든 클래스를 고쳐야한다. </li>
+</ul>
+<p>다시말해, 객체 지향 코드에서 어려운 변경은 절차적인 코드에서 쉬우며, 절차적인 코드에서 어려운 변경은 객체 지향 코드에서 쉽다!<br>복잡한 시스템을 짜다보면 새로운 함수가 아니라 새로운 자료 타입이 필요한 경우가 생긴다. 이때는 클래스 와 객체 지향 코드에서 쉽다!<br>반면, 새로운 자료 타입이 아니라 새로운 함수가 필요한 경우도 생긴다. 이때는 절차적인 코드와 자료구조가 좀 더 적합함! </p>
+<h2 id="디미터-법칙"><a href="#디미터-법칙" class="headerlink" title="디미터 법칙"></a>디미터 법칙</h2><p>디미터 법칙은 자신이 조작하는 객체의 속사정을 몰라야 한다는 법칙이다. 즉, 객체는 자료를 숨기고 함수를 공개한다.<br>디미터 법칙은 “클래스 C의 메서드 f는 다음과 같은 객체의 메서드만 호출해야한다.”</p>
+<ul>
+<li>클래스 C</li>
+<li>f가 생성한 객체 </li>
+<li>f 인수로 넘어온 객체 </li>
+<li>C 인스턴스 변수에 저장된 객체 </li>
+</ul>
+<p>디미터 법칙을 해하는 가장 대표적인 예는 메서드 체이닝을 활용하는 부분 (모든 메서드 체이닝이 문제가 아니라는 것이 중요!) 이라 할수있다. </p>
+<figure class="highlight java"><figcaption><span>디미터 법칙을 어긴 예</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">final</span> String outputDir = ctxt.getOptions().getScratchDir().getAbsolutePath(); </span><br></pre></td></tr></table></figure>
+
+<h3 id="기차-충돌"><a href="#기차-충돌" class="headerlink" title="기차 충돌"></a>기차 충돌</h3><p>위와 같은 코드를 기차 충돌이라고 한다. 위와 같은 코드는 차라리 아래와 같이 나누는편이 좋다. </p>
+<figure class="highlight java"><figcaption><span>디미터 법칙을 어긴 예</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Option opts = ctxt.getOptions();</span><br><span class="line">File scrachDir = opts.getScratchDir();</span><br><span class="line"><span class="keyword">final</span> String outputDir = scratchDir.getAbsolutePath(); </span><br></pre></td></tr></table></figure>
+
+<p>위 예제 역시 디미터 법칙을 해하는 요소이긴하다. 왜냐하면 ctxt객체가 Options를 포함하고, Options는 ScratchDir을 포함하고, ScartchDir은 AbsolutePath를 포함한다는 사실을 안다. 즉, 함수하나가 아는 지식이 방대하다. 위 코드를 사용하는 함수는 많은 객체를 탐색할 줄 안다는 말이다.<br>위 두 예제코드를 아래 코드처럼 구현했다면 디미터 법칙이 거론되지 않았을것이다. </p>
+<figure class="highlight java"><figcaption><span>디미터 법칙을 어긴 예</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">final</span> String outputDir = ctxt.options.scartchDir.absouletePath;  </span><br></pre></td></tr></table></figure>
+
+<p>객체라면 내부 구조를 숨겨야 하므로 확실히 디미터 법칙을 위반한다. 반면, 자료구조라면 당연히 내부 구조를 노출하므로 디미터 법칙이 적용되지 않는다.</p>
+<h3 id="잡종구조"><a href="#잡종구조" class="headerlink" title="잡종구조"></a>잡종구조</h3><p>절반은 객체, 절반은 자료구조인 잡종구조는 되도록 피하는것이 좋다. 프로그래머가 함수나 타입을 보호할지 공개할지 확신하지 못해 어중간하게 내놓은 설계에 불과함. </p>
+<h3 id="구조체-감추기"><a href="#구조체-감추기" class="headerlink" title="구조체 감추기"></a>구조체 감추기</h3><blockquote><p>객체라면 ‘뭔가를 하라고’ 말해야지 속을 드러내라고 말하면 안된다. </p>
+</blockquote>
+
+<h2 id="자료-전달-객체-DTO"><a href="#자료-전달-객체-DTO" class="headerlink" title="자료 전달 객체 (DTO)"></a>자료 전달 객체 (DTO)</h2><ul>
+<li>DTO는 공개변수만 있고 함수가 없는 클래스다. </li>
+<li>Bean은 private변수를 getter/setter 함수로 조작한다. 일종의 사이비 캡슐화로, 일부 OO순수주의자나 만족시킬뿐 별다른 이익을 제공하지 않는다. </li>
+</ul>
+<h3 id="활성-레코드"><a href="#활성-레코드" class="headerlink" title="활성 레코드"></a>활성 레코드</h3><ul>
+<li>활성 레코드는 DTO의 특수형태다. DTO와 같은 맥락이나, 대개 save나 find와 같은 탐색함수도 제공함. </li>
+<li>활성 레코드는 자료구조로 취급해야함. </li>
+</ul>
+
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/2021/02/08/clean-code-5/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                Comment and share
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
                             href="/2021/01/27/clean-code-4/"
                             aria-label=": clean-code-4"
                         >
@@ -962,185 +1313,6 @@
         
     </article>
     
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/2021/01/18/java-effective-3/"
-                            aria-label=": java-effective-3"
-                        >
-                            java-effective-3
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time datetime="2021-01-18T01:58:36+00:00">
-	
-		    Jan 18, 2021
-    	
-    </time>
-    
-        <span>in </span>
-        
-    <a class="category-link" href="/categories/Effective-Java/">Effective Java</a>, <a class="category-link" href="/categories/Study/">Study</a>, <a class="category-link" href="/categories/%EA%B0%9D%EC%B2%B4-%EC%83%9D%EC%84%B1%EA%B3%BC-%ED%8C%8C%EA%B4%B4/">객체 생성과 파괴</a>
-
-
-    
-</div>
-
-            </div>
-            
-                <div class="postShorten-content">
-                    <blockquote><p>싱글턴(singleton) 이란?<br>=&gt; 인스턴스를 오직 하나만 생성할 수 있는 클래스<br>=&gt; ex) 함수와 같은 무상태 객체 (stateless object) , 설계상 유일해야하는 시스템 컨포넌트 </p>
-</blockquote>
-
-<h2 id="아이템3-private생성자나-열거타입으로-싱글턴임을-보증하라"><a href="#아이템3-private생성자나-열거타입으로-싱글턴임을-보증하라" class="headerlink" title="아이템3. private생성자나 열거타입으로 싱글턴임을 보증하라."></a>아이템3. private생성자나 열거타입으로 싱글턴임을 보증하라.</h2><p><strong>클래스를 싱글턴으로 만들면 이를 사용하는 클라이언트를 테스트하기가 어려워질 수 있다.</strong> 그 이유는 타입을 인터페이스로 정의한 다음 그 인터페이스를 구현해서 만든 싱글턴이 아니라면 싱글턴 인스턴스를 가짜 구현으로 대체 할 수 없기때문이다. 저자는 싱글턴 만드는 방식을 3가지로 소개한다. 아래 내용 참고 해보자. </p>
-<h3 id="싱글턴1-public-static-멤버가-final-필드-방식"><a href="#싱글턴1-public-static-멤버가-final-필드-방식" class="headerlink" title="싱글턴1. public static 멤버가 final 필드 방식"></a>싱글턴1. public static 멤버가 final 필드 방식</h3><figure class="highlight java"><figcaption><span>public static final 필드 방식 싱긑턴</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Elvis</span> </span>&#123;</span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> Elvis INSTANCE = <span class="keyword">new</span> Elvis(); </span><br><span class="line">	<span class="function"><span class="keyword">private</span> <span class="title">Elvis</span><span class="params">()</span> </span>&#123;&#125; <span class="comment">//내부 코드 중략 </span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">leaveTheBuilding</span><span class="params">()</span> </span>&#123;&#125; <span class="comment">//내부 코드 중략 </span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h4 id="싱글턴1의-장점"><a href="#싱글턴1의-장점" class="headerlink" title="싱글턴1의 장점"></a>싱글턴1의 장점</h4><ul>
-<li>해당 클래스가 싱글턴임이 API에 명핵하게 드러남</li>
-<li>간결함 </li>
-</ul>
-<h3 id="싱글턴2-정적팩터리-방식의-싱글턴"><a href="#싱글턴2-정적팩터리-방식의-싱글턴" class="headerlink" title="싱글턴2. 정적팩터리 방식의 싱글턴"></a>싱글턴2. 정적팩터리 방식의 싱글턴</h3><figure class="highlight java"><figcaption><span>정적팩터리 방식의 싱글턴</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Elvis</span> </span>&#123;</span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> Elvis INSTANCE = <span class="keyword">new</span> Elvis(); </span><br><span class="line">	<span class="function"><span class="keyword">private</span> <span class="title">Elvis</span><span class="params">()</span> </span>&#123;&#125;</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Elvis <span class="title">getInstance</span><span class="params">()</span> </span>&#123;<span class="keyword">return</span> INSTANCE;&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">leaveTheBuilding</span><span class="params">()</span> </span>&#123;&#125;	</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h4 id="싱글턴2의-장점"><a href="#싱글턴2의-장점" class="headerlink" title="싱글턴2의 장점"></a>싱글턴2의 장점</h4><ul>
-<li><p>마음만 먹으면 API를 바꾸지 않아도, 싱글턴이 아니게 변경 가능 </p>
-</li>
-<li><p>정적 팩터리를 제네릭 싱글턴 팩터리로 만들 수 있음 (아이템 30)</p>
-</li>
-<li><p>정적 팩터리의 메서드 참조를 공급자(supplier)로 사용할수 있음</p>
-<figure class="highlight java"><figcaption><span>supplier 적용</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Supplier&lt;Elvis&gt; = Elvis::getInstance; </span><br></pre></td></tr></table></figure>
-
-</li>
-</ul>
-<p>싱글턴1,2 방식으로 싱글턴을 개발하면, 직렬화 할때 Serializable을 구현만 하면 안되고, 역직렬화 되었을때 인스턴스가 생성되는 부분을 초반에 조져야 한다. 역직렬화 공격을 방어하려면, 아래 코드를 확인해보자.</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F;싱글턴임을 보장해주는 readResolve 메서드 </span><br><span class="line">private Object readResolve() &#123;</span><br><span class="line">	&#x2F;&#x2F;진짜 Elvis는 반환하고, 가짜는 GC에 버린다. </span><br><span class="line">	return INSTANCE; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h3 id="싱글턴3-원소가-하나인-열거타입-선언"><a href="#싱글턴3-원소가-하나인-열거타입-선언" class="headerlink" title="싱글턴3. 원소가 하나인 열거타입 선언"></a>싱글턴3. 원소가 하나인 열거타입 선언</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">public enum Elvis &#123;</span><br><span class="line">	INSTANCE; </span><br><span class="line">	</span><br><span class="line">	public void leaveTheBuilding() &#123;&#125; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h4 id="싱글턴3의-장점"><a href="#싱글턴3의-장점" class="headerlink" title="싱글턴3의 장점"></a>싱글턴3의 장점</h4><ul>
-<li>싱글턴1 방식과 비슷하지만, 더 간결하고 추가적인 노력없이 직렬화 가능 하며 심지어 아주 복잡한 직렬화 상황이나 리플렉션 공격에도 제2의 인스턴스가 생성되는걸 방지 할 수 있다.</li>
-</ul>
-<p>조금 부자연스러워 보일수는 있는데, 저자는 대부분상황에서는 원소가 하나뿐인 열거타입이 싱글턴 만드는 가장 좋은 방법이라고 소개하고있다. 단, 만들려는 싱글턴이 Enum외의 클래스를 상속해야 한다면 이 방법은 사용할수 없다고 한다. (열거 타입이 다른 인터페이스를 구현하도록 선언 할 수는 있다.)</p>
-
-                    
-                        
-
-
-                    
-                    
-                        <p>
-                            <a
-                                href="/2021/01/18/java-effective-3/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                Comment and share
-                            </a>
-                        </p>
-                    
-                </div>
-            
-        </div>
-        
-    </article>
-    
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/2021/01/16/java-effective-2/"
-                            aria-label=": java-effective-2"
-                        >
-                            java-effective-2
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time datetime="2021-01-16T04:57:19+00:00">
-	
-		    Jan 16, 2021
-    	
-    </time>
-    
-        <span>in </span>
-        
-    <a class="category-link" href="/categories/Effective-Java/">Effective Java</a>, <a class="category-link" href="/categories/Study/">Study</a>, <a class="category-link" href="/categories/%EA%B0%9D%EC%B2%B4-%EC%83%9D%EC%84%B1%EA%B3%BC-%ED%8C%8C%EA%B4%B4/">객체 생성과 파괴</a>
-
-
-    
-</div>
-
-            </div>
-            
-                <div class="postShorten-content">
-                    <p>객체 생성함에 있어서, 아이템1 에서 학습한 정적팩터리 와 생성자에는 똑같은 제약이 하나 있다. 선택적 매개변수가 많을때 적절히 대응하기 어렵다는 점이다. </p>
-<h2 id="아이템2-생성자에-매개변수가-많다면-빌더를-고려하라"><a href="#아이템2-생성자에-매개변수가-많다면-빌더를-고려하라" class="headerlink" title="아이템2. 생성자에 매개변수가 많다면 빌더를 고려하라."></a>아이템2. 생성자에 매개변수가 많다면 빌더를 고려하라.</h2><blockquote><p>점층적 생성자 패턴도 쓸 수는 있지만, 매개변수 개수가 많아지면 클라이언트 코드를 작성하거나 읽기 어렵다. </p>
-</blockquote>
-
-<h3 id="해결안1-생성자"><a href="#해결안1-생성자" class="headerlink" title="해결안1. 생성자"></a>해결안1. 생성자</h3><figure class="highlight java"><figcaption><span>점층적 생성자 패턴</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">NutiritionFacts coke = <span class="keyword">new</span> NutritionFacts(<span class="number">240</span>,<span class="number">8</span>,<span class="number">100</span>,<span class="number">35</span>,<span class="number">27</span>);</span><br></pre></td></tr></table></figure>
-
-<p>위 코드를 보았을때 무엇이 느껴지는가? 정말 해당 클래스 스펙을 확인하지 않고서는 식별이 어렵고, 개인적으로 IDE의 버프를 받아 변수명 힌트를 받지 않으면, 엄하게 다른 값 넣고, 삽질하는 경우를 갠적으로 좀 겪어봤다. </p>
-<h3 id="해결안2-자바빈즈-Java-Beans"><a href="#해결안2-자바빈즈-Java-Beans" class="headerlink" title="해결안2. 자바빈즈(Java Beans)"></a>해결안2. 자바빈즈(Java Beans)</h3><figure class="highlight java"><figcaption><span>자바빈즈</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">NutiritionFacts coke = <span class="keyword">new</span> NutritionFacts();</span><br><span class="line">coke.setServingSize(<span class="number">240</span>);</span><br><span class="line">coke.setServings(<span class="number">8</span>);</span><br><span class="line">coke.setCalories(<span class="number">100</span>);</span><br><span class="line">coke.setSodium(<span class="number">35</span>);</span><br><span class="line">coke.setCarbohydrate(<span class="number">27</span>);</span><br></pre></td></tr></table></figure>
-
-<p>위 코드는 현업에서 본인이 자주 사용했던 기법이다. 생성자 보다는 확실히 가독성 측면에서는 사용성이 편하지만, 이 부분도 사실 매개변수가 많아지면 불편함이 있고, 소스도 굉장히 길어져서 보기가 싫은 기억이 자주 있다. 그리고 객체 하나를 인스턴스 생성하려면, 위 코드처럼 여러개의 set메소드를 호출 해야한다. 그리고 생성자에서는 각 변수가 어떻게 나와야하는지 지정을 해주지만, 자바빈즈는 개발자가 set메서드를 입력해야하기 때문에 지정된 매개변수를 넣기가 힘들어서, 코드 일관성이 깨져서,버그를 유발시키기도하고, 또한 자바빈즈는 클래스를 불변클래스(아이템17)으로 만들수 없으며, 스레드 안정성을 얻으려면 추가적인 작업해줘야한다. (lock) 이런 단점을 보완 하기 위해 객체 Freezing을 수행한다고 한다.</p>
-<p>그럼 Object Freezing이란? 멀티 스레드 환경에서 객체내에 각 변수을 get할때 freeze 를 synchronized 가 되었는지 확인하고 freeze를 수행 하는데 멀티 스레드 환경이다 보니, 그 변수를 사용중에 있는데 set하는 불상사가 발생하게 된다면, 해당 변수가 set되어지는것을 방지하기 위해서 freeze된부분이 true이면 예외를 던져서 set하지 못하도록 막는 부분이 Object Freezing이다. 쉽게 말하면 화장실 변기에 앉아서 볼일을 보고있는데, 갑자기 뒷사람이 문을 열더니, 너 놔와! 하면서 내동댕이 치고, 쫒겨나는 현상이라 생각하면 될것 같다. 이런 상황을 미연에 방지하기 위해 사용중이라고 문밖에 표시를 하고, 문 잠그고 안전하게 볼일볼수있도록 도와주는 부분을 Freezing 한다라고 개인적으로 이해했다. </p>
-<h3 id="해결안3-빌더패턴"><a href="#해결안3-빌더패턴" class="headerlink" title="해결안3. 빌더패턴"></a>해결안3. 빌더패턴</h3><figure class="highlight java"><figcaption><span>빌더패턴 심플 버전</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">NutritionFacts</span> </span>&#123;</span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">int</span> servingSize;</span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">int</span> servings; </span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">int</span> calories; </span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">int</span> fat; </span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">int</span> sodium; </span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">int</span> carbohydrate; </span><br><span class="line">	</span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">Builder</span> </span>&#123;</span><br><span class="line">		<span class="comment">//필수 매개변수 </span></span><br><span class="line">		<span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">int</span> servingSize; </span><br><span class="line">		<span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">int</span> servings;</span><br><span class="line">		</span><br><span class="line">		</span><br><span class="line">		<span class="comment">//선택적 매개변수</span></span><br><span class="line">		<span class="keyword">private</span> <span class="keyword">int</span> calories = <span class="number">0</span>; </span><br><span class="line">		<span class="keyword">private</span> <span class="keyword">int</span> fat = <span class="number">0</span>; </span><br><span class="line">		<span class="keyword">private</span> <span class="keyword">int</span> sodium = <span class="number">0</span>; </span><br><span class="line">		<span class="keyword">private</span> <span class="keyword">int</span> carbohydrate = <span class="number">0</span>;</span><br><span class="line">		</span><br><span class="line">		<span class="function"><span class="keyword">public</span> <span class="title">Builder</span><span class="params">(<span class="keyword">int</span> servingSize, <span class="keyword">int</span> servings)</span> </span>&#123;</span><br><span class="line">			<span class="keyword">this</span>.servingSize = servingSize; </span><br><span class="line">			<span class="keyword">this</span>.servings = servings; </span><br><span class="line">		&#125;</span><br><span class="line">		</span><br><span class="line">		<span class="function"><span class="keyword">public</span> Builder <span class="title">calories</span><span class="params">(<span class="keyword">int</span> val)</span> </span>&#123;</span><br><span class="line">			calories = val; </span><br><span class="line">			<span class="keyword">return</span> <span class="keyword">this</span>; </span><br><span class="line">		&#125;</span><br><span class="line">		</span><br><span class="line">		<span class="function"><span class="keyword">public</span> Builder <span class="title">fat</span><span class="params">(<span class="keyword">int</span> val)</span> </span>&#123;</span><br><span class="line">			fat = val; </span><br><span class="line">			<span class="keyword">return</span> <span class="keyword">this</span>;</span><br><span class="line">		&#125;</span><br><span class="line">		</span><br><span class="line">		<span class="function"><span class="keyword">public</span> Builder <span class="title">sodium</span><span class="params">(<span class="keyword">int</span> val)</span> </span>&#123;</span><br><span class="line">			sodium = val; </span><br><span class="line">			<span class="keyword">return</span> <span class="keyword">this</span>; </span><br><span class="line">		&#125;</span><br><span class="line">		</span><br><span class="line">		<span class="function"><span class="keyword">public</span> Builder <span class="title">carbohydrate</span><span class="params">(<span class="keyword">int</span> val)</span> </span>&#123;</span><br><span class="line">			carbohydrate = val; </span><br><span class="line">			<span class="keyword">return</span> <span class="keyword">this</span>; </span><br><span class="line">		&#125;</span><br><span class="line">		</span><br><span class="line">		<span class="function"><span class="keyword">public</span> NuritionFacts <span class="title">build</span><span class="params">()</span> </span>&#123;</span><br><span class="line">			<span class="keyword">return</span> <span class="keyword">new</span> NuritionFacts(<span class="keyword">this</span>); </span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="function"><span class="keyword">private</span> <span class="title">NuritionFacts</span><span class="params">(Builder bulider)</span> </span>&#123;</span><br><span class="line">		servingSize = builder.servingSize; </span><br><span class="line">		servings = builder.servings; </span><br><span class="line">		calories = builder.calories; </span><br><span class="line">		fat = builder.fat; </span><br><span class="line">		sodium = builder.sodium; </span><br><span class="line">		carbohydrate = builder.carbohydrate; </span><br><span class="line">	&#125;</span><br><span class="line">	&#125;</span><br></pre></td></tr></table></figure>
-
-<p>책에서는 핵심만 도드라져 보이도록 유효성 검사 코드는 생략했다고한다. 잘못된 매개변수임을 유효성 검토하려면, 빌더의 생성자와 메서드에서 입력매개변수를 검사하고, build 메서드가 호출하는 생성자에서 여러 매개변수에 걸친 불변식 (invariant)을 검사하자. (invalid메서드 만들어서 객체가 정말 유효한지 검증하자는 말이다.) </p>
-<blockquote><p>Class Invariant?<br><a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Class_invariant">https://en.wikipedia.org/wiki/Class_invariant</a><br>위 위키 사이트에 잘 명시가 되어있는데, 말이 어려워서 그렇지 결국 유효성 검증을 하라는 말이다.<br>예를들어 1월은 1~31일까지 있는데 32일까지 나오는것로 표기되면 오류 이기 때문에, 객체 생성 시점 전에 assert를 하라는 소리이다. </p>
-</blockquote>
-
-<figure class="highlight java"><figcaption><span>빌더패턴 인스턴스 생성부</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">NutiritionFacts coke = <span class="keyword">new</span> NutritionFacts.Builder(<span class="number">240</span>,<span class="number">8</span>).calories(<span class="number">100</span>).sodium(<span class="number">35</span>).carbohydrate(<span class="number">27</span>).build();</span><br></pre></td></tr></table></figure>
-
-<p>길고 긴 Builder를 작성하고 나면, 위와같이 간단하게(?) 객체를 생성할수 있다. 딱 봐도 가독성이 좋고, 필수 매개변수 와 옵션 매개변수를 나눌수가 있어서, 필수 매개변수 이외에 옵션으로 불필요 매개변수는 빼고 객체를 넣어도 상관이 없다.<br>그리고 <strong>빌더 패턴은 계층적으로 설계된 클래스와 함께 쓰기에 좋다.</strong> 주저리 주저리 하는것 보다 아래 코드를 보자. </p>
-<figure class="highlight java"><figcaption><span>Pizza Abstract Builder</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">Pizza</span> </span>&#123;</span><br><span class="line">	<span class="keyword">public</span> <span class="class"><span class="keyword">enum</span> <span class="title">Topping</span> </span>&#123;HAM, MUSHROOM, ONION, PEPPER, SAUAGE&#125;</span><br><span class="line">	<span class="keyword">final</span> Set&lt;Topping&gt; toppings; </span><br><span class="line">	</span><br><span class="line">	<span class="keyword">abstract</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">Builder</span>&lt;<span class="title">T</span> <span class="keyword">extends</span> <span class="title">Builder</span>&lt;<span class="title">T</span>&gt;&gt; </span>&#123;</span><br><span class="line">		EnumSet&lt;Topping&gt; toppings = EnumSet.noneOf(Topping.class);</span><br><span class="line">		<span class="function"><span class="keyword">public</span> T <span class="title">addTopping</span><span class="params">(Topping topping)</span> </span>&#123;</span><br><span class="line">			toppings.add(Objects.requireNonNull(topping)); </span><br><span class="line">			<span class="keyword">return</span> self(); </span><br><span class="line">		&#125;</span><br><span class="line">		</span><br><span class="line">		<span class="function"><span class="keyword">abstract</span> Pizza <span class="title">build</span><span class="params">()</span></span>; </span><br><span class="line">		</span><br><span class="line">		<span class="comment">// 하위 클래스는 이 메서드를 재정의 하여 this를 반환하도록 해야한다. </span></span><br><span class="line">		<span class="function"><span class="keyword">protected</span> <span class="keyword">abstract</span> T <span class="title">self</span><span class="params">()</span></span>; </span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	Pizza(Builder&lt;?&gt; builder) &#123;</span><br><span class="line">		toppings = builder.toppings.clone(); <span class="comment">//아이템 50 참고 </span></span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight java"><figcaption><span>NyPizza Builder</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">NyPizza</span> <span class="keyword">extends</span> <span class="title">Pizza</span> </span>&#123; </span><br><span class="line">	<span class="keyword">public</span> <span class="class"><span class="keyword">enum</span> <span class="title">Size</span> </span>&#123;SMALL, MEDIUM, LARGE&#125;</span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">final</span> Size size; </span><br><span class="line">	</span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">Builder</span> <span class="keyword">extends</span> <span class="title">Pizza</span>.<span class="title">Builder</span>&lt;<span class="title">Builder</span>&gt; </span>&#123;</span><br><span class="line">		<span class="keyword">private</span> <span class="keyword">final</span> Size size; </span><br><span class="line">		</span><br><span class="line">		<span class="function">pubilc <span class="title">Builder</span><span class="params">(Size size)</span> </span>&#123;</span><br><span class="line">			<span class="keyword">this</span>.size = Objects.requireNonNull(size); </span><br><span class="line">		&#125;</span><br><span class="line">		</span><br><span class="line">		<span class="meta">@Override</span></span><br><span class="line">		<span class="function"><span class="keyword">public</span> NyPizza <span class="title">build</span><span class="params">()</span> </span>&#123;</span><br><span class="line">			<span class="keyword">return</span> <span class="keyword">new</span> NyPizza(<span class="keyword">this</span>); </span><br><span class="line">		&#125;</span><br><span class="line">		</span><br><span class="line">		<span class="meta">@Override</span> </span><br><span class="line">		<span class="function"><span class="keyword">public</span> <span class="keyword">protected</span> Builder <span class="title">self</span><span class="params">()</span> </span>&#123;</span><br><span class="line">			<span class="keyword">return</span> <span class="keyword">this</span>; </span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="function"><span class="keyword">private</span> <span class="title">NyPizza</span><span class="params">(Builder builder)</span> </span>&#123;</span><br><span class="line">		<span class="keyword">super</span>(builder); </span><br><span class="line">		size = builder.size; </span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight java"><figcaption><span>Calzone Builder</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Calzone</span> <span class="keyword">extends</span> <span class="title">Pizza</span> </span>&#123; </span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">boolean</span> sauceInside; </span><br><span class="line">	</span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">Builder</span> <span class="keyword">extends</span> <span class="title">Pizza</span>.<span class="title">Builder</span>&lt;<span class="title">Builder</span>&gt; </span>&#123;</span><br><span class="line">		<span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">boolean</span> sauceInside;</span><br><span class="line">		</span><br><span class="line">		<span class="function">pubilc Builder <span class="title">sauceInside</span><span class="params">()</span> </span>&#123;</span><br><span class="line">			sauceInside = <span class="keyword">true</span>; </span><br><span class="line">			<span class="keyword">return</span> <span class="keyword">this</span>; </span><br><span class="line">		&#125;</span><br><span class="line">		</span><br><span class="line">		<span class="meta">@Override</span></span><br><span class="line">		<span class="function"><span class="keyword">public</span> Calzone <span class="title">build</span><span class="params">()</span> </span>&#123;</span><br><span class="line">			<span class="keyword">return</span> <span class="keyword">new</span> Calzone(<span class="keyword">this</span>); </span><br><span class="line">		&#125;</span><br><span class="line">		</span><br><span class="line">		<span class="meta">@Override</span> </span><br><span class="line">		<span class="function"><span class="keyword">public</span> <span class="keyword">protected</span> Builder <span class="title">self</span><span class="params">()</span> </span>&#123;</span><br><span class="line">			<span class="keyword">return</span> <span class="keyword">this</span>; </span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="function"><span class="keyword">private</span> <span class="title">Calzone</span><span class="params">(Builder builder)</span> </span>&#123;</span><br><span class="line">		<span class="keyword">super</span>(builder); </span><br><span class="line">		sauceInside = builder.sauceInside; </span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight java"><figcaption><span>Calzone Builder</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">NyPizza pizza = <span class="keyword">new</span> NyPizza.Builder(SMALL).addTopping(SAUSAGE).addTopping(ONION).build();</span><br><span class="line">CalZone calzone = <span class="keyword">new</span> Calzone.Builder().addTopping(HAM).sauceInside().build(); </span><br></pre></td></tr></table></figure>
-
-<p>위 코드 처럼 Pizza 추상 클래스를 확장받아서 NyPizza 와 Calzone를 구현하였다. 그래서 기본적으로 addTopping은 하위 클래스에서 사용하고,<br>각각 하위 클래스에서 필수 파라미터로 지정한 부분만 추가적으로 세팅을 한 부분을 확인 할 수 있다.(size, sauceInside)  </p>
-<p>이처럼 빌더패턴은 상당히 유연한 객체로 가변인수를 사용할수있고, 각각 적절한 메서드로 나눠서 선언할수도있고, 메서드를 여러번 호출하도록 하고 각 호출때 넘겨진 매개변수들을 하나의 필드로 모을수도 있다. 그리고 빌더에 넘기는 매개변수에 따라 다른 객체를 만들수도 있다.<br>(앞의 예제 처럼 가능하다는 것이다.)</p>
-<blockquote><p><strong>생성자나 정적 팩터리가 처리해야 할 매개변수가 많다면 빌더 패턴을 선택하는 게 더 낫다.</strong><br>=&gt; 매개변수 중 다수가 필수가 아니거나 같은 타입이면 특히 더 그렇다. 빌더는 점층적 생성자보다 클라이언트 코드를 읽고 쓰기가 훨씬 간결하고,<br>자바빈즈보다 훨씬 안전하다. </p>
-</blockquote>
-
-<p>내가 겪은 현업에서는 요즘들어서 빌더가 자주 보이는 편이고, 아직까지는 많이 사용되고 있지는 않는듯하다. 앞으로 복잡하고 큰 도메인 일수록 빌더를 구현해보는것도 나쁘지는 않을듯하다.<br>단, 매개변수가 최소 4개이상은 받을거라는 전제하에.. 직접 짜는것보다 롬복 @Builder를 통해서 사용할 경우가 많을수도 있지만, 너무 롬복에 의존하지말고, 상황에 따라서 직접 짜는 부분도 고려하도록 하자. </p>
-
-                    
-                        
-
-
-                    
-                    
-                        <p>
-                            <a
-                                href="/2021/01/16/java-effective-2/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                Comment and share
-                            </a>
-                        </p>
-                    
-                </div>
-            
-        </div>
-        
-    </article>
-    
     <div class="pagination-bar">
     <ul class="pagination">
         
@@ -1156,7 +1328,18 @@
           </li>
         
         
-        <li class="pagination-number">page 6 of 6</li>
+          <li class="pagination-next">
+            <a
+                class="btn btn--default btn--small"
+                href="/archives/page/7/"
+                aria-label="OLDER POSTS"
+            >
+              <span>OLDER POSTS</span>
+              <i class="fa fa-angle-right text-base icon-ml"></i>
+            </a>
+          </li>
+        
+        <li class="pagination-number">page 6 of 7</li>
     </ul>
 </div>
 

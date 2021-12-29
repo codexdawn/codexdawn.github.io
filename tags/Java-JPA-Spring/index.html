@@ -247,6 +247,75 @@
                     
                         <a
                             class="link-unstyled"
+                            href="/2021/11/01/jpa-work-2/"
+                            aria-label=": jpa-work-2"
+                        >
+                            jpa-work-2
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2021-11-01T03:40:02+00:00">
+	
+		    Nov 01, 2021
+    	
+    </time>
+    
+        <span>in </span>
+        
+    <a class="category-link" href="/categories/JPA/">JPA</a>, <a class="category-link" href="/categories/%EC%9C%A0%EB%A0%88%EC%B9%B4or%EC%82%BD%EC%A7%88/">유레카or삽질</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <h1 id="ManyToOne-다중-fetchJoin시-주의사항"><a href="#ManyToOne-다중-fetchJoin시-주의사항" class="headerlink" title="ManyToOne 다중 fetchJoin시 주의사항"></a>ManyToOne 다중 fetchJoin시 주의사항</h1><p>사건의 발단은 이렇다. 일단 OneToMany(컬렉션 조인) 로 fetchJoin은 2개이상은 어렵다. 이유는 컬렉션의 컬렉션으로 곱하기로 배가 되기때문에 MultiBagFetchException 떨어저셔서 불가능하다. (그래서 쿼리를 쪼개서 가져오던지 아님 projection처리를 개별로 해서 가져오던지 등의 방법으로 해결 한다. )<br>하지만 반대로 ManyToOne의 연관관계는 해당 이슈가 없기때문에 몇개를 fetchJoin해도 이슈는 없는것이 당연한 부분이다. 하지만 이상한 오류와 함께 나를 당혹시킨 에러가 있었으니.. </p>
+<figure class="highlight java"><figcaption><span>문제의 코드</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> List&lt;ProductCategoryInfo&gt; <span class="title">findProductInfoByProductIdsAndPartnerId</span><span class="params">(List&lt;Long&gt; productIds, String partnerId)</span> </span>&#123;</span><br><span class="line">       <span class="keyword">return</span> dealJpaQueryFactory.select(projectionChartInfo())</span><br><span class="line">           .from(productEntity, productEntity)</span><br><span class="line">           .innerJoin(productEntity.detailCategory, categoryDivideEntity).fetchJoin()</span><br><span class="line">           .innerJoin(productEntity.detailCategory.smallCategory, categorySmallEntity).fetchJoin()</span><br><span class="line">           .where(productNosIn(productIds), partnerIdIs(partnerId))</span><br><span class="line">           .fetch();</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+
+<p>위 와 같이 다중 fetchJoin으로 해당 테이블의 프로젝션 정보를 모두 가져오려고 하였으나, 아래와 같은 오류로 실패하게 되었다. </p>
+<blockquote><p>org.springframework.dao.InvalidDataAccessApiUsageException: org.hibernate.QueryException: query specified join fetching, but the owner of the fetched association was not present in the select list [FromElement{explicit,not a collection join,fetch join,fetch non-lazy properties,classAlias=categorySmallEntity,role=com.wemakeprice.v.seller.domain.repository.jpa.deal.category.entity.CategoryDivideEntity.smallCategory,tableName=category_small,tableAlias=categorysm3_,origin=category_divide categorydi2_,columns={categorydi2_.scate_cd,className=com.wemakeprice.v.seller.domain.repository.jpa.deal.category.entity.CategorySmallEntity}}] [select productEntity<br>from com.wemakeprice.v.seller.domain.repository.jpa.deal.category.entity.ProductEntity productEntity<br>  inner join fetch productEntity.detailCategory as categoryDivideEntity<br>  inner join fetch productEntity.detailCategory.smallCategory as categorySmallEntity<br>where productEntity.productId in (?1) and productEntity.partnerId = ?2]; nested exception is java.lang.IllegalArgumentException: org.hibernate.QueryException: query specified join fetching, but the owner of the fetched association was not present in the select list [FromElement{explicit,not a collection join,fetch join,fetch non-lazy properties,classAlias=categorySmallEntity,role=com.wemakeprice.v.seller.domain.repository.jpa.deal.category.entity.CategoryDivideEntity.smallCategory,tableName=category_small,tableAlias=categorysm3_,origin=category_divide categorydi2_,columns={categorydi2_.scate_cd,className=com.wemakeprice.v.seller.domain.repository.jpa.deal.category.entity.CategorySmallEntity}}] [select productEntity<br>from com.wemakeprice.v.seller.domain.repository.jpa.deal.category.entity.ProductEntity productEntity<br>  inner join fetch productEntity.detailCategory as categoryDivideEntity<br>  inner join fetch productEntity.detailCategory.smallCategory as categorySmallEntity<br>where productEntity.productId in (?1) and productEntity.partnerId = ?2]</p>
+</blockquote>
+
+<p>해당 이슈가 발생한 원인은 아주 간단한 곳에서 발생하였다. </p>
+<figure class="highlight java"><figcaption><span>간단한해결코드</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> List&lt;ProductEntity&gt; <span class="title">testFindFetchJoin</span><span class="params">(List&lt;Long&gt; productIds, String partnerId)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> dealJpaQueryFactory.selectFrom(productEntity)</span><br><span class="line">        .innerJoin(productEntity.detailCategory, categoryDivideEntity).fetchJoin()</span><br><span class="line">        .innerJoin(categoryDivideEntity.smallCategory, categorySmallEntity).fetchJoin()</span><br><span class="line">        .where(productNosIn(productIds), partnerIdIs(partnerId))</span><br><span class="line">        .fetch();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<p>querydsl에서 테이블 join 구성시 발생한 이슈로 productEntity에서 categorySmallEntity를 참조할수 없어서 발생한 이슈이다. 참조의 참조로 가져오게 하지말고 실제 엔티티에서 직접 참조해서 가져오게 하는것이 맞다. 문제의 코드에서는 productEntity를 통해서 categoryDivideEntity를 거쳐서 categorySmallEntity를 참조하는건 실제적인 연관관계 주인이 아닌 productEntity로부터 참조하였기때문에 해당 이슈가 발생한것으로 판단된다. 그러므로 위와 같이 실제 연관관계 매핑되어있는 테이블로 직접 명시하여 쿼리를 짜야 위와같은 에러가 안날수있음 </p>
+
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/2021/11/01/jpa-work-2/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                Comment and share
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
                             href="/2021/06/22/jpa-work-1/"
                             aria-label=": jpa-work-1"
                         >

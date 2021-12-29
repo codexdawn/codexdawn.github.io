@@ -1,0 +1,613 @@
+
+<!DOCTYPE html>
+<html lang="en">
+    
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="generator" content="codexdawn">
+    <title>spring-batch-1 - codexdawn</title>
+    <meta name="author" content="codexdawn">
+    
+    
+    
+        
+            <link rel="alternate" type="application/atom+xml" title="RSS" href="/atom.xml">
+        
+    
+    <script type="application/ld+json">{"@context":"http://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"codexdawn","sameAs":["https://github.com/codexdawn","https://www.facebook.com/beherzt.dev","https://www.linkedin.com/in/sim-jisung-3048872a/","mailto:cloudkaiser@gmail.com"],"image":"https://www.gravatar.com/avatar/d97fd4b94c429915f1cb55eb27e7d4d9"},"articleBody":"Spring Batch 도전기 (간단스 정리)[참고]조졸도님블로그\n기본적인 용어JOB : 배치를 수행할 일거리STEP: JOB내에 배치를 단계적으로 수행하는 작업단위Reader: STEP내에서 조회 역할을 담당 (대상을 쿼리로 조회)Processor: Reader에서 가져온 데이터로 비즈니스로직을 처리 담당 (중간에서 계산 / 세팅 등)Writer: Processor에서 처리된 데이터들을 최종 트랜젝션 처리 (Ready상태를 -&gt; Complete상태로 바꾼다든지.. 뭐그런 상태 최종 처리)@JobScope: Job이 실행되는 시점에 Job Paramter가 생성 (Late binding 처리됨)@StepScope: 스프링 컨테이너가 올라갈때 Job Parameter가 생성 (빌드시점 생성)Chunk : 한번에 처리될 트랜잭션 단위 (PageSize는 조회될 대상의 사이즈이며 Chunk단위랑은 다름)\n기본 구조설정batch-설정12345678910111213141516171819// build.gradle에 아래 의존성 추가 // implementation &#x27;org.springframework.boot:spring-boot-starter-batch&#x27;// querydsl 사용하려면 추가// implementation &#x27;com.querydsl:querydsl-jpa&#x27;// implementation &#x27;com.querydsl:querydsl-apt&#x27;@Configuration@EnableBatchProcessingpublic class SpringBatchConfig &#123;    @Bean    BatchConfigurer configurer(@Qualifier(&quot;vbatchMasterDataSource&quot;) DataSource dataSource) &#123;        return new DefaultBatchConfigurer(dataSource);    &#125;&#125;\n\n\njob 구조batch-job12345678@Bean(name = JOB_NAME)   public Job job() &#123;       return jobBuilderFactory.get(JOB_NAME)           .start(unusedStep())           .next(saveStep())           .next(removeStep())           .build();   &#125;\n\nstep 구조batch-job123456789@Bean(name = SAVE_STEP_NAME)   public Step saveStep() &#123;       return stepBuilderFactory.get(SAVE_STEP_NAME)           .&lt;BestRankQueryResult, BestRankSummaryEntity&gt;chunk(CHUNK_SIZE)           .reader(saveReader())           .processor(bestRankSummarySaveProcessor)           .writer(bestRankSummarySaveWriter)           .build();   &#125;\n\nreader구조\nspring batch에서는 본디 jpaPagingItemReader 처럼 jpa관련 리더를 제공하지만, querydsl사용이 어렵다. 조졸두님 블로그 확인하면 이부분을 해소하는 방법을 올려주셨음. 참고하자 \n여기서 @StepScope는 job parameter가 없기때문에 제거해도 됨. (파라미터가 있는경우만 넣어주는것이 좋음)\n\nbatch-reader12345678910111213141516171819202122232425262728293031@Bean(name = SAVE_READER_NAME)   @StepScope   public QuerydslPagingItemReader&lt;BestRankQueryResult&gt; saveReader() &#123;       final LocalDateTime startDate = parse(LocalDateTime.now().minusDays(2).format(ofPattern(&quot;yyyy-MM-dd&quot;)).concat(&quot;T&quot;)           .concat(LocalDateTime.now().minusDays(2).format(ofPattern(&quot;HH:00:00&quot;))));       final LocalDateTime endDate = parse(LocalDateTime.now().format(ofPattern(&quot;yyyy-MM-dd&quot;)).concat(&quot;T&quot;)           .concat(LocalDateTime.now().format(ofPattern(&quot;HH:59:59&quot;))));       return new QuerydslPagingItemReader&lt;&gt;(vorderEntityManagerFactory, CHUNK_SIZE, jpaQueryFactory -&gt;           jpaQueryFactory.select(getBestRankQueryProjection())               .from(bestRankEntity)               .where(betweenBasisDate(startDate, endDate))               .groupBy(bestRankEntity.productId), false);   &#125;   private QBestRankQueryResult getBestRankQueryProjection() &#123;       String basisDate = LocalDateTime.now().format(ofPattern(&quot;yyyy-MM-dd&quot;)).concat(&quot;T&quot;)           .concat(LocalDateTime.now().minusHours(1).format(ofPattern(&quot;HH:00:00&quot;)));       return new QBestRankQueryResult(bestRankEntity.productId.as(&quot;productId&quot;)           , bestRankEntity.productPrice.as(&quot;productPrice&quot;)           , bestRankEntity.wStyleOrderCount.sum().coalesce(0L).as(&quot;wStyleOrderCount&quot;)           , bestRankEntity.wStyleProductCount.sum().coalesce(0).as(&quot;wStyleProductCount&quot;)           , bestRankEntity.wmpOrderCount.sum().coalesce(0L).as(&quot;wmpOrderCount&quot;)           , bestRankEntity.wmpProductCount.sum().coalesce(0).as(&quot;wmpProductCount&quot;)           , constant(LocalDateTime.parse(basisDate)));   &#125;   private BooleanExpression betweenBasisDate(LocalDateTime startDate, LocalDateTime endDate) &#123;       return bestRankEntity.basisDate.between(startDate, endDate);   &#125;\n\nprocessor 구조batch-processor1234567891011121314151617181920212223242526272829303132333435363738394041424344454647484950@Slf4j@Service@RequiredArgsConstructorpublic class BestRankSummarySaveProcessor implements ItemProcessor&lt;BestRankQueryResult, BestRankSummaryEntity&gt; &#123;    private static final float wStyleBoost = 2.0f;    private static final float wmpBoost = 0.01f;    private final ProductDetailViewCountProvider productDetailViewCountProvider;    @Override    public BestRankSummaryEntity process(BestRankQueryResult item) throws Exception &#123;        BestRankSummaryEntity saveTarget = new BestRankSummaryEntity();        saveTarget.setBasisDate(parse(now().minusHours(48).format(ofPattern(&quot;yyyy-MM-dd&#x27;T&#x27;HH:00:00&quot;))));        saveTarget.setProductId(item.getProductId());        saveTarget.setUsable(true);        Float boostScore = 0.0f;        if (item.getWStyleOrderCount() &gt; 0L || item.getWStyleProductCount() &gt; 0) &#123;            boostScore += (item.getWStyleOrderCount() * wStyleBoost) + (item.getWStyleProductCount() * wStyleBoost);        &#125;        if (item.getWmpOrderCount() &gt; 0L || item.getWmpProductCount() &gt; 0) &#123;            boostScore += (item.getWmpOrderCount() * wmpBoost) + (item.getWmpProductCount() * wmpBoost);        &#125;        final Integer productDetailViewCount = getProductDetailViewCount(item.getProductId());        if (isCalculateProductViewCount(productDetailViewCount)) &#123;            boostScore += (productDetailViewCount * 0.005F);        &#125;        saveTarget.setBoostScore(boostScore);        return saveTarget;    &#125;    private boolean isCalculateProductViewCount(final Integer productViewCount) &#123;        return productViewCount &gt; 0;    &#125;    private Integer getProductDetailViewCount(final Long productId) &#123;        final LocalDateTime startDate = parse(LocalDateTime.now().minusDays(1).format(ofPattern(&quot;yyyy-MM-dd&quot;)).concat(&quot;T&quot;)            .concat(LocalDateTime.now().minusDays(1).format(ofPattern(&quot;HH:00:00&quot;))));        final LocalDateTime endDate = parse(LocalDateTime.now().format(ofPattern(&quot;yyyy-MM-dd&quot;)).concat(&quot;T&quot;)            .concat(LocalDateTime.now().format(ofPattern(&quot;HH:59:59&quot;))));        return productDetailViewCountProvider.getProductDetailViewCount(productId, startDate, endDate);    &#125;&#125;\n\nwriter구조batch-writer123456789101112@Slf4j@Service@RequiredArgsConstructorpublic class BestRankSummarySaveWriter implements ItemWriter&lt;BestRankSummaryEntity&gt; &#123;    private final BestRankSummaryProvider bestRankSummaryProvider;    @Override    public void write(List&lt;? extends BestRankSummaryEntity&gt; items) throws Exception &#123;        bestRankSummaryProvider.saveAll((List&lt;BestRankSummaryEntity&gt;) items);    &#125;&#125;\n\n","dateCreated":"2021-12-29T05:43:43+00:00","dateModified":"2021-12-29T07:04:19+00:00","datePublished":"2021-12-29T05:43:43+00:00","description":"","headline":"spring-batch-1","image":[],"mainEntityOfPage":{"@type":"WebPage","@id":"https://codexdawn.github.io/2021/12/29/spring-batch-1/"},"publisher":{"@type":"Organization","name":"codexdawn","sameAs":["https://github.com/codexdawn","https://www.facebook.com/beherzt.dev","https://www.linkedin.com/in/sim-jisung-3048872a/","mailto:cloudkaiser@gmail.com"],"image":"https://www.gravatar.com/avatar/d97fd4b94c429915f1cb55eb27e7d4d9","logo":{"@type":"ImageObject","url":"https://www.gravatar.com/avatar/d97fd4b94c429915f1cb55eb27e7d4d9"}},"url":"https://codexdawn.github.io/2021/12/29/spring-batch-1/","keywords":"Java,JPA,Spring,Batch, Batch, querydsl"}</script>
+    <meta name="description" content="Spring Batch 도전기 (간단스 정리)[참고]조졸도님블로그 기본적인 용어JOB : 배치를 수행할 일거리STEP: JOB내에 배치를 단계적으로 수행하는 작업단위Reader: STEP내에서 조회 역할을 담당 (대상을 쿼리로 조회)Processor: Reader에서 가져온 데이터로 비즈니스로직을 처리 담당 (중간에서 계산 &#x2F; 세팅 등)Writer: Pro">
+<meta property="og:type" content="blog">
+<meta property="og:title" content="spring-batch-1">
+<meta property="og:url" content="https://codexdawn.github.io/2021/12/29/spring-batch-1/index.html">
+<meta property="og:site_name" content="codexdawn">
+<meta property="og:description" content="Spring Batch 도전기 (간단스 정리)[참고]조졸도님블로그 기본적인 용어JOB : 배치를 수행할 일거리STEP: JOB내에 배치를 단계적으로 수행하는 작업단위Reader: STEP내에서 조회 역할을 담당 (대상을 쿼리로 조회)Processor: Reader에서 가져온 데이터로 비즈니스로직을 처리 담당 (중간에서 계산 &#x2F; 세팅 등)Writer: Pro">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2021-12-29T05:43:43.000Z">
+<meta property="article:modified_time" content="2021-12-29T07:04:19.912Z">
+<meta property="article:author" content="codexdawn">
+<meta property="article:tag" content="Java,JPA,Spring,Batch">
+<meta property="article:tag" content="Batch">
+<meta property="article:tag" content="querydsl">
+<meta name="twitter:card" content="summary">
+    
+    
+        
+    
+    
+    
+    
+    
+    <!--STYLES-->
+    
+<link rel="stylesheet" href="/assets/css/style-3sspfygaapf5d6tbrnqmyrhdcstv0iwwmi4wor2yeip9c44sowy9gbdzyyjm.min.css">
+
+    <!--STYLES END-->
+    
+
+    
+
+    
+        
+    
+</head>
+
+    <body>
+        <div id="blog">
+            <!-- Define author's picture -->
+
+
+    
+
+<header id="header" data-behavior="5">
+    <i id="btn-open-sidebar" class="fa fa-lg fa-bars"></i>
+    <div class="header-title">
+        <a
+            class="header-title-link"
+            href="/"
+            aria-label=""
+        >
+            codexdawn
+        </a>
+    </div>
+    
+        
+            <a
+                class="header-right-picture "
+                href="#about"
+                aria-label="Open the link: /#about"
+            >
+        
+        
+        </a>
+    
+</header>
+
+            <!-- Define author's picture -->
+
+
+<nav id="sidebar" data-behavior="5">
+    <div class="sidebar-container">
+        
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/"
+                            
+                            rel="noopener"
+                            title="Home"
+                        >
+                        <i class="sidebar-button-icon fa fa-home" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Home</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/all-categories"
+                            
+                            rel="noopener"
+                            title="Categories"
+                        >
+                        <i class="sidebar-button-icon fa fa-bookmark" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Categories</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/all-tags"
+                            
+                            rel="noopener"
+                            title="Tags"
+                        >
+                        <i class="sidebar-button-icon fa fa-tags" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Tags</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="#about"
+                            
+                            rel="noopener"
+                            title="About"
+                        >
+                        <i class="sidebar-button-icon fa fa-question" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">About</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="https://github.com/codexdawn"
+                            
+                                target="_blank"
+                            
+                            rel="noopener"
+                            title="GitHub"
+                        >
+                        <i class="sidebar-button-icon fab fa-github" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">GitHub</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="https://www.facebook.com/beherzt.dev"
+                            
+                                target="_blank"
+                            
+                            rel="noopener"
+                            title="Facebook"
+                        >
+                        <i class="sidebar-button-icon fab fa-facebook" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Facebook</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="https://www.linkedin.com/in/sim-jisung-3048872a/"
+                            
+                                target="_blank"
+                            
+                            rel="noopener"
+                            title="LinkedIn"
+                        >
+                        <i class="sidebar-button-icon fab fa-linkedin" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">LinkedIn</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="mailto:cloudkaiser@gmail.com"
+                            
+                                target="_blank"
+                            
+                            rel="noopener"
+                            title="Mail"
+                        >
+                        <i class="sidebar-button-icon fa fa-envelope" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Mail</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/atom.xml"
+                            
+                            rel="noopener"
+                            title="RSS"
+                        >
+                        <i class="sidebar-button-icon fa fa-rss" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">RSS</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+    </div>
+</nav>
+
+            
+            <div id="main" data-behavior="5"
+                 class="
+                        hasCoverMetaIn
+                        ">
+                
+<article class="post">
+    
+    
+        <div class="post-header main-content-wrap text-left">
+    
+        <h1 class="post-title">
+            spring-batch-1
+        </h1>
+    
+    
+        <div class="post-meta">
+    <time datetime="2021-12-29T05:43:43+00:00">
+	
+		    Dec 29, 2021
+    	
+    </time>
+    
+        <span>in </span>
+        
+    <a class="category-link" href="/categories/Batch/">Batch</a>, <a class="category-link" href="/categories/%EC%9C%A0%EB%A0%88%EC%B9%B4or%EC%82%BD%EC%A7%88/">유레카or삽질</a>
+
+
+    
+</div>
+
+    
+</div>
+
+    
+    <div class="post-content markdown">
+        <div class="main-content-wrap">
+            <h1 id="Spring-Batch-도전기-간단스-정리"><a href="#Spring-Batch-도전기-간단스-정리" class="headerlink" title="Spring Batch 도전기 (간단스 정리)"></a>Spring Batch 도전기 (간단스 정리)</h1><p>[참고]<br><a target="_blank" rel="noopener" href="https://jojoldu.tistory.com/324?category=902551">조졸도님블로그</a></p>
+<h2 id="기본적인-용어"><a href="#기본적인-용어" class="headerlink" title="기본적인 용어"></a>기본적인 용어</h2><p>JOB : 배치를 수행할 일거리<br>STEP: JOB내에 배치를 단계적으로 수행하는 작업단위<br>Reader: STEP내에서 조회 역할을 담당 (대상을 쿼리로 조회)<br>Processor: Reader에서 가져온 데이터로 비즈니스로직을 처리 담당 (중간에서 계산 / 세팅 등)<br>Writer: Processor에서 처리된 데이터들을 최종 트랜젝션 처리 (Ready상태를 -&gt; Complete상태로 바꾼다든지.. 뭐그런 상태 최종 처리)<br>@JobScope: Job이 실행되는 시점에 Job Paramter가 생성 (Late binding 처리됨)<br>@StepScope: 스프링 컨테이너가 올라갈때 Job Parameter가 생성 (빌드시점 생성)<br>Chunk : 한번에 처리될 트랜잭션 단위 (PageSize는 조회될 대상의 사이즈이며 Chunk단위랑은 다름)</p>
+<h2 id="기본-구조"><a href="#기본-구조" class="headerlink" title="기본 구조"></a>기본 구조</h2><h3 id="설정"><a href="#설정" class="headerlink" title="설정"></a>설정</h3><figure class="highlight java"><figcaption><span>batch-설정</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="comment">// build.gradle에 아래 의존성 추가 </span></span><br><span class="line"><span class="comment">// implementation &#x27;org.springframework.boot:spring-boot-starter-batch&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// querydsl 사용하려면 추가</span></span><br><span class="line"><span class="comment">// implementation &#x27;com.querydsl:querydsl-jpa&#x27;</span></span><br><span class="line"><span class="comment">// implementation &#x27;com.querydsl:querydsl-apt&#x27;</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">@Configuration</span></span><br><span class="line"><span class="meta">@EnableBatchProcessing</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">SpringBatchConfig</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Bean</span></span><br><span class="line">    <span class="function">BatchConfigurer <span class="title">configurer</span><span class="params">(<span class="meta">@Qualifier(&quot;vbatchMasterDataSource&quot;)</span> DataSource dataSource)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> DefaultBatchConfigurer(dataSource);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<h3 id="job-구조"><a href="#job-구조" class="headerlink" title="job 구조"></a>job 구조</h3><figure class="highlight java"><figcaption><span>batch-job</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Bean(name = JOB_NAME)</span></span><br><span class="line">   <span class="function"><span class="keyword">public</span> Job <span class="title">job</span><span class="params">()</span> </span>&#123;</span><br><span class="line">       <span class="keyword">return</span> jobBuilderFactory.get(JOB_NAME)</span><br><span class="line">           .start(unusedStep())</span><br><span class="line">           .next(saveStep())</span><br><span class="line">           .next(removeStep())</span><br><span class="line">           .build();</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="step-구조"><a href="#step-구조" class="headerlink" title="step 구조"></a>step 구조</h3><figure class="highlight java"><figcaption><span>batch-job</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Bean(name = SAVE_STEP_NAME)</span></span><br><span class="line">   <span class="function"><span class="keyword">public</span> Step <span class="title">saveStep</span><span class="params">()</span> </span>&#123;</span><br><span class="line">       <span class="keyword">return</span> stepBuilderFactory.get(SAVE_STEP_NAME)</span><br><span class="line">           .&lt;BestRankQueryResult, BestRankSummaryEntity&gt;chunk(CHUNK_SIZE)</span><br><span class="line">           .reader(saveReader())</span><br><span class="line">           .processor(bestRankSummarySaveProcessor)</span><br><span class="line">           .writer(bestRankSummarySaveWriter)</span><br><span class="line">           .build();</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="reader구조"><a href="#reader구조" class="headerlink" title="reader구조"></a>reader구조</h4><ul>
+<li>spring batch에서는 본디 jpaPagingItemReader 처럼 jpa관련 리더를 제공하지만, querydsl사용이 어렵다. 조졸두님 블로그 확인하면 이부분을 해소하는 방법을 올려주셨음. 참고하자 </li>
+<li>여기서 @StepScope는 job parameter가 없기때문에 제거해도 됨. (파라미터가 있는경우만 넣어주는것이 좋음)</li>
+</ul>
+<figure class="highlight java"><figcaption><span>batch-reader</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Bean(name = SAVE_READER_NAME)</span></span><br><span class="line">   <span class="meta">@StepScope</span></span><br><span class="line">   <span class="function"><span class="keyword">public</span> QuerydslPagingItemReader&lt;BestRankQueryResult&gt; <span class="title">saveReader</span><span class="params">()</span> </span>&#123;</span><br><span class="line">       <span class="keyword">final</span> LocalDateTime startDate = parse(LocalDateTime.now().minusDays(<span class="number">2</span>).format(ofPattern(<span class="string">&quot;yyyy-MM-dd&quot;</span>)).concat(<span class="string">&quot;T&quot;</span>)</span><br><span class="line">           .concat(LocalDateTime.now().minusDays(<span class="number">2</span>).format(ofPattern(<span class="string">&quot;HH:00:00&quot;</span>))));</span><br><span class="line">       <span class="keyword">final</span> LocalDateTime endDate = parse(LocalDateTime.now().format(ofPattern(<span class="string">&quot;yyyy-MM-dd&quot;</span>)).concat(<span class="string">&quot;T&quot;</span>)</span><br><span class="line">           .concat(LocalDateTime.now().format(ofPattern(<span class="string">&quot;HH:59:59&quot;</span>))));</span><br><span class="line"></span><br><span class="line">       <span class="keyword">return</span> <span class="keyword">new</span> QuerydslPagingItemReader&lt;&gt;(vorderEntityManagerFactory, CHUNK_SIZE, jpaQueryFactory -&gt;</span><br><span class="line">           jpaQueryFactory.select(getBestRankQueryProjection())</span><br><span class="line">               .from(bestRankEntity)</span><br><span class="line">               .where(betweenBasisDate(startDate, endDate))</span><br><span class="line">               .groupBy(bestRankEntity.productId), <span class="keyword">false</span>);</span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line">   <span class="function"><span class="keyword">private</span> QBestRankQueryResult <span class="title">getBestRankQueryProjection</span><span class="params">()</span> </span>&#123;</span><br><span class="line">       String basisDate = LocalDateTime.now().format(ofPattern(<span class="string">&quot;yyyy-MM-dd&quot;</span>)).concat(<span class="string">&quot;T&quot;</span>)</span><br><span class="line">           .concat(LocalDateTime.now().minusHours(<span class="number">1</span>).format(ofPattern(<span class="string">&quot;HH:00:00&quot;</span>)));</span><br><span class="line"></span><br><span class="line">       <span class="keyword">return</span> <span class="keyword">new</span> QBestRankQueryResult(bestRankEntity.productId.as(<span class="string">&quot;productId&quot;</span>)</span><br><span class="line">           , bestRankEntity.productPrice.as(<span class="string">&quot;productPrice&quot;</span>)</span><br><span class="line">           , bestRankEntity.wStyleOrderCount.sum().coalesce(<span class="number">0L</span>).as(<span class="string">&quot;wStyleOrderCount&quot;</span>)</span><br><span class="line">           , bestRankEntity.wStyleProductCount.sum().coalesce(<span class="number">0</span>).as(<span class="string">&quot;wStyleProductCount&quot;</span>)</span><br><span class="line">           , bestRankEntity.wmpOrderCount.sum().coalesce(<span class="number">0L</span>).as(<span class="string">&quot;wmpOrderCount&quot;</span>)</span><br><span class="line">           , bestRankEntity.wmpProductCount.sum().coalesce(<span class="number">0</span>).as(<span class="string">&quot;wmpProductCount&quot;</span>)</span><br><span class="line">           , constant(LocalDateTime.parse(basisDate)));</span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line">   <span class="function"><span class="keyword">private</span> BooleanExpression <span class="title">betweenBasisDate</span><span class="params">(LocalDateTime startDate, LocalDateTime endDate)</span> </span>&#123;</span><br><span class="line">       <span class="keyword">return</span> bestRankEntity.basisDate.between(startDate, endDate);</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="processor-구조"><a href="#processor-구조" class="headerlink" title="processor 구조"></a>processor 구조</h4><figure class="highlight java"><figcaption><span>batch-processor</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Slf4j</span></span><br><span class="line"><span class="meta">@Service</span></span><br><span class="line"><span class="meta">@RequiredArgsConstructor</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">BestRankSummarySaveProcessor</span> <span class="keyword">implements</span> <span class="title">ItemProcessor</span>&lt;<span class="title">BestRankQueryResult</span>, <span class="title">BestRankSummaryEntity</span>&gt; </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">float</span> wStyleBoost = <span class="number">2.0f</span>;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">float</span> wmpBoost = <span class="number">0.01f</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> ProductDetailViewCountProvider productDetailViewCountProvider;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> BestRankSummaryEntity <span class="title">process</span><span class="params">(BestRankQueryResult item)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        BestRankSummaryEntity saveTarget = <span class="keyword">new</span> BestRankSummaryEntity();</span><br><span class="line"></span><br><span class="line">        saveTarget.setBasisDate(parse(now().minusHours(<span class="number">48</span>).format(ofPattern(<span class="string">&quot;yyyy-MM-dd&#x27;T&#x27;HH:00:00&quot;</span>))));</span><br><span class="line">        saveTarget.setProductId(item.getProductId());</span><br><span class="line">        saveTarget.setUsable(<span class="keyword">true</span>);</span><br><span class="line"></span><br><span class="line">        Float boostScore = <span class="number">0.0f</span>;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (item.getWStyleOrderCount() &gt; <span class="number">0L</span> || item.getWStyleProductCount() &gt; <span class="number">0</span>) &#123;</span><br><span class="line">            boostScore += (item.getWStyleOrderCount() * wStyleBoost) + (item.getWStyleProductCount() * wStyleBoost);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (item.getWmpOrderCount() &gt; <span class="number">0L</span> || item.getWmpProductCount() &gt; <span class="number">0</span>) &#123;</span><br><span class="line">            boostScore += (item.getWmpOrderCount() * wmpBoost) + (item.getWmpProductCount() * wmpBoost);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">final</span> Integer productDetailViewCount = getProductDetailViewCount(item.getProductId());</span><br><span class="line">        <span class="keyword">if</span> (isCalculateProductViewCount(productDetailViewCount)) &#123;</span><br><span class="line">            boostScore += (productDetailViewCount * <span class="number">0.005F</span>);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        saveTarget.setBoostScore(boostScore);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> saveTarget;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">boolean</span> <span class="title">isCalculateProductViewCount</span><span class="params">(<span class="keyword">final</span> Integer productViewCount)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> productViewCount &gt; <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> Integer <span class="title">getProductDetailViewCount</span><span class="params">(<span class="keyword">final</span> Long productId)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">final</span> LocalDateTime startDate = parse(LocalDateTime.now().minusDays(<span class="number">1</span>).format(ofPattern(<span class="string">&quot;yyyy-MM-dd&quot;</span>)).concat(<span class="string">&quot;T&quot;</span>)</span><br><span class="line">            .concat(LocalDateTime.now().minusDays(<span class="number">1</span>).format(ofPattern(<span class="string">&quot;HH:00:00&quot;</span>))));</span><br><span class="line">        <span class="keyword">final</span> LocalDateTime endDate = parse(LocalDateTime.now().format(ofPattern(<span class="string">&quot;yyyy-MM-dd&quot;</span>)).concat(<span class="string">&quot;T&quot;</span>)</span><br><span class="line">            .concat(LocalDateTime.now().format(ofPattern(<span class="string">&quot;HH:59:59&quot;</span>))));</span><br><span class="line">        <span class="keyword">return</span> productDetailViewCountProvider.getProductDetailViewCount(productId, startDate, endDate);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="writer구조"><a href="#writer구조" class="headerlink" title="writer구조"></a>writer구조</h4><figure class="highlight java"><figcaption><span>batch-writer</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Slf4j</span></span><br><span class="line"><span class="meta">@Service</span></span><br><span class="line"><span class="meta">@RequiredArgsConstructor</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">BestRankSummarySaveWriter</span> <span class="keyword">implements</span> <span class="title">ItemWriter</span>&lt;<span class="title">BestRankSummaryEntity</span>&gt; </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> BestRankSummaryProvider bestRankSummaryProvider;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">write</span><span class="params">(List&lt;? extends BestRankSummaryEntity&gt; items)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        bestRankSummaryProvider.saveAll((List&lt;BestRankSummaryEntity&gt;) items);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+            
+
+
+        </div>
+    </div>
+    <div id="post-footer" class="post-footer main-content-wrap">
+        
+            <div class="post-footer-tags">
+                <span class="text-color-light text-small">TAGGED IN</span><br/>
+                
+    <a class="tag tag--primary tag--small t-none-link" href="/tags/Batch/" rel="tag">Batch</a> <a class="tag tag--primary tag--small t-none-link" href="/tags/Java-JPA-Spring-Batch/" rel="tag">Java,JPA,Spring,Batch</a> <a class="tag tag--primary tag--small t-none-link" href="/tags/querydsl/" rel="tag">querydsl</a>
+
+            </div>
+        
+        
+            <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    <a
+                        class="post-action-btn btn btn--disabled"
+                        aria-hidden="true"
+                    >
+                        
+                        <i class="fa fa-angle-left" aria-hidden="true"></i>
+                        <span class="hide-xs hide-sm text-small icon-ml">PREVIOUS</span>
+                    </a>
+            </li>
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/2021/11/01/jpa-work-2/"
+                    data-tooltip="jpa-work-2"
+                    aria-label="NEXT: jpa-work-2"
+                >
+                    
+                        <span class="hide-xs hide-sm text-small icon-mr">NEXT</span>
+                        <i class="fa fa-angle-right" aria-hidden="true"></i>
+                    </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a
+                class="post-action-btn btn btn--default btn-open-shareoptions"
+                href="#btn-open-shareoptions"
+                aria-label="Share this post"
+            >
+                <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </a>
+        </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://codexdawn.github.io/2021/12/29/spring-batch-1/"
+                    title="Share on Facebook"
+                    aria-label="Share on Facebook"
+                >
+                    <i class="fab fa-facebook" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://twitter.com/intent/tweet?text=https://codexdawn.github.io/2021/12/29/spring-batch-1/"
+                    title="Share on Twitter"
+                    aria-label="Share on Twitter"
+                >
+                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://plus.google.com/share?url=https://codexdawn.github.io/2021/12/29/spring-batch-1/"
+                    title="Share on Google+"
+                    aria-label="Share on Google+"
+                >
+                    <i class="fab fa-google-plus" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+        
+            
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#" aria-label="Back to top">
+            
+                <i class="fa fa-list" aria-hidden="true"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+        
+        
+            
+        
+    </div>
+</article>
+
+
+
+                <footer id="footer" class="main-content-wrap">
+    <span class="copyrights">
+        Copyrights &copy; 2021 codexdawn. All Rights Reserved.
+    </span>
+</footer>
+
+            </div>
+            
+                <div id="bottom-bar" class="post-bottom-bar" data-behavior="5">
+                    <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    <a
+                        class="post-action-btn btn btn--disabled"
+                        aria-hidden="true"
+                    >
+                        
+                        <i class="fa fa-angle-left" aria-hidden="true"></i>
+                        <span class="hide-xs hide-sm text-small icon-ml">PREVIOUS</span>
+                    </a>
+            </li>
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/2021/11/01/jpa-work-2/"
+                    data-tooltip="jpa-work-2"
+                    aria-label="NEXT: jpa-work-2"
+                >
+                    
+                        <span class="hide-xs hide-sm text-small icon-mr">NEXT</span>
+                        <i class="fa fa-angle-right" aria-hidden="true"></i>
+                    </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a
+                class="post-action-btn btn btn--default btn-open-shareoptions"
+                href="#btn-open-shareoptions"
+                aria-label="Share this post"
+            >
+                <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </a>
+        </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://codexdawn.github.io/2021/12/29/spring-batch-1/"
+                    title="Share on Facebook"
+                    aria-label="Share on Facebook"
+                >
+                    <i class="fab fa-facebook" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://twitter.com/intent/tweet?text=https://codexdawn.github.io/2021/12/29/spring-batch-1/"
+                    title="Share on Twitter"
+                    aria-label="Share on Twitter"
+                >
+                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://plus.google.com/share?url=https://codexdawn.github.io/2021/12/29/spring-batch-1/"
+                    title="Share on Google+"
+                    aria-label="Share on Google+"
+                >
+                    <i class="fab fa-google-plus" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+        
+            
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#" aria-label="Back to top">
+            
+                <i class="fa fa-list" aria-hidden="true"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+                </div>
+                
+    <div id="share-options-bar" class="share-options-bar" data-behavior="5">
+        <i id="btn-close-shareoptions" class="fa fa-times"></i>
+        <ul class="share-options">
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://www.facebook.com/sharer/sharer.php?u=https://codexdawn.github.io/2021/12/29/spring-batch-1/"
+                        aria-label="Share on Facebook"
+                    >
+                        <i class="fab fa-facebook" aria-hidden="true"></i><span>Share on Facebook</span>
+                    </a>
+                </li>
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://twitter.com/intent/tweet?text=https://codexdawn.github.io/2021/12/29/spring-batch-1/"
+                        aria-label="Share on Twitter"
+                    >
+                        <i class="fab fa-twitter" aria-hidden="true"></i><span>Share on Twitter</span>
+                    </a>
+                </li>
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://plus.google.com/share?url=https://codexdawn.github.io/2021/12/29/spring-batch-1/"
+                        aria-label="Share on Google+"
+                    >
+                        <i class="fab fa-google-plus" aria-hidden="true"></i><span>Share on Google+</span>
+                    </a>
+                </li>
+            
+        </ul>
+    </div>
+
+
+            
+        </div>
+        
+
+
+<div id="about">
+    <div id="about-card">
+        <div id="about-btn-close">
+            <i class="fa fa-times"></i>
+        </div>
+        
+            <h4 id="about-card-name">codexdawn</h4>
+        
+            <div id="about-card-bio"><p>author.bio</p>
+</div>
+        
+        
+            <div id="about-card-job">
+                <i class="fa fa-briefcase"></i>
+                <br/>
+                <p>author.job</p>
+
+            </div>
+        
+        
+    </div>
+</div>
+
+        
+        
+<div id="cover" style="background-image:url('/assets/images/cover-v1.2.0.jpg');"></div>
+        <!--SCRIPTS-->
+
+<script src="/assets/js/script-ikbi0v8fyzuu91xv5rmpcrnwb4qinfgborzd5kejmj8wr6ibfra8oaxqshyg.min.js"></script>
+
+<!--SCRIPTS END-->
+
+
+    
+
+
+
+
+    </body>
+</html>
