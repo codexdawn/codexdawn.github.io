@@ -247,6 +247,93 @@
                     
                         <a
                             class="link-unstyled"
+                            href="/2021/12/30/java-effective-14/"
+                            aria-label=": java-effective-14"
+                        >
+                            java-effective-14
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2021-12-30T06:17:35+00:00">
+	
+		    Dec 30, 2021
+    	
+    </time>
+    
+        <span>in </span>
+        
+    <a class="category-link" href="/categories/Effective-Java/">Effective Java</a>, <a class="category-link" href="/categories/Study/">Study</a>, <a class="category-link" href="/categories/%EB%AA%A8%EB%93%A0-%EA%B0%9D%EC%B2%B4%EC%9D%98-%EA%B3%B5%ED%86%B5-%EB%A9%94%EC%84%9C%EB%93%9C/">모든 객체의 공통 메서드</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <h1 id="Comparable을-구현할지-고려하라"><a href="#Comparable을-구현할지-고려하라" class="headerlink" title="Comparable을 구현할지 고려하라"></a>Comparable을 구현할지 고려하라</h1><h2 id="Comparable-뭐임"><a href="#Comparable-뭐임" class="headerlink" title="Comparable 뭐임?"></a>Comparable 뭐임?</h2><ul>
+<li>Comparable은 유일한 메서드인 compareTo만 존재함</li>
+<li>기본적으로 equals와 동일하지만 여기에 더해 순서까지 비교가능하다는 특징이있음. 따라서 정렬이 가능함. </li>
+</ul>
+<h2 id="언제-사용해야할까-사용법은"><a href="#언제-사용해야할까-사용법은" class="headerlink" title="언제 사용해야할까? 사용법은 ?"></a>언제 사용해야할까? 사용법은 ?</h2><ul>
+<li>알파벳, 숫자, 연대와 같이 순서가 명확한 값 클래스를 작성할때 반드시 Comparable 인터페이스를 구현!!</li>
+</ul>
+<figure class="highlight java"><figcaption><span>기본타입필드가 여럿일때 비교</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">compareTo</span><span class="params">(PhoneNumber pn)</span> </span>&#123;</span><br><span class="line">	<span class="keyword">int</span> result = Short.compare(areaCode, pn.areaCode);</span><br><span class="line">	<span class="keyword">if</span>(result == <span class="number">0</span>) &#123;</span><br><span class="line">		result = Short.compare(prefix, pn.prefix);</span><br><span class="line">		</span><br><span class="line">		<span class="keyword">if</span>(result == <span class="number">0</span>) &#123;</span><br><span class="line">			result = Short.compare(lineNum, pn.lineNum);</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> result; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>위 와 같은 방식으로 Comparable를 정의할수있겠지만, JAVA8 이상을 활용한다면 위 방법은 구식이다. 코드도 복잡하고</li>
+</ul>
+<figure class="highlight java"><figcaption><span>비교자 생성 메서드를 활용한 비교자</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> Comparator&lt;PhoneNumber&gt; COMPARATOR = comparingInt((PhoneNumber pn) -&gt; pn.areaCode)</span><br><span class="line">														.thenComparingInt(pn -&gt; pn.prefix)</span><br><span class="line">														.thenComparingInt(pn -&gt; pn.lineNum);</span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">compareTo</span><span class="params">(PhoneNumber pn)</span> </span>&#123;</span><br><span class="line">	<span class="keyword">return</span> COMPARATOR.compare(<span class="keyword">this</span>, pn);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p>위와같이 java8의 Comparator를 활용하여 코드를 깔끔하고 성능향상에도 도움을 줄수있음. </p>
+</li>
+<li><p>값의차를 기준으로 compareTo를 사용하는건 절대로 해서는 안됨 </p>
+<figure class="highlight java"><figcaption><span>해시코드 값의 차를 기준으로 하는 비교자</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> Comparator&lt;Object&gt; hashCodeOrder = <span class="keyword">new</span> Comparator&lt;&gt;() &#123;</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">compare</span><span class="params">(Object o1, Object o2)</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> o1.hashCode() - o2.hashCode(); </span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>위 방식은 정수 오버플로우를 일으키거나 IEEE 754 부동소수점 계산방식에 따른 오류 발생한다. 그리고 성능도 별로다</p>
+</li>
+</ul>
+<figure class="highlight java"><figcaption><span>해시코드 값의 차를 기준으로 하는 비교자 개선방법</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> Comparator&lt;Object&gt; hashCodeOrder = <span class="keyword">new</span> Comparator&lt;&gt;() &#123;</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">compare</span><span class="params">(Object o1, Object o2)</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> Integer.compare(o1.hashCode(), o2.hashCode); </span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">static</span> Comparator&lt;Object&gt; hashCodeOrder = Comparator.comparingInt(o -&gt; o.hashCode()); </span><br></pre></td></tr></table></figure>
+
+
+<h2 id="정리"><a href="#정리" class="headerlink" title="정리"></a>정리</h2><ul>
+<li>순서를 고려한다면 Comparable을 구현하자 </li>
+<li>compareTo 메서드에서 필드의 값을 비교할때 &lt; 와 &gt; 연산자는 쓰지말고 대신 박싱된 기본 타입 클래스가 제공하는 정적 compare 메서드나 Comparator 인터페이스가 제공하는 비교자 생성 메서드를 사용하자. </li>
+</ul>
+
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/2021/12/30/java-effective-14/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                Comment and share
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
                             href="/2021/09/15/java-effective-13/"
                             aria-label=": java-effective-13"
                         >
@@ -272,7 +359,36 @@
             </div>
             
                 <div class="postShorten-content">
-                    <h1 id="clone-재정의는-주의해서-진행하라"><a href="#clone-재정의는-주의해서-진행하라" class="headerlink" title="clone 재정의는 주의해서 진행하라"></a>clone 재정의는 주의해서 진행하라</h1>
+                    <h1 id="clone-재정의는-주의해서-진행하라"><a href="#clone-재정의는-주의해서-진행하라" class="headerlink" title="clone 재정의는 주의해서 진행하라"></a>clone 재정의는 주의해서 진행하라</h1><h2 id="clone이-뭐지"><a href="#clone이-뭐지" class="headerlink" title="clone이 뭐지?"></a>clone이 뭐지?</h2><ul>
+<li>객체의 복사본을 생성해서 반환하는 역할을 함 </li>
+<li>자주 쓰인다고하는데, 솔직히 제대로 쓴걸 본적이 없음</li>
+</ul>
+<blockquote><p>clone을 사용했을때 아래 조건들은 모두 참이다. </p>
+<p>x.clone() != x (O)<br>x.clone().getClass() == x.getClass() (O)<br>x.clone().equals(x) (O)</p>
+</blockquote>
+
+<h2 id="그럼-clone은-왜-조심해서-사용해야해"><a href="#그럼-clone은-왜-조심해서-사용해야해" class="headerlink" title="그럼 clone은 왜 조심해서 사용해야해?"></a>그럼 clone은 왜 조심해서 사용해야해?</h2><ul>
+<li>복제하고자하는 타겟 클래스의 하위클래스에서 super.clone을 호출하면 잘못된 클래스의 객체가 만들어져 결국 하위 클래스의 clone메서드가 제대로 동작하지 않게됨. (class에 final이라면 괜찮음 - 확장 불가능한 불변클래스이기 때문)</li>
+</ul>
+<figure class="highlight java"><figcaption><span>가변상태를 참조하지 않는 클래스용 clone 메서드</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// PhoneNumber 클래스는 반드시 Cloneable을 구현한다고 추가해야함. </span></span><br><span class="line"><span class="comment">// PhoneNumber 클래스 전용으로 사용되는 clone이기에 super로 호출했을때 상위타입 혹은 Object형태로 들어오는 clone객체를 방지할수있음. </span></span><br><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> PhoneNumber <span class="title">clone</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	<span class="keyword">try</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> (PhoneNumber) <span class="keyword">super</span>.clone();</span><br><span class="line">	&#125; <span class="keyword">catch</span>(CloneNotSupportedException e) &#123;</span><br><span class="line">		<span class="keyword">throw</span> <span class="keyword">new</span> AssertioError(); <span class="comment">//일어날수없는 일 </span></span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>clone 메서드는 사실상 생성자와 같은 효과를 냄 즉, clone은 원본 객체에 아무런 해를 끼치지 않는 동시에 복제된 객체의 불변식을 보장해야함. </li>
+<li>배열복제할때는 clone사용을 권장함. clone기능을 제대로 활용하는 유일한 참 조건임. </li>
+<li>Cloneable 아키텍처는 가변 객체를 참조하는 필드는 final로 선언하라 는 일반 용법고 충돌되기때문에 clone사용시 final필드로 선언되어있음 반드시 제거해야함. </li>
+<li>Stack클래스 처럼 내부에 elements 배열객체를 갖는 클래스는 원본이나 복제본중 하나가 수정되면 내용이 달라지기때문에 프로그램이 오동작하거나 NullPointerException이 발생할수있음, 따라서 elements배열의 clone을 재귀적으로 호출헤야함. (ex&gt; result.elements = elements.clone())</li>
+</ul>
+<h2 id="clone-메서드-사용하기-겁나-복잡한-대체-방법-없음"><a href="#clone-메서드-사용하기-겁나-복잡한-대체-방법-없음" class="headerlink" title="clone 메서드 사용하기 겁나 복잡한 대체 방법 없음?"></a>clone 메서드 사용하기 겁나 복잡한 대체 방법 없음?</h2><ul>
+<li>Cloneable을 이미 구현한 클래스는 clone을 반드시 잘 구현해야한다. 하지만 그런 상황이 아니라면 <strong>복사 생성자와 복사 팩터리라는 더 나은 객체 복사 방식을 제공 할수 있음</strong> </li>
+<li>복사생성자(변환생성자) : public Yum(Yum yum) {…}; </li>
+<li>복사팩터리(변환팩터리) : public static Yum newInstance(Yum yum) {…};</li>
+</ul>
+<h2 id="정리"><a href="#정리" class="headerlink" title="정리"></a>정리</h2><ul>
+<li>Cloneable은 왠만해서는 쓰지말고, 새로운 인터페이스를 만들때 역시 Cloneable을 확장해서는 안됨. 여러 사이드이펙트를 발생할 리스크가 큼 </li>
+<li>final 클래스라면 큰 위험은 없지만 성능 최적화 관점에서 큰이슈 없을때만 가능하지 그외에는 그냥 사용하지 말자</li>
+<li>복제기능은 생성자와 팩터리를 이용하는것이 갑이다 라는것이 결론이다. 단, 배열만 clone사용이 깔끔하다. </li>
+</ul>
+
                     
                         
 

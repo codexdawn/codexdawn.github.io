@@ -247,6 +247,248 @@
                     
                         <a
                             class="link-unstyled"
+                            href="/2021/03/18/jpa-persistence/"
+                            aria-label=": jpa-persistence"
+                        >
+                            jpa-persistence
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2021-03-18T02:11:16+00:00">
+	
+		    Mar 18, 2021
+    	
+    </time>
+    
+        <span>in </span>
+        
+    <a class="category-link" href="/categories/Study/">Study</a>, <a class="category-link" href="/categories/%EC%98%81%EC%86%8D%EC%84%B1-%EA%B4%80%EB%A6%AC/">영속성 관리</a>, <a class="category-link" href="/categories/%EC%9E%90%EB%B0%94ORM%ED%91%9C%EC%A4%80JPA%ED%94%84%EB%A1%9C%EA%B7%B8%EB%9E%98%EB%B0%8D/">자바ORM표준JPA프로그래밍</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <h1 id="영속성-관리"><a href="#영속성-관리" class="headerlink" title="영속성 관리"></a>영속성 관리</h1><h2 id="EntityManagerFactory-와-EntityManager"><a href="#EntityManagerFactory-와-EntityManager" class="headerlink" title="EntityManagerFactory 와 EntityManager"></a>EntityManagerFactory 와 EntityManager</h2><figure class="highlight java"><figcaption><span>EntityManagerFactory와EntityManager사용법</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">final</span> EntityManagerFactory entityManagerFactory = Persistence.createEntityManagerFactory(<span class="string">&quot;jpa&quot;</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">final</span> EntityManager entityManager = entityManagerFactory.createEntityManager();</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight xml"><figcaption><span>persistence.xml</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; ?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">persistence</span> <span class="attr">xmlns</span>=<span class="string">&quot;http://xmlns.jcp.org/xml/ns/persistence&quot;</span> <span class="attr">version</span>=<span class="string">&quot;2.2&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">persistence-unit</span> <span class="attr">name</span>=<span class="string">&quot;jpa&quot;</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">class</span>&gt;</span>entity.Member<span class="tag">&lt;/<span class="name">class</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">class</span>&gt;</span>entity.Team<span class="tag">&lt;/<span class="name">class</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">class</span>&gt;</span>entity.Order<span class="tag">&lt;/<span class="name">class</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">class</span>&gt;</span>entity.Product<span class="tag">&lt;/<span class="name">class</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">class</span>&gt;</span>entity.Address<span class="tag">&lt;/<span class="name">class</span>&gt;</span></span><br><span class="line"></span><br><span class="line">        <span class="tag">&lt;<span class="name">properties</span>&gt;</span></span><br><span class="line"></span><br><span class="line">            <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">&quot;javax.persistence.jdbc.driver&quot;</span> <span class="attr">value</span>=<span class="string">&quot;org.h2.Driver&quot;</span>/&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">&quot;javax.persistence.jdbc.user&quot;</span> <span class="attr">value</span>=<span class="string">&quot;sa&quot;</span> /&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">&quot;javax.persistence.jdbc.password&quot;</span> <span class="attr">value</span>=<span class="string">&quot;&quot;</span> /&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">&quot;javax.persistence.jdbc.url&quot;</span> <span class="attr">value</span>=<span class="string">&quot;jdbc:h2:tcp://localhost/~/jpqlshop&quot;</span>/&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">&quot;hibernate.dialect&quot;</span> <span class="attr">value</span>=<span class="string">&quot;org.hibernate.dialect.H2Dialect&quot;</span>/&gt;</span></span><br><span class="line"></span><br><span class="line">            <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">&quot;hibernate.show_sql&quot;</span> <span class="attr">value</span>=<span class="string">&quot;true&quot;</span>/&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">&quot;hibernate.format_sql&quot;</span> <span class="attr">value</span>=<span class="string">&quot;true&quot;</span>/&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">&quot;hibernate.use_sql_comments&quot;</span> <span class="attr">value</span>=<span class="string">&quot;true&quot;</span>/&gt;</span></span><br><span class="line"></span><br><span class="line">            <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">&quot;hibernate.hbm2ddl.auto&quot;</span> <span class="attr">value</span>=<span class="string">&quot;create&quot;</span>/&gt;</span></span><br><span class="line"></span><br><span class="line">        <span class="tag">&lt;/<span class="name">properties</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;/<span class="name">persistence-unit</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">persistence</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p><strong>Persistence.createEntityManagerFactory(“jpa”)</strong> 를 호출하면 META_INF/persistence.xml 에 있는 정보를 바탕으로 EntityManagerFactory를 생성한다. </p>
+</li>
+<li><p>EntityManagerFactory는 멀티스레드로 동시에 접근해도 안전하여, 서로 다른 스레드간에 공유가능하지만, EntityManager는 멀티스레드로 동시 접근하면, 동시성 문제로 스레드간 절대 공유하면 안됨. </p>
+</li>
+</ul>
+<h2 id="Persistence-Context-영속성-컨텍스트"><a href="#Persistence-Context-영속성-컨텍스트" class="headerlink" title="Persistence Context (영속성 컨텍스트)"></a>Persistence Context (영속성 컨텍스트)</h2><ul>
+<li>Persistence Context : Entity를 영구 저장하는 환경 </li>
+<li>em.persist(member)는 단순 저장을 넘어서, entityManager를 사용해서 Persistence Context에 저장한다. </li>
+<li>EntityManager로 저장 혹은 조회 명령을 하면 EntityManager가 Persistence Context에 해당 Entity를 보관함. </li>
+</ul>
+<h2 id="Entity-LifeCycle-엔티티-생명주기"><a href="#Entity-LifeCycle-엔티티-생명주기" class="headerlink" title="Entity LifeCycle(엔티티 생명주기)"></a>Entity LifeCycle(엔티티 생명주기)</h2><p><img src="https://thorben-janssen.com/wp-content/uploads/2020/07/Lifecycle-Model-1024x576.png" alt="Entity LifeCycle"><br>[참고: thorben-janssen.com]</p>
+<blockquote><p>Entity 4가지 상태 </p>
+<ul>
+<li>비영속 (new/transient) : Persistence Context와 전혀 관계 없는 상태   </li>
+<li>영속 (Managed) : Persistence Context 저장된 상태 </li>
+<li>준영속 (detached) : Persistence Context 저장되었다가 분리된 상태 </li>
+<li>삭제 (removed) : 삭제된 상태 </li>
+</ul>
+</blockquote>
+
+<h3 id="비영속"><a href="#비영속" class="headerlink" title="비영속"></a>비영속</h3><ul>
+<li>Entity객체를 단순 생성한 상태 (em.persist 호출 전 상태)</li>
+</ul>
+<h3 id="영속"><a href="#영속" class="headerlink" title="영속"></a>영속</h3><ul>
+<li>Persistence Context가 관리하는 Entity를 영속 상태라함. </li>
+<li>em.find() / JPQL을 사용해서 조회한 Entity도 Persistence Context가 관리하게됨. </li>
+</ul>
+<h3 id="준영속"><a href="#준영속" class="headerlink" title="준영속"></a>준영속</h3><ul>
+<li>em.detach 호출 (ex&gt; em.detach(member))</li>
+<li>em.close로 Persistence Context를 닫은 상태 </li>
+<li>em.clear로 Persistence Context를 초기화한 상태 </li>
+</ul>
+<h2 id="Persistence-Context-특징"><a href="#Persistence-Context-특징" class="headerlink" title="Persistence Context 특징"></a>Persistence Context 특징</h2><ol>
+<li>Persistence Context와 식별자 값 </li>
+</ol>
+<ul>
+<li>Persistence Context는 식별자 값(@Id로 테이블 기본키와 매핑한 값)으로 구분 </li>
+<li>영속상태는 식별자 값이 반드시 있어야함. 없으면 예외 발생 </li>
+</ul>
+<ol start="2">
+<li>Persistence Context와 데이터베이스 저장 </li>
+</ol>
+<ul>
+<li>JPA는 보통 트랜잭션을 커밋하는 순간 Persistence Context에 새로 저장된 Entity를 DB에 반영 (flush)</li>
+</ul>
+<ol start="3">
+<li>Persistence Context가 Entity를 관리하면 아래와 같은 장점이 있음. </li>
+</ol>
+<ul>
+<li><p>1차 캐시 </p>
+</li>
+<li><p>동일성 보장 </p>
+</li>
+<li><p>트랜잭션을 지원하는 쓰기 지연 </p>
+</li>
+<li><p>변경 감지 </p>
+</li>
+<li><p>지연 로딩 </p>
+<h3 id="Entity-조회"><a href="#Entity-조회" class="headerlink" title="Entity 조회"></a>Entity 조회</h3></li>
+</ul>
+<ul>
+<li>Persistence Context는 내부에 캐시를 가지고있음 이것이 1차 캐시임 </li>
+</ul>
+<figure class="highlight java"><figcaption><span>entity조회 예제</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line">Team team = <span class="keyword">new</span> Team();</span><br><span class="line">team.setName(<span class="string">&quot;Team1&quot;</span>);</span><br><span class="line">entityManager.persist(team);</span><br><span class="line"></span><br><span class="line">Team team2 = <span class="keyword">new</span> Team();</span><br><span class="line">team2.setName(<span class="string">&quot;Team2&quot;</span>);</span><br><span class="line">entityManager.persist(team2);</span><br><span class="line"></span><br><span class="line">Member member = <span class="keyword">new</span> Member();</span><br><span class="line">member.setUserName(<span class="string">&quot;m1&quot;</span>);</span><br><span class="line">member.setAge(<span class="number">36</span>);</span><br><span class="line">member.setTeam(team);</span><br><span class="line"></span><br><span class="line">entityManager.persist(member);</span><br><span class="line"></span><br><span class="line">Member member2 = <span class="keyword">new</span> Member();</span><br><span class="line">member2.setUserName(<span class="string">&quot;m2&quot;</span>);</span><br><span class="line">member2.setAge(<span class="number">30</span>);</span><br><span class="line">member2.setTeam(team);</span><br><span class="line"></span><br><span class="line">entityManager.persist(member2);</span><br><span class="line"></span><br><span class="line">Member member3 = <span class="keyword">new</span> Member();</span><br><span class="line">member3.setUserName(<span class="string">&quot;m3&quot;</span>);</span><br><span class="line">member3.setAge(<span class="number">20</span>);</span><br><span class="line">member3.setTeam(team2);</span><br><span class="line"></span><br><span class="line">entityManager.persist(member3);</span><br><span class="line"><span class="comment">// -- 여기까지는 1차캐시랑 쿼리저장소에 저장되어있음, 아직 flush를 안했음. 디비에 없는 상태</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//member1은 1차캐시에서 바로 가져옴 (디비에서가져온게 아님!)</span></span><br><span class="line">Member member1 = entityManager.find(Member.class, member.getId());</span><br><span class="line">System.out.println(member1);</span><br><span class="line"></span><br><span class="line"><span class="comment">//jpql로 호출하면 강제 flush되고, 영속상태로 바뀌고, 캐시에 저장된 값을 반환 (get으로 호출하는 시점에 디비에서 꺼내온다.)</span></span><br><span class="line">Member member1_1 = entityManager.createQuery(<span class="string">&quot;select m from Member m where  m.id = :member1&quot;</span>, Member.class)</span><br><span class="line">                .setParameter(<span class="string">&quot;member1&quot;</span>, member1.getId())</span><br><span class="line">                .getSingleResult();</span><br><span class="line"></span><br><span class="line"><span class="comment">//위 두개는 무조건 true 왜냐 1차캐시에서 같은 주소값으로 가져오기때문 </span></span><br><span class="line">System.out.println(<span class="string">&quot;member1_1 = member1 ==&gt; &quot;</span> + (member1_1 == member1));</span><br><span class="line"></span><br><span class="line">transaction.commit();</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>em.find을 호출하면 1차캐시부터 호출해서 봄 (insert쿼리 커밋되기전이라도 1차캐시에 존재하면 바로 가져옴)</li>
+<li>jpql을 사용하면 insert쿼리가 flush되고 조회 쿼리가 나감 (디비에 조회 값이 없기때문에 쓰기지연 쿼리저장소에 저장되어있던 쿼리를 다 부어버리고, 디비조회해버림)</li>
+<li>member1을 여러번 호출해도 같은 주소값을 가져옴 (member1 == member1 =&gt; true) 즉, Persistence Context에서 가져온 값은 동일성이 보장됨. </li>
+</ul>
+<h3 id="Entity-등록"><a href="#Entity-등록" class="headerlink" title="Entity 등록"></a>Entity 등록</h3><ul>
+<li>commit을 한 순간 Persistence Context를 flush하고 디비 commit 진행<ul>
+<li>em.persist를 하고 flush를 한다고 디비에 반영되는것이 아니라, commit 명령어가 나갔을때 비로소 insert쿼리가 반영됨 </li>
+<li>flush는 Persistence Context의 변경 내용을 DB에 전달하는 역할이다. <blockquote><p>트랜잭션을 지원하는 쓰기지연이 가능한 이유 </p>
+<p>begin(); //트랜잭션 시작</p>
+<p>save(A);<br>save(B);<br>save(C);</p>
+<p>commit(); // 트랜잭션 커밋 </p>
+<ol>
+<li><p>데이터를 저장하는 즉시 등록쿼리를 데이터베이스에 보낸다. 예제에서 save() 메소드를 호출할때마다 즉시 DB에 등록쿼리를 보낸다. 그리고 마지막에 트랜잭션을 커밋한다.</p>
+</li>
+<li><p>데이터를 저장하면 등록쿼리를 DB에 보내지않고 메모리에 모아둔다. 그리고 트랜잭션을 커밋할때 모아둔 등록쿼리를 DB에 보낸후 커밋한다. </p>
+</li>
+</ol>
+<p>결론은 어떻게든 커밋직전에 DB에 SQL을 전달하면 됨. 그래서 쓰기지연이 가능하다. </p>
+</blockquote>
+
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="Entity-수정"><a href="#Entity-수정" class="headerlink" title="Entity 수정"></a>Entity 수정</h3><blockquote><p>기존 SQL 업데이트 쿼리의 문제점</p>
+<ul>
+<li>수정 쿼리가 많아지는 것 </li>
+<li>비즈니스로직을 분석하기 위해 SQL문을 지속적으로 확인해야함 </li>
+<li>결국 직.간접적으로 비즈니스로직이 SQL에 의존하게 됨</li>
+</ul>
+</blockquote>
+
+<h4 id="변경감지-Dirty-Check"><a href="#변경감지-Dirty-Check" class="headerlink" title="변경감지 (Dirty Check)"></a>변경감지 (Dirty Check)</h4><p>JPA의 업데이트를 확인해보자 </p>
+<figure class="highlight java"><figcaption><span>entity업데이트 예제</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">Member member = <span class="keyword">new</span> Member();</span><br><span class="line">member.setUserName(<span class="string">&quot;m1&quot;</span>);</span><br><span class="line">member.setAge(<span class="number">36</span>);</span><br><span class="line">member.setTeam(team);</span><br><span class="line"></span><br><span class="line">entityManager.persist(member);</span><br><span class="line"></span><br><span class="line"><span class="comment">//JPA UPDATE방법</span></span><br><span class="line">member.setAge(<span class="number">35</span>);</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>JPA는 변경감지(Dirty Check)를 통해서 update문을 생성한다. </li>
+</ul>
+<blockquote><p>변경감지 수행 순서 </p>
+<ol>
+<li>트랜잭션을 커밋하면 EntityManager 내부에서 먼저 flush를 호출됨. </li>
+<li>Entity와 Snapshot을 비교해 변경된 Entity를 찾는다. </li>
+<li>변경된 Entity가 있으면 수정쿼리를 생성해서 쓰기 지연 SQL 저장소에 보낸다. </li>
+<li>쓰기 지연 저장소의 SQL을 DB에 보냄</li>
+<li>DB 트랜잭션을 커밋함. </li>
+</ol>
+</blockquote>
+
+<ul>
+<li>변경감지는 Persistence Context가 관리하는 영속상태 Entity에만 적용됨. </li>
+</ul>
+<p>JPA의 update기본전략은 Entity의 모든 필드를 업데이트 한다. </p>
+<blockquote><p>모든 필드를 업데이트 하면 좋은점 </p>
+<ol>
+<li>수정쿼리가 항상 같다 </li>
+<li>DB에 동일한 쿼리를 보내면 DB는 이전에 한번 파싱된 쿼리를 재사용 가능</li>
+</ol>
+<p>참고&gt; 부분업데이트를 해야한다면, @DynamicUpdate를 사용한다. (필드가 30개 이상이라면 추천)</p>
+</blockquote>
+
+<h3 id="Entity-삭제"><a href="#Entity-삭제" class="headerlink" title="Entity 삭제"></a>Entity 삭제</h3><figure class="highlight java"><figcaption><span>entity업데이트 예제</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Member member = em.find(Member.class, <span class="string">&quot;memberA&quot;</span>); </span><br><span class="line"></span><br><span class="line">entityManager.remove(member);</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>remove메서드를 호출하는 순간 Persistence Context에서도 제거됨 </li>
+</ul>
+<h2 id="Flush"><a href="#Flush" class="headerlink" title="Flush"></a>Flush</h2><p>Flush는 Persistence Context의 변경내용을 DB에 반영해줌. (반영만 하고 실제로는 Commit시 적용됨.)</p>
+<blockquote><p>Flush를 수행하면 벌어지는 일?</p>
+<ol>
+<li>Dirty Check 가 동작함. 스냅샷과 비교해서 수정된 entity를 찾아서 수정쿼리를 만들어 쓰기지연 SQL저장소에 등록함 </li>
+<li>쓰기지연 SQL저장소의 쿼리를 DB에 전송 (등록,수정,삭제)</li>
+</ol>
+</blockquote>
+
+<p>Persistence Context를 flush하는 방법 3가지 </p>
+<ol>
+<li>em.flush를 호출 </li>
+<li>트랜잭션 커밋시 자동 호출 </li>
+<li>JPQL 쿼리 실행시 자동 호출 </li>
+</ol>
+<h3 id="flush모드-옵션"><a href="#flush모드-옵션" class="headerlink" title="flush모드 옵션"></a>flush모드 옵션</h3><ul>
+<li>FlushModeType.AUTO : 커밋이나 쿼리를 실행할 때 플러시 (기본값)</li>
+<li>FlushModeType.COMMIT : 커밋할때만 플러시 </li>
+</ul>
+<h2 id="준영속-1"><a href="#준영속-1" class="headerlink" title="준영속"></a>준영속</h2><p>Persistence Context가 관리하는 영속상태의 Entity가 Persistence Context에서 분리된 것을 준영속 상태한다.<br>따라서, 준영속 상태에서는 Persistence Context가 제공하는 기능을 사용할수 없다! </p>
+<blockquote><p>준영속 상태를 만드는 방법 3가지 </p>
+<ol>
+<li>em.detach(entity) : 특정 Entity만 준영속 상태로 전환 </li>
+<li>em.clear() : Persistence Context를 완전히 초기화 </li>
+<li>em.close() : Persistence Context를 종료 </li>
+</ol>
+</blockquote>
+
+<h3 id="Entity를-준영속-상태로-전환-detach"><a href="#Entity를-준영속-상태로-전환-detach" class="headerlink" title="Entity를 준영속 상태로 전환 : detach"></a>Entity를 준영속 상태로 전환 : detach</h3><figure class="highlight java"><figcaption><span>준영속사용방법</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">Member member = <span class="keyword">new</span> Member();</span><br><span class="line">member.setUserName(<span class="string">&quot;m1&quot;</span>);</span><br><span class="line">member.setAge(<span class="number">36</span>);</span><br><span class="line"></span><br><span class="line">entityManager.persist(member);</span><br><span class="line"></span><br><span class="line"><span class="comment">//JPA에서 update문</span></span><br><span class="line">member.setAge(<span class="number">35</span>);</span><br><span class="line"></span><br><span class="line">entityManager.detach(member);</span><br><span class="line"></span><br><span class="line">Member mb = entityManager.find(Member.class, member.getId());</span><br><span class="line">System.out.println(<span class="string">&quot;detach obj: &quot;</span>+mb); <span class="comment">//null로 출력됨 왜냐면 영속성 관리에서 제거되었기 때문에</span></span><br><span class="line">transaction.commit();</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>준영속 상태가 되면 Persistence Context의 관리에서 벗어나게 되므로, 선택된 해당 Entity의 기존 쓰기 지연 SQL저장소에 저장되어 있던 부분도 제거됨. 따라서 등록,업데이트 등의 쿼리는 미수행됨. </li>
+</ul>
+<h4 id="Persistence-Context-초기화-clear"><a href="#Persistence-Context-초기화-clear" class="headerlink" title="Persistence Context 초기화 : clear"></a>Persistence Context 초기화 : clear</h4><ul>
+<li>Persistence Context가 초기화 되었기때문에 detach 같이 특정 Entity가 제거되는것이 아닌, 모든 Persistence Context에 등록된 캐시, 쓰기 지연 SQL 저장소에 저장된 모든것들이 초기화됨. </li>
+</ul>
+<h4 id="Persistence-Context-종료-close"><a href="#Persistence-Context-종료-close" class="headerlink" title="Persistence Context 종료 : close"></a>Persistence Context 종료 : close</h4><ul>
+<li>Persistence Context가 종료되었기때문에 더이상 Persistence Context관리가 되지 않는다. </li>
+</ul>
+<h4 id="준영속-상태의-특징"><a href="#준영속-상태의-특징" class="headerlink" title="준영속 상태의 특징"></a>준영속 상태의 특징</h4><ul>
+<li>거의 비영속에 가깝다</li>
+<li>식별자 값을 가지고있다. (이미 한번 Persistence Context관리가 되었기때문에)</li>
+<li>지연 로딩을 할 수 없다. </li>
+</ul>
+<ul>
+<li>지연로딩은 실제 객체 대신 프록시 객체를 로딩해두고 해당 객체를 실제 사용할때 Persistence Context 통해 데이터를 불러오는 방법. </li>
+</ul>
+<h3 id="병합-merge"><a href="#병합-merge" class="headerlink" title="병합: merge"></a>병합: merge</h3><p>준영속 상태에서 영속상태로 전환하려면 em.merge(entity) 사용하면 된다.<br>비영속 상태에서도 merge를 사용하면 영속상태로 전환 가능하다. (merge는 saveOrUpdate 기능을 수행)</p>
+<p>merge는 새로운 entity로 생성되기때문에, 기존에 준영속 시킨 객체와 다른 인스턴스를 가진다. 따라서 기존에 참조하던 준영속 entity 변수에 새롭게 merge한entity를 참조하도록 코드를 변경하는것이 안전함 </p>
+<p>ex&gt;<br>//Member mergeMember = em2.merge(member); //아래 코드로 변경<br>member = em2.merge(member); //기존 준영속상태로 참조하던 인스턴스로 할당해주는것이 안전함! </p>
+
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/2021/03/18/jpa-persistence/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                Comment and share
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
                             href="/2021/02/24/java-effective-10/"
                             aria-label=": java-effective-10"
                         >
@@ -1367,119 +1609,6 @@
                         <p>
                             <a
                                 href="/2021/02/16/clean-code-9/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                Comment and share
-                            </a>
-                        </p>
-                    
-                </div>
-            
-        </div>
-        
-    </article>
-    
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/2021/02/16/clean-code-8/"
-                            aria-label=": clean-code-8"
-                        >
-                            clean-code-8
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time datetime="2021-02-16T05:56:17+00:00">
-	
-		    Feb 16, 2021
-    	
-    </time>
-    
-        <span>in </span>
-        
-    <a class="category-link" href="/categories/Clean-Code/">Clean Code</a>, <a class="category-link" href="/categories/Study/">Study</a>, <a class="category-link" href="/categories/%EB%8B%A8%EC%9C%84-%ED%85%8C%EC%8A%A4%ED%8A%B8/">단위 테스트</a>
-
-
-    
-</div>
-
-            </div>
-            
-                <div class="postShorten-content">
-                    <h1 id="단위-테스트"><a href="#단위-테스트" class="headerlink" title="단위 테스트"></a>단위 테스트</h1><h2 id="TDD법칙-세-가지"><a href="#TDD법칙-세-가지" class="headerlink" title="TDD법칙 세 가지"></a>TDD법칙 세 가지</h2><blockquote><p><strong>첫째 법칙</strong> : 실패하는 단위 테스트를 작성할 때까지 실제 코드를 작성하지 않는다.<br><strong>둘째 법칙</strong> : 컴파일은 실패하지 않으면서 실행이 실패하는 정도로만 단위 테스트를 작성한다.<br><strong>셋째 법칙</strong> : 현재 실패하는 테스트를 통과할 정도로만 실제코드를 작성한다. </p>
-</blockquote>
-
-<ul>
-<li>위와 같이 일하면 매일 수 십개, 매달 수 백개, 매년 수천개에 달하는 테스트 케이스가 나온다. (결국 실제 코드를 모두 테스트하는 격이됨.)</li>
-<li>실제 코드와 맞먹을 정도로 방대한 테스트 코드는 심각한 관리 문제를 유발하기도 한다. (그래서 테스트 케이스도 리팩토링 한다는 소리가 여기서 나옴.)</li>
-</ul>
-<h2 id="깨끗한-테스트-코드-유지하기"><a href="#깨끗한-테스트-코드-유지하기" class="headerlink" title="깨끗한 테스트 코드 유지하기"></a>깨끗한 테스트 코드 유지하기</h2><ul>
-<li>실제 코드가 진화하면 테스트코드도 변경해줘야함.</li>
-<li>테스트코드가 지저분할수록 변경하기 어려움. (테스트케이스 추가하는 시간이 실제 코드 짜는 시간보다 더 오래걸림.)</li>
-<li>테스트코드도 실무코드 못지 않게 깨끗하게 잘 관리가 잘되어야함. (주기적인 리팩토링도 고려해야함.) </li>
-</ul>
-<h3 id="테스트는-유연성-유지보수성-재사용성을-제공한다"><a href="#테스트는-유연성-유지보수성-재사용성을-제공한다" class="headerlink" title="테스트는 유연성, 유지보수성, 재사용성을 제공한다."></a>테스트는 유연성, 유지보수성, 재사용성을 제공한다.</h3><ul>
-<li>코드에 유연성, 유지보수성, 재사용성을 제공하는 버팀목은 바로 __단위테스트__다. (테스트케이스가 없다면 잠정적 버그이기 때문.)</li>
-</ul>
-<h2 id="깨끗한-테스트-코드"><a href="#깨끗한-테스트-코드" class="headerlink" title="깨끗한 테스트 코드"></a>깨끗한 테스트 코드</h2><ul>
-<li>깨끗한 테스트 코드를 만드려면 무조건 <strong>가독성</strong> 이다. </li>
-<li><a target="_blank" rel="noopener" href="http://fitnesse.org/FitNesse.FullReferenceGuide.UserGuide.WritingAcceptanceTests.AcceptanceTestPatterns.BuildOperateCheck">BUILD-OPERATE-CHECK</a> 테스트 구조에 적합함.(Build : 테스트 자료를 만들고 Operate : 테스트 자료를 조작하고 Check : 잘되는지 확인)</li>
-</ul>
-<h3 id="도메인에-특화된-테스트-언어"><a href="#도메인에-특화된-테스트-언어" class="headerlink" title="도메인에 특화된 테스트 언어"></a>도메인에 특화된 테스트 언어</h3><ul>
-<li>도메인에 특화된 언어 (DSL) 로 구현하여 테스트코드를 깔끔하게 유지하는게 중요. <blockquote><p><a target="_blank" rel="noopener" href="https://www.jetbrains.com/ko-kr/mps/concepts/domain-specific-languages/">DSL</a>?<br>도메인 특화 언어는 관련 특정 분야에 최적화된 프로그래밍 언어입니다. DSL은 해당 분야 또는 도메인의 개념과 규칙을 사용합니다.<br>(EX&gt; SQL)</p>
-</blockquote></li>
-<li>DSL로 구현함에 목적은 흔히 쓰는 시스템 조작 API (저자기준으로 assertEquals)를 사용하는 대신, 함수와 유틸리티를 구현한 후 그 함수와 유틸리티를 사용하므로 테스트 코드를 짜기도 읽기도 쉬워짐.(저자기준 assertResponseIsXML,assertResponseContains)</li>
-</ul>
-<h3 id="이중-표준"><a href="#이중-표준" class="headerlink" title="이중 표준"></a>이중 표준</h3><ul>
-<li>테스트 코드에 적용하는 표준은 실제 코드에 적용하는 표준과 확실히 다르다. </li>
-<li>단순하고 간결하고 표현력이 풍부해야 하지만, 실제 코드만큼 효율적인 필요는 없다. </li>
-<li>실제코드에 비즈니스로직을 제대로 검증하는 부분이라면, 테스트코드가 실제코드에 매핑할 필요까지는 없다는 이야기. </li>
-</ul>
-<h2 id="테스트당-assert-하나"><a href="#테스트당-assert-하나" class="headerlink" title="테스트당 assert 하나"></a>테스트당 assert 하나</h2><ul>
-<li><p>JUnit 으로 테스트 코드를 짤 때는 함수마다 assert문을 단 하나만 사용해야함. (결론이 하나 이기 때문) </p>
-</li>
-<li><p>TDD에서 given-when-then(mockito,BDD) 법칙을 활용하는게 좋다. (테스트 코드가 일관성 있게 유지됨)</p>
-</li>
-<li><p>given-when-then으로 테스트코드를 짜다보면 중복코드가 많아짐.</p>
-<blockquote><p>Q&gt; given-when-then의 중복코드 해결방법? </p>
-<ol>
-<li>Template Method 패턴(given/when부분을 부모클래스,then을 자식클래스) </li>
-<li>@Before 함수에 given/when의 공통로직을 넣고, @Test함수에 then을 넣는방식 </li>
-</ol>
-</blockquote>
-</li>
-<li><p>무조건 1함수-1assert를 지킬 의무는 없지만, 가급적 지켜달라는 소리다. 필요할때는 과감하게 여러 assert도 활용할수도 있어야함. </p>
-</li>
-</ul>
-<h3 id="테스트당-개념-하나"><a href="#테스트당-개념-하나" class="headerlink" title="테스트당 개념 하나"></a>테스트당 개념 하나</h3><ul>
-<li>테스트 함수마다 한 개념만 테스트 하라. </li>
-<li>3장 함수에서 설명했듯, 함수내에 가급적 하나의 기능만 넣도록 가이드한다. 테스트 함수도 마찬가지다! (결국 여러개의 개념이 들어갔다는건 함수가 여러 기능을 한다는 증거)</li>
-</ul>
-<h2 id="F-I-R-S-T"><a href="#F-I-R-S-T" class="headerlink" title="F.I.R.S.T"></a>F.I.R.S.T</h2><ul>
-<li>Fast : 테스트는 빨라야 한다. (테스트 로직이 느려지지 않도록 성능이슈를 늘 고민해야함.)</li>
-<li>Independent : 각 테스트는 서로 의존하면 안됨. (각 테스트는 독립적으로 그리고 어떤 순서로 실행해도 괜찮아야함.)</li>
-<li>Repeatable : 테스트는 어떤 환경에서도 반복 가능해야함. (지속적으로 테스트가 클래스 내에 전체테스트가 돌수 있어야함.)</li>
-<li>Self-Validating : 테스트는 Bool값으로 결과를 내야함. (성공이냐 실패냐로 판가름)</li>
-<li>Timely : 테스트는 적시에 작성해야함. (단위 테스트는 테스트하려는 실제 코드를 구현하기 직전에 구현 해아함.)</li>
-</ul>
-
-                    
-                        
-
-
-                    
-                    
-                        <p>
-                            <a
-                                href="/2021/02/16/clean-code-8/#post-footer"
                                 class="postShorten-excerpt_link link"
                                 aria-label=""
                             >

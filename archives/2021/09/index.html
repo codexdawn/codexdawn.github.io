@@ -272,7 +272,36 @@
             </div>
             
                 <div class="postShorten-content">
-                    <h1 id="clone-재정의는-주의해서-진행하라"><a href="#clone-재정의는-주의해서-진행하라" class="headerlink" title="clone 재정의는 주의해서 진행하라"></a>clone 재정의는 주의해서 진행하라</h1>
+                    <h1 id="clone-재정의는-주의해서-진행하라"><a href="#clone-재정의는-주의해서-진행하라" class="headerlink" title="clone 재정의는 주의해서 진행하라"></a>clone 재정의는 주의해서 진행하라</h1><h2 id="clone이-뭐지"><a href="#clone이-뭐지" class="headerlink" title="clone이 뭐지?"></a>clone이 뭐지?</h2><ul>
+<li>객체의 복사본을 생성해서 반환하는 역할을 함 </li>
+<li>자주 쓰인다고하는데, 솔직히 제대로 쓴걸 본적이 없음</li>
+</ul>
+<blockquote><p>clone을 사용했을때 아래 조건들은 모두 참이다. </p>
+<p>x.clone() != x (O)<br>x.clone().getClass() == x.getClass() (O)<br>x.clone().equals(x) (O)</p>
+</blockquote>
+
+<h2 id="그럼-clone은-왜-조심해서-사용해야해"><a href="#그럼-clone은-왜-조심해서-사용해야해" class="headerlink" title="그럼 clone은 왜 조심해서 사용해야해?"></a>그럼 clone은 왜 조심해서 사용해야해?</h2><ul>
+<li>복제하고자하는 타겟 클래스의 하위클래스에서 super.clone을 호출하면 잘못된 클래스의 객체가 만들어져 결국 하위 클래스의 clone메서드가 제대로 동작하지 않게됨. (class에 final이라면 괜찮음 - 확장 불가능한 불변클래스이기 때문)</li>
+</ul>
+<figure class="highlight java"><figcaption><span>가변상태를 참조하지 않는 클래스용 clone 메서드</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// PhoneNumber 클래스는 반드시 Cloneable을 구현한다고 추가해야함. </span></span><br><span class="line"><span class="comment">// PhoneNumber 클래스 전용으로 사용되는 clone이기에 super로 호출했을때 상위타입 혹은 Object형태로 들어오는 clone객체를 방지할수있음. </span></span><br><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> PhoneNumber <span class="title">clone</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	<span class="keyword">try</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> (PhoneNumber) <span class="keyword">super</span>.clone();</span><br><span class="line">	&#125; <span class="keyword">catch</span>(CloneNotSupportedException e) &#123;</span><br><span class="line">		<span class="keyword">throw</span> <span class="keyword">new</span> AssertioError(); <span class="comment">//일어날수없는 일 </span></span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>clone 메서드는 사실상 생성자와 같은 효과를 냄 즉, clone은 원본 객체에 아무런 해를 끼치지 않는 동시에 복제된 객체의 불변식을 보장해야함. </li>
+<li>배열복제할때는 clone사용을 권장함. clone기능을 제대로 활용하는 유일한 참 조건임. </li>
+<li>Cloneable 아키텍처는 가변 객체를 참조하는 필드는 final로 선언하라 는 일반 용법고 충돌되기때문에 clone사용시 final필드로 선언되어있음 반드시 제거해야함. </li>
+<li>Stack클래스 처럼 내부에 elements 배열객체를 갖는 클래스는 원본이나 복제본중 하나가 수정되면 내용이 달라지기때문에 프로그램이 오동작하거나 NullPointerException이 발생할수있음, 따라서 elements배열의 clone을 재귀적으로 호출헤야함. (ex&gt; result.elements = elements.clone())</li>
+</ul>
+<h2 id="clone-메서드-사용하기-겁나-복잡한-대체-방법-없음"><a href="#clone-메서드-사용하기-겁나-복잡한-대체-방법-없음" class="headerlink" title="clone 메서드 사용하기 겁나 복잡한 대체 방법 없음?"></a>clone 메서드 사용하기 겁나 복잡한 대체 방법 없음?</h2><ul>
+<li>Cloneable을 이미 구현한 클래스는 clone을 반드시 잘 구현해야한다. 하지만 그런 상황이 아니라면 <strong>복사 생성자와 복사 팩터리라는 더 나은 객체 복사 방식을 제공 할수 있음</strong> </li>
+<li>복사생성자(변환생성자) : public Yum(Yum yum) {…}; </li>
+<li>복사팩터리(변환팩터리) : public static Yum newInstance(Yum yum) {…};</li>
+</ul>
+<h2 id="정리"><a href="#정리" class="headerlink" title="정리"></a>정리</h2><ul>
+<li>Cloneable은 왠만해서는 쓰지말고, 새로운 인터페이스를 만들때 역시 Cloneable을 확장해서는 안됨. 여러 사이드이펙트를 발생할 리스크가 큼 </li>
+<li>final 클래스라면 큰 위험은 없지만 성능 최적화 관점에서 큰이슈 없을때만 가능하지 그외에는 그냥 사용하지 말자</li>
+<li>복제기능은 생성자와 팩터리를 이용하는것이 갑이다 라는것이 결론이다. 단, 배열만 clone사용이 깔끔하다. </li>
+</ul>
+
                     
                         
 

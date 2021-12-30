@@ -247,6 +247,93 @@
                     
                         <a
                             class="link-unstyled"
+                            href="/2021/12/30/java-effective-14/"
+                            aria-label=": java-effective-14"
+                        >
+                            java-effective-14
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2021-12-30T06:17:35+00:00">
+	
+		    Dec 30, 2021
+    	
+    </time>
+    
+        <span>in </span>
+        
+    <a class="category-link" href="/categories/Effective-Java/">Effective Java</a>, <a class="category-link" href="/categories/Study/">Study</a>, <a class="category-link" href="/categories/%EB%AA%A8%EB%93%A0-%EA%B0%9D%EC%B2%B4%EC%9D%98-%EA%B3%B5%ED%86%B5-%EB%A9%94%EC%84%9C%EB%93%9C/">모든 객체의 공통 메서드</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <h1 id="Comparable을-구현할지-고려하라"><a href="#Comparable을-구현할지-고려하라" class="headerlink" title="Comparable을 구현할지 고려하라"></a>Comparable을 구현할지 고려하라</h1><h2 id="Comparable-뭐임"><a href="#Comparable-뭐임" class="headerlink" title="Comparable 뭐임?"></a>Comparable 뭐임?</h2><ul>
+<li>Comparable은 유일한 메서드인 compareTo만 존재함</li>
+<li>기본적으로 equals와 동일하지만 여기에 더해 순서까지 비교가능하다는 특징이있음. 따라서 정렬이 가능함. </li>
+</ul>
+<h2 id="언제-사용해야할까-사용법은"><a href="#언제-사용해야할까-사용법은" class="headerlink" title="언제 사용해야할까? 사용법은 ?"></a>언제 사용해야할까? 사용법은 ?</h2><ul>
+<li>알파벳, 숫자, 연대와 같이 순서가 명확한 값 클래스를 작성할때 반드시 Comparable 인터페이스를 구현!!</li>
+</ul>
+<figure class="highlight java"><figcaption><span>기본타입필드가 여럿일때 비교</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">compareTo</span><span class="params">(PhoneNumber pn)</span> </span>&#123;</span><br><span class="line">	<span class="keyword">int</span> result = Short.compare(areaCode, pn.areaCode);</span><br><span class="line">	<span class="keyword">if</span>(result == <span class="number">0</span>) &#123;</span><br><span class="line">		result = Short.compare(prefix, pn.prefix);</span><br><span class="line">		</span><br><span class="line">		<span class="keyword">if</span>(result == <span class="number">0</span>) &#123;</span><br><span class="line">			result = Short.compare(lineNum, pn.lineNum);</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> result; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>위 와 같은 방식으로 Comparable를 정의할수있겠지만, JAVA8 이상을 활용한다면 위 방법은 구식이다. 코드도 복잡하고</li>
+</ul>
+<figure class="highlight java"><figcaption><span>비교자 생성 메서드를 활용한 비교자</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> Comparator&lt;PhoneNumber&gt; COMPARATOR = comparingInt((PhoneNumber pn) -&gt; pn.areaCode)</span><br><span class="line">														.thenComparingInt(pn -&gt; pn.prefix)</span><br><span class="line">														.thenComparingInt(pn -&gt; pn.lineNum);</span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">compareTo</span><span class="params">(PhoneNumber pn)</span> </span>&#123;</span><br><span class="line">	<span class="keyword">return</span> COMPARATOR.compare(<span class="keyword">this</span>, pn);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p>위와같이 java8의 Comparator를 활용하여 코드를 깔끔하고 성능향상에도 도움을 줄수있음. </p>
+</li>
+<li><p>값의차를 기준으로 compareTo를 사용하는건 절대로 해서는 안됨 </p>
+<figure class="highlight java"><figcaption><span>해시코드 값의 차를 기준으로 하는 비교자</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> Comparator&lt;Object&gt; hashCodeOrder = <span class="keyword">new</span> Comparator&lt;&gt;() &#123;</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">compare</span><span class="params">(Object o1, Object o2)</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> o1.hashCode() - o2.hashCode(); </span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>위 방식은 정수 오버플로우를 일으키거나 IEEE 754 부동소수점 계산방식에 따른 오류 발생한다. 그리고 성능도 별로다</p>
+</li>
+</ul>
+<figure class="highlight java"><figcaption><span>해시코드 값의 차를 기준으로 하는 비교자 개선방법</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> Comparator&lt;Object&gt; hashCodeOrder = <span class="keyword">new</span> Comparator&lt;&gt;() &#123;</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">compare</span><span class="params">(Object o1, Object o2)</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> Integer.compare(o1.hashCode(), o2.hashCode); </span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">static</span> Comparator&lt;Object&gt; hashCodeOrder = Comparator.comparingInt(o -&gt; o.hashCode()); </span><br></pre></td></tr></table></figure>
+
+
+<h2 id="정리"><a href="#정리" class="headerlink" title="정리"></a>정리</h2><ul>
+<li>순서를 고려한다면 Comparable을 구현하자 </li>
+<li>compareTo 메서드에서 필드의 값을 비교할때 &lt; 와 &gt; 연산자는 쓰지말고 대신 박싱된 기본 타입 클래스가 제공하는 정적 compare 메서드나 Comparator 인터페이스가 제공하는 비교자 생성 메서드를 사용하자. </li>
+</ul>
+
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/2021/12/30/java-effective-14/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                Comment and share
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
                             href="/2021/09/15/java-effective-13/"
                             aria-label=": java-effective-13"
                         >
@@ -272,7 +359,36 @@
             </div>
             
                 <div class="postShorten-content">
-                    <h1 id="clone-재정의는-주의해서-진행하라"><a href="#clone-재정의는-주의해서-진행하라" class="headerlink" title="clone 재정의는 주의해서 진행하라"></a>clone 재정의는 주의해서 진행하라</h1>
+                    <h1 id="clone-재정의는-주의해서-진행하라"><a href="#clone-재정의는-주의해서-진행하라" class="headerlink" title="clone 재정의는 주의해서 진행하라"></a>clone 재정의는 주의해서 진행하라</h1><h2 id="clone이-뭐지"><a href="#clone이-뭐지" class="headerlink" title="clone이 뭐지?"></a>clone이 뭐지?</h2><ul>
+<li>객체의 복사본을 생성해서 반환하는 역할을 함 </li>
+<li>자주 쓰인다고하는데, 솔직히 제대로 쓴걸 본적이 없음</li>
+</ul>
+<blockquote><p>clone을 사용했을때 아래 조건들은 모두 참이다. </p>
+<p>x.clone() != x (O)<br>x.clone().getClass() == x.getClass() (O)<br>x.clone().equals(x) (O)</p>
+</blockquote>
+
+<h2 id="그럼-clone은-왜-조심해서-사용해야해"><a href="#그럼-clone은-왜-조심해서-사용해야해" class="headerlink" title="그럼 clone은 왜 조심해서 사용해야해?"></a>그럼 clone은 왜 조심해서 사용해야해?</h2><ul>
+<li>복제하고자하는 타겟 클래스의 하위클래스에서 super.clone을 호출하면 잘못된 클래스의 객체가 만들어져 결국 하위 클래스의 clone메서드가 제대로 동작하지 않게됨. (class에 final이라면 괜찮음 - 확장 불가능한 불변클래스이기 때문)</li>
+</ul>
+<figure class="highlight java"><figcaption><span>가변상태를 참조하지 않는 클래스용 clone 메서드</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// PhoneNumber 클래스는 반드시 Cloneable을 구현한다고 추가해야함. </span></span><br><span class="line"><span class="comment">// PhoneNumber 클래스 전용으로 사용되는 clone이기에 super로 호출했을때 상위타입 혹은 Object형태로 들어오는 clone객체를 방지할수있음. </span></span><br><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> PhoneNumber <span class="title">clone</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	<span class="keyword">try</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> (PhoneNumber) <span class="keyword">super</span>.clone();</span><br><span class="line">	&#125; <span class="keyword">catch</span>(CloneNotSupportedException e) &#123;</span><br><span class="line">		<span class="keyword">throw</span> <span class="keyword">new</span> AssertioError(); <span class="comment">//일어날수없는 일 </span></span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>clone 메서드는 사실상 생성자와 같은 효과를 냄 즉, clone은 원본 객체에 아무런 해를 끼치지 않는 동시에 복제된 객체의 불변식을 보장해야함. </li>
+<li>배열복제할때는 clone사용을 권장함. clone기능을 제대로 활용하는 유일한 참 조건임. </li>
+<li>Cloneable 아키텍처는 가변 객체를 참조하는 필드는 final로 선언하라 는 일반 용법고 충돌되기때문에 clone사용시 final필드로 선언되어있음 반드시 제거해야함. </li>
+<li>Stack클래스 처럼 내부에 elements 배열객체를 갖는 클래스는 원본이나 복제본중 하나가 수정되면 내용이 달라지기때문에 프로그램이 오동작하거나 NullPointerException이 발생할수있음, 따라서 elements배열의 clone을 재귀적으로 호출헤야함. (ex&gt; result.elements = elements.clone())</li>
+</ul>
+<h2 id="clone-메서드-사용하기-겁나-복잡한-대체-방법-없음"><a href="#clone-메서드-사용하기-겁나-복잡한-대체-방법-없음" class="headerlink" title="clone 메서드 사용하기 겁나 복잡한 대체 방법 없음?"></a>clone 메서드 사용하기 겁나 복잡한 대체 방법 없음?</h2><ul>
+<li>Cloneable을 이미 구현한 클래스는 clone을 반드시 잘 구현해야한다. 하지만 그런 상황이 아니라면 <strong>복사 생성자와 복사 팩터리라는 더 나은 객체 복사 방식을 제공 할수 있음</strong> </li>
+<li>복사생성자(변환생성자) : public Yum(Yum yum) {…}; </li>
+<li>복사팩터리(변환팩터리) : public static Yum newInstance(Yum yum) {…};</li>
+</ul>
+<h2 id="정리"><a href="#정리" class="headerlink" title="정리"></a>정리</h2><ul>
+<li>Cloneable은 왠만해서는 쓰지말고, 새로운 인터페이스를 만들때 역시 Cloneable을 확장해서는 안됨. 여러 사이드이펙트를 발생할 리스크가 큼 </li>
+<li>final 클래스라면 큰 위험은 없지만 성능 최적화 관점에서 큰이슈 없을때만 가능하지 그외에는 그냥 사용하지 말자</li>
+<li>복제기능은 생성자와 팩터리를 이용하는것이 갑이다 라는것이 결론이다. 단, 배열만 clone사용이 깔끔하다. </li>
+</ul>
+
                     
                         
 
@@ -926,80 +1042,6 @@
                         <p>
                             <a
                                 href="/2021/01/22/java-effective-5/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                Comment and share
-                            </a>
-                        </p>
-                    
-                </div>
-            
-        </div>
-        
-    </article>
-    
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/2021/01/18/java-effective-1/"
-                            aria-label=": java-effective-1"
-                        >
-                            java-effective-1
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time datetime="2021-01-18T08:06:18+00:00">
-	
-		    Jan 18, 2021
-    	
-    </time>
-    
-        <span>in </span>
-        
-    <a class="category-link" href="/categories/Effective-Java/">Effective Java</a>, <a class="category-link" href="/categories/Study/">Study</a>, <a class="category-link" href="/categories/%EA%B0%9D%EC%B2%B4-%EC%83%9D%EC%84%B1%EA%B3%BC-%ED%8C%8C%EA%B4%B4/">객체 생성과 파괴</a>
-
-
-    
-</div>
-
-            </div>
-            
-                <div class="postShorten-content">
-                    <p>기본적으로 자바에서는 인스턴스를 얻는 수단은 public 생성자이지만,<br>클래스는 생성자와 별도로 정적 팩터리 메서드를 제공 할수 있다. </p>
-<h2 id="아이템1-생성자-대신-정적-팩터리-메서드를-고려하라"><a href="#아이템1-생성자-대신-정적-팩터리-메서드를-고려하라" class="headerlink" title="아이템1. 생성자 대신 정적 팩터리 메서드를 고려하라."></a>아이템1. 생성자 대신 정적 팩터리 메서드를 고려하라.</h2><figure class="highlight java"><figcaption><span>Boolean.valueOf</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Boolean <span class="title">valueOf</span><span class="params">(<span class="keyword">boolean</span> b)</span> </span>&#123;</span><br><span class="line">	<span class="keyword">return</span> b ? Boolean.TRUE : Boolean.FALSE; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>위 메서드는 기본적으로 기본 타입인 boolean을 받아 Boolean 객체 참조로 변환해 준다. </p>
-<h3 id="장점1-이름을-가질수-있다-메서드의-목적을-분명하게-알수있다"><a href="#장점1-이름을-가질수-있다-메서드의-목적을-분명하게-알수있다" class="headerlink" title="장점1. 이름을 가질수 있다. (메서드의 목적을 분명하게 알수있다.)"></a>장점1. 이름을 가질수 있다. (메서드의 목적을 분명하게 알수있다.)</h3><p>자바에서 기본으로 제공하는 public생성자는 이름을 가질수없으며, 매개변수들이 포함되어 있는 생성자 역시 이름이 없다.<br>그래서 개발자들은 여러 생성자가 존재 할 경우, 어떤 역할을 하는지 한눈에 알아보기가 쉽지않을것이다.<br>이런 public생성자의 단점을 이름을 가질수있는 정적 팩터리 메서드가 해결 할 수있다. </p>
-<h3 id="장점2-호출될-때마다-인스턴스를-새로-생성하지-않아도-된다"><a href="#장점2-호출될-때마다-인스턴스를-새로-생성하지-않아도-된다" class="headerlink" title="장점2. 호출될 때마다 인스턴스를 새로 생성하지 않아도 된다."></a>장점2. 호출될 때마다 인스턴스를 새로 생성하지 않아도 된다.</h3><p>자바에서 public생성자를 호출 하려면 new 키워드로 인스턴스를 생성하게 되어있다.<br>하지만 정적 팩터리 메서드를 사용하면, 매번 인스턴스를 생성하지 않아도 된다.<br>특히 불변 클래스(immutable class; 아이템17)는 인스턴스를 미리 만들어놓거나 새로 생성한 인스턴스를 캐싱하여, 재활용하는 식으로 불필요한 객체 생성을 피할수 있다. (EX&gt; Boolean.valueOf) 따라서 같은 객체가 자주 요청되는 상황이라면 성능을 상당히 끌어올려 준다.</p>
-<blockquote><p>인스턴스 통제(instance-controlled) 클래스란? (ex&gt; 싱글턴)<br>=&gt; 반복된 요청에 같은 객체를 반환하는 식으로 정적 팩터리 방식의 클래스는 언제 어느 인스턴스를 살아 있게 할지를 철저히 통제 할수있다. </p>
-<p>인스턴스를 통제하는 이유는?<br>=&gt; 싱글턴, 인스턴스화 불가(Util성 클래스에서 생성자 막을때), 불변 값 클래스에서 동치인 인스턴스가 단 하나임을 보장 (a == b 일때, a.equals(b) 성립) </p>
-</blockquote>
-
-<h3 id="장점3-반환-타입의-하위-타입-객체를-반환할-수-있는-능력이-있다"><a href="#장점3-반환-타입의-하위-타입-객체를-반환할-수-있는-능력이-있다" class="headerlink" title="장점3. 반환 타입의 하위 타입 객체를 반환할 수 있는 능력이 있다."></a>장점3. 반환 타입의 하위 타입 객체를 반환할 수 있는 능력이 있다.</h3><p>제목이 거창해서 그렇지, 간단하게 생각하면 인터페이스를 반환 타입을 갖게하고, 실제로는 인터페이스를 구현하는 구현체를 리턴하는 방식 가장 대표적인 예는 <code>java.util.Collections</code> 이다. 이 컬렉션 프레임워크는 45개의 구현체 클래스를 사용하고 있지만, 실제로 사용하는 개발자는 45개나 되는 구현체를 굳이 알필요가 없도록, 정적 팩터리 메서드를 사용하였다.<br>자바8부터는 인터페이스가 정적 메서드(public static) 를 가질 수 없는 제한이 풀렸다. 자바9에서는 private 정적메서드까지 허락하지만,정적 필드와 정적 멤버 클래스는 여전히 public이어야함. </p>
-<h3 id="장점4-입력-매개변수에-따라-매번-다른-클래스의-객체를-반환할-수-있다"><a href="#장점4-입력-매개변수에-따라-매번-다른-클래스의-객체를-반환할-수-있다" class="headerlink" title="장점4. 입력 매개변수에 따라 매번 다른 클래스의 객체를 반환할 수 있다."></a>장점4. 입력 매개변수에 따라 매번 다른 클래스의 객체를 반환할 수 있다.</h3><p>장점3과 비슷한 맥락이지만, 차이점은 매개변수의 갯수의 차이다. EnumSet은 public생성자가 없이 오직 정적 팩터리만 제공하는데, 원소가 64개 이하면 RegularEnumSet을 65개이상이면 JumboEnumSet의 인스턴스를 반환하게 구현되어있다.<br>하지만 굳이 개발자가 하위타입의 리턴타입을 알 필요가 있을까? 당연 없다. </p>
-<h3 id="장점5-정적-팩터리-메서드를-작성하는-시점에는-반환할-객체의-클래스가-존재하지-않아도-된다"><a href="#장점5-정적-팩터리-메서드를-작성하는-시점에는-반환할-객체의-클래스가-존재하지-않아도-된다" class="headerlink" title="장점5. 정적 팩터리 메서드를 작성하는 시점에는 반환할 객체의 클래스가 존재하지 않아도 된다."></a>장점5. 정적 팩터리 메서드를 작성하는 시점에는 반환할 객체의 클래스가 존재하지 않아도 된다.</h3><p>이 책에서는 위 장점의 예를 둔 부분이, JDBC이다. JDBC로 개발할때를 생각하면 어느정도 이해를 할 수 있다.</p>
-<figure class="highlight java"><figcaption><span>jdbc example</span><a target="_blank" rel="noopener" href="https://www.tutorialspoint.com/jdbc-class-forname-vs-drivermanager-registerdriver">tutorialspoint.com</a></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//Registering the Driver</span></span><br><span class="line">   DriverManager.registerDriver(<span class="keyword">new</span> com.mysql.jdbc.Driver());       <span class="comment">//Class.forName으로 자주 씀. </span></span><br><span class="line">   <span class="comment">//Getting the connection</span></span><br><span class="line">   String mysqlUrl = <span class="string">&quot;jdbc:mysql://localhost/mydatabase&quot;</span>;</span><br><span class="line">   Connection con = DriverManager.getConnection(mysqlUrl, <span class="string">&quot;root&quot;</span>, <span class="string">&quot;password&quot;</span>);</span><br><span class="line">   System.out.println(<span class="string">&quot;Connection established: &quot;</span>+con);</span><br></pre></td></tr></table></figure>
-<p>위 코드에서 확인 할 수 있듯이, Connection을 사용하기 위해서 <code>DriverManager.registerDriver</code> 통해서 어떤 DB의 방언을 사용할것 인지 결정하고 (제공자등록API),<br>Connection인터페이스는 어떤 DB방언에도 연결할수있도록 서비스 인터페이스 역할을 담당하고, 결국 <code>DriverManager.getConnection</code>을 통해서 서비스에 접근하여 인스턴스를 얻을수있도록 한다. 여기서 DriverManager.getConnection 이 장점5의 의도이다.<br>그래서 우리가 서로 다른 DB의 방언을 제공자 등록 API를 통해 세팅하고, DB접근정보가 담겨있는 서비스접근 API를 통해서 Connection 인터페이스로 반환하게 할때, 마치 DB를 연결하기 위해 중간다리 역할 (브리지 패턴) 처럼 혹은 레고 처럼 조립되는 과정이 있다는걸 알수가 있다. 우리가 흔히 알고있는 DI(의존객체주입) 와 유사하다고 생각하면 된다. </p>
-<h3 id="단점1-상속을-하려면-public이나-protected-생성자가-필요하니-정적-팩터리-메서드만-제공하면-하위-클래스를-만들수-없다"><a href="#단점1-상속을-하려면-public이나-protected-생성자가-필요하니-정적-팩터리-메서드만-제공하면-하위-클래스를-만들수-없다" class="headerlink" title="단점1. 상속을 하려면 public이나 protected 생성자가 필요하니 정적 팩터리 메서드만 제공하면 하위 클래스를 만들수 없다."></a>단점1. 상속을 하려면 public이나 protected 생성자가 필요하니 정적 팩터리 메서드만 제공하면 하위 클래스를 만들수 없다.</h3><p>java.util.Collections 컬렉션 프레임워크 처럼 유틸리티 구현 클래스들은 상속할 수 없다는 이야기다. 글쓴이는 이 제약은 상속 보다는 컴포지션을 사용(아이템 18) 하도록 유도하고, 불변 타입(아이템 17)으로 만들려면 이 제약을 지켜야하기에 오히려 장점이 아닌가라고 생각했다.</p>
-<h3 id="단점2-정적-펙터리-메서드는-프로그래머가-찾기-힘들다"><a href="#단점2-정적-펙터리-메서드는-프로그래머가-찾기-힘들다" class="headerlink" title="단점2. 정적 펙터리 메서드는 프로그래머가 찾기 힘들다."></a>단점2. 정적 펙터리 메서드는 프로그래머가 찾기 힘들다.</h3><p>개발자들이 각자의 네이밍룰로 정적 펙터리 메서드를 구현하면, 그 메서드를 찾기위해서 클래스를 찾아서 분석 해야하는 비용이 생겨서, 찾기 어렵다고 표현한것이 아닐까? 추측해본다.<br>그래서 글쓴이는 from, of, valueOf. getInstance 등과 같은 범용적으로 사용되는 정적 팩터리 메서드를 예시로 들면서, 네이밍으로도 그 기능을 알 수 있도록 구현하는걸 추천하고 있다. </p>
-
-                    
-                        
-
-
-                    
-                    
-                        <p>
-                            <a
-                                href="/2021/01/18/java-effective-1/#post-footer"
                                 class="postShorten-excerpt_link link"
                                 aria-label=""
                             >
