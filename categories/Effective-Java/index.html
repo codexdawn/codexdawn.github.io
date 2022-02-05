@@ -247,23 +247,23 @@
                     
                         <a
                             class="link-unstyled"
-                            href="/2021/12/30/java-effective-14/"
-                            aria-label=": java-effective-14"
+                            href="/2022/02/05/java-effective-25/"
+                            aria-label=": java-effective-25"
                         >
-                            java-effective-14
+                            java-effective-25
                         </a>
                     
                 </h1>
                 <div class="postShorten-meta">
-    <time datetime="2021-12-30T06:17:35+00:00">
+    <time datetime="2022-02-05T10:45:46+00:00">
 	
-		    Dec 30, 2021
+		    Feb 05, 2022
     	
     </time>
     
         <span>in </span>
         
-    <a class="category-link" href="/categories/Effective-Java/">Effective Java</a>, <a class="category-link" href="/categories/Study/">Study</a>, <a class="category-link" href="/categories/%EB%AA%A8%EB%93%A0-%EA%B0%9D%EC%B2%B4%EC%9D%98-%EA%B3%B5%ED%86%B5-%EB%A9%94%EC%84%9C%EB%93%9C/">모든 객체의 공통 메서드</a>
+    <a class="category-link" href="/categories/Effective-Java/">Effective Java</a>, <a class="category-link" href="/categories/Study/">Study</a>, <a class="category-link" href="/categories/%ED%81%B4%EB%9E%98%EC%8A%A4%EC%99%80-%EC%9D%B8%ED%84%B0%ED%8E%98%EC%9D%B4%EC%8A%A4/">클래스와 인터페이스</a>
 
 
     
@@ -272,35 +272,11 @@
             </div>
             
                 <div class="postShorten-content">
-                    <h1 id="Comparable을-구현할지-고려하라"><a href="#Comparable을-구현할지-고려하라" class="headerlink" title="Comparable을 구현할지 고려하라"></a>Comparable을 구현할지 고려하라</h1><h2 id="Comparable-뭐임"><a href="#Comparable-뭐임" class="headerlink" title="Comparable 뭐임?"></a>Comparable 뭐임?</h2><ul>
-<li>Comparable은 유일한 메서드인 compareTo만 존재함</li>
-<li>기본적으로 equals와 동일하지만 여기에 더해 순서까지 비교가능하다는 특징이있음. 따라서 정렬이 가능함. </li>
-</ul>
-<h2 id="언제-사용해야할까-사용법은"><a href="#언제-사용해야할까-사용법은" class="headerlink" title="언제 사용해야할까? 사용법은 ?"></a>언제 사용해야할까? 사용법은 ?</h2><ul>
-<li>알파벳, 숫자, 연대와 같이 순서가 명확한 값 클래스를 작성할때 반드시 Comparable 인터페이스를 구현!!</li>
-</ul>
-<figure class="highlight java"><figcaption><span>기본타입필드가 여럿일때 비교</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">compareTo</span><span class="params">(PhoneNumber pn)</span> </span>&#123;</span><br><span class="line">	<span class="keyword">int</span> result = Short.compare(areaCode, pn.areaCode);</span><br><span class="line">	<span class="keyword">if</span>(result == <span class="number">0</span>) &#123;</span><br><span class="line">		result = Short.compare(prefix, pn.prefix);</span><br><span class="line">		</span><br><span class="line">		<span class="keyword">if</span>(result == <span class="number">0</span>) &#123;</span><br><span class="line">			result = Short.compare(lineNum, pn.lineNum);</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> result; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<ul>
-<li>위 와 같은 방식으로 Comparable를 정의할수있겠지만, JAVA8 이상을 활용한다면 위 방법은 구식이다. 코드도 복잡하고</li>
-</ul>
-<figure class="highlight java"><figcaption><span>비교자 생성 메서드를 활용한 비교자</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> Comparator&lt;PhoneNumber&gt; COMPARATOR = comparingInt((PhoneNumber pn) -&gt; pn.areaCode)</span><br><span class="line">														.thenComparingInt(pn -&gt; pn.prefix)</span><br><span class="line">														.thenComparingInt(pn -&gt; pn.lineNum);</span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">compareTo</span><span class="params">(PhoneNumber pn)</span> </span>&#123;</span><br><span class="line">	<span class="keyword">return</span> COMPARATOR.compare(<span class="keyword">this</span>, pn);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<ul>
-<li><p>위와같이 java8의 Comparator를 활용하여 코드를 깔끔하고 성능향상에도 도움을 줄수있음. </p>
-</li>
-<li><p>값의차를 기준으로 compareTo를 사용하는건 절대로 해서는 안됨 </p>
-<figure class="highlight java"><figcaption><span>해시코드 값의 차를 기준으로 하는 비교자</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> Comparator&lt;Object&gt; hashCodeOrder = <span class="keyword">new</span> Comparator&lt;&gt;() &#123;</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">compare</span><span class="params">(Object o1, Object o2)</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> o1.hashCode() - o2.hashCode(); </span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>위 방식은 정수 오버플로우를 일으키거나 IEEE 754 부동소수점 계산방식에 따른 오류 발생한다. 그리고 성능도 별로다</p>
-</li>
-</ul>
-<figure class="highlight java"><figcaption><span>해시코드 값의 차를 기준으로 하는 비교자 개선방법</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> Comparator&lt;Object&gt; hashCodeOrder = <span class="keyword">new</span> Comparator&lt;&gt;() &#123;</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">compare</span><span class="params">(Object o1, Object o2)</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> Integer.compare(o1.hashCode(), o2.hashCode); </span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">static</span> Comparator&lt;Object&gt; hashCodeOrder = Comparator.comparingInt(o -&gt; o.hashCode()); </span><br></pre></td></tr></table></figure>
-
-
-<h2 id="정리"><a href="#정리" class="headerlink" title="정리"></a>정리</h2><ul>
-<li>순서를 고려한다면 Comparable을 구현하자 </li>
-<li>compareTo 메서드에서 필드의 값을 비교할때 &lt; 와 &gt; 연산자는 쓰지말고 대신 박싱된 기본 타입 클래스가 제공하는 정적 compare 메서드나 Comparator 인터페이스가 제공하는 비교자 생성 메서드를 사용하자. </li>
+                    <h1 id="톱레벨-클래스는-한파일에-하나만-담아라"><a href="#톱레벨-클래스는-한파일에-하나만-담아라" class="headerlink" title="톱레벨 클래스는 한파일에 하나만 담아라"></a>톱레벨 클래스는 한파일에 하나만 담아라</h1><ul>
+<li>소스파일 하나에 톱레벨 클래스를 여러개를 담는데는 컴파일러 오류가 나는 부분은 없지만 득은 없으며, 심각한 위험이 있을수있음 </li>
+<li>한파일에 여러 톱레벨 클래스를 두면 한 클래스를 여러가지로 정의할수 있으며 그중 어느것을 사용할지는 어느 소스파일을 먼저 컴파일하냐에따라 달라짐 (런타임 시점에서 결정되는 치명적인 부분이 결함으로 작용된다는 의미)</li>
+<li>위 이슈를 해결하는 방법은 간단하다. 그냥 톱클래스는 한파일에만 담는것! </li>
+<li>굳이 한파일에 여러 톱레벨 클래스를 담으려면 정적 멤버 클래스로 (private static class) 구현하면 가능함. </li>
 </ul>
 
                     
@@ -311,7 +287,7 @@
                     
                         <p>
                             <a
-                                href="/2021/12/30/java-effective-14/#post-footer"
+                                href="/2022/02/05/java-effective-25/#post-footer"
                                 class="postShorten-excerpt_link link"
                                 aria-label=""
                             >
@@ -334,23 +310,23 @@
                     
                         <a
                             class="link-unstyled"
-                            href="/2021/09/15/java-effective-13/"
-                            aria-label=": java-effective-13"
+                            href="/2022/02/05/java-effective-24/"
+                            aria-label=": java-effective-24"
                         >
-                            java-effective-13
+                            java-effective-24
                         </a>
                     
                 </h1>
                 <div class="postShorten-meta">
-    <time datetime="2021-09-15T13:37:42+00:00">
+    <time datetime="2022-02-05T10:02:54+00:00">
 	
-		    Sep 15, 2021
+		    Feb 05, 2022
     	
     </time>
     
         <span>in </span>
         
-    <a class="category-link" href="/categories/Effective-Java/">Effective Java</a>, <a class="category-link" href="/categories/Study/">Study</a>, <a class="category-link" href="/categories/%EB%AA%A8%EB%93%A0-%EA%B0%9D%EC%B2%B4%EC%9D%98-%EA%B3%B5%ED%86%B5-%EB%A9%94%EC%84%9C%EB%93%9C/">모든 객체의 공통 메서드</a>
+    <a class="category-link" href="/categories/Effective-Java/">Effective Java</a>, <a class="category-link" href="/categories/Study/">Study</a>, <a class="category-link" href="/categories/%ED%81%B4%EB%9E%98%EC%8A%A4%EC%99%80-%EC%9D%B8%ED%84%B0%ED%8E%98%EC%9D%B4%EC%8A%A4/">클래스와 인터페이스</a>
 
 
     
@@ -359,526 +335,549 @@
             </div>
             
                 <div class="postShorten-content">
-                    <h1 id="clone-재정의는-주의해서-진행하라"><a href="#clone-재정의는-주의해서-진행하라" class="headerlink" title="clone 재정의는 주의해서 진행하라"></a>clone 재정의는 주의해서 진행하라</h1><h2 id="clone이-뭐지"><a href="#clone이-뭐지" class="headerlink" title="clone이 뭐지?"></a>clone이 뭐지?</h2><ul>
-<li>객체의 복사본을 생성해서 반환하는 역할을 함 </li>
-<li>자주 쓰인다고하는데, 솔직히 제대로 쓴걸 본적이 없음</li>
+                    <h1 id="멤버-클래스는-되도록-static-으로-만들라"><a href="#멤버-클래스는-되도록-static-으로-만들라" class="headerlink" title="멤버 클래스는 되도록 static 으로 만들라"></a>멤버 클래스는 되도록 static 으로 만들라</h1><ul>
+<li>중첩클래스 (nested class)란? 다른 클래스안에 정의된 클래스임 </li>
+<li>중첩클래스 종류? 정적멤버클래스, 멤버클래스, 익명 클래스, 지역 클래스 (이중 첫번째 제외하고 내부 클래스에 해당 (inner class))</li>
+<li>정적 멤버 클래스 vs 멤버 클래스 <ul>
+<li>구문상 차이는 static이 있고 없고 차이</li>
+<li>비정적 멤버 클래스의 인스턴스는 바깥 클래스의 인스턴스와 암묵적으로 연결됨. 그래서 비정적 멤버 클래스의 인스턴스 메서드에서 정규화된 this를 사용해 바깥 인스턴스의 메서드를 호출하거나 바깥 인스턴스의 참조를 가져올수있음 </li>
+<li>정규화된 this란? 클래스명.this 형태로 바깥 클래스의 이름을 명시하는 용법 </li>
+<li>개념상 중첩 클래스의 인스턴스가 바깥 인스턴스와 독립적으로 존재할수있다면 정적 멤버 클래스로 만들어야함. 비정적 멤버 클래스는 바깥 인스턴스없이는 생성할수 없기 때문</li>
 </ul>
-<blockquote><p>clone을 사용했을때 아래 조건들은 모두 참이다. </p>
-<p>x.clone() != x (O)<br>x.clone().getClass() == x.getClass() (O)<br>x.clone().equals(x) (O)</p>
-</blockquote>
-
-<h2 id="그럼-clone은-왜-조심해서-사용해야해"><a href="#그럼-clone은-왜-조심해서-사용해야해" class="headerlink" title="그럼 clone은 왜 조심해서 사용해야해?"></a>그럼 clone은 왜 조심해서 사용해야해?</h2><ul>
-<li>복제하고자하는 타겟 클래스의 하위클래스에서 super.clone을 호출하면 잘못된 클래스의 객체가 만들어져 결국 하위 클래스의 clone메서드가 제대로 동작하지 않게됨. (class에 final이라면 괜찮음 - 확장 불가능한 불변클래스이기 때문)</li>
-</ul>
-<figure class="highlight java"><figcaption><span>가변상태를 참조하지 않는 클래스용 clone 메서드</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// PhoneNumber 클래스는 반드시 Cloneable을 구현한다고 추가해야함. </span></span><br><span class="line"><span class="comment">// PhoneNumber 클래스 전용으로 사용되는 clone이기에 super로 호출했을때 상위타입 혹은 Object형태로 들어오는 clone객체를 방지할수있음. </span></span><br><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> PhoneNumber <span class="title">clone</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	<span class="keyword">try</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> (PhoneNumber) <span class="keyword">super</span>.clone();</span><br><span class="line">	&#125; <span class="keyword">catch</span>(CloneNotSupportedException e) &#123;</span><br><span class="line">		<span class="keyword">throw</span> <span class="keyword">new</span> AssertioError(); <span class="comment">//일어날수없는 일 </span></span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<ul>
-<li>clone 메서드는 사실상 생성자와 같은 효과를 냄 즉, clone은 원본 객체에 아무런 해를 끼치지 않는 동시에 복제된 객체의 불변식을 보장해야함. </li>
-<li>배열복제할때는 clone사용을 권장함. clone기능을 제대로 활용하는 유일한 참 조건임. </li>
-<li>Cloneable 아키텍처는 가변 객체를 참조하는 필드는 final로 선언하라 는 일반 용법고 충돌되기때문에 clone사용시 final필드로 선언되어있음 반드시 제거해야함. </li>
-<li>Stack클래스 처럼 내부에 elements 배열객체를 갖는 클래스는 원본이나 복제본중 하나가 수정되면 내용이 달라지기때문에 프로그램이 오동작하거나 NullPointerException이 발생할수있음, 따라서 elements배열의 clone을 재귀적으로 호출헤야함. (ex&gt; result.elements = elements.clone())</li>
-</ul>
-<h2 id="clone-메서드-사용하기-겁나-복잡한-대체-방법-없음"><a href="#clone-메서드-사용하기-겁나-복잡한-대체-방법-없음" class="headerlink" title="clone 메서드 사용하기 겁나 복잡한 대체 방법 없음?"></a>clone 메서드 사용하기 겁나 복잡한 대체 방법 없음?</h2><ul>
-<li>Cloneable을 이미 구현한 클래스는 clone을 반드시 잘 구현해야한다. 하지만 그런 상황이 아니라면 <strong>복사 생성자와 복사 팩터리라는 더 나은 객체 복사 방식을 제공 할수 있음</strong> </li>
-<li>복사생성자(변환생성자) : public Yum(Yum yum) {…}; </li>
-<li>복사팩터리(변환팩터리) : public static Yum newInstance(Yum yum) {…};</li>
-</ul>
-<h2 id="정리"><a href="#정리" class="headerlink" title="정리"></a>정리</h2><ul>
-<li>Cloneable은 왠만해서는 쓰지말고, 새로운 인터페이스를 만들때 역시 Cloneable을 확장해서는 안됨. 여러 사이드이펙트를 발생할 리스크가 큼 </li>
-<li>final 클래스라면 큰 위험은 없지만 성능 최적화 관점에서 큰이슈 없을때만 가능하지 그외에는 그냥 사용하지 말자</li>
-<li>복제기능은 생성자와 팩터리를 이용하는것이 갑이다 라는것이 결론이다. 단, 배열만 clone사용이 깔끔하다. </li>
-</ul>
-
-                    
-                        
-
-
-                    
-                    
-                        <p>
-                            <a
-                                href="/2021/09/15/java-effective-13/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                Comment and share
-                            </a>
-                        </p>
-                    
-                </div>
-            
-        </div>
-        
-    </article>
-    
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/2021/09/15/java-effective-12/"
-                            aria-label=": java-effective-12"
-                        >
-                            java-effective-12
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time datetime="2021-09-15T12:37:51+00:00">
-	
-		    Sep 15, 2021
-    	
-    </time>
-    
-        <span>in </span>
-        
-    <a class="category-link" href="/categories/Effective-Java/">Effective Java</a>, <a class="category-link" href="/categories/Study/">Study</a>, <a class="category-link" href="/categories/%EB%AA%A8%EB%93%A0-%EA%B0%9D%EC%B2%B4%EC%9D%98-%EA%B3%B5%ED%86%B5-%EB%A9%94%EC%84%9C%EB%93%9C/">모든 객체의 공통 메서드</a>
-
-
-    
-</div>
-
-            </div>
-            
-                <div class="postShorten-content">
-                    <h1 id="toString을-항상-재정의하라"><a href="#toString을-항상-재정의하라" class="headerlink" title="toString을 항상 재정의하라"></a>toString을 항상 재정의하라</h1><ul>
-<li>toString을 잘 구현한 클래스는 사용하기에 훨씬 즐겁고 , 그 클래스를 사용한 시스템은 디버깅하기 쉽다</li>
-<li>실전에서 toString은 그 객체가 가진 주요 정보 모두를 반환하는게 좋다 </li>
-<li>포맷을 명시하든 아니든 의도는 명확히 밝혀야한다. </li>
-<li>유틸리티 클랫느는 toString을 제공할 이유가 없다. </li>
-<li>대부분의 열거타입도 toString을 제공하니 굳이 재정의안해도 됨 </li>
-<li>하위 클래스들이 공유해야할 문자열 표현이 추상 클래스라면 toString을 재정의 해줘야함 (예컨데 대다수의 컬렉션 구현체는 추상 컬렉션 클래스의 toString메서드를 상속함 ) </li>
-<li>구글의 AutoValue는 toString 도 생성해줌 </li>
-<li>toString은 결국 개발자들이 디버깅하고 손쉽게 정보를 파악하기 위한 옵션이다. </li>
-</ul>
-
-                    
-                        
-
-
-                    
-                    
-                        <p>
-                            <a
-                                href="/2021/09/15/java-effective-12/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                Comment and share
-                            </a>
-                        </p>
-                    
-                </div>
-            
-        </div>
-        
-    </article>
-    
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/2021/09/15/java-effective-11/"
-                            aria-label=": java-effective-11"
-                        >
-                            java-effective-11
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time datetime="2021-09-15T07:42:17+00:00">
-	
-		    Sep 15, 2021
-    	
-    </time>
-    
-        <span>in </span>
-        
-    <a class="category-link" href="/categories/Effective-Java/">Effective Java</a>, <a class="category-link" href="/categories/Study/">Study</a>, <a class="category-link" href="/categories/%EB%AA%A8%EB%93%A0-%EA%B0%9D%EC%B2%B4%EC%9D%98-%EA%B3%B5%ED%86%B5-%EB%A9%94%EC%84%9C%EB%93%9C/">모든 객체의 공통 메서드</a>
-
-
-    
-</div>
-
-            </div>
-            
-                <div class="postShorten-content">
-                    <h1 id="equals를-재정의하려거든-hashCode도-재정의하라"><a href="#equals를-재정의하려거든-hashCode도-재정의하라" class="headerlink" title="equals를 재정의하려거든 hashCode도 재정의하라"></a>equals를 재정의하려거든 hashCode도 재정의하라</h1><p>equals를 재정의하고 hashCode를 재정의 하지 않으면 어떻게됨? </p>
-<ul>
-<li>응. 사용못해.. 문제 발생해서 (Hash계열 컬렉션들은 모두 안됨 HashMap,HashSet.. )</li>
-<li>hash 계열은 키값을 기준으로 탐색하기 때문에, equals할때 해당 key에 해당하는 value를 찾고자 할텐데,이때 동일한 key값 여부를 찾게됨. 하지만 equals만 정의해버리면 hash가 재정의 되어있지않기때문에 nullPointerException이 발생하게 됨.(즉, 논리적인 같은 객체는 같은 해시코드를 반환해야한다.) </li>
-<li>가급적이면 IDE 혹은 AutoValue라이브러리 등 에서 정의해주는 부분을 그대로 사용하는것이 좋을듯함 </li>
-</ul>
-<figure class="highlight java"><figcaption><span>최악의 해시코드 - 잘되긴하지만 하지말자</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span> </span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">hashCode</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	<span class="keyword">return</span> <span class="number">42</span>; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>위 해시코드로 정의하는것이 최악의 로직인 이유는? </p>
-<ul>
-<li>모든 객체에게 똑같은 값만 내어주기떄문에 모든 객체가 해시테이블의 버킷 하나에 담겨 마치 연결 리스트 처럼 동작하게됨. 그 결과 평균시간이 O(1) 에서 O(N)으로 느려져서 객체가 많아지면 성능이 최악이됨 </li>
-</ul>
-<figure class="highlight java"><figcaption><span>전형적인 해시코드 - PhoneNumber객체기준</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span> </span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">hashCode</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	<span class="keyword">int</span> result = Short.hashCode(areaCode);</span><br><span class="line">	result = <span class="number">31</span> * result + Short.hashCode(prefix);</span><br><span class="line">	result = <span class="number">31</span> * result + Short.hashCOde(lineNum);</span><br><span class="line">	<span class="keyword">return</span> result; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<ul>
-<li>위 코드에서 31을 곱하는 이유는 31이 홀수이면서 소수(Prime)이기때문인데, 짝수이면 오버플로우가 발생하면 정보를 잃게됨 </li>
-<li>성능 높인다 치고 해시 코드를 계산할때 필수필드를 생략해서는 절대로 안된다. 속도는 빨라질지 몰라도 나중에 해시테이블 성능을 급격하게 안좋게 할수있다. 특정 필드만 키값이 몰리는 현상을 고루 분포해서 해시테이블을 관리할수도있기때문에 가급적 필수 필드들은 왠만하면 다 정의해주자. </li>
-</ul>
-<figure class="highlight java"><figcaption><span>해시코드 지연초기화 - 스레드 안정성 고려</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">int</span> hashCode; </span><br><span class="line"></span><br><span class="line"><span class="meta">@Override</span> </span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">hashCode</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	<span class="keyword">if</span>(result == <span class="number">0</span>) &#123;</span><br><span class="line">		result = Short.hashCode(areaCode);</span><br><span class="line">		result = <span class="number">31</span> * result + Short.hashCode(prefix);</span><br><span class="line">		result = <span class="number">31</span> * result + Short.hashCOde(lineNum);</span><br><span class="line">		<span class="keyword">return</span> result;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<ul>
-<li>클래스가 불변이고, 해시코드를 계산하는 비용이 크다면 매번 새로 계산하기보다 캐싱하는 방식을 고려하는게 좋은데 이럴때 hashCode를 지연초기화 하면 좋다. </li>
-<li>필드를 지연 초기화 하려면 스레드 안전하도록 만들어주도록 신경써야함 </li>
-</ul>
-
-                    
-                        
-
-
-                    
-                    
-                        <p>
-                            <a
-                                href="/2021/09/15/java-effective-11/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                Comment and share
-                            </a>
-                        </p>
-                    
-                </div>
-            
-        </div>
-        
-    </article>
-    
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/2021/02/24/java-effective-10/"
-                            aria-label=": java-effective-10"
-                        >
-                            java-effective-10
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time datetime="2021-02-24T06:07:49+00:00">
-	
-		    Feb 24, 2021
-    	
-    </time>
-    
-        <span>in </span>
-        
-    <a class="category-link" href="/categories/Effective-Java/">Effective Java</a>, <a class="category-link" href="/categories/Study/">Study</a>, <a class="category-link" href="/categories/%EB%AA%A8%EB%93%A0-%EA%B0%9D%EC%B2%B4%EC%9D%98-%EA%B3%B5%ED%86%B5-%EB%A9%94%EC%84%9C%EB%93%9C/">모든 객체의 공통 메서드</a>
-
-
-    
-</div>
-
-            </div>
-            
-                <div class="postShorten-content">
-                    <h2 id="equals는-일반규약을-지켜-재정의-하라"><a href="#equals는-일반규약을-지켜-재정의-하라" class="headerlink" title="equals는 일반규약을 지켜 재정의 하라"></a>equals는 일반규약을 지켜 재정의 하라</h2><h3 id="equals를-재정의-하지-말아야할-경우"><a href="#equals를-재정의-하지-말아야할-경우" class="headerlink" title="equals를 재정의 하지 말아야할 경우"></a>equals를 재정의 하지 말아야할 경우</h3><ul>
-<li><strong>각 인스턴스가 본질적으로 고유하다.</strong> 값을 표현하는게 아니라 동작하는 개체를 표현하는 클래스가 여기 해당됨. (Thread가 좋은예)</li>
-<li><strong>인스턴스의 ‘논리적 동치성’을 검사할 일이 없다.</strong> Pattern클래스로 인스턴스가 정규표현식을 나타내는지 검사하는 방법도 있지만, 설계자가 원하지 않고 필요없다고 판단할수도 있음 그럴때는 기본 equals만으로 해결해도됨.</li>
-<li><strong>상위 클래스에서 재정의한 equals가 하위 클래스에도 딱 들어맞는다</strong> (ex&gt; List구현체들은 AbstractList로부터 상속받아 그대로 사용.)</li>
-<li><strong>클래스가 private이거나 package-private이고 equals메서드를 호출할 일이 없다.</strong> <figure class="highlight java"><figcaption><span>equals메서드 호출금지방법</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span> <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">equals</span><span class="params">(Object o)</span> </span>&#123;</span><br><span class="line">	<span class="keyword">throw</span> <span class="keyword">new</span> AssertionError(); <span class="comment">//호출금지 </span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
 </li>
+<li>멤버 클래스에서 바깥 인스턴스에 접근할일 없다면 무조건 static을 붙여서 정적 멤버 클래스로 만들자! static을 생략하면 바깥 인스턴스로 숨은 외부 참조를 갖게된다. 또한 이런 부분으로 메모리 누수 현상을 겪을수있음. </li>
+<li>익명클래스는 바깥 클래스의 멤버 아님. 익명 클래스는 멤버와 달리 쓰이는 시점에 선언과 동시에 인스턴스가 생성됨. 정적 문맥에서라도 상수변수이외에 정적 멤버를 가질수 없음 </li>
+<li>익명 클래스는 응용하는데 제약이 많다. 선언한 지점에서만 인스턴스를 만들수있고, instanceof 검사나 클래스의 이름이 필요한 작업은 수행못함 </li>
+<li>익명 클래스는 여러 인터페이스를 구현할수없고, 인터페이스를 구현하는 동시에 다른 클래스를 상속할수도 없다. 추가적으로 가독성도 안좋음 </li>
+<li>자바8이상부터는 익명클래스보다는 람다로 사용함 </li>
+<li>지역 클래스는 가장 드물게 사용됨. 지역클래스는 지역변수를 사용하는 곳이라면 실질적으로 어디서든 사용가능함. 익명 클래스처럼 비정적 문맥에서 사용될때만 바깥 인스턴스를 참조할수 있으며 정적 멤버는 가질수 없음. 가독성을 위해서 가급적 짧게 작성하길 권장함. </li>
 </ul>
-<p>그렇다면 equals를 재정의 해야할 때는 언제? </p>
-<ul>
-<li>객체 식별성(object identity; 두 객체가 물리적으로 같은가)이 아니라, 논리적 동치성을 확인해야하는데, 상위 클래스의 equals가 논리적 동치성을 비교하도록 재정의되지 않았을 때다. (주로 값클래스들이 해당됨. Integer,String)</li>
-<li>값 클래스라고 해도 값이 같은 인스턴스가 둘 이상 만들어지지 않음을 보장하는 인스턴스 통제 클래스(아이템1)이라면 equals재정의 안해도됨(Enum도 포함).</li>
-</ul>
-<blockquote><p>equals메서드를 재정의할때 반드시 지켜야하는 규약 </p>
-<ul>
-<li>반사성(reflexivity) : null이 아닌 모든 참조값 x에 대해 x.equals(x)는 true다. </li>
-<li>대칭성(symmetry) : null이 아닌 모든 참조값 x,y에 대해 x.equals(y)가 true면, y.equals(x)도 true다. </li>
-<li>추이성(transitivity) : null이 아닌 모든 참조값 x,y,z에 대해, x.equals(y)가 true이고, y.equals(z)도 true면, x.equals(z)도 true다.</li>
-<li>일관성(consistency) : null이 아닌 모든 참조값 x,y에 대해, x.equals(y)를 반복해서 호출하면 항상 true를 반환하거나 항상 false를 반환한다. </li>
-<li>null-아님 : null이 아닌 모든 참조값 x에 대해, x.equals(null)은 false다. </li>
-</ul>
-</blockquote>
 
-<h3 id="반사성"><a href="#반사성" class="headerlink" title="반사성"></a>반사성</h3><ul>
-<li>이부분은 일부로 어기지 않는 이상 거의 만족 시키는 조건이다. </li>
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/2022/02/05/java-effective-24/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                Comment and share
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
+                            href="/2022/02/05/java-effective-23/"
+                            aria-label=": java-effective-23"
+                        >
+                            java-effective-23
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2022-02-05T09:36:56+00:00">
+	
+		    Feb 05, 2022
+    	
+    </time>
+    
+        <span>in </span>
+        
+    <a class="category-link" href="/categories/Effective-Java/">Effective Java</a>, <a class="category-link" href="/categories/Study/">Study</a>, <a class="category-link" href="/categories/%ED%81%B4%EB%9E%98%EC%8A%A4%EC%99%80-%EC%9D%B8%ED%84%B0%ED%8E%98%EC%9D%B4%EC%8A%A4/">클래스와 인터페이스</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <h1 id="태그-달린-클래스보다는-클래스-계층구조를-활용하라"><a href="#태그-달린-클래스보다는-클래스-계층구조를-활용하라" class="headerlink" title="태그 달린 클래스보다는 클래스 계층구조를 활용하라"></a>태그 달린 클래스보다는 클래스 계층구조를 활용하라</h1><ul>
+<li>태그달린 클래스? 두가지 이상의 의미를 표현할수있고, 그중 현재 표현하는 의미를 태그값으로 알려주는 클래스 </li>
+<li>태그달린 클래스는 그냥 문제 그자체다. 안티패턴임! 태그달린 클래스는 장황하고, 오류내기도 쉽고, 비효율적임. </li>
+<li>태그달린 클래스를 사용하지 말고 계층구조로 변환하는것이 맞다!</li>
 </ul>
-<h3 id="대칭성"><a href="#대칭성" class="headerlink" title="대칭성"></a>대칭성</h3><figure class="highlight java"><figcaption><span>잘못된코드 - 대칭성위배!</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">CaseInsensitiveString</span> </span>&#123;</span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">final</span> String s; </span><br><span class="line">	</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="title">CaseUnsensitiveString</span><span class="params">(String s)</span> </span>&#123;</span><br><span class="line">		<span class="keyword">this</span>.s = Objects.requireNonNull(s); </span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="comment">// 대칭성 위배! </span></span><br><span class="line">	<span class="meta">@Override</span> <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">equals</span><span class="params">(Object o)</span> </span>&#123;</span><br><span class="line">		<span class="keyword">if</span>(o <span class="keyword">instanceof</span> CaseInsensitiveString) &#123;</span><br><span class="line">			<span class="keyword">return</span> s.equalsIgnoreCase((CaseInsensitiveString) o).s); </span><br><span class="line">		&#125;</span><br><span class="line">		</span><br><span class="line">		<span class="keyword">if</span>(o <span class="keyword">instanceof</span> String) &#123; <span class="comment">//한방향으로 작동함! </span></span><br><span class="line">			<span class="keyword">return</span> s.equalsIngnoreCase((String) o); </span><br><span class="line">		&#125;</span><br><span class="line">		</span><br><span class="line">		<span class="keyword">return</span> <span class="keyword">false</span>; </span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// ... 나머지 코드 생략 ... </span></span><br><span class="line"></span><br><span class="line"><span class="comment">/* 실제 구현할때 */</span></span><br><span class="line"></span><br><span class="line">CaseInsensitiveString cis = <span class="keyword">new</span> CaseInsensitiveString(<span class="string">&quot;Polish&quot;</span>); </span><br><span class="line">String s = <span class="string">&quot;polish&quot;</span>; </span><br><span class="line"></span><br><span class="line">cis.equals(s); <span class="comment">//true </span></span><br><span class="line">s.equals(cis); <span class="comment">//false 를 반환해서 대칭성 위반됨. String객체는 CaseInsensitiveString의 존재를 모름.  </span></span><br><span class="line"></span><br><span class="line">List&lt;CaseInsensitiveString&gt; list = <span class="keyword">new</span> ArrayList&lt;&gt;(); </span><br><span class="line">list.add(cis); </span><br><span class="line"></span><br><span class="line">list.contains(s); <span class="comment">//contains는 s.equals로 비교하기때문에, false로 반환하게 될것임. 하지만 타 JDK에서는 true나 예외처리가 발생할수도있음. </span></span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><figcaption><span>태그달린클래스-안티패턴</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Figure</span> </span>&#123;</span><br><span class="line">	<span class="class"><span class="keyword">enum</span> <span class="title">Shape</span> </span>&#123;RECTANGLE, CIRCLE&#125;;</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">final</span> Shape shape; </span><br><span class="line">	</span><br><span class="line">	<span class="comment">//사각형</span></span><br><span class="line">	<span class="keyword">double</span> length; </span><br><span class="line">	<span class="keyword">double</span> width; </span><br><span class="line">	</span><br><span class="line">	<span class="comment">//원 </span></span><br><span class="line">	<span class="keyword">double</span> radius; </span><br><span class="line">	</span><br><span class="line">	<span class="comment">//원 전용 생성자 </span></span><br><span class="line">	Figure(<span class="keyword">double</span> radius) &#123;</span><br><span class="line">		shape = Shape.CIRCLE;</span><br><span class="line">		<span class="keyword">this</span>.radius = radius; </span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="comment">//사각형 전용 생성자 </span></span><br><span class="line">	Figure(<span class="keyword">double</span> length, <span class="keyword">double</span> width) &#123;</span><br><span class="line">		shape = Shape.RECTANGLE; </span><br><span class="line">		<span class="keyword">this</span>.length = length; </span><br><span class="line">		<span class="keyword">this</span>.width = width; </span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="function"><span class="keyword">double</span> <span class="title">area</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">switch</span>(shape) &#123;</span><br><span class="line">			<span class="keyword">case</span> RECTANGLE:</span><br><span class="line">				<span class="keyword">return</span> length * width; </span><br><span class="line">			<span class="keyword">case</span> CIRCLE:</span><br><span class="line">				<span class="keyword">return</span> Math.PI * (radius * radius);</span><br><span class="line">			<span class="keyword">default</span>:</span><br><span class="line">				<span class="keyword">throw</span> <span class="keyword">new</span> AssertionError(shape);</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-<p>결국 위 문제를 해결하려면 CaseInsensitiveString의 equals를 String과도 연동하겠다는 허황된 꿈을 버려야한다. 아래 코드를 확인하자.</p>
-<figure class="highlight java"><figcaption><span>개선된코드</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span> <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">equals</span><span class="params">(Object o)</span> </span>&#123;</span><br><span class="line">	<span class="keyword">return</span> o <span class="keyword">instanceof</span> CaseInsensitiveString &amp;&amp; ((CaseInsensitiveString) o).s.equalsIgnoreCase(s); </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><figcaption><span>태그달린크래스에서 계층구조로 변환</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="comment">//추상클래스 </span></span><br><span class="line"><span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">Figure</span> </span>&#123;</span><br><span class="line">	<span class="function"><span class="keyword">abstract</span> <span class="keyword">double</span> <span class="title">area</span><span class="params">()</span></span>; </span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//원</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Circle</span> <span class="keyword">extends</span> <span class="title">Figure</span> </span>&#123;</span><br><span class="line">	<span class="keyword">final</span> <span class="keyword">double</span> radius; </span><br><span class="line">	</span><br><span class="line">	Circle(<span class="keyword">double</span> radius) &#123; <span class="keyword">this</span>.radius = radius; &#125;</span><br><span class="line">	</span><br><span class="line">	<span class="meta">@Override</span> </span><br><span class="line">	<span class="function"><span class="keyword">double</span> <span class="title">area</span><span class="params">()</span> </span>&#123; <span class="keyword">return</span> Math.PI * (radius * radius); &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//사각형</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Rectangle</span> <span class="keyword">extends</span> <span class="title">Figure</span> </span>&#123;</span><br><span class="line">	<span class="keyword">final</span> <span class="keyword">double</span> length; </span><br><span class="line">	<span class="keyword">final</span> <span class="keyword">double</span> width; </span><br><span class="line">	</span><br><span class="line">	Rectangle(<span class="keyword">double</span> length, <span class="keyword">double</span> width) &#123;</span><br><span class="line">		<span class="keyword">this</span>.length = length; </span><br><span class="line">		<span class="keyword">this</span>.width = width; </span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="meta">@Override</span></span><br><span class="line">	<span class="function"><span class="keyword">double</span> <span class="title">area</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> length * width; </span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//정사각형</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Square</span> <span class="keyword">extends</span> <span class="title">Rectangle</span> </span>&#123;</span><br><span class="line">	Squre(<span class="keyword">double</span> side) &#123;</span><br><span class="line">		<span class="keyword">super</span>(side,side);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
 
-<h3 id="추이성"><a href="#추이성" class="headerlink" title="추이성"></a>추이성</h3><figure class="highlight java"><figcaption><span>추이성</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br></pre></td><td class="code"><pre><span class="line"> </span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Point</span> </span>&#123;</span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">int</span> x; </span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">int</span> y; </span><br><span class="line">	</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="title">Point</span><span class="params">(<span class="keyword">int</span> x, <span class="keyword">int</span> y)</span> </span>&#123;</span><br><span class="line">		<span class="keyword">this</span>.x = x; </span><br><span class="line">		<span class="keyword">this</span>.y = y; </span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="meta">@Override</span> <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">equals</span><span class="params">(Object o)</span> </span>&#123;</span><br><span class="line">		<span class="keyword">if</span>(!(o <span class="keyword">instanceof</span> Point))</span><br><span class="line">			<span class="keyword">return</span> <span class="keyword">false</span>; </span><br><span class="line">		Point p = (Point) o; </span><br><span class="line">		<span class="keyword">return</span> p.x == x &amp;&amp; p.y == y; </span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="comment">//리스코브 치환 원칙 위배! </span></span><br><span class="line">	<span class="meta">@Override</span> <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">equals</span><span class="params">(Object o)</span> </span>&#123;</span><br><span class="line">		<span class="keyword">if</span>(o == <span class="keyword">null</span> || o.getClass != getClass()) &#123;</span><br><span class="line">			<span class="keyword">return</span> <span class="keyword">false</span>; </span><br><span class="line">		&#125;</span><br><span class="line">		Point p = (Point) o; </span><br><span class="line">		<span class="keyword">return</span> p.x == x &amp;&amp; p.y == y; </span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="comment">//...나머지 코드 생략...</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 이제 클래스를 확장해서 점에 색상을 더해봅시다. </span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ColorPoint</span> <span class="keyword">extends</span> <span class="title">Point</span> </span>&#123; </span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">final</span> Color color; </span><br><span class="line">	</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="title">ColorPoint</span><span class="params">(<span class="keyword">int</span> x, <span class="keyword">int</span> y, Color color)</span> </span>&#123;</span><br><span class="line">		<span class="keyword">super</span>(x,y); </span><br><span class="line">		<span class="keyword">this</span>.color = color; </span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="comment">//...나머지 코드 생략...</span></span><br><span class="line">	</span><br><span class="line">	<span class="comment">// 대칭성 위배 </span></span><br><span class="line">	<span class="meta">@Override</span> <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">equals</span><span class="params">(Object o)</span> </span>&#123;</span><br><span class="line">		<span class="keyword">if</span>(!(o <span class="keyword">instanceof</span> Point)) &#123;</span><br><span class="line">			<span class="keyword">return</span> <span class="keyword">false</span>; </span><br><span class="line">		&#125;</span><br><span class="line">		</span><br><span class="line">		<span class="comment">//o가 ColorPoint면 색상까지 비교한다. </span></span><br><span class="line">		<span class="keyword">return</span> <span class="keyword">super</span>.equals(o) &amp;&amp; ((ColorPoint) o).color == color; </span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="comment">// 추이성 위배 </span></span><br><span class="line">	<span class="meta">@Override</span> <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">equals</span><span class="params">(Object o)</span> </span>&#123;</span><br><span class="line">		<span class="keyword">if</span>(!(o <span class="keyword">instanceof</span> Point)) &#123;</span><br><span class="line">			<span class="keyword">return</span> <span class="keyword">false</span>; </span><br><span class="line">		&#125;</span><br><span class="line">		</span><br><span class="line">		<span class="comment">// o가 일반 Point면 색상을 무시하고 비교한다. </span></span><br><span class="line">		<span class="keyword">if</span>(!(o <span class="keyword">instanceof</span> ColorPoint)) &#123;</span><br><span class="line">			<span class="keyword">return</span> o.equals(<span class="keyword">this</span>); </span><br><span class="line">		&#125;</span><br><span class="line">		</span><br><span class="line">		<span class="comment">//o가 ColorPoint면 색상까지 비교한다. </span></span><br><span class="line">		<span class="keyword">return</span> <span class="keyword">super</span>.equals(o) &amp;&amp; ((ColorPoint) o).color == color; </span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/* 구현코드 */</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//대칭성 위배되는 equals를 사용 할 경우</span></span><br><span class="line">Point p = <span class="keyword">new</span> Point(<span class="number">1</span>,<span class="number">2</span>); </span><br><span class="line">ColorPoint cp = <span class="keyword">new</span> ColorPoint(<span class="number">1</span>,<span class="number">2</span>,Color.RED); </span><br><span class="line"></span><br><span class="line">p.equals(cp); <span class="comment">// true</span></span><br><span class="line">cp.equals(p); <span class="comment">// 무조건 false </span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">//추이성 위배되는 equals를 사용 할 경우 </span></span><br><span class="line">ColorPoint p1 = <span class="keyword">new</span> ColorPoint(<span class="number">1</span>,<span class="number">2</span>,Color.RED); </span><br><span class="line">Point p2 = <span class="keyword">new</span> Point(<span class="number">1</span>,<span class="number">2</span>); </span><br><span class="line">ColorPoint p3 = <span class="keyword">new</span> ColorPoint(<span class="number">1</span>,<span class="number">2</span>,Color.BULE);</span><br><span class="line"></span><br><span class="line">p1.equals(p2); <span class="comment">//true </span></span><br><span class="line">p2.equals(p3); <span class="comment">//true</span></span><br><span class="line">p1.equals(p3); <span class="comment">//false 추이성 위배! </span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">//리스코브치환 원칙을 위배하는 equals를 사용하는 경우 </span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> Set&lt;Point&gt; unitCircle = Set.of(<span class="keyword">new</span> Point(<span class="number">1</span>,<span class="number">0</span>), <span class="keyword">new</span> Point(<span class="number">0</span>,<span class="number">1</span>), <span class="keyword">new</span> Point(-<span class="number">1</span>,<span class="number">0</span>), <span class="keyword">new</span> Point(<span class="number">0</span>,-<span class="number">1</span>)); </span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">boolean</span> <span class="title">onUnitCircle</span><span class="params">(Point p)</span> </span>&#123;</span><br><span class="line">	<span class="keyword">return</span> unitCircle.contains(p); </span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//Point를 확장하여 만들어진 인스턴스 개수를 생성자에서 세도록 해보자 </span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">CounterPoint</span> <span class="keyword">extends</span> <span class="title">Point</span> </span>&#123;</span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> AtomicInteger count = <span class="keyword">new</span> AtomicInteger(); </span><br><span class="line">	</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="title">CountPoint</span><span class="params">(<span class="keyword">int</span> x, <span class="keyword">int</span> y)</span> </span>&#123;</span><br><span class="line">		<span class="keyword">super</span>(x,y); </span><br><span class="line">		counter.incrementAndGet();</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">int</span> <span class="title">numberCreated</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> counter.get(); </span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">CountPoint countPoint = <span class="keyword">new</span> CountPoint(<span class="number">0</span>,<span class="number">1</span>);</span><br><span class="line"><span class="comment">//아래 메서드는 false가 나올것이다. 왜냐면 리스코드치환원칙에 위배 되기때문 getClass비교로 인해 Point클래스 이외에 무조건 false처리됨.</span></span><br><span class="line">countPoint.onUnitCircle(countPoint); </span><br><span class="line"></span><br></pre></td></tr></table></figure>
 
-<p>그렇다면 추이성 위배를 막으려면 어떻게 해야하는것이 좋을까? 아래 코드에서 확인가능하다. </p>
-<figure class="highlight java"><figcaption><span>추이성 위배를 방지방법</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ColorPoint</span> </span>&#123; </span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">final</span> Point; </span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">final</span> Color; </span><br><span class="line">	</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="title">ColorPoint</span><span class="params">(<span class="keyword">int</span> x, <span class="keyword">int</span> y, Color color)</span> </span>&#123;</span><br><span class="line">		point = <span class="keyword">new</span> Point(x,y); </span><br><span class="line">		<span class="keyword">this</span>.color = Objects.requireNonNull(color); </span><br><span class="line">	&#125; </span><br><span class="line">	</span><br><span class="line">	<span class="comment">//이 ColorPoint의 Point 뷰를 반환한다. </span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> Point <span class="title">asPoint</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> point; </span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">	<span class="meta">@Override</span> <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">equals</span><span class="params">(Object o)</span> </span>&#123;</span><br><span class="line">		<span class="keyword">if</span>(!(o <span class="keyword">instanceof</span> ColorPoint)) &#123;</span><br><span class="line">			<span class="keyword">return</span> <span class="keyword">false</span>; </span><br><span class="line">		&#125;</span><br><span class="line">		ColorPoint cp = (ColorPoint) o; </span><br><span class="line">		<span class="keyword">return</span> cp.point.equals(point) &amp;&amp; cp.color.equals(color); </span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="comment">//...나머지 코드 생략... </span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+                    
+                        
 
-<h3 id="일관성"><a href="#일관성" class="headerlink" title="일관성"></a>일관성</h3><ul>
-<li>클래스가 불변이든 가변인든 equals의 판단에 신뢰할 수 없는 자원이 끼어들게 해서는 안된다. (java.net.URL의 equals는 주어진 URL과 매핑된 호스트의 ip주소를 이용해 비교함.)</li>
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/2022/02/05/java-effective-23/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                Comment and share
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
+                            href="/2022/02/05/java-effective-22/"
+                            aria-label=": java-effective-22"
+                        >
+                            java-effective-22
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2022-02-05T09:27:14+00:00">
+	
+		    Feb 05, 2022
+    	
+    </time>
+    
+        <span>in </span>
+        
+    <a class="category-link" href="/categories/Effective-Java/">Effective Java</a>, <a class="category-link" href="/categories/Study/">Study</a>, <a class="category-link" href="/categories/%ED%81%B4%EB%9E%98%EC%8A%A4%EC%99%80-%EC%9D%B8%ED%84%B0%ED%8E%98%EC%9D%B4%EC%8A%A4/">클래스와 인터페이스</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <h1 id="인터페이스는-타입을-정의하는-용도로만-사용하라"><a href="#인터페이스는-타입을-정의하는-용도로만-사용하라" class="headerlink" title="인터페이스는 타입을 정의하는 용도로만 사용하라"></a>인터페이스는 타입을 정의하는 용도로만 사용하라</h1><ul>
+<li>인터페이스는 자신을 구현한 클래스의 인스턴스를 참조할수 있는 타입 역할을 한다. 달리말해, 클래스가 어떤 인터페이스를 구현한다는것은 자신의 인스턴스로 무엇을 할수 있는지를 클라이언트에 얘기해주는것. 인터페이스는 오로지 이용도로만 사용해야함!!! </li>
+<li>상수값을 모아놓는 상수 인터페이스는 안티 패턴이다! 상수 인터페이스를 구현하는건 클래스의 API로 노출하는 행위다. </li>
+<li>상수 인터페이스 대신 상수 유틸클래스를 작성하자! (private 생성자는 필수 구현!)</li>
 </ul>
-<h3 id="null-아님"><a href="#null-아님" class="headerlink" title="null-아님"></a>null-아님</h3><ul>
-<li>equals 메서드에서 null여부를 검사하는 부분은 하지말자. null여부를 검사하지말고, instanceof로 매개변수가 올바른 클래스타입인지 여부를 파악해야함. </li>
+
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/2022/02/05/java-effective-22/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                Comment and share
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
+                            href="/2022/02/05/java-effective-21/"
+                            aria-label=": java-effective-21"
+                        >
+                            java-effective-21
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2022-02-05T09:05:24+00:00">
+	
+		    Feb 05, 2022
+    	
+    </time>
+    
+        <span>in </span>
+        
+    <a class="category-link" href="/categories/Effective-Java/">Effective Java</a>, <a class="category-link" href="/categories/Study/">Study</a>, <a class="category-link" href="/categories/%ED%81%B4%EB%9E%98%EC%8A%A4%EC%99%80-%EC%9D%B8%ED%84%B0%ED%8E%98%EC%9D%B4%EC%8A%A4/">클래스와 인터페이스</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <h1 id="인터페이스는-구현하는-쪽을-생각해-설계하라"><a href="#인터페이스는-구현하는-쪽을-생각해-설계하라" class="headerlink" title="인터페이스는 구현하는 쪽을 생각해 설계하라"></a>인터페이스는 구현하는 쪽을 생각해 설계하라</h1><ul>
+<li>인터페이스의 디폴트메서드를 선언하면 그 인터페이스를 구현한 후 디폴트 메서드를 재정의하지않은 모든 클래스에서 디폴트 구현이 쓰이게 된다. </li>
+<li>디톨트 메서드는 컴파일에 성공하더라도 기존 구현체에 런타임 오류를 일으킬수 있다. (잘못 구현하면 굉장히 위험한 존재!)</li>
+<li>기존 인터페이스에 디폴트 메서드를 추가하는 행위는 굉장히 심사숙고해야함.</li>
+<li>새로운 인터페이스의 경우는 표준적인 메서드 구현을 제공하는데 아주 유용한 수단이며 그 인터페이스를 더 쉽게 구현해 활용할수 있게끔 한다. </li>
+<li>결론은 인터페이스를 설계할때는 늘 세심한 주의를 기울여야하며 테스트를 반드시 권장한다. </li>
 </ul>
-<p>지금까지 내용을 종합해서 양질의 equals메서드 구현방법을 단계별로 기술하면?</p>
-<ol>
-<li>== 연산자를 사용해 입력이 자기 자신의 참조인지 확인한다. : 자기 자신이면 true를 반환. 이는 단순한 성능 최적화용으로, 비교 작업이 복잡한 상황일때 값어치가 있음.</li>
-<li>instanceof 연산자로 입력이 올바른 타입인지 확인한다. : 그렇지 않다면 false로 리턴함. </li>
-<li>입력을 올바른 타입으로 형변환한다. : 2번에서 instanceof검사를 했기때문에 이단계는 100% 성공</li>
-<li>입력 객체와 자기 자신의 대응되는 핵심필드들이 모두 일치하는지 하나씩 검사한다 : 모든 필드가 일치하면 true, 하나라도 불일치시 false리턴. </li>
+
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/2022/02/05/java-effective-21/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                Comment and share
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
+                            href="/2022/02/05/java-effective-20/"
+                            aria-label=": java-effective-20"
+                        >
+                            java-effective-20
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2022-02-05T07:09:26+00:00">
+	
+		    Feb 05, 2022
+    	
+    </time>
+    
+        <span>in </span>
+        
+    <a class="category-link" href="/categories/Effective-Java/">Effective Java</a>, <a class="category-link" href="/categories/Study/">Study</a>, <a class="category-link" href="/categories/%ED%81%B4%EB%9E%98%EC%8A%A4%EC%99%80-%EC%9D%B8%ED%84%B0%ED%8E%98%EC%9D%B4%EC%8A%A4/">클래스와 인터페이스</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <h1 id="추상-클래스-보다는-인터페이스를-우선하라"><a href="#추상-클래스-보다는-인터페이스를-우선하라" class="headerlink" title="추상 클래스 보다는 인터페이스를 우선하라"></a>추상 클래스 보다는 인터페이스를 우선하라</h1><ul>
+<li>자바가 제공하는 다중 구현 메커니즘은 추상 클래스와 인터페이스가 존재함 </li>
+<li>자바8부터는 default method 를 제공하여 추상클래스와 인스턴스 메서드를 구현 형태로 제공함 </li>
+<li>추상 클래스와 인터페이스의 큰차이점은 추상클래스가 정의한 타입을 구현하는 클래스는 반드시 추상 클래스의 하위클래스가 되어야한다는점, 자바는 단일상속만 지원되니 새로운 타입을 정의하는데 큰 제약이 있음 </li>
+<li>인터페이스는 믹스인 정의에 안성맞춤이다. 믹스인이란? 클래스가 구현할수있는 타입으로 믹스인을 구현한 클래스에 원래의 ‘주된타입’ 외에도 특정 선택적 행위를 제공한다고 선언 하는 효과를 준다. (ex&gt; Comparable) </li>
+<li>인터페이스와 추상골격구현 클래스를 함께 제공하면 인터페이스의 공통메서드를 제공하면서, 추상골격구현 클래스로 중복제거 효과를 볼수있음 (템플릿 메서드 패턴)  </li>
+<li>추상골격구현클래스는 관례상 접두어로 Abtract~ 형태로 사용함 (AbtractList)</li>
+<li>일반적으로 다중 구현용 타입으로는 인터페이스가 적합하다. 복잡한 인터페이스라면 구현하는 수고를 덜어주는 골격 구현 클래스를 함께 제공하는 방법을 꼭 고려하자! </li>
+<li>골격구현은 가능한! 인터페이스의 디폴트메서드로 제공하여 그 인터페이스를 구현한 모든곳에서 활용하도록 하는것이 좋지만, 가능한 이라고 한이유는 인터페이스에 걸려있는 구현상의 제약때문에 골격구현을 추상 클래스로 제공하는 경우가 더 흔하기 때문 </li>
+</ul>
+<p><a target="_blank" rel="noopener" href="https://javabom.tistory.com/22">추상골격구현 좋은예시</a></p>
+
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/2022/02/05/java-effective-20/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                Comment and share
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
+                            href="/2022/02/05/java-effective-19/"
+                            aria-label=": java-effective-19"
+                        >
+                            java-effective-19
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2022-02-05T06:08:05+00:00">
+	
+		    Feb 05, 2022
+    	
+    </time>
+    
+        <span>in </span>
+        
+    <a class="category-link" href="/categories/Effective-Java/">Effective Java</a>, <a class="category-link" href="/categories/Study/">Study</a>, <a class="category-link" href="/categories/%ED%81%B4%EB%9E%98%EC%8A%A4%EC%99%80-%EC%9D%B8%ED%84%B0%ED%8E%98%EC%9D%B4%EC%8A%A4/">클래스와 인터페이스</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <h1 id="상속을-고려해-설계하고-문서화하라-그러지않았다면-상속을-금지하라"><a href="#상속을-고려해-설계하고-문서화하라-그러지않았다면-상속을-금지하라" class="headerlink" title="상속을 고려해 설계하고 문서화하라. 그러지않았다면 상속을 금지하라"></a>상속을 고려해 설계하고 문서화하라. 그러지않았다면 상속을 금지하라</h1><ul>
+<li>상속용 클래스는 재정의 할수 있는 메서드들을 내부적으로 어떻게 이용하는지(자기사용) 문서로 남겨야함 </li>
+<li>상속 클래스를 작성시 내부동작에 영향을 줄수 있는 메서드들은 protected로 선언해야함 </li>
+<li>protected메서드는 하나하나가 내부구현에 해당되므로 그수는 가능한 적어야하지만, 너무 적어도 안된다. </li>
+<li>상속용 클래스를 시험할 방법은 직접 만들어서 확인하는것이 유일함! 상속용 클래스는 반드시 배포전 하위클래스를 만들어서 테스트해봐야함! </li>
+<li>상속용 클래스의 생성자는 직접적으로든 간적접으로든 재정의 가능 메서드를 호출해서는 절대! 안됨! 이유는 상위클래스 생성자가 하위 클래스 생성자 보다 먼저 수행되기때문에 프로그램 오작동이 일어날수있음 </li>
+<li></li>
+</ul>
+
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/2022/02/05/java-effective-19/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                Comment and share
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
+                            href="/2021/12/31/java-effective-18/"
+                            aria-label=": java-effective-18"
+                        >
+                            java-effective-18
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2021-12-31T04:23:48+00:00">
+	
+		    Dec 31, 2021
+    	
+    </time>
+    
+        <span>in </span>
+        
+    <a class="category-link" href="/categories/Effective-Java/">Effective Java</a>, <a class="category-link" href="/categories/Study/">Study</a>, <a class="category-link" href="/categories/%ED%81%B4%EB%9E%98%EC%8A%A4%EC%99%80-%EC%9D%B8%ED%84%B0%ED%8E%98%EC%9D%B4%EC%8A%A4/">클래스와 인터페이스</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <h1 id="상속보다는-컴포지션을-사용하라"><a href="#상속보다는-컴포지션을-사용하라" class="headerlink" title="상속보다는 컴포지션을 사용하라"></a>상속보다는 컴포지션을 사용하라</h1><h2 id="상속의-문제점은"><a href="#상속의-문제점은" class="headerlink" title="상속의 문제점은?"></a>상속의 문제점은?</h2><ul>
+<li>상속은 캡슐화를 깨뜨린다. (상위클래스가 어떻게 구현되었냐에따라서 하위클래스의 동작이 상이할수있음)</li>
+<li>상위 클래스의 로직을 완벽하게 이해하지 못하고, 확장해서 사용하면 논리오류가 발생할 확률이 크다</li>
+<li>상속은 is-a관계가 성립될때만 사용해야한다. A is B = B is a 인지를 늘 생각하고 저 식이 성립안되면 컴포지션을 고려해야한다. </li>
+</ul>
+<h2 id="상속을-대체할-방법은-컴포지션-composition"><a href="#상속을-대체할-방법은-컴포지션-composition" class="headerlink" title="상속을 대체할 방법은? 컴포지션 (composition)"></a>상속을 대체할 방법은? 컴포지션 (composition)</h2><ul>
+<li>컴포지션은 기존 클래스가 새로운 클래스의 구성요소로 쓰다는 뜻이며, 새로운 클래스를 만들고 private필드로 기존클래스의 인스턴스를 참조하게 하는 방식이며, 새 클래스의 인스턴스 메서드들은 기존 클래스의 대응하는 메서드들을 호출해 반환한다. 이방식을 전달(forwarding) 이라하며 새클래스의 메서드를 전달 메서드라 부름. </li>
+<li>컴포지션 + 전달 = 위임(delegate) 이다. </li>
+<li>구아바 프레임워크는 모든 컬렉션 인터페이스용 전달 메서드를 전부 구현해놨음. </li>
+</ul>
+
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/2021/12/31/java-effective-18/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                Comment and share
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
+                            href="/2021/12/31/java-effective-17/"
+                            aria-label=": java-effective-17"
+                        >
+                            java-effective-17
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2021-12-31T02:29:18+00:00">
+	
+		    Dec 31, 2021
+    	
+    </time>
+    
+        <span>in </span>
+        
+    <a class="category-link" href="/categories/Effective-Java/">Effective Java</a>, <a class="category-link" href="/categories/Study/">Study</a>, <a class="category-link" href="/categories/%ED%81%B4%EB%9E%98%EC%8A%A4%EC%99%80-%EC%9D%B8%ED%84%B0%ED%8E%98%EC%9D%B4%EC%8A%A4/">클래스와 인터페이스</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <h1 id="변경-가능성을-최소화하라"><a href="#변경-가능성을-최소화하라" class="headerlink" title="변경 가능성을 최소화하라"></a>변경 가능성을 최소화하라</h1><h2 id="클래스를-불변으로-만드려면"><a href="#클래스를-불변으로-만드려면" class="headerlink" title="클래스를 불변으로 만드려면?"></a>클래스를 불변으로 만드려면?</h2><ol>
+<li>객체의 상태를 변경하는 메서드(변경자)를 제공하지 않는다.</li>
+<li>클래스를 확장할수 없도록 한다. <ul>
+<li>하위 클래스에서 부주의하게 혹은 나쁜의도로 객체의 상태를 변하게 만드는 사례를 막아줌 </li>
+</ul>
+</li>
+<li>모든 필드를 final로 선언한다.<ul>
+<li>설계자의 의도를 명확하게 하기 위한 수단 </li>
+<li>스레드 세이프 하기 위한 수단 </li>
+</ul>
+</li>
+<li>모든 필드를 private으로 선언한다.<ul>
+<li>필드가 참조하는 가변객체를 클라이언트에서 직접 접근해 수정하는 일을 막는다.</li>
+<li>불변객체를 참조하는 필드를 public final 로 만 선언해도 불변 객체가 되지만, 다음 릴리스에서 내부 표현을 바꾸지 못하므로 비권장</li>
+</ul>
+</li>
+<li>자신외에 내부의 가변 컴포넌트에 접근할수 없도록 한다. <ul>
+<li>클래스에 가변 객체를 참조하는 필드가 하나라도 있다면 클라이언트에서 그 객체의 참조를 얻을수 없도록 해야함. </li>
+<li>생성자, 접근자, readObject메서드 모두에서 방어적 복사를 수행해야함.  </li>
+</ul>
+</li>
 </ol>
-<p>equals를 다 구현했다면, 세가지만 자문해보자. 대칭적인가? 추이성이 있는가? 일관적인가? 자문에서 끝내지말고 단위테스트를 작성해서 돌려보자.<br>다음 이상의 비법을 따라 작성해본 PhoneNumber클래스용 equals메서드다. </p>
-<figure class="highlight java"><figcaption><span>전형적인 equals메서드의 예</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">PhoneNumber</span> </span>&#123;</span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">short</span> areaCode, prefix, lineNum; </span><br><span class="line">	</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="title">PhoneNumber</span><span class="params">(<span class="keyword">int</span> areaCode, <span class="keyword">int</span> prefix, <span class="keyword">int</span> lineNum)</span> </span>&#123;</span><br><span class="line">		<span class="keyword">this</span>.areaCode = rangeCheck(areaCode,<span class="number">999</span>,<span class="string">&quot;지역코드&quot;</span>);</span><br><span class="line">		<span class="keyword">this</span>.prefix = rangeCheck(prefix,<span class="number">999</span>,<span class="string">&quot;프리픽스&quot;</span>);</span><br><span class="line">		<span class="keyword">this</span>.lineNum = rangeCheck(lineNum,<span class="number">9999</span>,<span class="string">&quot;가입자번호&quot;</span>);</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">short</span> <span class="title">rangeCheck</span><span class="params">(<span class="keyword">int</span> val, <span class="keyword">int</span> max, String arg)</span> </span>&#123;</span><br><span class="line">		<span class="keyword">if</span>(val &lt; <span class="number">0</span> || val &gt; max) &#123;</span><br><span class="line">			<span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException(arg + <span class="string">&quot;: &quot;</span> + val);</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">return</span> (<span class="keyword">short</span>) val; </span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line"> 	<span class="meta">@Override</span> <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">equals</span><span class="params">(Object o)</span> </span>&#123;</span><br><span class="line">		<span class="keyword">if</span>(o == <span class="keyword">this</span>) &#123;</span><br><span class="line">			<span class="keyword">return</span> <span class="keyword">true</span>; </span><br><span class="line">		&#125;</span><br><span class="line">		</span><br><span class="line">		<span class="keyword">if</span>(!(o <span class="keyword">instanceof</span> PhoneNumber)) &#123;</span><br><span class="line">			<span class="keyword">return</span> <span class="keyword">false</span>; </span><br><span class="line">		&#125;</span><br><span class="line">		</span><br><span class="line">		PhoneNumber pn = (PhoneNumber) o; </span><br><span class="line">		<span class="keyword">return</span> pn.lineNum == lineNum &amp;&amp; pn.prefix == prefix &amp;&amp; pn.areaCode == areaCode; </span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>equals 메서드를 정의할때 주의사항! </p>
+<h2 id="불변-객체의-장점"><a href="#불변-객체의-장점" class="headerlink" title="불변 객체의 장점?"></a>불변 객체의 장점?</h2><ol>
+<li><p>불변객체는 단순하다 </p>
 <ul>
-<li>equals를 재정의할때는 hashCode도 반드시 재정의해아한다!!! (아이템11)</li>
-<li>너무 복잡하게 해결하려 들지 말자! 필드들의 동치성만 검사해도 equals 규약을 어렵지않게 지킬수있음. </li>
-<li>Object외의 타입을 매개변수로 받는 equals 메서드는 선언하지 말자. </li>
+<li>생성된 시점부터 파괴될때까지 그대로 간직함.</li>
+<li>가변객체는 상태전이가 발생하여 문서로 남겨놓지않으면 믿고 사용하기 어려움. (신뢰성 제로)</li>
 </ul>
-
-                    
-                        
-
-
-                    
-                    
-                        <p>
-                            <a
-                                href="/2021/02/24/java-effective-10/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                Comment and share
-                            </a>
-                        </p>
-                    
-                </div>
-            
-        </div>
-        
-    </article>
-    
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/2021/02/23/java-effective-9/"
-                            aria-label=": java-effective-9"
-                        >
-                            java-effective-9
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time datetime="2021-02-23T08:26:08+00:00">
-	
-		    Feb 23, 2021
-    	
-    </time>
-    
-        <span>in </span>
-        
-    <a class="category-link" href="/categories/Effective-Java/">Effective Java</a>, <a class="category-link" href="/categories/Study/">Study</a>, <a class="category-link" href="/categories/%EA%B0%9D%EC%B2%B4-%EC%83%9D%EC%84%B1%EA%B3%BC-%ED%8C%8C%EA%B4%B4/">객체 생성과 파괴</a>
-
-
-    
-</div>
-
-            </div>
-            
-                <div class="postShorten-content">
-                    <h2 id="try-finally-보다는-try-with-resources를-사용하라"><a href="#try-finally-보다는-try-with-resources를-사용하라" class="headerlink" title="try-finally 보다는 try-with-resources를 사용하라"></a>try-finally 보다는 try-with-resources를 사용하라</h2><ul>
-<li>자바 라이브러리에는 close메서드를 호출해 직접 닫아줘야하는 자원이 꽤 있음. (InputStream,OutputStream,java.sql.Connection등)</li>
-<li>JAVA7이 들어서면서 try-with-resources가 제공됨. 이 구조를 사용하려면 AutoClosable이 구현되어있어야함. </li>
+</li>
+<li><p>불변객체는 근본적으로 스레드 안전하여 따로 동기화 할 필요 없다. </p>
+<ul>
+<li>여러 스레드가 동시에 사용해도 절대 훼손없음. </li>
+<li>다른스레드의 영향이 없어서 불변객체는 안심하고 공유 가능 </li>
 </ul>
-<figure class="highlight java"><figcaption><span>try-with-resources 사용법1</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">static</span> String <span class="title">firstLineOfFile</span><span class="params">(String path)</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">	<span class="keyword">try</span>(BufferedReader br = <span class="keyword">new</span> BufferedReader(<span class="keyword">new</span> FileReader(path))) &#123;</span><br><span class="line">		<span class="keyword">return</span> br.readLine(); </span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight java"><figcaption><span>try-with-resources 사용법2</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">copy</span><span class="params">(String src, String dst)</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">	<span class="keyword">try</span>(InputStream in = <span class="keyword">new</span> FileInputStream(src); </span><br><span class="line">		OutputStream out = <span class="keyword">new</span> FileOutputStream(dst)) &#123;</span><br><span class="line">		<span class="keyword">byte</span>[] buf = <span class="keyword">new</span> <span class="keyword">byte</span>[BUFFER_SIZE]; </span><br><span class="line">		<span class="keyword">int</span> n; </span><br><span class="line">		<span class="keyword">while</span>((n = in.read(buf)) &gt;= <span class="number">0</span>)</span><br><span class="line">			out.write(buf,<span class="number">0</span>,n); </span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight java"><figcaption><span>try-with-resources 사용법3</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">static</span> String <span class="title">firstLineOfFile</span><span class="params">(String path, String defaultVal)</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">	<span class="keyword">try</span>(BufferedReader br = <span class="keyword">new</span> BufferedReader(<span class="keyword">new</span> FileReader(path))) &#123;</span><br><span class="line">		<span class="keyword">return</span> br.readLine(); </span><br><span class="line">	&#125; <span class="keyword">catch</span>(IOException e) &#123;</span><br><span class="line">		<span class="keyword">return</span> defaultVal; </span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-                    
-                        
-
-
-                    
-                    
-                        <p>
-                            <a
-                                href="/2021/02/23/java-effective-9/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                Comment and share
-                            </a>
-                        </p>
-                    
-                </div>
-            
-        </div>
-        
-    </article>
-    
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/2021/02/23/java-effective-8/"
-                            aria-label=": java-effective-8"
-                        >
-                            java-effective-8
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time datetime="2021-02-23T07:43:45+00:00">
-	
-		    Feb 23, 2021
-    	
-    </time>
-    
-        <span>in </span>
-        
-    <a class="category-link" href="/categories/Effective-Java/">Effective Java</a>, <a class="category-link" href="/categories/Study/">Study</a>, <a class="category-link" href="/categories/%EA%B0%9D%EC%B2%B4-%EC%83%9D%EC%84%B1%EA%B3%BC-%ED%8C%8C%EA%B4%B4/">객체 생성과 파괴</a>
-
-
-    
-</div>
-
-            </div>
-            
-                <div class="postShorten-content">
-                    <h2 id="finalizer-와-cleaner-사용을-피하라"><a href="#finalizer-와-cleaner-사용을-피하라" class="headerlink" title="finalizer 와 cleaner 사용을 피하라"></a>finalizer 와 cleaner 사용을 피하라</h2><ul>
-<li>자바는 두가지 객체 소멸자가 있는데, finalizer 와 cleaner이다. </li>
-<li>finalizer는 예측할수 없고, 상황에 따라 위험할수 있어 일반적으로 불필요함. </li>
-<li>cleaner는 finalizer보다는 덜 위험하지만, 여전히 예측할수 없고, 느리고, 일반적으로 불필요함. (GC에서 소멸하는 역할을 담당하기때문)</li>
-<li>finalizer와 cleaner로는 제때 실행되어야하는 (realtime환경) 작업은 절대 할 수 없음. (application이 제때 종료되어야하는데, 게으른 finalizer/ cleaner로 인해 종료가 안되어있는 상태로 유지될 수있다.)</li>
-<li>상태를 영구적으로 수정하는 작업에서는 절대로! finalizer나 cleaner에 의존해서는 안됨! </li>
-<li>System.gc / System.runFinaliztion 메서드에 현혹되지 말자. GC 처리의 우선순위를 높여줄지언정 제때 처리된다는 보장이 없음 </li>
-<li>finalizer/cleaner는 심각한 성능 문제도 동반한다. (AutoClosable처리에 비해 50배의 성능차 발생 )</li>
-<li>finalizer/cleaner를 대신할 묘안은? AutoClosable을 구현해주고, 클라이언트에서 인스턴스를 다사용하면 close 메서드를 호출하면 됨. (일반적으로 예외가 발생해도 제대로 종료되도록 try-with-resources를 사용해야함.)</li>
+</li>
+<li><p>불변 클래스는 자주 사용되는 인스턴스를 캐싱하여 같은 인스턴스를 중복 생성되지 않게 해주는 정적 팩터리를 제공할수있다. </p>
+<ul>
+<li>정적 팩터리를 사용하면 여러 클라이언트가 한 인스턴스를 공유하여 메모리 사용량과 가비지 컬렉션 비용을 줄일수있음. </li>
+<li>public생성자 대신 정적 팩터리를 만들어두면 클라이언트를 수정하지 않고도 필요에 따라 캐시기능을 나중에 덧붙일수있음. </li>
 </ul>
-<blockquote><p>finalizer 와 cleaner는 그럼 언제 사용해야 잘사용했다고 칭찬받을까? </p>
-<ol>
-<li>자원의 소유자가 close메서드를 호출하지 못할걸 대비한 안전망이다.</li>
-<li>Native-Peer와 연결된 객체 (JVM 메모리 구조중 - Native Method Area 영역을 말함 (JNI))에서 close하고 싶을때 호출한다. Native Method Area영역은 자바 객체가 아니기때문에 GC에서 관리하지 못한다. </li>
+</li>
+<li><p>불변 객체는 자유롭게 공유할수있음은 물론 불변 객체끼리는 내부 데이터를 공유할수있다. </p>
+</li>
+<li><p>객체를 만들때 다른 불변 객체들을 구성요소로 사용하면 이점이 많다. </p>
+<ul>
+<li>값이 바뀌지 않는 구성요소들로 이뤄진 객체라면 그 구조가 아무리 복잡하더라도 불변식을 유지하기 훨씬 수월하기 때문</li>
+</ul>
+</li>
+<li><p>불변객체는 그 자체로 실패 원자성을 제공한다. </p>
+<ul>
+<li>상태가 절대 변하지 않으니 잠깐이라도 불일치 상태에 빠질 가능성이 없다.</li>
+</ul>
+</li>
 </ol>
-</blockquote>
-
-<ul>
-<li>결론은 finalizer/cleaner활용보다는 AutoClosable로 객체life를 관리하고, try-with-resources로 객체를 호출해 관리하는것이 베스트이다. </li>
+<h2 id="불변-클래스-단점"><a href="#불변-클래스-단점" class="headerlink" title="불변 클래스 단점?"></a>불변 클래스 단점?</h2><ol>
+<li>값이 다르면 반드시 독립된 객체로 만들어야한다. (1개라도 다르면 100개를 만들어도 다 버려짐.)<ul>
+<li>위 부분을 대처하는 방법은 2가지로 소개됨<ul>
+<li>다단계연산 : 미리쓰일 부분을 예측하여 기본기능으로 제공하는 방법  </li>
+<li>가변동반클래스 : 대표적인 예가 String -&gt; StringBuilder (구닥다리 StringBuffer)</li>
 </ul>
-
-                    
-                        
-
-
-                    
-                    
-                        <p>
-                            <a
-                                href="/2021/02/23/java-effective-8/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                Comment and share
-                            </a>
-                        </p>
-                    
-                </div>
-            
-        </div>
-        
-    </article>
-    
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/2021/02/23/java-effective-7/"
-                            aria-label=": java-effective-7"
-                        >
-                            java-effective-7
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time datetime="2021-02-23T05:16:40+00:00">
-	
-		    Feb 23, 2021
-    	
-    </time>
-    
-        <span>in </span>
-        
-    <a class="category-link" href="/categories/Effective-Java/">Effective Java</a>, <a class="category-link" href="/categories/Study/">Study</a>, <a class="category-link" href="/categories/%EA%B0%9D%EC%B2%B4-%EC%83%9D%EC%84%B1%EA%B3%BC-%ED%8C%8C%EA%B4%B4/">객체 생성과 파괴</a>
-
-
-    
-</div>
-
-            </div>
-            
-                <div class="postShorten-content">
-                    <h2 id="다-쓴-객체는-참조를-해제하라"><a href="#다-쓴-객체는-참조를-해제하라" class="headerlink" title="다 쓴 객체는 참조를 해제하라"></a>다 쓴 객체는 참조를 해제하라</h2><figure class="highlight java"><figcaption><span>메모리누수가 일어는 위치는 어디인가?</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Stack</span> </span>&#123;</span><br><span class="line">	<span class="keyword">private</span> Object[] elements; </span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">int</span> size = <span class="number">0</span>; </span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> DEFAULT_INITIAL_CAPACITY = <span class="number">16</span>; </span><br><span class="line">	</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="title">Stack</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		elements = <span class="keyword">new</span> Object[DEFAULT_INITIAL_CAPACITY];</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">push</span><span class="params">(Object e)</span> </span>&#123;</span><br><span class="line">		ensureCapacity();</span><br><span class="line">		elements[size++] = e; </span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="function"><span class="keyword">public</span> Object <span class="title">pop</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">if</span>(size == <span class="number">0</span>) &#123;</span><br><span class="line">			<span class="keyword">throw</span> <span class="keyword">new</span> EmptyStackException(); </span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">return</span> elements[--size]; </span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="comment">//배열의 크기는 2배씩 증가 , 원소를 위한 공간을 적어도 하나 이상 확보 </span></span><br><span class="line">	<span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">ensureCapacity</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">if</span>(elements.length == size) &#123;</span><br><span class="line">			elements = Arrays.copyOf(elements,<span class="number">2</span> * size + <span class="number">1</span>); </span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<blockquote><p>Q&gt; 위 코드에서 메모리 누수는 어디서 발생할까?</p>
-<ul>
-<li>스택이 커졌다 줄어둘때 스택에서 꺼내진 객체들을 GC가 회수 하지 않는다. 프로그램에서 더이상 사용하지 않더라도 말이다. (pop 메서드) </li>
-</ul>
-</blockquote>
-
-<ul>
-<li>위 코드의 메모리누수는 어떻게 해결해야하는가? 아래 코드를 확인해보자. </li>
-</ul>
-<figure class="highlight java"><figcaption><span>제대로 구현 pop메서드</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> Object <span class="title">pop</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	<span class="keyword">if</span>(size == <span class="number">0</span>) &#123;</span><br><span class="line">		<span class="keyword">throw</span> <span class="keyword">new</span> EmptyStackException(); </span><br><span class="line">	&#125;</span><br><span class="line">	Object result = elements[--size]; </span><br><span class="line">	elements[size] = <span class="keyword">null</span>; <span class="comment">//다 쓴 참조 해제  </span></span><br><span class="line">	<span class="keyword">return</span> result; </span><br><span class="line">&#125;	</span><br></pre></td></tr></table></figure>
-
-<ul>
-<li>위와 같이 null처리하면 실수로 사용하려하면, NullPointerException을 던지며 종료되어 조기에 발견 가능 </li>
-</ul>
-<blockquote><p>Q&gt; null처리는 언제 해야할까? (Stack 클래스 메모리 누수 이유)</p>
-<ul>
-<li>스택이 자기 메모리를 직접 관리하기 때문 (Heap에서 참조로 스택과 연결되어있어서 GC가 해제를 못함)</li>
-</ul>
-<p>개발자들은 자기 메모리를 직접 관리하는 클래스라면 프로그래머는 항시 메모리 누수에 주의 해야한다. </p>
-</blockquote>
-
-<ul>
-<li><p>캐시 역시 메모리 누수의 주범이다. 객체 참조를 캐시에 넣고 이 사실을 까맣게 잊은채 그 객체를 다 쓴뒤로도 한참 놔두는일.이부분을 해소하려면, WeakHashMap을 사용해 캐시를 만들자. 그럼 다쓴 엔트리는 그 즉시 제거됨.  </p>
 </li>
-<li><p>리스너 혹은 콜백이라 불리는 것도 메모리누수의 주범이다. 클라이언트가 콜백을 등록하고 명확히 해지하지 않을때 발생한다. 이럴때는 콜백을 약한 참조로 저장하면 GC가 즉시 수거해감. (ex&gt; WeakHashMap에 키로 저장하면 됨.)</p>
+</ul>
+</li>
+</ol>
+<h2 id="스마트한-불변클래스-작성-방법"><a href="#스마트한-불변클래스-작성-방법" class="headerlink" title="스마트한 불변클래스 작성 방법?"></a>스마트한 불변클래스 작성 방법?</h2><figure class="highlight java"><figcaption><span>생성자 대신 정적 팩터리를 사용한 불변클래스</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Complex</span> </span>&#123;</span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">double</span> re; </span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">double</span> im; </span><br><span class="line">	</span><br><span class="line">	<span class="function"><span class="keyword">private</span> <span class="title">Complex</span><span class="params">(<span class="keyword">double</span> re, <span class="keyword">double</span> im)</span> </span>&#123;</span><br><span class="line">		<span class="keyword">this</span>.re = re;</span><br><span class="line">		<span class="keyword">this</span>.im = im; </span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="comment">// 불변이기에 캐시도 가능 </span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Complex <span class="title">valueOf</span><span class="params">(<span class="keyword">double</span> re, <span class="keyword">double</span> im)</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="keyword">new</span> Complex(re,im);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>클래스에 final을 걸어서 상속을 못하게하는방법도 있지만 위 코드처럼 생성자를 비공개처리하고 정적팩터리로 제공하는 방법도 있음. </li>
+</ul>
+<h2 id="객체-생성하면서-명심할것"><a href="#객체-생성하면서-명심할것" class="headerlink" title="객체 생성하면서 명심할것!"></a>객체 생성하면서 명심할것!</h2><ul>
+<li>클래스에 getter가 있다고 무조건 setter를 생성하지말고 필요할때 setter를 열어주자 (필요한 필드만!)</li>
+<li>클래스는 꼭 필요한 경우가 아니면 무조건 불변이어야 한다! </li>
+<li>모든 클래스를 불변으로 만들순없다 그럼 변경할수있는 부분을 최소한으로 줄이도록하자 (변경해야할 필드 제외하곤 private final 붙이는 습관화)</li>
+<li>생성자는 불변식이 설정이 모두 완료된, 초기화가 완벽히 끝난 상태의 객체를 생성해야함. <ul>
+<li>확실한 이유가 없다면 생성자와 정적 팩터리 외에는 그 어떤 초기화 메서드도 public으로 제공하면 안됨 </li>
+<li>객체를 재활용할 목적으로 상태를 다시 초기화 하는 메서드도 안됨. </li>
+</ul>
 </li>
 </ul>
 
@@ -890,7 +889,7 @@
                     
                         <p>
                             <a
-                                href="/2021/02/23/java-effective-7/#post-footer"
+                                href="/2021/12/31/java-effective-17/#post-footer"
                                 class="postShorten-excerpt_link link"
                                 aria-label=""
                             >
@@ -913,23 +912,23 @@
                     
                         <a
                             class="link-unstyled"
-                            href="/2021/02/23/java-effective-6/"
-                            aria-label=": java-effective-6"
+                            href="/2021/12/31/java-effective-16/"
+                            aria-label=": java-effective-16"
                         >
-                            java-effective-6
+                            java-effective-16
                         </a>
                     
                 </h1>
                 <div class="postShorten-meta">
-    <time datetime="2021-02-23T02:33:32+00:00">
+    <time datetime="2021-12-31T01:50:34+00:00">
 	
-		    Feb 23, 2021
+		    Dec 31, 2021
     	
     </time>
     
         <span>in </span>
         
-    <a class="category-link" href="/categories/Effective-Java/">Effective Java</a>, <a class="category-link" href="/categories/Study/">Study</a>, <a class="category-link" href="/categories/%EA%B0%9D%EC%B2%B4-%EC%83%9D%EC%84%B1%EA%B3%BC-%ED%8C%8C%EA%B4%B4/">객체 생성과 파괴</a>
+    <a class="category-link" href="/categories/Effective-Java/">Effective Java</a>, <a class="category-link" href="/categories/Study/">Study</a>, <a class="category-link" href="/categories/%ED%81%B4%EB%9E%98%EC%8A%A4%EC%99%80-%EC%9D%B8%ED%84%B0%ED%8E%98%EC%9D%B4%EC%8A%A4/">클래스와 인터페이스</a>
 
 
     
@@ -938,24 +937,11 @@
             </div>
             
                 <div class="postShorten-content">
-                    <h2 id="불필요한-객체-생성을-피하라"><a href="#불필요한-객체-생성을-피하라" class="headerlink" title="불필요한 객체 생성을 피하라"></a>불필요한 객체 생성을 피하라</h2><ul>
-<li>String객체를 인스턴스화 시키는건 미친짓이다. (new String(“s”))</li>
-<li>소위 비싼 객체는 반복해서 사용하지 말고 캐싱하여 재사용하자 (static final로 만들어서 사용할수 있도록)</li>
-</ul>
-<figure class="highlight java"><figcaption><span>정규표현식 개선전 코드</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">boolean</span> <span class="title">isRomanNumeral</span><span class="params">(String s)</span> </span>&#123;</span><br><span class="line">	<span class="keyword">return</span> s.matches(<span class="string">&quot;^(?=.)M*(C[MD]|DC&#123;0,3&#125;)&quot;</span>)a + <span class="string">&quot;(X[CL]|L?X&#123;0,3&#125;)(I[XV]|V?&#123;0,3&#125;$)&quot;</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight java"><figcaption><span>정규표현식 개선후 코드</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">RomanNumerals</span> </span>&#123;</span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> Pattern ROMAN = Pattern.compile(<span class="string">&quot;^(?=.)M*(C[MD]|DC&#123;0,3&#125;)&quot;</span>)a + <span class="string">&quot;(X[CL]|L?X&#123;0,3&#125;)(I[XV]|V?&#123;0,3&#125;$&quot;</span>);</span><br><span class="line">	</span><br><span class="line">	<span class="function"><span class="keyword">static</span> <span class="keyword">boolean</span> <span class="title">isRomanNumeral</span><span class="params">(String s)</span> </span>&#123;</span><br><span class="line">		reutrn ROMAN.matcher(s).matches(); </span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<ul>
-<li>개선전 코드의 String.matches는 정규표현식으로 문자열 형태를 확인하는 가장 쉬운 방법이지만, 성능이 중요한 상황에서 반복해 사용하기엔 적합하지 않다. </li>
-<li>개선후 코드이 Pattern객체는 한번 쓰고나서 곧바로 GC 대상으로 잡힌다. Pattern객체는 입력받은 정규표현식에 해당하는 유한 상태 머신을 만들기때문에 인스턴스 생성비용이 높다. 따라서 이부분을 개선하려면, 정규표현식을 표현하는 변수를 클래스 초기화 즉 정적 초기화(static final)하여 직접 생성해 캐싱해두고, 나중에 isRomanNumeral메서드가 호출될때 인스턴스를 재사용하도록 한다.</li>
-<li>불필요한 객체를 만드는 또다른 예는 ‘오토박싱’이다. 아래 코드로 확인해보자 </li>
-</ul>
-<figure class="highlight java"><figcaption><span>정규표현식 개선후 코드</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">long</span> <span class="title">sum</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	Long sum = <span class="number">0L</span>; </span><br><span class="line">	<span class="keyword">for</span>(<span class="keyword">long</span> i = <span class="number">0</span>; i &lt;= Integer.MAX_VALUE; i++) &#123;</span><br><span class="line">		sum += i; </span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> sum; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<ul>
-<li>위 코드는 sum을 오토박싱해서 사용하고 있는데, 이부분은 결국 Long인스턴스변수를 계속 생성하고 있기때문에 성능저하를 유발한다. </li>
-<li>박싱된 기본타입보다는 기본 타입을 사용하고, 의도치 않은 오토박싱이 숨어들지 않도록 주의해야함. </li>
+                    <h1 id="public클래스에서는-public필드가-안닌-접근자-메서드를-사용하라"><a href="#public클래스에서는-public필드가-안닌-접근자-메서드를-사용하라" class="headerlink" title="public클래스에서는 public필드가 안닌 접근자 메서드를 사용하라"></a>public클래스에서는 public필드가 안닌 접근자 메서드를 사용하라</h1><ul>
+<li>public 클래스는 멤버변수를 public으로 하면 안된다. (데이터 필드에 직접 접근할수있어서 캡슐화 이점을 제공하지 못함.)</li>
+<li>멤버변수를 public으로 하지말고 private으로 하고 getter/setter로 접근자 메서드로 처리할수있도록 해야함.</li>
+<li>패키지 바깥에서 접근할수있는 클래스라면 접근자메서드를 사용하고, package-private 클래스 혹은 private 중첩 클래스라면 데이터필드를 노출한다해도 큰이슈는 없음. </li>
+<li>public클래스의 필드가 불변이라면 직접 노출할때의 단점이 조금 줄어들지만 좋은 방식은 아님. API를 변경하지 않고는 표현방식을 바꿀수없고, 필드를 읽을때 부수작업을 수행할수 없다는 단점은 여전함. 단, 불변식은 보장할수있게된다. (setter가 없기때문에..)</li>
 </ul>
 
                     
@@ -966,82 +952,7 @@
                     
                         <p>
                             <a
-                                href="/2021/02/23/java-effective-6/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                Comment and share
-                            </a>
-                        </p>
-                    
-                </div>
-            
-        </div>
-        
-    </article>
-    
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/2021/01/22/java-effective-5/"
-                            aria-label=": java-effective-5"
-                        >
-                            java-effective-5
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time datetime="2021-01-22T01:14:26+00:00">
-	
-		    Jan 22, 2021
-    	
-    </time>
-    
-        <span>in </span>
-        
-    <a class="category-link" href="/categories/Effective-Java/">Effective Java</a>, <a class="category-link" href="/categories/Study/">Study</a>, <a class="category-link" href="/categories/%EA%B0%9D%EC%B2%B4-%EC%83%9D%EC%84%B1%EA%B3%BC-%ED%8C%8C%EA%B4%B4/">객체 생성과 파괴</a>
-
-
-    
-</div>
-
-            </div>
-            
-                <div class="postShorten-content">
-                    <blockquote><p>많은 클래스가 하나 이상의 자원에 의존한다. </p>
-</blockquote>
-
-<h2 id="아이템5-자원을-직접-명시하지-말고-의존-객체-주입을-사용하라"><a href="#아이템5-자원을-직접-명시하지-말고-의존-객체-주입을-사용하라" class="headerlink" title="아이템5. 자원을 직접 명시하지 말고 의존 객체 주입을 사용하라"></a>아이템5. 자원을 직접 명시하지 말고 의존 객체 주입을 사용하라</h2><figure class="highlight java"><figcaption><span>정적 유틸리티를 잘못 만든 예 - 유연하지 않고 테스트하기 어렵다.</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"> </span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">SpellChecker</span> </span>&#123;</span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> Lexicon dictionary = ...; </span><br><span class="line"></span><br><span class="line">	<span class="function"><span class="keyword">private</span> <span class="title">SpellChecker</span><span class="params">()</span> </span>&#123;&#125; <span class="comment">//객체생성방지 </span></span><br><span class="line">	</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">boolean</span> <span class="title">isValid</span><span class="params">(String word)</span> </span>&#123;&#125;</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">static</span> List&lt;String&gt; <span class="title">suggestions</span><span class="params">(String typo)</span> </span>&#123;&#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight java"><figcaption><span>싱글턴을 잘못 만든 예 - 유연하지 않고 테스트하기 어렵다.</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"> </span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">SpellChecker</span> </span>&#123;</span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">final</span> Lexicon dictionary = ... ;</span><br><span class="line">	<span class="function"><span class="keyword">private</span> <span class="title">SpellChecker</span><span class="params">(...)</span> </span>&#123;&#125;</span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">static</span> SpellChecker INSTANCE = <span class="keyword">new</span> SpellChecker(...) &#123;&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">isValid</span><span class="params">(String word)</span> </span>&#123;&#125;</span><br><span class="line">	<span class="function"><span class="keyword">public</span> List&lt;String&gt; <span class="title">suggestions</span><span class="params">(String typo)</span> </span>&#123;&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>두 방식 모두 사전을 단 하나만 사용한다고 가정한다는 점에서 그리 훌륭해 보이지 않는다. (용도에 따라서 다양한 사전을 구현할수 있기때문)<br>사용하는 자원에 따라 동작이 달라지는 클래스에는 정적 유틸리티 클래스나 싱글턴 방식이 적합하지 않다.<br>대신, 클래스가 여러 자원 인스턴스를 지원해야 하며, 클라이언트가 원하는 자원을 사용해야한다. 이 조건을 만족하는 간단한 패턴이 있으니,<br>바로 인스턴스를 생성할 때 생성자에 필오한 자원을 넘겨주는 방식이다. (생성자 DI 방식)</p>
-<figure class="highlight java"><figcaption><span>DI는 유연성과 테스트 용이성을 높여준다.</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"> </span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">SpellChecker</span> </span>&#123;</span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">final</span> Lexicon dictionary;</span><br><span class="line">	</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="title">SpellChecker</span><span class="params">(Lexicon dictionary)</span> </span>&#123;</span><br><span class="line">		<span class="keyword">this</span>.dictionary = Objects.requireNonNull(dictionary); </span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">isValid</span><span class="params">(String word)</span> </span>&#123;&#125;</span><br><span class="line">	<span class="function"><span class="keyword">public</span> List&lt;String&gt; <span class="title">suggestions</span><span class="params">(String typo)</span> </span>&#123;&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>DI를 사용하면, 딱 하나의 자원 (dictionary) 만 사용하지만, 자원이 몇 개든 의존 관계가 어떻든 잘 동작함. 또한 불변을 보장하여 (같은 자원을 사용하려는) 여러 클라이언트가 의존 객체들을 안심하고 공유할 수 있기도 하다.<br>의존객체주입은 생성자, 정적 팩터리, 빌더 모두에 똑같이 응용 할 수 있다.<br>이 패턴의 쓸만한 변형으로, 생성자에 자원 팩터리를 넘겨주는 방식이 있다.</p>
-<blockquote><p>펙터리란? </p>
-<ul>
-<li>호출 할때 마다 특정 타입의 인스턴스를 반복해서 만들어주는 객체 </li>
-</ul>
-</blockquote>
-
-<p>즉, 팩터리 메서드 패턴을 구현 한 것이다. 자바8에서 소개한 Supplier<T> 인터페이스가 팩터리를 표현한 완벽한 예다.<br>Supplier<T> 를 입력으로 받는 메서드는 일반적으로 한정적 와일드카드 타입을 사용해 팩터리의 타입 매개변수를 제한해야한다. 이 방식을 사용해 클라이언트는 자신이 명시한 타입의 하위 타입이라면 무엇이든 생성할 수 있는 팩터리를 넘길수 있다. </T></T></p>
-
-                    
-                        
-
-
-                    
-                    
-                        <p>
-                            <a
-                                href="/2021/01/22/java-effective-5/#post-footer"
+                                href="/2021/12/31/java-effective-16/#post-footer"
                                 class="postShorten-excerpt_link link"
                                 aria-label=""
                             >
@@ -1070,7 +981,7 @@
             </a>
           </li>
         
-        <li class="pagination-number">page 1 of 2</li>
+        <li class="pagination-number">page 1 of 3</li>
     </ul>
 </div>
 
@@ -1080,7 +991,7 @@
 
                 <footer id="footer" class="main-content-wrap">
     <span class="copyrights">
-        Copyrights &copy; 2021 codexdawn. All Rights Reserved.
+        Copyrights &copy; 2022 codexdawn. All Rights Reserved.
     </span>
 </footer>
 

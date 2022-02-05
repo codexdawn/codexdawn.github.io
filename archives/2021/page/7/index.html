@@ -247,6 +247,397 @@
                     
                         <a
                             class="link-unstyled"
+                            href="/2021/01/22/java-effective-5/"
+                            aria-label=": java-effective-5"
+                        >
+                            java-effective-5
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2021-01-22T01:14:26+00:00">
+	
+		    Jan 22, 2021
+    	
+    </time>
+    
+        <span>in </span>
+        
+    <a class="category-link" href="/categories/Effective-Java/">Effective Java</a>, <a class="category-link" href="/categories/Study/">Study</a>, <a class="category-link" href="/categories/%EA%B0%9D%EC%B2%B4-%EC%83%9D%EC%84%B1%EA%B3%BC-%ED%8C%8C%EA%B4%B4/">객체 생성과 파괴</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <blockquote><p>많은 클래스가 하나 이상의 자원에 의존한다. </p>
+</blockquote>
+
+<h2 id="아이템5-자원을-직접-명시하지-말고-의존-객체-주입을-사용하라"><a href="#아이템5-자원을-직접-명시하지-말고-의존-객체-주입을-사용하라" class="headerlink" title="아이템5. 자원을 직접 명시하지 말고 의존 객체 주입을 사용하라"></a>아이템5. 자원을 직접 명시하지 말고 의존 객체 주입을 사용하라</h2><figure class="highlight java"><figcaption><span>정적 유틸리티를 잘못 만든 예 - 유연하지 않고 테스트하기 어렵다.</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"> </span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">SpellChecker</span> </span>&#123;</span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> Lexicon dictionary = ...; </span><br><span class="line"></span><br><span class="line">	<span class="function"><span class="keyword">private</span> <span class="title">SpellChecker</span><span class="params">()</span> </span>&#123;&#125; <span class="comment">//객체생성방지 </span></span><br><span class="line">	</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">boolean</span> <span class="title">isValid</span><span class="params">(String word)</span> </span>&#123;&#125;</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">static</span> List&lt;String&gt; <span class="title">suggestions</span><span class="params">(String typo)</span> </span>&#123;&#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><figcaption><span>싱글턴을 잘못 만든 예 - 유연하지 않고 테스트하기 어렵다.</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"> </span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">SpellChecker</span> </span>&#123;</span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">final</span> Lexicon dictionary = ... ;</span><br><span class="line">	<span class="function"><span class="keyword">private</span> <span class="title">SpellChecker</span><span class="params">(...)</span> </span>&#123;&#125;</span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">static</span> SpellChecker INSTANCE = <span class="keyword">new</span> SpellChecker(...) &#123;&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">isValid</span><span class="params">(String word)</span> </span>&#123;&#125;</span><br><span class="line">	<span class="function"><span class="keyword">public</span> List&lt;String&gt; <span class="title">suggestions</span><span class="params">(String typo)</span> </span>&#123;&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>두 방식 모두 사전을 단 하나만 사용한다고 가정한다는 점에서 그리 훌륭해 보이지 않는다. (용도에 따라서 다양한 사전을 구현할수 있기때문)<br>사용하는 자원에 따라 동작이 달라지는 클래스에는 정적 유틸리티 클래스나 싱글턴 방식이 적합하지 않다.<br>대신, 클래스가 여러 자원 인스턴스를 지원해야 하며, 클라이언트가 원하는 자원을 사용해야한다. 이 조건을 만족하는 간단한 패턴이 있으니,<br>바로 인스턴스를 생성할 때 생성자에 필오한 자원을 넘겨주는 방식이다. (생성자 DI 방식)</p>
+<figure class="highlight java"><figcaption><span>DI는 유연성과 테스트 용이성을 높여준다.</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"> </span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">SpellChecker</span> </span>&#123;</span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">final</span> Lexicon dictionary;</span><br><span class="line">	</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="title">SpellChecker</span><span class="params">(Lexicon dictionary)</span> </span>&#123;</span><br><span class="line">		<span class="keyword">this</span>.dictionary = Objects.requireNonNull(dictionary); </span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">isValid</span><span class="params">(String word)</span> </span>&#123;&#125;</span><br><span class="line">	<span class="function"><span class="keyword">public</span> List&lt;String&gt; <span class="title">suggestions</span><span class="params">(String typo)</span> </span>&#123;&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>DI를 사용하면, 딱 하나의 자원 (dictionary) 만 사용하지만, 자원이 몇 개든 의존 관계가 어떻든 잘 동작함. 또한 불변을 보장하여 (같은 자원을 사용하려는) 여러 클라이언트가 의존 객체들을 안심하고 공유할 수 있기도 하다.<br>의존객체주입은 생성자, 정적 팩터리, 빌더 모두에 똑같이 응용 할 수 있다.<br>이 패턴의 쓸만한 변형으로, 생성자에 자원 팩터리를 넘겨주는 방식이 있다.</p>
+<blockquote><p>펙터리란? </p>
+<ul>
+<li>호출 할때 마다 특정 타입의 인스턴스를 반복해서 만들어주는 객체 </li>
+</ul>
+</blockquote>
+
+<p>즉, 팩터리 메서드 패턴을 구현 한 것이다. 자바8에서 소개한 Supplier<T> 인터페이스가 팩터리를 표현한 완벽한 예다.<br>Supplier<T> 를 입력으로 받는 메서드는 일반적으로 한정적 와일드카드 타입을 사용해 팩터리의 타입 매개변수를 제한해야한다. 이 방식을 사용해 클라이언트는 자신이 명시한 타입의 하위 타입이라면 무엇이든 생성할 수 있는 팩터리를 넘길수 있다. </T></T></p>
+
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/2021/01/22/java-effective-5/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                Comment and share
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
+                            href="/2021/01/21/clean-code-2/"
+                            aria-label=": clean-code-2"
+                        >
+                            clean-code-2
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2021-01-21T07:25:42+00:00">
+	
+		    Jan 21, 2021
+    	
+    </time>
+    
+        <span>in </span>
+        
+    <a class="category-link" href="/categories/Clean-Code/">Clean Code</a>, <a class="category-link" href="/categories/Study/">Study</a>, <a class="category-link" href="/categories/%ED%95%A8%EC%88%98/">함수</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <h1 id="함수"><a href="#함수" class="headerlink" title="함수"></a>함수</h1><h2 id="1-작게-만들어라"><a href="#1-작게-만들어라" class="headerlink" title="1.작게 만들어라!"></a>1.작게 만들어라!</h2><ul>
+<li>함수를 만드는 첫번째 규칙은 <strong>작게</strong> 다. </li>
+<li>함수를 만드는 둘째 규칙은 <strong>더작게</strong> 다. </li>
+<li>켄트 벡 아저씨 기준으로 모든 함수가 2~4줄 정도가 작게만드는 기준이다.  </li>
+</ul>
+<h3 id="1-1-블록과-들여쓰기"><a href="#1-1-블록과-들여쓰기" class="headerlink" title="1-1) 블록과 들여쓰기"></a>1-1) 블록과 들여쓰기</h3><ul>
+<li>if/else/while 문 등에 들어가는 블록은 한 줄이어야 한다. 대개 거기서 함수를 호출한다. 그러면 바깥을 감싸는 함수가 작아질 뿐아니라, 블록안에서 호출하는 함수 이름을 적절히 짓는다면, 코드를 이해하기도 쉬워진다. 이 말은 중첩 구조가 생길 만큼 함수가 커져서는 안 된다는 뜻이다. 그러므로 함수에서 들여쓰기 수준은 1단이나 2단을 넘어서는 안된다. </li>
+<li><a target="_blank" rel="noopener" href="https://www.sonarsource.com/docs/CognitiveComplexity.pdf">Cognitive Complexity 이슈 체크 하기</a></li>
+</ul>
+<h2 id="2-한-가지만-해라"><a href="#2-한-가지만-해라" class="headerlink" title="2. 한 가지만 해라!"></a>2. 한 가지만 해라!</h2><blockquote><p>함수는 한 가지를 해야한다. 그 한 가지를 잘 해야 한다. 그 한 가지만을 해야 한다. </p>
+</blockquote>
+
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> String <span class="title">renderPageWithSetupsAndTeardowns</span><span class="params">(PageData pageData, <span class="keyword">boolean</span> isSuite)</span> </span>&#123;</span><br><span class="line">	<span class="keyword">if</span> (isTestPage(pageData))</span><br><span class="line">		incloudeSetupAndTeardownPages(pageData, isSuite);</span><br><span class="line">	<span class="keyword">return</span> pageData.getHtml();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>위 코드는 한 가지만 하는가? 디테일 하게 보면 세 가지를 한다고 주장 할 수도 있다.</p>
+<ul>
+<li>페이지가 테스트 페이지인지 판단한다. </li>
+<li>그렇다면 섦정 페이지와 해제 페이지를 넣는다. </li>
+<li>페이지를 HTML로 렌더링한다.</li>
+</ul>
+<p>과연 한가지인가 세가지인가? 위에서 언급하는 세 단계는 지정된 함수 이름아래에서 추상화 수준이 <strong>하나</strong> 다. 지정된 함수 이름아래에서 추상화 수준이 하나인 단계만 수행한다면 그 함수는 한 가지 작업만 한다.<br>따라서, 함수가 한가지만 하는지 판단하는 방법은 하나 더 있는데, 단순히 다른 표현이 아니라 의미 있는 이름으로 다른 함수를 추출할 수 있다면 그 함수는 여러 작업을 하는 셈이다. </p>
+<h2 id="3-함수-당-추상화-수준은-하나로"><a href="#3-함수-당-추상화-수준은-하나로" class="headerlink" title="3. 함수 당 추상화 수준은 하나로!"></a>3. 함수 당 추상화 수준은 하나로!</h2><ul>
+<li>한 함수내에 추상화 수준을 섞으면 코드를 읽는 사람이 헷갈린다. 특정 표현이 근본 개념인지 아니면 세부사항인지 구분하기 어려운탓이다. 하지만 문제는 여기서 그치지않고, 근본 개념과 세부사항을 뒤섞기 시작하면, 깨어진 창문처럼 사람들이 함수에 세부사항을 점점 더 추가한다. </li>
+</ul>
+<h3 id="3-1-위에서-아래로-코드-읽기-내려가기-규칙"><a href="#3-1-위에서-아래로-코드-읽기-내려가기-규칙" class="headerlink" title="3-1) 위에서 아래로 코드 읽기 : 내려가기 규칙"></a>3-1) 위에서 아래로 코드 읽기 : 내려가기 규칙</h3><ul>
+<li>코드는 위에서 아래로 이야기 처럼 읽혀야 좋다. </li>
+<li>한 함수 다음에는 추상화 수준이 한 단계 낮은 함수가 온다. 즉, 위에서 아래로 프로그램을 읽으면 함수 추상화 수준이 한 번에 한 단계씩 낮아진다. 이것을 <strong>내려가기 규칙</strong> 이라고 한다. </li>
+</ul>
+<p>결국 저자가 말하는 내려가기 규칙 역시 <strong>한 가지</strong> 만 하는 함수를 구현하기 위한 방법이라서 제안하고 있는 부분이다.<br>내려가기 규칙을 잘 활용하면 각 함수는 다음 함수를 소개한다.(종속 함수) 따라서 각 함수는 일정한 추상화 수준을 유지한다. (3-7 코드를 확인해보자!)</p>
+<h2 id="4-Switch-문"><a href="#4-Switch-문" class="headerlink" title="4. Switch 문"></a>4. Switch 문</h2><p>switch문은 작게 만들기 어렵다. 원론적으로 switch 문자체는 N가지 처리를 하는 분기문이기 때문이다. 아래 스위치 문을 확인해보자. </p>
+<figure class="highlight java"><figcaption><span>switch문 나쁜예</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> Money <span class="title">calculatePay</span><span class="params">(Employee e)</span> <span class="keyword">throws</span> InvaliEmployeeType </span>&#123;</span><br><span class="line">	<span class="keyword">switch</span>(e.type) &#123;</span><br><span class="line">		<span class="keyword">case</span> COMMITIONED:</span><br><span class="line">		  <span class="keyword">return</span> calculrateCommitionedPay(e); </span><br><span class="line">		<span class="keyword">case</span> HOULY: </span><br><span class="line">		  <span class="keyword">return</span> calculrateHoulyPay(e); </span><br><span class="line">		<span class="keyword">case</span> SALARIED: </span><br><span class="line">		  <span class="keyword">return</span> calculateSalariedPay(e);</span><br><span class="line">		<span class="keyword">default</span>:</span><br><span class="line">		  <span class="keyword">throw</span> <span class="keyword">new</span> InvalidEmployeeType(e.type); </span><br><span class="line">	&#125;</span><br><span class="line">&#125; </span><br></pre></td></tr></table></figure>
+
+<p>위 함수는 몇가지 문제가 있다.</p>
+<ul>
+<li>함수가 길다. 새직원 유형을 추가하면 더 길어짐. </li>
+<li>‘한가지’ 작업만 수행하지 않는다. </li>
+<li>SRP(Single Responseibliity Prinsiple) - 단일책임의원칙을 위반함 코드를 변경할 이유가 여럿 있기때문에</li>
+<li>OCP(Open Closed Prinsiple) - 개방폐쇄원칙 위반함. 새 직원 유형을 추가할때마다 코드를 변경해줘야 하기때문 </li>
+</ul>
+<blockquote><p>OOP에서 SOLID? (<a target="_blank" rel="noopener" href="https://ko.wikipedia.org/wiki/SOLID_(%EA%B0%9D%EC%B2%B4_%EC%A7%80%ED%96%A5_%EC%84%A4%EA%B3%84)">SOLID Wiki 참고</a>)<br>S : SRP(Single Responsibility Principle) : 한 클래스는 하나의 책임만 가져아 한다.<br>O : OCP(Open/Closed Principle) : 소프트웨어 요소는 확장에는 열려 있으나, 변경에는 닫혀 있어야 한다.<br>L : LSP(Liskov Substitution Principle) : 프로그램의 객체는 프로그램의 정확성을 깨뜨리지 않으면서 하위 타입의 인스턴스로 바꿀 수 있어야 한다.<br>I : ISP(Interface Segregation Principle) : 특정 클라이언트를 위한 인터페이스 여러개가 범용 인터페이스 하나보다 낫다.<br>D : DIP(Dependency Inversion Principle) : 프로그래머는 추상화에 의존해야지, 구체화에 의존하면 안된다. (의존성 주입은 이 원칙을 따름)</p>
+</blockquote>
+
+<p>그렇다면 위 switch문은 어떻게 개선 할 수 있을까? 아래 코드를 보자 </p>
+<figure class="highlight java"><figcaption><span>switch 개선코드</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">Employee</span> </span>&#123;</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="keyword">boolean</span> <span class="title">isPayday</span><span class="params">()</span></span>;</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">abstract</span> Money <span class="title">calculatePay</span><span class="params">()</span></span>;</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="keyword">void</span> <span class="title">deliveryPay</span><span class="params">(Money pay)</span></span>; </span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">EmployeeFactory</span> </span>&#123;</span><br><span class="line">	<span class="function"><span class="keyword">public</span> Employee <span class="title">makeEmployee</span><span class="params">(EmployeeRecord r)</span> <span class="keyword">throws</span> InvalidEmployeeType</span>; </span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">EmployeeFactoryImpl</span> <span class="keyword">implements</span> <span class="title">EmployeeFactory</span> </span>&#123; </span><br><span class="line">	<span class="function"><span class="keyword">public</span> Employee <span class="title">makeEmployee</span><span class="params">(EmployeeRecord r)</span> <span class="keyword">throws</span> InvaliEmployeeType </span>&#123;</span><br><span class="line">		<span class="keyword">switch</span>(r.type) &#123;</span><br><span class="line">			<span class="keyword">case</span> COMMITIONED:</span><br><span class="line">			  <span class="keyword">return</span> <span class="keyword">new</span> CommissionedEmployee(r);</span><br><span class="line">			<span class="keyword">case</span> HOULY: </span><br><span class="line">			  <span class="keyword">return</span> <span class="keyword">new</span> HourlyEmployee(r);</span><br><span class="line">			<span class="keyword">case</span> SALARIED: </span><br><span class="line">			  <span class="keyword">return</span> <span class="keyword">new</span> SalariedEmployee(r); </span><br><span class="line">			<span class="keyword">default</span>:</span><br><span class="line">			  <span class="keyword">throw</span> <span class="keyword">new</span> InvalidEmployeeType(e.type); </span><br><span class="line">		&#125;</span><br><span class="line">	&#125; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>개선된 코드에서 확인 가능하듯, 추상 클래스에 switch문을 숨겨놨다. 팩토리는 switch문을 통해 적절한 Employee 파생 클래스의 인스턴스를 생성한다.<br>calculratePay, isPayday, deliveryPay등 과 같은 함수는 Employee 인터페이스를 거쳐 호출 된다. 그러면 다형성으로 인해 실제 파생 클래스의 함수가 실행된다. </p>
+<h2 id="5-서술적인-이름을-사용하라"><a href="#5-서술적인-이름을-사용하라" class="headerlink" title="5. 서술적인 이름을 사용하라."></a>5. 서술적인 이름을 사용하라.</h2><ul>
+<li>이름이 길어져도 좋다. 시간이 걸려도 길고 서술적인 이름이 짧고 어려운 이름 보다 낫다. </li>
+<li>길고 서술적인 이름이 길고 서술적인 주석보다 낫다! 함수이름을 정할때는 여러 단어가 쉽게 읽히는 명명법을 사용한다. 그런 다음, 여러 단어를 사용해 함수 기능을 잘 표현하는 이름을 선택한다. </li>
+</ul>
+<h2 id="6-함수-인수"><a href="#6-함수-인수" class="headerlink" title="6. 함수 인수"></a>6. 함수 인수</h2><p>함수에서 이상적인 인수 개수는 0개 곧 무항이다. 그 다음은 1개 , 그 다음은 2개, 3개는 가능한 피하는 편이 좋고, 4개 이상은 특별한 이유가 필요하다. 특별한 이유가 있어도 사용하면 안된다. </p>
+<h3 id="6-1-많이-쓰는-단항"><a href="#6-1-많이-쓰는-단항" class="headerlink" title="6-1) 많이 쓰는 단항"></a>6-1) 많이 쓰는 단항</h3><p>함수에 인수를 1개 넘기는 이유는 2가지가 있다. </p>
+<ul>
+<li>인수에 질문을 던지는 경우 </li>
+<li>인수를 뭔가 변환해서 반환하는 경우 </li>
+</ul>
+<p>위 두가지가 아니면 단항 함수는 가급적 피하도록 하자. 예를들어서 <code>void includeSetupPageInto(StringBuffer pageText)</code> 는 피한다. 변환 함수에서 출력 인수를 사용하면 혼란을 일으킨다.<br>입력 인수를 변환하는 함수라면 변환해서 결과는 반환값으로 돌려주도록 하자. (ex- StringBuffer transform(StringBuffer in) 이 void transform(StringBuffer in)보다 좋다.) </p>
+<h3 id="6-2-플래그-인수"><a href="#6-2-플래그-인수" class="headerlink" title="6-2) 플래그 인수"></a>6-2) 플래그 인수</h3><p>플래그 인수는 추하다. 함수로 boolean형태로 넘기는 형태는 정말 끔찍하다. 왜냐하면, 함수가 한꺼번에 여러가지를 처리한다고 대놓고 공표하는 셈이니까!<br>플래그가 참이면 이거 거짓이면 저거 이런식으로 말이다. (2가지 추상형태로 나뉘게됨)</p>
+<h3 id="6-3-이항-함수"><a href="#6-3-이항-함수" class="headerlink" title="6-3) 이항 함수"></a>6-3) 이항 함수</h3><p>인수가 2개인 함수는 인수가 1개인 함수보다 이해하기 어렵다. 이항함수가 무조건 나쁘다는것은 아니고, 프로그램 짜다보면 불가피 한 경우가 생긴다.<br>하지만 그만큼 위험이 따른다는 사실을 인지하고 가능하면 단항함수로 바꾸도록 애써야한다. </p>
+<h3 id="6-4-삼항-함수"><a href="#6-4-삼항-함수" class="headerlink" title="6-4) 삼항 함수"></a>6-4) 삼항 함수</h3><p>이건 2항보다 더 이해하기 어렵다. 그래서 삼항함수는 만들때는 신중히 고려하도록 권고하고있다. </p>
+<h3 id="6-5-인수-객체"><a href="#6-5-인수-객체" class="headerlink" title="6-5) 인수 객체"></a>6-5) 인수 객체</h3><p>인수가 2-3개 필요하다면 일부를 독자적인 클래스 변수로 선언할 가능성을 짚어본다.</p>
+<blockquote><p>Circle makeCircle(double x, double y, double radius);<br>Circle makeCircle(Point point, double radius); </p>
+</blockquote>
+
+<p><code>Point</code>객체로 어떻게 3개 인수를 2개인수로 눈속임이라 여겨질지 모르겠으나 그렇지않다. 위 예제에서는 x와y를 묶었듯이 변수를 묶어 넘기려면 이름을 붙여야 하므로 결국은 개념을 표현하게 된다. </p>
+<h3 id="6-7-인수-목록"><a href="#6-7-인수-목록" class="headerlink" title="6-7) 인수 목록"></a>6-7) 인수 목록</h3><p>때로는 인수 개수가 가변적인 함수도 필요하다. <code>String.format</code> 메서드가 가장 좋은 예이다.<br><code>String.format</code>메서드는 여러개의 String을 받는 가변인수를 포함한다. 따라서 사용될때는 여러가지 인수를 받지만, 결국은 이항함수이다.<br>가변인수를 취하는 함수는 단항,이항,삼항 함수로 취급할수 있다. 하지만 이를 넘어서는 인수를 사용할 경우 문제가 있다. (결국 가변인수를 사용해도 3항이상 넘어가는걸 유의하자는 의미)</p>
+<h3 id="6-8-동사와-키워드"><a href="#6-8-동사와-키워드" class="headerlink" title="6-8) 동사와 키워드"></a>6-8) 동사와 키워드</h3><p>함수의 의도나 인수의 순서와 의도를 제대로 표현하려면 좋은 함수 이름이 필수다! 단항 함수는 함수와 인수가 동사/명사 쌍을 이뤄야한다. (ex- writeField(name))<br>그리고 함수이름에 키워드를 추가하는 형식이다. (assertEquals -&gt; assertExpectedEqualsActual(expected, actual)) </p>
+<h2 id="7-부수효과를-일으키지마라"><a href="#7-부수효과를-일으키지마라" class="headerlink" title="7. 부수효과를 일으키지마라!"></a>7. 부수효과를 일으키지마라!</h2><p>부수효과는 거짓말이다. 함수에서 한가지만 하겠다고 약속했는데, 남몰래 다른 짓을 하니까. 때로는 함수로 넘어온 인수나 시스템 전역 변수를 수정한다. 어느쪽이든 교활하고 해로운 거짓말이다.<br>많은 경우 시간적인 결합이나 순서 종속성을 초래한다. 결론은 두가지 일을 하게되면 차라리 메서드명을 두가지일을 한다고 명시를 하도록 해서 개발자가 명확하게 기능을 메서드명으로 이해할수있도록 하자. </p>
+<h2 id="8-명령과-조회를-분리하라"><a href="#8-명령과-조회를-분리하라" class="headerlink" title="8. 명령과 조회를 분리하라!"></a>8. 명령과 조회를 분리하라!</h2><p>함수는 뭔가를 수행하거나 뭔가에 답하거나 둘 중 하나만 해야한다. 둘 다 하면 안된다. 즉, 객체 상태를 변경하거나 아니면 객체 정보를 반환하거나 둘 중 하나다.<br>둘다 하면 혼란을 초래한다. </p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">set</span><span class="params">(String attribute, String value)</span></span>; </span><br></pre></td></tr></table></figure>
+
+<p>위 함수는 이름이 attribute인 속성을 찾아 값을 value로 설정한후 성공하면 true, 실패면 false로 리턴하도록 한다.<br>이 상태에서 if(set(“username”,”unclebob”))..이렇게 사용하면, 이해가 될까? 안된다..<br>따라서 username이라는 attribute가 존재하는지 확인하는 메서드와 set하는 메서드는 분리 되어야한다. </p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span>(attributeExists(<span class="string">&quot;username&quot;</span>)) &#123;</span><br><span class="line">	setAttribute(<span class="string">&quot;username&quot;</span>,<span class="string">&quot;unclebob&quot;</span>); </span><br><span class="line">&#125; </span><br></pre></td></tr></table></figure>
+
+<h2 id="9-오류코드보다-예외를-사용하라"><a href="#9-오류코드보다-예외를-사용하라" class="headerlink" title="9. 오류코드보다 예외를 사용하라!"></a>9. 오류코드보다 예외를 사용하라!</h2><p>오류로 걸러낼때 상수 혹은 변수로 비교해서 걸러내는것 보다, try-catch문으로 오류 를걸러내는것이 더 깔끔하다. </p>
+<h3 id="9-1-try-catch-블록-뽑아내기"><a href="#9-1-try-catch-블록-뽑아내기" class="headerlink" title="9-1) try-catch 블록 뽑아내기"></a>9-1) try-catch 블록 뽑아내기</h3><p>try-catch문은 추하다. (코드가 드럽다는 소리다.) 코드 구조에 혼란을 일으키며, 정상 동작과 오류 처리 동작을 뒤섞는다. 그러므로 try-catch 블록을 별도 함수로 뽑아내는 편이 좋다.<br>(try-catch문을 별로로 메서드로 추출하라는 소리다.)</p>
+<h3 id="9-2-오류처리도-한-가지-작업이다"><a href="#9-2-오류처리도-한-가지-작업이다" class="headerlink" title="9-2) 오류처리도 한 가지 작업이다"></a>9-2) 오류처리도 한 가지 작업이다</h3><p>함수는 한가지 작업만 해야한다. 오류처리도 마찬가지다. 오류를 처리하는 함수는 오류만 처리해야 마땅하다. </p>
+<h3 id="9-3-Error-java-의존성-자석"><a href="#9-3-Error-java-의존성-자석" class="headerlink" title="9-3) Error.java 의존성 자석"></a>9-3) Error.java 의존성 자석</h3><p>오류 코드를 반환한다는건 클래스든 열거형 변수든 어디선가 오류 코드를 정의한다는 소리다.<br>결론은 위 와같이 변수를 추가해서 하는것보다, 예외클래스를 하나 생성해서 예외처리를 하는것이 차라리 더 낫다. 오류 코드대신 예외처리를 하는 방향으로 하자. </p>
+<h2 id="10-반복하지-마라"><a href="#10-반복하지-마라" class="headerlink" title="10. 반복하지 마라!"></a>10. 반복하지 마라!</h2><p>중복코드를 남발하지 말자는 소리다 </p>
+<h2 id="11-구조적-프로그래밍"><a href="#11-구조적-프로그래밍" class="headerlink" title="11. 구조적 프로그래밍"></a>11. 구조적 프로그래밍</h2><p>함수는 return문이 하나 여야한다. loop안에서 break,continue같은걸 사용해서는 안되며, goto문은 더더욱 안된다.<br>단, 함수를 작게 만든다면, 간혹 return,break,continue를 여러차례 사용해도 괜찮다. </p>
+<h2 id="12-함수를-어떻게-짜죠"><a href="#12-함수를-어떻게-짜죠" class="headerlink" title="12. 함수를 어떻게 짜죠 ?"></a>12. 함수를 어떻게 짜죠 ?</h2><p>코딩은 글짓기와 유사함.<br>일단 코딩함(들여쓰기도 많고 중복도 많고해도 일단 짠다. 1차원적 코딩) -&gt; 단위테스트 수행 -&gt; 코드다듬기 -&gt; 함수만들고, 이름바꾸고,중복제거하고 -&gt; 메서드줄이고 순서바꿈 -&gt; 때로는 전체 클래스 쪼갬 (이와중에도 단위테스트는 여전히 통과되야함.)</p>
+
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/2021/01/21/clean-code-2/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                Comment and share
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
+                            href="/2021/01/20/clean-code-1/"
+                            aria-label=": clean_code_1"
+                        >
+                            clean_code_1
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2021-01-20T11:22:29+00:00">
+	
+		    Jan 20, 2021
+    	
+    </time>
+    
+        <span>in </span>
+        
+    <a class="category-link" href="/categories/Clean-Code/">Clean Code</a>, <a class="category-link" href="/categories/Study/">Study</a>, <a class="category-link" href="/categories/%EC%9D%98%EB%AF%B8-%EC%9E%88%EB%8A%94-%EC%9D%B4%EB%A6%84/">의미 있는 이름</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <h1 id="의미-있는-이름"><a href="#의미-있는-이름" class="headerlink" title="의미 있는 이름"></a>의미 있는 이름</h1><h2 id="1-의도를-분명히-밝혀라"><a href="#1-의도를-분명히-밝혀라" class="headerlink" title="1. 의도를 분명히 밝혀라"></a>1. 의도를 분명히 밝혀라</h2><blockquote><p><strong>변수나 함수 그리고 클래스 이름은 다음과 같은 굵직한 질문에 모두 답해야한다.</strong> </p>
+<ul>
+<li>변수(혹은 함수나 클래스)의 존재 이유는? </li>
+<li>수행 기능은? </li>
+<li>사용 방법은? </li>
+<li>따로 주석이 필요하다면 의도를 분명히 드러내지 못했다는 말이다.  </li>
+</ul>
+</blockquote>
+
+<p>의도가 드러나는 이름을 사용하면 코드 이해와 변경이 쉬워진다. 다음 코드는 무엇을 할까?</p>
+<figure class="highlight java"><figcaption><span>의미가불명확한코드</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> List&lt;<span class="keyword">int</span>[]&gt; getThen() &#123;</span><br><span class="line">	<span class="keyword">public</span> List&lt;<span class="keyword">int</span>[]&gt; list1 = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">for</span> (<span class="keyword">int</span>[] x : theList) &#123;</span><br><span class="line">		<span class="keyword">if</span>(x[<span class="number">0</span>] == <span class="number">4</span>)</span><br><span class="line">			list1.add(x)</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">return</span> list1;</span><br><span class="line">&#125;</span><br><span class="line"> </span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><figcaption><span>의미가부여된코드1</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> List&lt;<span class="keyword">int</span>[]&gt; getFlaggedCells() &#123;</span><br><span class="line">	List&lt;<span class="keyword">int</span>[]&gt; flaggedCells = ArrayList&lt;&gt;();</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">for</span>(<span class="keyword">int</span>[] cell: gameBoard) &#123;</span><br><span class="line">		<span class="keyword">if</span>(cell[STATUS_VALUE] == FLAGGED) &#123;</span><br><span class="line">			flaggedCells.add(cell); </span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">return</span> flaggedCells; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<figure class="highlight java"><figcaption><span>의미가부여된코드2</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> List&lt;Cell&gt; <span class="title">getFlaggedCells</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	List&lt;Cell&gt; flaggedCells = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">for</span>(Cell cell : gameBoard) &#123;</span><br><span class="line">		<span class="keyword">if</span>(cell.isFlagged()) &#123;</span><br><span class="line">			flaggedCells.add(cell);</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">return</span> flaggedCells; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>1,2,3번 코드가 발전된 부분을 비교해보자. 우선 1번에서 2번코드는 의미를 부여해서 코드가 어떤 동작을 목적으로 개발되었는지 알수있도록 의미를 부여하였으며, 2번에서 3번코드는 <code>Cell</code>이라는 객체를 만들어 해당 객체의 명확한 의도를 정의 했고,<br><code>cell.isFlagged()</code> 메서드를 작성해서 FLAGGED라는 상수를 감춰서 좀 더 이해하기 쉽고 이쁘게 코드를 구성했다는 걸 알수있다. 이 처럼 모든 코드에는 명확한 의도가 네이밍을 통해 알수 있어야한다. </p>
+<h2 id="2-그릇된-정보를-피하라"><a href="#2-그릇된-정보를-피하라" class="headerlink" title="2. 그릇된 정보를 피하라"></a>2. 그릇된 정보를 피하라</h2><p>프로그래머는 코드에 그릇된 단서를 남겨서는 안된다. </p>
+<h3 id="그릇된-단서는-코드-의미를-흐린다"><a href="#그릇된-단서는-코드-의미를-흐린다" class="headerlink" title="그릇된 단서는 코드 의미를 흐린다."></a>그릇된 단서는 코드 의미를 흐린다.</h3><p>예를들어, 여러 계정을 그룹으로 묶을 때, 실제 List가 아니라면, aacountList라 명명하지 않는다. 프로그래머에게 List라는 단어는 특수한 의미다.<br>계정을 담는 컨테이너가 실제 List가 아니라면 프로그래머에게 그릇된 정보를 제공하는 셈이다. 그러므로 accountGroup, bunchOfAccounts 아니면, Accounts라 명명한다. </p>
+<h3 id="서로-흡사한-이름을-사용하지-않는다"><a href="#서로-흡사한-이름을-사용하지-않는다" class="headerlink" title="서로 흡사한 이름을 사용하지 않는다."></a>서로 흡사한 이름을 사용하지 않는다.</h3><p>한 모듈에서 XYZControllerForEfficientHandlingOfStrings 라는 이름을 사용하고, 조금 떨어진 모듈에서 XYZContllerForEfficientStorageOfStrings라는 이름을 사용한다면? 두 단어는 겁나게 비슷하다. </p>
+<h3 id="유사한-개념은-유사한-표기법을-사용한다"><a href="#유사한-개념은-유사한-표기법을-사용한다" class="headerlink" title="유사한 개념은 유사한 표기법을 사용한다."></a>유사한 개념은 유사한 표기법을 사용한다.</h3><p>이것도 <strong>정보</strong> 다. 일관성이 떨어지는 표기법은 <strong>그릇된 정보</strong> 다. 요즘 IDE는 몇자만 입력하면 후보목록에 유사한 개념이 알파멧 순으로 나온다면 그리고 각 개념의 차이가 명백히 드러난다면 코드 자동 완성 기능은 굉장히 유용해진다.<br>십중팔구 개발자들은 네이밍만 보고 객체를 선택한다(상세 주석이나 메서드 목록 잘 안보고 네이밍만으로 판단하는 경우 많음)</p>
+<h2 id="3-의미-있게-구분하라"><a href="#3-의미-있게-구분하라" class="headerlink" title="3. 의미 있게 구분하라"></a>3. 의미 있게 구분하라</h2><h3 id="컴파일러를-통과할지라도-연속된-숫자를-덧붙이거나-불용어-noise-word-를-추가하는-방식은-비추천"><a href="#컴파일러를-통과할지라도-연속된-숫자를-덧붙이거나-불용어-noise-word-를-추가하는-방식은-비추천" class="headerlink" title="컴파일러를 통과할지라도 연속된 숫자를 덧붙이거나 불용어 (noise word) 를 추가하는 방식은 비추천"></a>컴파일러를 통과할지라도 연속된 숫자를 덧붙이거나 불용어 (noise word) 를 추가하는 방식은 비추천</h3><p>이름이 달라야한다면 의미도 달라져야함. (a1,a2….) </p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">copyChars</span><span class="params">(<span class="keyword">char</span> a1[] , <span class="keyword">char</span> a2[])</span> </span>&#123;</span><br><span class="line">	<span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; a1.length; i++) &#123;</span><br><span class="line">		a2[i]  = a1[i]; </span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>위 코드에서 함수의 인수명을 source 와 destination 으로 사용했으면 가독성이 훨씬 좋았을것이다. </p>
+<h3 id="불용어를-추가한-이름-역시-아무런-정보를-제공하지-못함"><a href="#불용어를-추가한-이름-역시-아무런-정보를-제공하지-못함" class="headerlink" title="불용어를 추가한 이름 역시 아무런 정보를 제공하지 못함."></a>불용어를 추가한 이름 역시 아무런 정보를 제공하지 못함.</h3><p><code>Product</code>라는 클래스가 있다고 가정하면, 다른 클래스를 <code>ProductInfo</code>, <code>ProductData</code> 라 부른다면 개념을 구분하지 않은 채 이름만 달리는 경우다. Info 와 Data는 의미가 불명확하기 때문에 그 클래스나 메소드등의 기능에 따라 분명한 네이밍을 정하는것이 중요하다. </p>
+<h2 id="4-발음하기-쉬운-이름을-사용하라"><a href="#4-발음하기-쉬운-이름을-사용하라" class="headerlink" title="4. 발음하기 쉬운 이름을 사용하라."></a>4. 발음하기 쉬운 이름을 사용하라.</h2><p>저자가 아는 분이 <code>genymdhms</code>(generate date, year, month,day,hour,minute,second)라는 네이밍을 사용했다고 한다. 저거 어떻게 발음해야함? 부르기도 힘들다. 저딴식으로 네이밍 적지말자. 부르기 쉬운 명칭이 이해도 빠르다. </p>
+<h2 id="5-검색하기-쉬운-이름을-사용하라"><a href="#5-검색하기-쉬운-이름을-사용하라" class="headerlink" title="5. 검색하기 쉬운 이름을 사용하라."></a>5. 검색하기 쉬운 이름을 사용하라.</h2><p>보통 변수나 상수명을 정의할때 대충 정의하면 무슨 의미인지도 모르고, 공통적으로 사용되는 단어나 알파벳등이 들어갔을때 검색하기 힘든 경우가 있다. 어떤 변수,상수,클래스,메서드든 간에 의미를 확인해서 검색하기 쉬운 단어로 사용하도록 하자.</p>
+<h2 id="6-인코딩을-피하라"><a href="#6-인코딩을-피하라" class="headerlink" title="6. 인코딩을 피하라."></a>6. 인코딩을 피하라.</h2><p>대표적으로 헝거리식 표기법 예전 C혹은 WinAPI시대에서나 볼수있는 부분으로, 변수명 앞에 멤버변수라는 의미를 담아 m_name 혹은 인터페이스 클래스라는 의미를 담아 IShape이런식으로 명칭을 정해서 사용을 자주했는데, 이제는 이런식으로 굳이 안해도 컴파일이나 개발하는데 큰 이슈를 주지않음<br>(예전에는 메서드 길이제한 문자제한등으로 헝거리식표기법을 사용했었음. 하지만 이제는 시대가 발전하면서 큰의미가 없어졌음. 메서드에 수십자적어도 심지어 한글을 적어도 이슈없음.)</p>
+<h2 id="7-자신의-기억력을-자랑하지-마라"><a href="#7-자신의-기억력을-자랑하지-마라" class="headerlink" title="7. 자신의 기억력을 자랑하지 마라."></a>7. 자신의 기억력을 자랑하지 마라.</h2><p>변수명 개같이 짓지 말자. for문을 예를들면 비교적 로직이 짧은 for문을 사용하면, i,x등의 변수명을 사용해도 괜찮지만, 로직이 복잡하고 내용이 긴 for문은 명확한 변수명으로 타 개발자가 혼돈하지 않고 명시하도록 하자. </p>
+<h2 id="8-클래스-이름"><a href="#8-클래스-이름" class="headerlink" title="8. 클래스 이름"></a>8. 클래스 이름</h2><p>클래스 이름 과 객체 이름은 명사나 명사구가 적합함. (Customer, WikiPAge..)</p>
+<h2 id="9-메서드-이름"><a href="#9-메서드-이름" class="headerlink" title="9. 메서드 이름"></a>9. 메서드 이름</h2><p>메서드 이름은 동사나 동사구가 적합함. (postPayment, deletePage, save …) 그리고 접근자,변경자,조건자는 자바빈 표준에 따라 get,set,is를 붙히도록 하자.<br>덧붙여서 생성자를 중복정의 할때 (다중 생성자) 정적 팩터리 메서드를 사용하도록 하자.(effective java item1 참고)</p>
+<h2 id="10-기발한-이름은-피하라"><a href="#10-기발한-이름은-피하라" class="headerlink" title="10. 기발한 이름은 피하라"></a>10. 기발한 이름은 피하라</h2><p>나만의 독창적인 이름으로 주변 개발자들이 못알아보게 만드는 이슈를 만들게 하지말자. 가급적 팀내 정한 네이밍 룰이 있으면 그 형식을 따르도록 하자. </p>
+<h2 id="11-한-개념에-한-단어를-사용하라"><a href="#11-한-개념에-한-단어를-사용하라" class="headerlink" title="11. 한 개념에 한 단어를 사용하라."></a>11. 한 개념에 한 단어를 사용하라.</h2><p>추상적인 개념 하나에 단어 하나를 선택해 이를 고수하도록 하자. 예를들어, 똑같은 메서드를 클래스마다 fetch, retrieve, get 으로 제각각 부르면 혼란스럽다. 통일해서 사용하도록 하자. </p>
+<h2 id="12-말장난을-하지-마라"><a href="#12-말장난을-하지-마라" class="headerlink" title="12. 말장난을 하지 마라."></a>12. 말장난을 하지 마라.</h2><p>11장 처럼 한개념에 한 단어를 사용하라고 해서 모든 <code>add</code>메서드를 1+1 처럼 더하는 값의 결과물을 내는 메서드를 사용했는데, 다른 add메서드에서는 집합체 안에 새로운 값 하나를 추가하는 메서드를 add로 사용하는건 곤란하다.<br>새로운 값이 추가되었을때는 append 혹은 insert로 네이밍하여 add와 혼용하지 않도록 조심하자.</p>
+<h2 id="13-해법-영역에서-가져온-이름을-사용하라"><a href="#13-해법-영역에서-가져온-이름을-사용하라" class="headerlink" title="13. 해법 영역에서 가져온 이름을 사용하라."></a>13. 해법 영역에서 가져온 이름을 사용하라.</h2><p>코드를 읽는 사람도 프로그래머라는 사실을 명심하자. 그러므로 전산용어, 알고리즘, 패턴, 수학용어등을 사용해도됨. </p>
+<h2 id="14-문제-영역에서-가져온-이름을-사용하라"><a href="#14-문제-영역에서-가져온-이름을-사용하라" class="headerlink" title="14. 문제 영역에서 가져온 이름을 사용하라."></a>14. 문제 영역에서 가져온 이름을 사용하라.</h2><p>적절한 프로그래머 용어가 없다면 문제 영역에서 이름을 가져온다. 그럼 코드를 보수하는 프로그래머가 분야 전문가에게 의미를 물어 파악 할수 있다. </p>
+<h2 id="15-의미있는-맥락을-추가하라"><a href="#15-의미있는-맥락을-추가하라" class="headerlink" title="15. 의미있는 맥락을 추가하라."></a>15. 의미있는 맥락을 추가하라.</h2><p>아래 코드 2개를 비교해보자. </p>
+<figure class="highlight java"><figcaption><span>맥락이 불분명한 함수</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">printGuessStatistics</span><span class="params">(<span class="keyword">char</span> candidate, <span class="keyword">int</span> count)</span> </span>&#123;</span><br><span class="line">	String number; </span><br><span class="line">	String verb; </span><br><span class="line">	String pluralModifier; </span><br><span class="line">	</span><br><span class="line">	<span class="keyword">if</span>(count == <span class="number">0</span>) &#123;</span><br><span class="line">		number = <span class="string">&quot;no&quot;</span>;</span><br><span class="line">		verb = <span class="string">&quot;are&quot;</span>;</span><br><span class="line">		pluralModifier = <span class="string">&quot;s&quot;</span>;</span><br><span class="line">		</span><br><span class="line">	&#125; <span class="keyword">else</span> <span class="keyword">if</span> (count == <span class="number">1</span>) &#123;</span><br><span class="line">		number = <span class="string">&quot;1&quot;</span>; </span><br><span class="line">		verb = <span class="string">&quot;is&quot;</span>; </span><br><span class="line">		pluralModifier = <span class="string">&quot;&quot;</span>; </span><br><span class="line">	&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">		number = Integer.toString(count);</span><br><span class="line">		verb = <span class="string">&quot;are&quot;</span>;</span><br><span class="line">		pluralModifier = <span class="string">&quot;s&quot;</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	String guessMessage = String.format(<span class="string">&quot;There %s %s %s%s&quot;</span>, verb, number, candidate, pluraModifier);</span><br><span class="line">	print(guessMessage);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<figure class="highlight java"><figcaption><span>맥락이 분명한 함수</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">GuessStatisticsMessage</span> </span>&#123;</span><br><span class="line">	<span class="keyword">private</span> String number; </span><br><span class="line">	<span class="keyword">private</span> String verb; </span><br><span class="line">	<span class="keyword">private</span> String pluralModifier; </span><br><span class="line">	</span><br><span class="line">	<span class="function"><span class="keyword">public</span> String <span class="title">make</span><span class="params">(<span class="keyword">char</span> candidate, <span class="keyword">int</span> count)</span> </span>&#123;</span><br><span class="line">		createPluralDependentMessageParts(count);</span><br><span class="line">		<span class="keyword">return</span> String.format(<span class="string">&quot;There %s %s %s%s&quot;</span>, verb, number, candidate, pluraModifier);</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">createPluralDependentMessageParts</span><span class="params">(<span class="keyword">int</span> count)</span> </span>&#123;</span><br><span class="line">		<span class="keyword">if</span> (count == <span class="number">0</span>) &#123;</span><br><span class="line">			thereAreNoLetters();</span><br><span class="line">		&#125; <span class="keyword">else</span> <span class="keyword">if</span> (count == <span class="number">1</span>) &#123;</span><br><span class="line">			thereIsOneLetter();</span><br><span class="line">		&#125; <span class="keyword">else</span> &#123; </span><br><span class="line">			thereAreManyLetters(count); </span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">thereAreManyLetters</span><span class="params">(<span class="keyword">int</span> count )</span> </span>&#123;</span><br><span class="line">		number = Integer.toString(count);</span><br><span class="line">		verb = <span class="string">&quot;are&quot;</span>;</span><br><span class="line">		pluralModifier = <span class="string">&quot;s&quot;</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">thereIsOneLetter</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		number = <span class="string">&quot;1&quot;</span>; </span><br><span class="line">		verb = <span class="string">&quot;is&quot;</span>; </span><br><span class="line">		pluralModifier = <span class="string">&quot;&quot;</span>; </span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">thereAreNoLetters</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		number = <span class="string">&quot;no&quot;</span>;</span><br><span class="line">		verb = <span class="string">&quot;are&quot;</span>;</span><br><span class="line">		pluralModifier = <span class="string">&quot;s&quot;</span>;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>1번코드를 보면서 어떤 부분이 느껴지는가? 변수만 보고서 의미가 파악되는가? 함수 이름으로는 대강 어떤 동작을 하겠거니 유추는 가능하지만, 알고리즘에서 나머지 맥락을 제공하는걸 알수있다. (결국 로직을 다봐야 알수있다는 말.)<br>결국 메서드만 봐서는 세 변수의 의미가 불분명하다. 그럼 개선된 코드에서는 어떻게 명확한 코드로 만들었을까? 우선 코드1번은 함수가 길다. 그리고 세변수를 함수 전반에서 사용한다. 그래서 함수를 작은 조각으로 쪼개고자 GuessStatisticsMessage라는 클래스는 만든뒤,<br>세 변수를 클래스에 멤버변수로 넣었다. 그러면 세 변수는 맥락이 분명해 진다. 즉, 세 변수는 확실하게 GuessStatisticsMessage 에 속한다. 이렇게 맥락을 개선하면 함수를 쪼개기가 쉬워지므로 알고리즘도 좀 더 명확해진다.<br>개인적으로 이번장에서 가장 감명깊게 본 파트이다. 개인적으로 개발하면서 이 부분에서 늘 신경을 못써서, 항상 코드가 복잡해지고 난잡해지는 이슈가 있었는데, 담번에는 좀 규모있고 복잡한 로직이 들어갈때, 맥락을 정확하게 하기 위해서 클래스로 쪼개는 연습을 해보도록 하자. </p>
+<h2 id="16-불필요한-맥락을-없애라"><a href="#16-불필요한-맥락을-없애라" class="headerlink" title="16. 불필요한 맥락을 없애라."></a>16. 불필요한 맥락을 없애라.</h2><p>이부분은 개인적으로 예를 들면 Gsfresh라는 프로젝트를 하고있다고 가정하자. Gsfresh가 메인이라고 하지만, 적용하는 로직이 광범위하고 클래스도 많고 변수도 많고, 메서드도 많다면 무조건 네이밍앞에 GSFCheckClaim 이런식으로 GSF를 서두에 다 붙일 필요는 없다는 의미다.<br>왜냐면 모든 관련 파일이나 변수나 메서드에 GSF~ 이런식으로 붙여버리면 검색할때도 힘들고 찾기도 힘들어 지기 때문이다. </p>
+
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/2021/01/20/clean-code-1/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                Comment and share
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
+                            href="/2021/01/18/java-effective-1/"
+                            aria-label=": java-effective-1"
+                        >
+                            java-effective-1
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2021-01-18T08:06:18+00:00">
+	
+		    Jan 18, 2021
+    	
+    </time>
+    
+        <span>in </span>
+        
+    <a class="category-link" href="/categories/Effective-Java/">Effective Java</a>, <a class="category-link" href="/categories/Study/">Study</a>, <a class="category-link" href="/categories/%EA%B0%9D%EC%B2%B4-%EC%83%9D%EC%84%B1%EA%B3%BC-%ED%8C%8C%EA%B4%B4/">객체 생성과 파괴</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <p>기본적으로 자바에서는 인스턴스를 얻는 수단은 public 생성자이지만,<br>클래스는 생성자와 별도로 정적 팩터리 메서드를 제공 할수 있다. </p>
+<h2 id="아이템1-생성자-대신-정적-팩터리-메서드를-고려하라"><a href="#아이템1-생성자-대신-정적-팩터리-메서드를-고려하라" class="headerlink" title="아이템1. 생성자 대신 정적 팩터리 메서드를 고려하라."></a>아이템1. 생성자 대신 정적 팩터리 메서드를 고려하라.</h2><figure class="highlight java"><figcaption><span>Boolean.valueOf</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Boolean <span class="title">valueOf</span><span class="params">(<span class="keyword">boolean</span> b)</span> </span>&#123;</span><br><span class="line">	<span class="keyword">return</span> b ? Boolean.TRUE : Boolean.FALSE; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>위 메서드는 기본적으로 기본 타입인 boolean을 받아 Boolean 객체 참조로 변환해 준다. </p>
+<h3 id="장점1-이름을-가질수-있다-메서드의-목적을-분명하게-알수있다"><a href="#장점1-이름을-가질수-있다-메서드의-목적을-분명하게-알수있다" class="headerlink" title="장점1. 이름을 가질수 있다. (메서드의 목적을 분명하게 알수있다.)"></a>장점1. 이름을 가질수 있다. (메서드의 목적을 분명하게 알수있다.)</h3><p>자바에서 기본으로 제공하는 public생성자는 이름을 가질수없으며, 매개변수들이 포함되어 있는 생성자 역시 이름이 없다.<br>그래서 개발자들은 여러 생성자가 존재 할 경우, 어떤 역할을 하는지 한눈에 알아보기가 쉽지않을것이다.<br>이런 public생성자의 단점을 이름을 가질수있는 정적 팩터리 메서드가 해결 할 수있다. </p>
+<h3 id="장점2-호출될-때마다-인스턴스를-새로-생성하지-않아도-된다"><a href="#장점2-호출될-때마다-인스턴스를-새로-생성하지-않아도-된다" class="headerlink" title="장점2. 호출될 때마다 인스턴스를 새로 생성하지 않아도 된다."></a>장점2. 호출될 때마다 인스턴스를 새로 생성하지 않아도 된다.</h3><p>자바에서 public생성자를 호출 하려면 new 키워드로 인스턴스를 생성하게 되어있다.<br>하지만 정적 팩터리 메서드를 사용하면, 매번 인스턴스를 생성하지 않아도 된다.<br>특히 불변 클래스(immutable class; 아이템17)는 인스턴스를 미리 만들어놓거나 새로 생성한 인스턴스를 캐싱하여, 재활용하는 식으로 불필요한 객체 생성을 피할수 있다. (EX&gt; Boolean.valueOf) 따라서 같은 객체가 자주 요청되는 상황이라면 성능을 상당히 끌어올려 준다.</p>
+<blockquote><p>인스턴스 통제(instance-controlled) 클래스란? (ex&gt; 싱글턴)<br>=&gt; 반복된 요청에 같은 객체를 반환하는 식으로 정적 팩터리 방식의 클래스는 언제 어느 인스턴스를 살아 있게 할지를 철저히 통제 할수있다. </p>
+<p>인스턴스를 통제하는 이유는?<br>=&gt; 싱글턴, 인스턴스화 불가(Util성 클래스에서 생성자 막을때), 불변 값 클래스에서 동치인 인스턴스가 단 하나임을 보장 (a == b 일때, a.equals(b) 성립) </p>
+</blockquote>
+
+<h3 id="장점3-반환-타입의-하위-타입-객체를-반환할-수-있는-능력이-있다"><a href="#장점3-반환-타입의-하위-타입-객체를-반환할-수-있는-능력이-있다" class="headerlink" title="장점3. 반환 타입의 하위 타입 객체를 반환할 수 있는 능력이 있다."></a>장점3. 반환 타입의 하위 타입 객체를 반환할 수 있는 능력이 있다.</h3><p>제목이 거창해서 그렇지, 간단하게 생각하면 인터페이스를 반환 타입을 갖게하고, 실제로는 인터페이스를 구현하는 구현체를 리턴하는 방식 가장 대표적인 예는 <code>java.util.Collections</code> 이다. 이 컬렉션 프레임워크는 45개의 구현체 클래스를 사용하고 있지만, 실제로 사용하는 개발자는 45개나 되는 구현체를 굳이 알필요가 없도록, 정적 팩터리 메서드를 사용하였다.<br>자바8부터는 인터페이스가 정적 메서드(public static) 를 가질 수 없는 제한이 풀렸다. 자바9에서는 private 정적메서드까지 허락하지만,정적 필드와 정적 멤버 클래스는 여전히 public이어야함. </p>
+<h3 id="장점4-입력-매개변수에-따라-매번-다른-클래스의-객체를-반환할-수-있다"><a href="#장점4-입력-매개변수에-따라-매번-다른-클래스의-객체를-반환할-수-있다" class="headerlink" title="장점4. 입력 매개변수에 따라 매번 다른 클래스의 객체를 반환할 수 있다."></a>장점4. 입력 매개변수에 따라 매번 다른 클래스의 객체를 반환할 수 있다.</h3><p>장점3과 비슷한 맥락이지만, 차이점은 매개변수의 갯수의 차이다. EnumSet은 public생성자가 없이 오직 정적 팩터리만 제공하는데, 원소가 64개 이하면 RegularEnumSet을 65개이상이면 JumboEnumSet의 인스턴스를 반환하게 구현되어있다.<br>하지만 굳이 개발자가 하위타입의 리턴타입을 알 필요가 있을까? 당연 없다. </p>
+<h3 id="장점5-정적-팩터리-메서드를-작성하는-시점에는-반환할-객체의-클래스가-존재하지-않아도-된다"><a href="#장점5-정적-팩터리-메서드를-작성하는-시점에는-반환할-객체의-클래스가-존재하지-않아도-된다" class="headerlink" title="장점5. 정적 팩터리 메서드를 작성하는 시점에는 반환할 객체의 클래스가 존재하지 않아도 된다."></a>장점5. 정적 팩터리 메서드를 작성하는 시점에는 반환할 객체의 클래스가 존재하지 않아도 된다.</h3><p>이 책에서는 위 장점의 예를 둔 부분이, JDBC이다. JDBC로 개발할때를 생각하면 어느정도 이해를 할 수 있다.</p>
+<figure class="highlight java"><figcaption><span>jdbc example</span><a target="_blank" rel="noopener" href="https://www.tutorialspoint.com/jdbc-class-forname-vs-drivermanager-registerdriver">tutorialspoint.com</a></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//Registering the Driver</span></span><br><span class="line">   DriverManager.registerDriver(<span class="keyword">new</span> com.mysql.jdbc.Driver());       <span class="comment">//Class.forName으로 자주 씀. </span></span><br><span class="line">   <span class="comment">//Getting the connection</span></span><br><span class="line">   String mysqlUrl = <span class="string">&quot;jdbc:mysql://localhost/mydatabase&quot;</span>;</span><br><span class="line">   Connection con = DriverManager.getConnection(mysqlUrl, <span class="string">&quot;root&quot;</span>, <span class="string">&quot;password&quot;</span>);</span><br><span class="line">   System.out.println(<span class="string">&quot;Connection established: &quot;</span>+con);</span><br></pre></td></tr></table></figure>
+<p>위 코드에서 확인 할 수 있듯이, Connection을 사용하기 위해서 <code>DriverManager.registerDriver</code> 통해서 어떤 DB의 방언을 사용할것 인지 결정하고 (제공자등록API),<br>Connection인터페이스는 어떤 DB방언에도 연결할수있도록 서비스 인터페이스 역할을 담당하고, 결국 <code>DriverManager.getConnection</code>을 통해서 서비스에 접근하여 인스턴스를 얻을수있도록 한다. 여기서 DriverManager.getConnection 이 장점5의 의도이다.<br>그래서 우리가 서로 다른 DB의 방언을 제공자 등록 API를 통해 세팅하고, DB접근정보가 담겨있는 서비스접근 API를 통해서 Connection 인터페이스로 반환하게 할때, 마치 DB를 연결하기 위해 중간다리 역할 (브리지 패턴) 처럼 혹은 레고 처럼 조립되는 과정이 있다는걸 알수가 있다. 우리가 흔히 알고있는 DI(의존객체주입) 와 유사하다고 생각하면 된다. </p>
+<h3 id="단점1-상속을-하려면-public이나-protected-생성자가-필요하니-정적-팩터리-메서드만-제공하면-하위-클래스를-만들수-없다"><a href="#단점1-상속을-하려면-public이나-protected-생성자가-필요하니-정적-팩터리-메서드만-제공하면-하위-클래스를-만들수-없다" class="headerlink" title="단점1. 상속을 하려면 public이나 protected 생성자가 필요하니 정적 팩터리 메서드만 제공하면 하위 클래스를 만들수 없다."></a>단점1. 상속을 하려면 public이나 protected 생성자가 필요하니 정적 팩터리 메서드만 제공하면 하위 클래스를 만들수 없다.</h3><p>java.util.Collections 컬렉션 프레임워크 처럼 유틸리티 구현 클래스들은 상속할 수 없다는 이야기다. 글쓴이는 이 제약은 상속 보다는 컴포지션을 사용(아이템 18) 하도록 유도하고, 불변 타입(아이템 17)으로 만들려면 이 제약을 지켜야하기에 오히려 장점이 아닌가라고 생각했다.</p>
+<h3 id="단점2-정적-펙터리-메서드는-프로그래머가-찾기-힘들다"><a href="#단점2-정적-펙터리-메서드는-프로그래머가-찾기-힘들다" class="headerlink" title="단점2. 정적 펙터리 메서드는 프로그래머가 찾기 힘들다."></a>단점2. 정적 펙터리 메서드는 프로그래머가 찾기 힘들다.</h3><p>개발자들이 각자의 네이밍룰로 정적 펙터리 메서드를 구현하면, 그 메서드를 찾기위해서 클래스를 찾아서 분석 해야하는 비용이 생겨서, 찾기 어렵다고 표현한것이 아닐까? 추측해본다.<br>그래서 글쓴이는 from, of, valueOf. getInstance 등과 같은 범용적으로 사용되는 정적 팩터리 메서드를 예시로 들면서, 네이밍으로도 그 기능을 알 수 있도록 구현하는걸 추천하고 있다. </p>
+
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/2021/01/18/java-effective-1/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                Comment and share
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
                             href="/2021/01/18/java-effective-4/"
                             aria-label=": java-effective-4"
                         >
@@ -506,7 +897,7 @@
 
                 <footer id="footer" class="main-content-wrap">
     <span class="copyrights">
-        Copyrights &copy; 2021 codexdawn. All Rights Reserved.
+        Copyrights &copy; 2022 codexdawn. All Rights Reserved.
     </span>
 </footer>
 

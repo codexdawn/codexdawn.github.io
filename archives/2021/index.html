@@ -247,6 +247,372 @@
                     
                         <a
                             class="link-unstyled"
+                            href="/2021/12/31/java-effective-18/"
+                            aria-label=": java-effective-18"
+                        >
+                            java-effective-18
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2021-12-31T04:23:48+00:00">
+	
+		    Dec 31, 2021
+    	
+    </time>
+    
+        <span>in </span>
+        
+    <a class="category-link" href="/categories/Effective-Java/">Effective Java</a>, <a class="category-link" href="/categories/Study/">Study</a>, <a class="category-link" href="/categories/%ED%81%B4%EB%9E%98%EC%8A%A4%EC%99%80-%EC%9D%B8%ED%84%B0%ED%8E%98%EC%9D%B4%EC%8A%A4/">클래스와 인터페이스</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <h1 id="상속보다는-컴포지션을-사용하라"><a href="#상속보다는-컴포지션을-사용하라" class="headerlink" title="상속보다는 컴포지션을 사용하라"></a>상속보다는 컴포지션을 사용하라</h1><h2 id="상속의-문제점은"><a href="#상속의-문제점은" class="headerlink" title="상속의 문제점은?"></a>상속의 문제점은?</h2><ul>
+<li>상속은 캡슐화를 깨뜨린다. (상위클래스가 어떻게 구현되었냐에따라서 하위클래스의 동작이 상이할수있음)</li>
+<li>상위 클래스의 로직을 완벽하게 이해하지 못하고, 확장해서 사용하면 논리오류가 발생할 확률이 크다</li>
+<li>상속은 is-a관계가 성립될때만 사용해야한다. A is B = B is a 인지를 늘 생각하고 저 식이 성립안되면 컴포지션을 고려해야한다. </li>
+</ul>
+<h2 id="상속을-대체할-방법은-컴포지션-composition"><a href="#상속을-대체할-방법은-컴포지션-composition" class="headerlink" title="상속을 대체할 방법은? 컴포지션 (composition)"></a>상속을 대체할 방법은? 컴포지션 (composition)</h2><ul>
+<li>컴포지션은 기존 클래스가 새로운 클래스의 구성요소로 쓰다는 뜻이며, 새로운 클래스를 만들고 private필드로 기존클래스의 인스턴스를 참조하게 하는 방식이며, 새 클래스의 인스턴스 메서드들은 기존 클래스의 대응하는 메서드들을 호출해 반환한다. 이방식을 전달(forwarding) 이라하며 새클래스의 메서드를 전달 메서드라 부름. </li>
+<li>컴포지션 + 전달 = 위임(delegate) 이다. </li>
+<li>구아바 프레임워크는 모든 컬렉션 인터페이스용 전달 메서드를 전부 구현해놨음. </li>
+</ul>
+
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/2021/12/31/java-effective-18/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                Comment and share
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
+                            href="/2021/12/31/java-effective-17/"
+                            aria-label=": java-effective-17"
+                        >
+                            java-effective-17
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2021-12-31T02:29:18+00:00">
+	
+		    Dec 31, 2021
+    	
+    </time>
+    
+        <span>in </span>
+        
+    <a class="category-link" href="/categories/Effective-Java/">Effective Java</a>, <a class="category-link" href="/categories/Study/">Study</a>, <a class="category-link" href="/categories/%ED%81%B4%EB%9E%98%EC%8A%A4%EC%99%80-%EC%9D%B8%ED%84%B0%ED%8E%98%EC%9D%B4%EC%8A%A4/">클래스와 인터페이스</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <h1 id="변경-가능성을-최소화하라"><a href="#변경-가능성을-최소화하라" class="headerlink" title="변경 가능성을 최소화하라"></a>변경 가능성을 최소화하라</h1><h2 id="클래스를-불변으로-만드려면"><a href="#클래스를-불변으로-만드려면" class="headerlink" title="클래스를 불변으로 만드려면?"></a>클래스를 불변으로 만드려면?</h2><ol>
+<li>객체의 상태를 변경하는 메서드(변경자)를 제공하지 않는다.</li>
+<li>클래스를 확장할수 없도록 한다. <ul>
+<li>하위 클래스에서 부주의하게 혹은 나쁜의도로 객체의 상태를 변하게 만드는 사례를 막아줌 </li>
+</ul>
+</li>
+<li>모든 필드를 final로 선언한다.<ul>
+<li>설계자의 의도를 명확하게 하기 위한 수단 </li>
+<li>스레드 세이프 하기 위한 수단 </li>
+</ul>
+</li>
+<li>모든 필드를 private으로 선언한다.<ul>
+<li>필드가 참조하는 가변객체를 클라이언트에서 직접 접근해 수정하는 일을 막는다.</li>
+<li>불변객체를 참조하는 필드를 public final 로 만 선언해도 불변 객체가 되지만, 다음 릴리스에서 내부 표현을 바꾸지 못하므로 비권장</li>
+</ul>
+</li>
+<li>자신외에 내부의 가변 컴포넌트에 접근할수 없도록 한다. <ul>
+<li>클래스에 가변 객체를 참조하는 필드가 하나라도 있다면 클라이언트에서 그 객체의 참조를 얻을수 없도록 해야함. </li>
+<li>생성자, 접근자, readObject메서드 모두에서 방어적 복사를 수행해야함.  </li>
+</ul>
+</li>
+</ol>
+<h2 id="불변-객체의-장점"><a href="#불변-객체의-장점" class="headerlink" title="불변 객체의 장점?"></a>불변 객체의 장점?</h2><ol>
+<li><p>불변객체는 단순하다 </p>
+<ul>
+<li>생성된 시점부터 파괴될때까지 그대로 간직함.</li>
+<li>가변객체는 상태전이가 발생하여 문서로 남겨놓지않으면 믿고 사용하기 어려움. (신뢰성 제로)</li>
+</ul>
+</li>
+<li><p>불변객체는 근본적으로 스레드 안전하여 따로 동기화 할 필요 없다. </p>
+<ul>
+<li>여러 스레드가 동시에 사용해도 절대 훼손없음. </li>
+<li>다른스레드의 영향이 없어서 불변객체는 안심하고 공유 가능 </li>
+</ul>
+</li>
+<li><p>불변 클래스는 자주 사용되는 인스턴스를 캐싱하여 같은 인스턴스를 중복 생성되지 않게 해주는 정적 팩터리를 제공할수있다. </p>
+<ul>
+<li>정적 팩터리를 사용하면 여러 클라이언트가 한 인스턴스를 공유하여 메모리 사용량과 가비지 컬렉션 비용을 줄일수있음. </li>
+<li>public생성자 대신 정적 팩터리를 만들어두면 클라이언트를 수정하지 않고도 필요에 따라 캐시기능을 나중에 덧붙일수있음. </li>
+</ul>
+</li>
+<li><p>불변 객체는 자유롭게 공유할수있음은 물론 불변 객체끼리는 내부 데이터를 공유할수있다. </p>
+</li>
+<li><p>객체를 만들때 다른 불변 객체들을 구성요소로 사용하면 이점이 많다. </p>
+<ul>
+<li>값이 바뀌지 않는 구성요소들로 이뤄진 객체라면 그 구조가 아무리 복잡하더라도 불변식을 유지하기 훨씬 수월하기 때문</li>
+</ul>
+</li>
+<li><p>불변객체는 그 자체로 실패 원자성을 제공한다. </p>
+<ul>
+<li>상태가 절대 변하지 않으니 잠깐이라도 불일치 상태에 빠질 가능성이 없다.</li>
+</ul>
+</li>
+</ol>
+<h2 id="불변-클래스-단점"><a href="#불변-클래스-단점" class="headerlink" title="불변 클래스 단점?"></a>불변 클래스 단점?</h2><ol>
+<li>값이 다르면 반드시 독립된 객체로 만들어야한다. (1개라도 다르면 100개를 만들어도 다 버려짐.)<ul>
+<li>위 부분을 대처하는 방법은 2가지로 소개됨<ul>
+<li>다단계연산 : 미리쓰일 부분을 예측하여 기본기능으로 제공하는 방법  </li>
+<li>가변동반클래스 : 대표적인 예가 String -&gt; StringBuilder (구닥다리 StringBuffer)</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<h2 id="스마트한-불변클래스-작성-방법"><a href="#스마트한-불변클래스-작성-방법" class="headerlink" title="스마트한 불변클래스 작성 방법?"></a>스마트한 불변클래스 작성 방법?</h2><figure class="highlight java"><figcaption><span>생성자 대신 정적 팩터리를 사용한 불변클래스</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Complex</span> </span>&#123;</span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">double</span> re; </span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">double</span> im; </span><br><span class="line">	</span><br><span class="line">	<span class="function"><span class="keyword">private</span> <span class="title">Complex</span><span class="params">(<span class="keyword">double</span> re, <span class="keyword">double</span> im)</span> </span>&#123;</span><br><span class="line">		<span class="keyword">this</span>.re = re;</span><br><span class="line">		<span class="keyword">this</span>.im = im; </span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="comment">// 불변이기에 캐시도 가능 </span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Complex <span class="title">valueOf</span><span class="params">(<span class="keyword">double</span> re, <span class="keyword">double</span> im)</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="keyword">new</span> Complex(re,im);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>클래스에 final을 걸어서 상속을 못하게하는방법도 있지만 위 코드처럼 생성자를 비공개처리하고 정적팩터리로 제공하는 방법도 있음. </li>
+</ul>
+<h2 id="객체-생성하면서-명심할것"><a href="#객체-생성하면서-명심할것" class="headerlink" title="객체 생성하면서 명심할것!"></a>객체 생성하면서 명심할것!</h2><ul>
+<li>클래스에 getter가 있다고 무조건 setter를 생성하지말고 필요할때 setter를 열어주자 (필요한 필드만!)</li>
+<li>클래스는 꼭 필요한 경우가 아니면 무조건 불변이어야 한다! </li>
+<li>모든 클래스를 불변으로 만들순없다 그럼 변경할수있는 부분을 최소한으로 줄이도록하자 (변경해야할 필드 제외하곤 private final 붙이는 습관화)</li>
+<li>생성자는 불변식이 설정이 모두 완료된, 초기화가 완벽히 끝난 상태의 객체를 생성해야함. <ul>
+<li>확실한 이유가 없다면 생성자와 정적 팩터리 외에는 그 어떤 초기화 메서드도 public으로 제공하면 안됨 </li>
+<li>객체를 재활용할 목적으로 상태를 다시 초기화 하는 메서드도 안됨. </li>
+</ul>
+</li>
+</ul>
+
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/2021/12/31/java-effective-17/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                Comment and share
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
+                            href="/2021/12/31/java-effective-16/"
+                            aria-label=": java-effective-16"
+                        >
+                            java-effective-16
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2021-12-31T01:50:34+00:00">
+	
+		    Dec 31, 2021
+    	
+    </time>
+    
+        <span>in </span>
+        
+    <a class="category-link" href="/categories/Effective-Java/">Effective Java</a>, <a class="category-link" href="/categories/Study/">Study</a>, <a class="category-link" href="/categories/%ED%81%B4%EB%9E%98%EC%8A%A4%EC%99%80-%EC%9D%B8%ED%84%B0%ED%8E%98%EC%9D%B4%EC%8A%A4/">클래스와 인터페이스</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <h1 id="public클래스에서는-public필드가-안닌-접근자-메서드를-사용하라"><a href="#public클래스에서는-public필드가-안닌-접근자-메서드를-사용하라" class="headerlink" title="public클래스에서는 public필드가 안닌 접근자 메서드를 사용하라"></a>public클래스에서는 public필드가 안닌 접근자 메서드를 사용하라</h1><ul>
+<li>public 클래스는 멤버변수를 public으로 하면 안된다. (데이터 필드에 직접 접근할수있어서 캡슐화 이점을 제공하지 못함.)</li>
+<li>멤버변수를 public으로 하지말고 private으로 하고 getter/setter로 접근자 메서드로 처리할수있도록 해야함.</li>
+<li>패키지 바깥에서 접근할수있는 클래스라면 접근자메서드를 사용하고, package-private 클래스 혹은 private 중첩 클래스라면 데이터필드를 노출한다해도 큰이슈는 없음. </li>
+<li>public클래스의 필드가 불변이라면 직접 노출할때의 단점이 조금 줄어들지만 좋은 방식은 아님. API를 변경하지 않고는 표현방식을 바꿀수없고, 필드를 읽을때 부수작업을 수행할수 없다는 단점은 여전함. 단, 불변식은 보장할수있게된다. (setter가 없기때문에..)</li>
+</ul>
+
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/2021/12/31/java-effective-16/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                Comment and share
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
+                            href="/2021/12/30/java-effective-15/"
+                            aria-label=": java-effective-15"
+                        >
+                            java-effective-15
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2021-12-30T08:00:46+00:00">
+	
+		    Dec 30, 2021
+    	
+    </time>
+    
+        <span>in </span>
+        
+    <a class="category-link" href="/categories/Effective-Java/">Effective Java</a>, <a class="category-link" href="/categories/Study/">Study</a>, <a class="category-link" href="/categories/%ED%81%B4%EB%9E%98%EC%8A%A4%EC%99%80-%EC%9D%B8%ED%84%B0%ED%8E%98%EC%9D%B4%EC%8A%A4/">클래스와 인터페이스</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <h1 id="클래스와-멤버의-접근권한을-최소화하라"><a href="#클래스와-멤버의-접근권한을-최소화하라" class="headerlink" title="클래스와 멤버의 접근권한을 최소화하라"></a>클래스와 멤버의 접근권한을 최소화하라</h1><blockquote><p>정보은닉의 장점 ? </p>
+<ul>
+<li>시스템 개발 속도를 높임. 여러 컴포넌트를 병렬로 개발할수 있기때문 </li>
+<li>시스템 관리 비용 낮춤. 각 컴포넌트를 더 빨리 파악하여 디버깅 가능/다른 컴포넌트로 교체 부담 적음 </li>
+<li>정보은닉 자체가 성능을 높여주지는 않지만, 성능 최적화에 도움을 줌. 완성된 시스템을 프로파일링해 최적화할 컴포넌트를 정한 다음 다른 컴포넌트에 영향을 주지않고 해당 컴포넌트만 최적화 할수있기때문</li>
+<li>소프트웨어 재사용성 증가. 외부에 의존하지않고 독자적으로 동작할수 있는 컴포넌트라면 그 컴포넌트와 함께 개발되지 않은 낯선 환경에서도 유용하게 쓰일 가능성이 크기 때문이다.</li>
+<li>큰 시스템을 제작하는 난이도를 낮춰준다. 시스템 전체가 아직 완성되지 않은 상태에서도 개별 컴포넌트의 동작을 검증할수있기떄문 </li>
+</ul>
+<p>자바에서는 정보은닉 어떻게 함?</p>
+<ul>
+<li>클래스,인터페이스,멤버의 접근성을 명시. 각요소에 접근성은 그 요소가 선언된 위치와 접근제한자로 정해짐. 이 접근 제한자를 잘 활용하는것이 정보은닉의 핵심이다. </li>
+</ul>
+</blockquote>
+
+<h2 id="정보은닉-잘하는법"><a href="#정보은닉-잘하는법" class="headerlink" title="정보은닉 잘하는법?"></a>정보은닉 잘하는법?</h2><ul>
+<li>기본원칙은 <strong>모든클래스와 멤버의 접근성을 가능한 좁혀야한다</strong> 한마디로 private 위주로 접근을 두자는 의미이며, 공개여부에 따라 차츰차츰 공개하는 방식을 하자는 의미다. </li>
+<li>톱레벨 클래스 | 인터페이스 =&gt; package-private,public (package-private : 패키지내에서만 접근가능)  </li>
+<li>패키지외부에 공개할일 없으면 package-private을 쓰자 </li>
+<li>바깥 클래스에서 클래스 하나에서만 접근하게 하려면 private static 으로 중첩시키면(nested class) 가능하다. </li>
+</ul>
+<blockquote><p>접근제한자 </p>
+<ul>
+<li>private : 멤버를 선언한 톱레벨 클래스에서만 접근 가능  </li>
+<li>package-private : 멤버가 소속된 패키지 안의 모든 클래스에서 접근할수있음. (접근제한자를 명시하지 않을때, 인터페이스는 기본이 public)</li>
+<li>protected : package-private 포함하고, 이 멤버를 선언한 클래스의 하위 클래스에서도 접근가능 </li>
+<li>public : 모든곳에서 접근가능 </li>
+</ul>
+</blockquote>
+
+<ul>
+<li>public클래스에서는 멤버의 접근수준을 package-private 에서 protected 바꾸는순간, 그 멤버에 접근할수있는 대상범위가 엄청나게 넓어진다. public클래스의 protected멤버는 공개 API이기때문에 영원히 지원해줘야함. 또한 내부 동작방식을 API문서에 적어 사용자에게 공개해야할수도있음. 따라서 protected 멤버는 적을수록 좋다! </li>
+<li>멤버 접근성을 좁히지 못하게 하는 제약하나가 있는데, 상위 클래스의 메서드를 재정의할때 그 접근수준을 상위 클래스보다 좁게 설정할수없음. 왜냐면 리스코프 치환 원칙에 의해서 상위 클래스는 하위 클래스를 대체 할수 있는 원칙으로 이 규칙을 어기면 컴파일 에러남. </li>
+<li>public클래스의 인스턴스 필드는 되도록 public이 아니어야함. public 가변필드를 갖는 클래스는 일반적으로 스레드 안전하지 않다. final로 불변객체로 참조해도 문제는 발생한다.</li>
+<li>클래스에서 public static final 배열필드를 두거나 이 필드를 반환하는 접근자 메서드를 제공해서는 안됨. </li>
+</ul>
+<figure class="highlight java"><figcaption><span>상수배열사용시 주의사항</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//보안허점이 있다. </span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> Thing[] VALUES = &#123;...&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">//개선1</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> Thing[] PRIVATE_VALUES = &#123;...&#125;;</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> List&lt;Thing&gt; VALUES = Collections.unmodifiableList(Arrays.asList(PRIVATE_VALUES));</span><br><span class="line"></span><br><span class="line"><span class="comment">//개선2 </span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> Thing[] PRIVATE_VALUES = &#123;...&#125;;</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> Thing[] values() &#123;</span><br><span class="line">	<span class="keyword">return</span> PRIVATE_VALUES.clone(); </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>java9 에 이르면 모듈시스템이라는 개념이 있는데 간략하게 모듈은 패키지가 클래스의 모음이라면 모듈은 패키지들의 모음이다. </li>
+<li>모듈은 자신에 속하는 패키지중에 export(공개) 할것들을 선언함. protected 혹은 public이라할지라도, 해당 패키지를 export하지 않으면 모듈 외부에서는 접근 불가능한 구조다. 물론 모듈내에서는 export로 선언여부에 영향범위없음 </li>
+<li>모듈은 접근제한자와 달리 상당히 주의해서 사용해야함. 만약 모듈의 JAR파일을 자신의 모듈경로가 아닌 애플리케이션 클래스패스에 두면 그 모듈안에 모든 패키지는 모듈이 없는것처럼, 모듈 공개여부와 관계없이 public/protected 멤버를 모듈밖에서 접근할수있게됨. </li>
+<li>모듈의 장점을 누비려면, 애초부터 패키지를 모듈단위로 묶고, 모듈 선언에 패키지들의 모든 의존성을 명시하고, 소스트리를 재배치하고 모듈 안으로부터 일반 패키지로의 모든접근에 특별한 조치를 해야함. (내부적인 export 설정을 말하는듯)</li>
+</ul>
+
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/2021/12/30/java-effective-15/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                Comment and share
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
                             href="/2021/12/30/java-effective-14/"
                             aria-label=": java-effective-14"
                         >
@@ -704,602 +1070,6 @@
         
     </article>
     
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/2021/09/06/kotlin-basic-7/"
-                            aria-label=": kotlin-basic-7"
-                        >
-                            kotlin-basic-7
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time datetime="2021-09-06T08:26:50+00:00">
-	
-		    Sep 06, 2021
-    	
-    </time>
-    
-        <span>in </span>
-        
-    <a class="category-link" href="/categories/KotlinInAction/">KotlinInAction</a>, <a class="category-link" href="/categories/Study/">Study</a>, <a class="category-link" href="/categories/%EC%BD%94%ED%8B%80%EB%A6%B0%EB%AC%B8%EB%B2%95-%EA%B8%B0%EC%B4%88/">코틀린문법&기초</a>
-
-
-    
-</div>
-
-            </div>
-            
-                <div class="postShorten-content">
-                    <h1 id="제네릭스"><a href="#제네릭스" class="headerlink" title="제네릭스"></a>제네릭스</h1><h2 id="제네릭-타입-파라미터"><a href="#제네릭-타입-파라미터" class="headerlink" title="제네릭 타입 파라미터"></a>제네릭 타입 파라미터</h2><ul>
-<li>제네릭스를 사용하면 <strong>타입 파라미터(type paramet)</strong> 를 받는 타입을 정의 할수 있다. </li>
-<li>제네릭 타입의 인스턴스를 만들려면 타입 파라미터를 구체적인 <strong>타입인자(type argument)</strong> 로 치환해야한다. </li>
-<li>코틀린 컴파일러는 보통 타입과 마찬가지로 타입 인자를 타입추론 할수있다. </li>
-</ul>
-<h3 id="제네릭-함수와-프로퍼티"><a href="#제네릭-함수와-프로퍼티" class="headerlink" title="제네릭 함수와 프로퍼티"></a>제네릭 함수와 프로퍼티</h3><ul>
-<li>확장 프로퍼티만 제네릭 하게 만들수있음. (일반 프로퍼티는 제네릭 사용 불가능)</li>
-</ul>
-<figure class="highlight kotlin"><figcaption><span>제네릭 함수와 프로퍼티</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="type">&lt;T&gt;</span> List<span class="type">&lt;T&gt;</span>.<span class="title">slice</span><span class="params">(indics:<span class="type">IntRange</span>)</span></span>: List&lt;T&gt;</span><br><span class="line"></span><br><span class="line">&gt;&gt; <span class="keyword">val</span> letters = (<span class="string">&#x27;a&#x27;</span>.. <span class="string">&#x27;z&#x27;</span>).toList()</span><br><span class="line">&gt;&gt; println(letters.slice&lt;<span class="built_in">Char</span>&gt;(<span class="number">0.</span><span class="number">.2</span>)) <span class="comment">//타입 인자를 명시적으로 지정 </span></span><br><span class="line">&gt;&gt;&gt; [a,b,c]</span><br><span class="line">&gt;&gt; println(letters.slice(<span class="number">10.</span><span class="number">.13</span>)) <span class="comment">// 컴파일러는 여기서 T가 Char라는 사실을 추론할수있게됨. </span></span><br><span class="line">&gt;&gt;&gt; [k,l,m,n]</span><br><span class="line"></span><br><span class="line"><span class="keyword">val</span> authors = listOf(<span class="string">&quot;Dmitty&quot;</span>,<span class="string">&quot;Svetlana&quot;</span>)</span><br><span class="line"><span class="keyword">val</span> readers = mutableListOf&lt;String&gt;(.....)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="type">&lt;T&gt;</span> List<span class="type">&lt;T&gt;</span>.<span class="title">filter</span><span class="params">(predicate: (<span class="type">T</span>) -&gt; <span class="type">Boolean</span>)</span></span>: List&lt;T&gt;</span><br><span class="line"></span><br><span class="line">&gt;&gt; readers.filter&#123;it !<span class="keyword">in</span> authors&#125; </span><br></pre></td></tr></table></figure>
-
-<h3 id="제네릭-클래스-선언"><a href="#제네릭-클래스-선언" class="headerlink" title="제네릭 클래스 선언"></a>제네릭 클래스 선언</h3><figure class="highlight kotlin"><figcaption><span>제네릭클래스</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">List</span>&lt;<span class="type">T</span>&gt; </span>&#123;</span><br><span class="line">	<span class="keyword">operator</span> <span class="function"><span class="keyword">fun</span> <span class="title">get</span><span class="params">(index:<span class="type">Int</span>)</span></span>: T <span class="comment">// 인터페이스 안에서 T를 일반 타입처럼 사용가능함  </span></span><br><span class="line">	<span class="comment">// ...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h3 id="타입-파라미터-제약"><a href="#타입-파라미터-제약" class="headerlink" title="타입 파라미터 제약"></a>타입 파라미터 제약</h3><ul>
-<li>타입 파라미터 제약은 클래스나 함수에 사용할수 있는 타입 인자를 제한하는 기능 (sum함수는 Number타입만 가능하지, String은 sum이 어렵다.)</li>
-<li>타입 파라미터 제약을 하려면 제네릭타입에 상한으로 지정하면 됨 </li>
-</ul>
-<figure class="highlight kotlin"><figcaption><span>타입 파라미터 제약</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="type">&lt;T: Comparable&lt;T&gt;</span>&gt; <span class="title">max</span><span class="params">(first:<span class="type">T</span>, second:<span class="type">T</span>)</span></span>: T &#123;</span><br><span class="line">	<span class="keyword">return</span> <span class="keyword">if</span> (first&gt;second) first <span class="keyword">else</span> second </span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&gt;&gt; println(max(<span class="string">&quot;kotlin&quot;</span>, <span class="string">&quot;java&quot;</span>)) <span class="comment">//문자열 비교는 알파벳순서로 비교, String은 Comparable&lt;String&gt;을 확장한다. 따라서 max사용가능 </span></span><br><span class="line">&gt;&gt;&gt; kotlin</span><br><span class="line">&gt;&gt; println(max(<span class="string">&quot;kotlin&quot;</span>, <span class="number">42</span>)) <span class="comment">// error남! 함수의 파라미터가 같은 T를 요구하기때문 </span></span><br><span class="line"></span><br><span class="line"><span class="comment">//타입 파라미터에 여러 제약 걸기 </span></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="type">&lt;T&gt;</span> <span class="title">ensureTrailingPeriod</span><span class="params">(seq:<span class="type">T</span>)</span></span> </span><br><span class="line">	<span class="keyword">where</span> T: CharSequence, T: Appendable &#123;</span><br><span class="line">	<span class="keyword">if</span>(!seq.endWith(<span class="string">&#x27;.&#x27;</span>)) &#123;</span><br><span class="line">		seq.append(<span class="string">&#x27;.&#x27;</span>)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&gt;&gt; <span class="keyword">val</span> helloworld = StringBuilder(<span class="string">&quot;Hello World&quot;</span>)</span><br><span class="line">&gt;&gt; ensureTrailingPeriod(helloworld)</span><br><span class="line">&gt;&gt; println(helloworld)</span><br><span class="line">&gt;&gt;&gt; Hello World. </span><br></pre></td></tr></table></figure>
-
-<h3 id="타입-파라미터를-Null이-될수-없는-타입으로-한정"><a href="#타입-파라미터를-Null이-될수-없는-타입으로-한정" class="headerlink" title="타입 파라미터를 Null이 될수 없는 타입으로 한정"></a>타입 파라미터를 Null이 될수 없는 타입으로 한정</h3><ul>
-<li>아무런 상한을 정하지 않은 타입 파라미터는 Any?를 상한으로 정한 파라미터와 같음 </li>
-<li>Null 가능성을 제외한 아무런 제약도 필요없다면 Any? 대신 Any를 상한으로 사용해야함 </li>
-</ul>
-<h2 id="실행시-제네릭스의-동작-소거된-타입-파라미터와-실체화된-타입-파라미터"><a href="#실행시-제네릭스의-동작-소거된-타입-파라미터와-실체화된-타입-파라미터" class="headerlink" title="실행시 제네릭스의 동작 : 소거된 타입 파라미터와 실체화된 타입 파라미터"></a>실행시 제네릭스의 동작 : 소거된 타입 파라미터와 실체화된 타입 파라미터</h2><h3 id="실행시점의-제네릭-타입검사와-캐스트"><a href="#실행시점의-제네릭-타입검사와-캐스트" class="headerlink" title="실행시점의 제네릭: 타입검사와 캐스트"></a>실행시점의 제네릭: 타입검사와 캐스트</h3><ul>
-<li>타입 소거 : 실행시점에 제네릭 클래스의 인스턴스에 타입 인자 정보가 들어있지 않다는 뜻이다. (JVM기준)</li>
-</ul>
-<p>if(value is List<String>) {….}<br>ERROR:Cannot check for instance of erased type </String></p>
-<ul>
-<li>위 와같이 실행시점에 어떤 값이 List인지는 구분할수있지만, List내 타입이 String인지 Person객체인지 알수없음. 에러내용에서 볼수있듯이 타입정보는 지워진다. 다만 저장해야하는 타입정보의 크기가 줄어들어서 전반적인 메모리 사용량이 줄어든다는 제네릭 타입 소거 나름의 장점이 있다고함. </li>
-</ul>
-<figure class="highlight kotlin"><figcaption><span>제네릭타입으로 타입캐스팅</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">printSum</span><span class="params">(c:<span class="type">Collection</span>&lt;*&gt;)</span></span> &#123;</span><br><span class="line">	<span class="keyword">val</span> intList = c <span class="keyword">as</span>? List&lt;<span class="built_in">Int</span>&gt; ?: IllegalArgumentException(<span class="string">&quot;List is expected&quot;</span>) <span class="comment">// 여기서 Unchecked cast: List&lt;*&gt; to List&lt;Int&gt; 경고 발생함 하지만 실행은 잘됨. </span></span><br><span class="line">	println(intList.sum())</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&gt;&gt; printSum(listOf(<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>))</span><br><span class="line">&gt;&gt;&gt; <span class="number">6</span></span><br><span class="line"></span><br><span class="line">&gt;&gt; printSum(setOf(<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>))</span><br><span class="line">&gt;&gt;&gt; IllegalArgumentException: List <span class="keyword">is</span> expected</span><br><span class="line"></span><br><span class="line">&gt;&gt; printSum(listOf(<span class="string">&quot;a&quot;</span>,<span class="string">&quot;b&quot;</span>,<span class="string">&quot;c&quot;</span>))</span><br><span class="line">&gt;&gt;&gt; ClassCastException: String cannot be cast to Number </span><br></pre></td></tr></table></figure>
-
-<ul>
-<li>코틀린 컴파일러는 안전하지 못한 is 검사는 금지하고 위험한 as캐스팅은 경고를 출력함 </li>
-</ul>
-<h3 id="실체화한-타입-파라미터를-사용한-함수-선언"><a href="#실체화한-타입-파라미터를-사용한-함수-선언" class="headerlink" title="실체화한 타입 파라미터를 사용한 함수 선언"></a>실체화한 타입 파라미터를 사용한 함수 선언</h3><ul>
-<li>인라인함수를 사용하면 타입소거로 실행시점에 타입이 지워져서 타입을 확인하지 못하는 부분을 해소할수있음 </li>
-<li>타입파라미터 앞에 <strong>reified</strong> 를 사용해야함  </li>
-<li>inline함수에서 가능한이유는 컴파일러에서 인라인함수 본문을 구현한 바이트코드를 그 함수가 호출되는 모든지점에 삽입함. 컴파일러는 실체화한 타입 인자를 사용해 인라인 함수를 호출하는 각 부분의 정확한 타입을 알수있다.  </li>
-</ul>
-<figure class="highlight kotlin"><figcaption><span>inline으로 실체화된 타입파라미터 확인</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">inline</span> <span class="function"><span class="keyword">fun</span> <span class="type">&lt;<span class="keyword">reified</span> T&gt;</span> <span class="title">isA</span><span class="params">(value:<span class="type">Any</span>)</span></span> = value <span class="keyword">is</span> T </span><br><span class="line">&gt;&gt; println(isA&lt;String&gt;(<span class="string">&quot;abc&quot;</span>))</span><br><span class="line">&gt;&gt;&gt; <span class="literal">true</span> </span><br><span class="line">&gt;&gt; println(isA&lt;String&gt;(<span class="number">123</span>))</span><br><span class="line">&gt;&gt;&gt; <span class="literal">false</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">inline</span> <span class="function"><span class="keyword">fun</span> <span class="type">&lt;<span class="keyword">reified</span> T&gt;</span> Iterable<span class="type">&lt;*&gt;</span>.<span class="title">filterIsInstance</span><span class="params">()</span></span>: List&lt;T&gt; &#123;</span><br><span class="line">	<span class="keyword">val</span> destination = mutableListOf&lt;T&gt;()</span><br><span class="line">	<span class="keyword">for</span>(element <span class="keyword">in</span> <span class="keyword">this</span>) &#123;</span><br><span class="line">		<span class="keyword">if</span>(element <span class="keyword">is</span> T) &#123;</span><br><span class="line">			destination.add(element)</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> destination</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&gt;&gt; <span class="keyword">val</span> items = listOf(<span class="string">&quot;one&quot;</span>,<span class="number">2</span>,<span class="string">&quot;three&quot;</span>)</span><br><span class="line">&gt;&gt; println(items.filterIsInstance&lt;String&gt;())</span><br><span class="line">&gt;&gt;&gt; [one,three]</span><br></pre></td></tr></table></figure>
-
-<h3 id="실체화한-타입-파라미터로-클래스-참조-대신"><a href="#실체화한-타입-파라미터로-클래스-참조-대신" class="headerlink" title="실체화한 타입 파라미터로 클래스 참조 대신"></a>실체화한 타입 파라미터로 클래스 참조 대신</h3><figure class="highlight kotlin"><figcaption><span>클래스로더</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> serviceImpl = ServiceLoader.load(Service::<span class="keyword">class</span>.java)</span><br><span class="line"></span><br><span class="line"><span class="comment">//위 코드는 아래와 같이 인라인함수를 통해 축약가능 </span></span><br><span class="line"><span class="keyword">val</span> serviceImpl = loadService&lt;Service&gt;()</span><br><span class="line"></span><br><span class="line"><span class="comment">//loadService구현체</span></span><br><span class="line"><span class="keyword">inline</span> <span class="function"><span class="keyword">fun</span> <span class="type">&lt;<span class="keyword">reified</span> T&gt;</span> <span class="title">loadService</span><span class="params">()</span></span> &#123;</span><br><span class="line">	<span class="keyword">return</span> ServiceLoader.load(T::<span class="keyword">class</span>.java)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h3 id="실체화한-타입-파라미터의-제약"><a href="#실체화한-타입-파라미터의-제약" class="headerlink" title="실체화한 타입 파라미터의 제약"></a>실체화한 타입 파라미터의 제약</h3><ol>
-<li>실체화한 타입 파라미터를 사용할수있는 경우 </li>
-</ol>
-<ul>
-<li>타입 검사와 캐스팅 (is,!is,as,as?)</li>
-<li>리플렉션 API (::class)</li>
-<li>코틀린 타입에 대응하는 Java.lang.Class얻기 (::class.java)</li>
-<li>다른 함수를 호출할때 타입 인자로 사용 </li>
-</ul>
-<ol start="2">
-<li>사용할수없는경우 </li>
-</ol>
-<ul>
-<li>타입 파라미터 클래스의 인스턴스 생성하기 </li>
-<li>타입 파라미터 클래스의 동반 객체 메소드 호출하기 </li>
-<li>실체화한 타입 파라미터를 요구하는 함수를 호출하면서 실체화하지 않은 타입 파라미터로 받은 타입을 타입인자로 넘기기</li>
-<li>클래스,프로퍼티,인라인 함수가 아닌 함수의 타입 파라미터를 reidied로 지정하기 </li>
-</ul>
-<h2 id="변성-제네릭과-하위-타입"><a href="#변성-제네릭과-하위-타입" class="headerlink" title="변성: 제네릭과 하위 타입"></a>변성: 제네릭과 하위 타입</h2><ul>
-<li>변성(variance) : List<String> 와 List<Any>와 같이 기저 타입이 같고 타입인자가 다른 여러타입이 서로 어떤관계가 있는지 설명하는 개념 </Any></String></li>
-</ul>
-<h3 id="변성이-있는-이유-인자를-함수에-넘기기"><a href="#변성이-있는-이유-인자를-함수에-넘기기" class="headerlink" title="변성이 있는 이유: 인자를 함수에 넘기기"></a>변성이 있는 이유: 인자를 함수에 넘기기</h3><figure class="highlight kotlin"><figcaption><span>변성</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">printContent</span><span class="params">(list:<span class="type">List</span>&lt;<span class="type">Any</span>&gt;)</span></span> &#123;</span><br><span class="line">    println(list.joinToString())</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">addAnswer</span><span class="params">(list:<span class="type">MutableList</span>&lt;<span class="type">Any</span>&gt;)</span></span> &#123;</span><br><span class="line">    list.add(<span class="number">54</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">main</span><span class="params">(args: <span class="type">Array</span>&lt;<span class="type">String</span>&gt;)</span></span> &#123;</span><br><span class="line">	printContent(listOf(<span class="string">&quot;abc&quot;</span>,<span class="string">&quot;bac&quot;</span>))</span><br><span class="line">    <span class="keyword">val</span> strings = mutableListOf(<span class="string">&quot;abc&quot;</span>,<span class="string">&quot;bac&quot;</span>)</span><br><span class="line">    addAnswer(strings)</span><br><span class="line">    println(strings.maxBy&#123;it.length&#125;)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<ul>
-<li>printContent 함수는 인자를 List<Any>로 받았지만, List<String>의 타입인자가 Any는 String의 포함하는 하위타입이기때문에 에러가 안남 </String></Any></li>
-<li>addAnswer 함수는 MutableListOf로 기존 정수형에서 string형태 값을 집어넣으려고 시도할수도있기때문에 해당 부분은 컴파일러가 예외를 발생시킴</li>
-</ul>
-<h3 id="클래스-타입-하위타입"><a href="#클래스-타입-하위타입" class="headerlink" title="클래스,타입,하위타입"></a>클래스,타입,하위타입</h3><ul>
-<li>하위타입 : Int는 Number의 하위타입이다. 하지만 String은 Number의 하위타입이 아니다. </li>
-<li>코틀린 컴파일러는 변수 대입이나 함수 인자 전달시 하위타입검사를 매번 수행함. </li>
-<li>널이 될수 있는 타입은 널이 될수없는 타입보다 상위타입이다. 즉 Any 타입 보다 Any? 타입이 더 상위 타입이다. </li>
-<li>무공변(invariant): 제네릭타입을 인스턴스화 할때 타입 인자로 서로 다른 타입이 들어가면 인스턴스 타입 사이의 하위타입관계가 성립하지 않는다. 예를들어 MutableList<A>,MutableList<B>가 존재하는데 A,B는 서로 다른타입이다. 그럼 MutableList<A>,MutableList<B>는 상.하위타입이 존재하지 않게된다. </B></A></B></A></li>
-<li>자바에서는 모든 클래스가 무공변이다. </li>
-</ul>
-<h3 id="공변성-하위-타입관계를-유지"><a href="#공변성-하위-타입관계를-유지" class="headerlink" title="공변성 : 하위 타입관계를 유지"></a>공변성 : 하위 타입관계를 유지</h3><ul>
-<li>공변성은 기본적으로 상.하 타입이 존재할 경우에만 할수있음 </li>
-<li>공변성은 java에서 T extends Any 처럼 사용할때 공변성의 규칙을 가지고 사용할수있음</li>
-<li>코틀린에서 공변성은 공변성을 갖을 타입 앞에 <strong>out</strong> 을 붙이는것이 특징이다. </li>
-</ul>
-<p>제네릭(타입 파리미터)에서의 out키워드의 용도 (제네릭에서의 공변성) </p>
-<ul>
-<li>공변성 : 하위타입관계가 유지됨 (상하위 타입 관계 식별가능)</li>
-<li>사용제한 : T를 아웃 위치에서만 사용가능 (타입 파라미터는 반환타입에서만 사용해야함) </li>
-<li>타입 파라미터가 공변적일때는 반환타입을 반드시 리턴할 필요가 없으며, List<T> 와 같이 타입 인자로도 리턴이 가능하다는걸 명심하자! 반드시 원형의 타입으로만 리턴할 필요는 없다는 이야기다. </T></li>
-</ul>
-<p>기타 참고해야할 타입파라미터의 공변</p>
-<ul>
-<li>생성자 파라미터는 인이나 아웃 어느쪽도 아님을 유의해야한다. </li>
-<li>MutableList는 공변적 클래스로 선언이 불가능하다. </li>
-</ul>
-<h3 id="반공변성-뒤집힌-하위-타입-관계"><a href="#반공변성-뒤집힌-하위-타입-관계" class="headerlink" title="반공변성 : 뒤집힌 하위 타입 관계"></a>반공변성 : 뒤집힌 하위 타입 관계</h3><ul>
-<li>반공변성 : 공변성을 거울에 비친 상이라 할수있음 (반대개념)</li>
-<li>공변성은 out키워드를 사용하지만, 반공변성은 in키워드를 사용한다. </li>
-<li>타입 파라미터 위치가 In위치에 있음 (함수의 반환타입이 아닌 함수 파라미터에 정의되어있음 )</li>
-<li>공변성은 producer 변성을 가지고 반공변성은 consumer 변성을 가진다라고 표현하기도함. </li>
-</ul>
-<h3 id="사용-지점-변성-타입이-언급되는-지점에서-변성-지정"><a href="#사용-지점-변성-타입이-언급되는-지점에서-변성-지정" class="headerlink" title="사용 지점 변성: 타입이 언급되는 지점에서 변성 지정"></a>사용 지점 변성: 타입이 언급되는 지점에서 변성 지정</h3><ul>
-<li>사용지점변성 : 자바에서는 타입 파라미터가 있는 타입을 사용할때마다 해당 타입 파라미터를 하위 타입이나 상위 타입중 어떤 타입으로 대치할 수 있는지 명시하는데, 이런 방식을 사용지점 방식이라함 </li>
-</ul>
-<figure class="highlight kotlin"><figcaption><span>사용지정변성 예시</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">printContent</span><span class="params">(list:<span class="type">List</span>&lt;<span class="type">Any</span>&gt;)</span></span> &#123;</span><br><span class="line">    println(list.joinToString())</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">removeAnswer</span><span class="params">(list:<span class="type">MutableList</span>&lt;<span class="type">out</span> <span class="type">Any</span>&gt;)</span></span>: String &#123;</span><br><span class="line">    list.removeAt(list.size-<span class="number">1</span>)</span><br><span class="line">    <span class="keyword">return</span> list.joinToString()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">addAnswer</span><span class="params">(list:<span class="type">MutableList</span>&lt;<span class="type">in</span> <span class="type">String</span>&gt;)</span></span>: <span class="built_in">Boolean</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> list.add(<span class="string">&quot;mza&quot;</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">main</span><span class="params">(args: <span class="type">Array</span>&lt;<span class="type">String</span>&gt;)</span></span> &#123;</span><br><span class="line">	printContent(listOf(<span class="string">&quot;abc&quot;</span>,<span class="string">&quot;bac&quot;</span>))</span><br><span class="line">    <span class="keyword">val</span> strings = mutableListOf(<span class="string">&quot;abc&quot;</span>,<span class="string">&quot;zyaa&quot;</span>,<span class="string">&quot;xyz&quot;</span>)</span><br><span class="line">    println(removeAnswer(strings))</span><br><span class="line">    println(strings.maxBy&#123;it.length&#125;)</span><br><span class="line">	</span><br><span class="line">	println(addAnswer(strings))</span><br><span class="line">    println(strings.joinToString())</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">컴파일 결과 </span><br><span class="line"></span><br><span class="line">&gt;&gt;&gt; abc, bac</span><br><span class="line">&gt;&gt;&gt; abc, zyaa</span><br><span class="line">&gt;&gt;&gt; zyaa</span><br><span class="line">&gt;&gt;&gt; <span class="literal">true</span></span><br><span class="line">&gt;&gt;&gt; abc, zyaa, mza</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span><span class="type">&lt;T&gt;</span> <span class="title">copyData</span><span class="params">(source:<span class="type">MutableList</span>&lt;<span class="type">T</span>&gt;, destination:<span class="type">MutableList</span>&lt;<span class="type">in</span> <span class="type">T</span>&gt;)</span></span> &#123; </span><br><span class="line"><span class="comment">// 원본 리스트 원소 타입의 상위타입을 대상 리스트 원소 타입으로 허용한다.</span></span><br><span class="line">	<span class="keyword">for</span> (item <span class="keyword">in</span> source) &#123;</span><br><span class="line">		destination.add(item)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<ul>
-<li>위 코드는 addAnswer메소드의 공변성을 지정한 케이스이며, 정상적으로 동작한다. 하지만 저기서 만약 사용하는 메서드가 add메소드를 사용하면 공변이 제대로 지정이 되지 않는다. add는 boolean으로 리턴하기때문에 안된다. 대신 in으로 지정하면 가능함. </li>
-</ul>
-<p>결론은 코틀린의 사용지점변성 선언은 자바의 한정 와일드카드와 똑같음. MutableList<out t> 는 자바 MutableList&lt;? extends T&gt; 와 같고 MutableList<in t> 는 자바 MutableList&lt;? super T&gt; 와 같다. </in></out></p>
-<h3 id="스타-프로젝션-타입-인자-대신-사용"><a href="#스타-프로젝션-타입-인자-대신-사용" class="headerlink" title="스타 프로젝션 : 타입 인자 대신 * 사용"></a>스타 프로젝션 : 타입 인자 대신 * 사용</h3><figure class="highlight kotlin"><figcaption><span>스타프로젝션 예시</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">printFirst</span><span class="params">(list:<span class="type">List</span>&lt;*&gt;)</span></span> &#123; <span class="comment">//모든 인자리스트를 받을수있음 </span></span><br><span class="line">	<span class="keyword">if</span>(list.isNotEmpty()) &#123; <span class="comment">//isNotEmpty()에서는 제네릭 타입 파라미터를 사용하지 않는다. </span></span><br><span class="line">		println(list.first()) <span class="comment">//first()는 이제 Any?를 반환하지만 여기서는 그 타입만으로도 충분하다 </span></span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&gt;&gt; printFirst(listOf(<span class="string">&quot;enok&quot;</span>,<span class="string">&quot;jisung&quot;</span>))</span><br><span class="line">&gt;&gt;&gt; enok </span><br></pre></td></tr></table></figure>
-
-
-                    
-                        
-
-
-                    
-                    
-                        <p>
-                            <a
-                                href="/2021/09/06/kotlin-basic-7/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                Comment and share
-                            </a>
-                        </p>
-                    
-                </div>
-            
-        </div>
-        
-    </article>
-    
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/2021/09/02/kotlin-basic-6/"
-                            aria-label=": kotlin-basic-6"
-                        >
-                            kotlin-basic-6
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time datetime="2021-09-02T09:26:13+00:00">
-	
-		    Sep 02, 2021
-    	
-    </time>
-    
-        <span>in </span>
-        
-    <a class="category-link" href="/categories/KotlinInAction/">KotlinInAction</a>, <a class="category-link" href="/categories/Study/">Study</a>, <a class="category-link" href="/categories/%EC%BD%94%ED%8B%80%EB%A6%B0%EB%AC%B8%EB%B2%95-%EA%B8%B0%EC%B4%88/">코틀린문법&기초</a>
-
-
-    
-</div>
-
-            </div>
-            
-                <div class="postShorten-content">
-                    <h1 id="고차함수-파라미터와-반환값으로-람다-사용"><a href="#고차함수-파라미터와-반환값으로-람다-사용" class="headerlink" title="고차함수: 파라미터와 반환값으로 람다 사용"></a>고차함수: 파라미터와 반환값으로 람다 사용</h1><h2 id="고차함수-정의"><a href="#고차함수-정의" class="headerlink" title="고차함수 정의"></a>고차함수 정의</h2><p>고차함수(high-order function): 다른 함수를 인자로 받거나 함수를 반환하는 함수 (filter,map,with 등의 함수도 고차함수다.)</p>
-<h3 id="함수-타입"><a href="#함수-타입" class="headerlink" title="함수 타입"></a>함수 타입</h3><figure class="highlight kotlin"><figcaption><span>함수 타입</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//코틀린의 타입추론으로 인해 리턴타입을 따로 정의하지 않아도 됨. </span></span><br><span class="line"><span class="keyword">val</span> sum = &#123;x:<span class="built_in">Int</span>,y:<span class="built_in">Int</span> -&gt; x + y&#125;</span><br><span class="line"><span class="keyword">val</span> action = &#123;println(<span class="number">42</span>)&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//위 예제를 타입선언시</span></span><br><span class="line"><span class="keyword">val</span> sum : (<span class="built_in">Int</span>,<span class="built_in">Int</span>) -&gt; <span class="built_in">Int</span> = &#123;x,y -&gt; x + y&#125;</span><br><span class="line"><span class="keyword">val</span> action: () -&gt; <span class="built_in">Unit</span> = &#123;println(<span class="number">42</span>)&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//반환타입의 null 가능성 </span></span><br><span class="line"><span class="keyword">var</span> canReturnNull: (<span class="built_in">Int</span>,<span class="built_in">Int</span>) -&gt; <span class="built_in">Int</span>? = &#123;x,y -&gt; <span class="literal">null</span>&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//반환함수자체의 null 가능성 (괄호가 빠지면 반환타입의 null이 될수있으므로 주의하자!)</span></span><br><span class="line"><span class="keyword">var</span> funOrNull:((<span class="built_in">Int</span>,<span class="built_in">Int</span>)-&gt;<span class="built_in">Int</span>)? = <span class="literal">null</span> </span><br></pre></td></tr></table></figure>
-
-<h3 id="인자로-받은-함수-호출"><a href="#인자로-받은-함수-호출" class="headerlink" title="인자로 받은 함수 호출"></a>인자로 받은 함수 호출</h3><figure class="highlight kotlin"><figcaption><span>인자로 받은 고차함수 호출</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">twoAndThree</span><span class="params">(operation: (<span class="type">Int</span>,<span class="type">Int</span>) -&gt; <span class="type">Int</span>)</span></span> &#123;</span><br><span class="line">	<span class="keyword">val</span> result = operation(<span class="number">2</span>,<span class="number">3</span>)</span><br><span class="line">	println(<span class="string">&quot;The Result is <span class="variable">$result</span>&quot;</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&gt;&gt; twoAndThree(a,b -&gt; a + b)</span><br><span class="line">&gt;&gt;&gt; The Result <span class="keyword">is</span> <span class="number">5</span> </span><br><span class="line"></span><br><span class="line">&gt;&gt; twoAndThree(a,b -&gt; a * b)</span><br><span class="line">&gt;&gt;&gt; The Result <span class="keyword">is</span> <span class="number">6</span> </span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">//String.filter 확장함수 </span></span><br><span class="line"><span class="function"><span class="keyword">fun</span> String.<span class="title">filter</span><span class="params">(predicate: (<span class="type">Char</span>) -&gt; <span class="type">Boolean</span>)</span></span>: String &#123;</span><br><span class="line">	<span class="keyword">val</span> sb = StringBuilder()</span><br><span class="line">	<span class="keyword">for</span> (index <span class="keyword">in</span> <span class="number">0</span> until length) &#123;</span><br><span class="line">		<span class="keyword">val</span> element = <span class="keyword">get</span>(index)</span><br><span class="line">		<span class="keyword">if</span>(predicate(element)) sb.append(element)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> sb.toString()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&gt;&gt; println(<span class="string">&quot;ab1c&quot;</span>.filter&#123;it <span class="keyword">in</span> <span class="string">&#x27;a&#x27;</span>..<span class="string">&#x27;z&#x27;</span>&#125;)</span><br><span class="line">&gt;&gt;&gt; abc</span><br></pre></td></tr></table></figure>
-
-<h3 id="디폴트-값을-지정한-함수-타입-파라미터나-NULL이-될-수-있는-함수-타입-파라미터"><a href="#디폴트-값을-지정한-함수-타입-파라미터나-NULL이-될-수-있는-함수-타입-파라미터" class="headerlink" title="디폴트 값을 지정한 함수 타입 파라미터나 NULL이 될 수 있는 함수 타입 파라미터"></a>디폴트 값을 지정한 함수 타입 파라미터나 NULL이 될 수 있는 함수 타입 파라미터</h3><figure class="highlight kotlin"><figcaption><span>디폴트 지정가능한 경우</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="type">&lt;T&gt;</span> Collection<span class="type">&lt;T&gt;</span>.<span class="title">joinToString</span><span class="params">(</span></span></span><br><span class="line"><span class="function"><span class="params">	separator: <span class="type">String</span> = <span class="string">&quot;, &quot;</span>,</span></span></span><br><span class="line"><span class="function"><span class="params">	prefix: <span class="type">String</span> = <span class="string">&quot;&quot;</span>,</span></span></span><br><span class="line"><span class="function"><span class="params">	postfix: <span class="type">String</span> = <span class="string">&quot;&quot;</span>,</span></span></span><br><span class="line"><span class="function"><span class="params">	transform: (<span class="type">T</span>) -&gt; <span class="type">String</span> = &#123; it.toString &#125; </span></span></span><br><span class="line"><span class="function"><span class="params">)</span></span>: String &#123;</span><br><span class="line">	<span class="keyword">val</span> result = StringBuilder(prefix)</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">for</span> ((index,element) <span class="keyword">in</span> <span class="keyword">this</span>.withIndex() ) &#123;</span><br><span class="line">		<span class="keyword">if</span> (index &gt; <span class="number">0</span>) result.append(separator) </span><br><span class="line">		result.append(transform(element))</span><br><span class="line">	&#125;</span><br><span class="line">	result.append(postfix)</span><br><span class="line">	<span class="keyword">return</span> result.toString()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&gt;&gt; <span class="keyword">val</span> letters = listOf(<span class="string">&quot;Alpha&quot;</span>,<span class="string">&quot;Beta&quot;</span>)</span><br><span class="line">&gt;&gt; println(letters.joinToString())</span><br><span class="line">&gt;&gt;&gt; Alpha, Beta</span><br><span class="line">&gt;&gt; println(letters.joinToString(&#123;it.toLowerCase()&#125;))</span><br><span class="line">&gt;&gt;&gt; alpha, beta</span><br><span class="line">&gt;&gt; println(letters.joinToString(separator=<span class="string">&quot;! &quot;</span>, postfix=<span class="string">&quot;! &quot;</span>, transform=&#123;it.toUpperCase&#125;))</span><br><span class="line">&gt;&gt;&gt; ALPHA! BETA!</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="type">&lt;T&gt;</span> Collection<span class="type">&lt;T&gt;</span>.<span class="title">joinToString</span><span class="params">(</span></span></span><br><span class="line"><span class="function"><span class="params">	separator: <span class="type">String</span> = <span class="string">&quot;, &quot;</span>,</span></span></span><br><span class="line"><span class="function"><span class="params">	prefix: <span class="type">String</span> = <span class="string">&quot;&quot;</span>,</span></span></span><br><span class="line"><span class="function"><span class="params">	postfix: <span class="type">String</span> = <span class="string">&quot;&quot;</span>,</span></span></span><br><span class="line"><span class="function"><span class="params">	transform: ((<span class="type">T</span>) -&gt; <span class="type">String</span>)? = <span class="literal">null</span> </span></span></span><br><span class="line"><span class="function"><span class="params">)</span></span>: String &#123;</span><br><span class="line">	<span class="keyword">val</span> result = StringBuilder(prefix)</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">for</span> ((index,element) <span class="keyword">in</span> <span class="keyword">this</span>.withIndex() ) &#123;</span><br><span class="line">		<span class="keyword">if</span> (index &gt; <span class="number">0</span>) result.append(separator) </span><br><span class="line">		<span class="keyword">val</span> str = transform?.invoke(element) ?: element.toString()</span><br><span class="line">		result.append(str)</span><br><span class="line">	&#125;</span><br><span class="line">	result.append(postfix)</span><br><span class="line">	<span class="keyword">return</span> result.toString()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h3 id="함수를-함수에서-반환"><a href="#함수를-함수에서-반환" class="headerlink" title="함수를 함수에서 반환"></a>함수를 함수에서 반환</h3><figure class="highlight kotlin"><figcaption><span>함수를 반환하는 함수 정의</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">enum</span> <span class="class"><span class="keyword">class</span> <span class="title">Delivery</span> </span>&#123;</span><br><span class="line">	STANDARD,</span><br><span class="line">	EXPEDITED </span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Order</span></span>(<span class="keyword">val</span> itemCount: <span class="built_in">Int</span>)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">getShippingCostCalculator</span><span class="params">(delivery: <span class="type">Delivery</span>)</span></span> : (Order) -&gt; <span class="built_in">Double</span> &#123;</span><br><span class="line">	<span class="keyword">if</span>(delivery == Delivery.EXPEDITED) &#123;</span><br><span class="line">		<span class="keyword">return</span> &#123;order -&gt; <span class="number">6</span> + <span class="number">2.1</span> * order.itemCount&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> &#123;order -&gt; <span class="number">1.2</span> * order.itemCount&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&gt;&gt; <span class="keyword">val</span> calculator = getShippingCostCalculator(Delivery.EXPEDITED)</span><br><span class="line">&gt;&gt; println(<span class="string">&quot;Shipping costs <span class="subst">$&#123;calculator(Order(<span class="number">3</span>))&#125;</span>&quot;</span>)</span><br><span class="line">&gt;&gt;&gt; Shipping costs <span class="number">12.3</span> </span><br><span class="line"></span><br><span class="line"><span class="comment">//함수를 반환하는 함수 UI코드 사용하기 </span></span><br><span class="line"><span class="keyword">data</span> <span class="class"><span class="keyword">class</span> <span class="title">Person</span></span>(<span class="keyword">val</span> firstName:String, <span class="keyword">val</span> lastName:String, <span class="keyword">val</span> phoneNumber:String?)</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ContactListFilters</span> </span>&#123;</span><br><span class="line">	<span class="keyword">var</span> prefix:String = <span class="string">&quot;&quot;</span></span><br><span class="line">	<span class="keyword">var</span> onlyWithPhoneNumber:<span class="built_in">Boolean</span> = <span class="literal">false</span> </span><br><span class="line">	</span><br><span class="line">	<span class="function"><span class="keyword">fun</span> <span class="title">getPredicate</span><span class="params">()</span></span>: (Person) -&gt; <span class="built_in">Boolean</span> &#123;</span><br><span class="line">		<span class="keyword">val</span> startsWithPrefix = &#123;</span><br><span class="line">			p:Person -&gt; p.firstName.startWith(prefix) || p.lastName.startWith(prefix)</span><br><span class="line">		&#125;</span><br><span class="line">		</span><br><span class="line">		<span class="keyword">if</span>(!onlyWithPhoneNumber) &#123;</span><br><span class="line">			<span class="keyword">return</span> startWithPrefix</span><br><span class="line">		&#125;</span><br><span class="line">		</span><br><span class="line">		<span class="keyword">return</span> &#123;</span><br><span class="line">			startsWithPrefix(it) &amp;&amp; it.phoneNumber != <span class="literal">null</span></span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&gt;&gt; <span class="keyword">val</span> contacts = listOf(Person(<span class="string">&quot;Dmitry&quot;</span>,<span class="string">&quot;Jemorov&quot;</span>,<span class="string">&quot;123-4567&quot;</span>), Person(<span class="string">&quot;Svetlana&quot;</span>, <span class="string">&quot;Isakova&quot;</span>, <span class="literal">null</span>))</span><br><span class="line">&gt;&gt; <span class="keyword">val</span> contactListFilters = ContactListFilters()</span><br><span class="line">&gt;&gt; with(contactListFilters) &#123;</span><br><span class="line">	prefix = <span class="string">&quot;Dm&quot;</span></span><br><span class="line">	onlyWithPhoneNumber = <span class="literal">true</span> </span><br><span class="line">&#125;</span><br><span class="line">&gt;&gt; println(contacts.filter(contactListFilters.getPredicate())) <span class="comment">//getPredicate이 반환한 함수를 filter에 인자로 넘김 </span></span><br><span class="line">&gt;&gt;&gt; [Person(firstName=Dmitry, lastName=Jemorov, phoneNumber=<span class="number">123</span>-<span class="number">4567</span>)]</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<h3 id="람다를-활용한-중복제거"><a href="#람다를-활용한-중복제거" class="headerlink" title="람다를 활용한 중복제거"></a>람다를 활용한 중복제거</h3><figure class="highlight kotlin"><figcaption><span>람다를 활용한 중복제거</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">data</span> <span class="class"><span class="keyword">class</span> <span class="title">SiteVisit</span></span>(</span><br><span class="line"><span class="keyword">val</span> path:String,</span><br><span class="line"><span class="keyword">val</span> duration:String,</span><br><span class="line"><span class="keyword">val</span> os:OS</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="keyword">enum</span> <span class="class"><span class="keyword">class</span> <span class="title">OS</span> </span>&#123;</span><br><span class="line">	WINDOWS,LINUX,MAC,IOS,ANDROID</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">val</span> log = listOf(</span><br><span class="line">	SiteVisit(<span class="string">&quot;/&quot;</span>,<span class="number">34.0</span>,OS.WINDOWS),</span><br><span class="line">	SiteVisit(<span class="string">&quot;/&quot;</span>,<span class="number">34.0</span>,OS.MAC),</span><br><span class="line">	SiteVisit(<span class="string">&quot;/login&quot;</span>,<span class="number">34.0</span>,OS.WINDOWS),</span><br><span class="line">	SiteVisit(<span class="string">&quot;/signup&quot;</span>,<span class="number">34.0</span>,OS.IOS),</span><br><span class="line">	SiteVisit(<span class="string">&quot;/&quot;</span>,<span class="number">34.0</span>,OS.ANDROID)</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="comment">// 사이트 방문 데이터를 하드코딩한 필터를 사용해 분석 </span></span><br><span class="line"><span class="keyword">val</span> averageWindowDuration = log.filter&#123;it.os == OS.WINDOWS&#125;.map(SiteVisit::duration).average()</span><br><span class="line">&gt;&gt; println(averageWindowDuration)</span><br><span class="line">&gt;&gt;&gt; <span class="number">23.0</span> </span><br><span class="line"></span><br><span class="line"><span class="comment">//일반 함수를 통해 중복 제거 </span></span><br><span class="line"><span class="function"><span class="keyword">fun</span> List<span class="type">&lt;SiteVisit&gt;</span>.<span class="title">averageDurationFor</span><span class="params">(os:<span class="type">OS</span>)</span></span> = filter &#123;it.os == os&#125;.map(SiteVisit::duration).average()</span><br><span class="line">&gt;&gt; println(log.averageDurationFor(OS.WINDOWS))</span><br><span class="line">&gt;&gt;&gt;<span class="number">23.0</span></span><br><span class="line">&gt;&gt; prinlnt(log.averageDurationFor(OS.MAC))</span><br><span class="line">&gt;&gt;&gt;<span class="number">22.0</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 복잡하게 하드코딩한 필터를 사용해 방문 데이터 분석</span></span><br><span class="line"><span class="keyword">val</span> averageMobileDuration = log.filter&#123;it.os <span class="keyword">in</span> setOf(OS.IOS, OS.ANDROID)&#125;.map(SiteVisit::duration).average()</span><br><span class="line">&gt;&gt; prinlnt(averageMobileDuration)</span><br><span class="line">&gt;&gt;&gt; <span class="number">12.15</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//위 함수를 고차함수 사용해 중복제거 </span></span><br><span class="line"><span class="function"><span class="keyword">fun</span> List<span class="type">&lt;SiteVisit&gt;</span>.<span class="title">averageDurationFor</span><span class="params">(predicate:(<span class="type">SiteVisit</span>) -&gt; <span class="type">Boolean</span>)</span></span> = filter(predicate).map(SiteVisit::duration).average()</span><br><span class="line">&gt;&gt; println(log.averageDurationFor&#123;it.os <span class="keyword">in</span> setOf(OS.ANDROID, OS.IOS)&#125;)</span><br><span class="line">&gt;&gt;&gt; <span class="number">12.15</span></span><br><span class="line">&gt;&gt; println(log.averageDurationFor&#123;it.os == OS.IOS &amp;&amp; it.path=<span class="string">&quot;/signup&quot;</span>&#125;)</span><br><span class="line">&gt;&gt;&gt; <span class="number">8.0</span> </span><br></pre></td></tr></table></figure>
-
-<ul>
-<li>코드 중복을 줄일때는 위 처럼 함수타입이 아주 적절할때가 많다. </li>
-</ul>
-<h2 id="인라인함수-람다의-부가비용-없애기"><a href="#인라인함수-람다의-부가비용-없애기" class="headerlink" title="인라인함수: 람다의 부가비용 없애기"></a>인라인함수: 람다의 부가비용 없애기</h2><p>inline함수 : inline변경자를 어떤 함수에 붙이면 컴파일러는 그 함수를 호출하는 모든 문장을 함수 본문에 해당하는 바이트코드로 바꿔치기 해준다. </p>
-<h3 id="인라이닝이-작동하는-방식"><a href="#인라이닝이-작동하는-방식" class="headerlink" title="인라이닝이 작동하는 방식"></a>인라이닝이 작동하는 방식</h3><ul>
-<li>어떤함수를 inline으로 선언하면 그 함수의 본문이 인라인 된다. 다른말로 하면 함수를 호출하는 코드를 함수를 호출하는 바이트코드 대신에 함수 본문을 번역한 바이트코드로 컴파일 한다는 의미다.</li>
-</ul>
-<figure class="highlight kotlin"><figcaption><span>인라인함수 정의 및 사용</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">inline</span> <span class="function"><span class="keyword">fun</span><span class="type">&lt;T&gt;</span> <span class="title">synchronized</span><span class="params">(lock:<span class="type">Lock</span>, action: () -&gt; <span class="type">T</span>)</span></span>: T &#123;</span><br><span class="line">	lock.lock() </span><br><span class="line">	<span class="keyword">try</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> action()</span><br><span class="line">	&#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">		lock.unlock()</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">foo</span><span class="params">(lock:<span class="type">Lock</span>)</span></span> &#123;</span><br><span class="line">	println(<span class="string">&quot;Before sync&quot;</span>)</span><br><span class="line">	</span><br><span class="line">	synchronized(lock) &#123;</span><br><span class="line">		println(<span class="string">&quot;Action&quot;</span>)</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	println(<span class="string">&quot;After sync&quot;</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//java compile된 버전 </span></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">__foo__</span><span class="params">(lock:<span class="type">Lock</span>)</span></span> &#123;</span><br><span class="line">	println(<span class="string">&quot;Before sync&quot;</span>)</span><br><span class="line">	</span><br><span class="line">	lock.lock()</span><br><span class="line">	<span class="keyword">try</span> &#123;</span><br><span class="line">		println(<span class="string">&quot;Action&quot;</span>)</span><br><span class="line">	&#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">		lock.unlock()</span><br><span class="line">	&#125;</span><br><span class="line">	println(<span class="string">&quot;After sync&quot;</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<ul>
-<li>한 인라인 함수를 두 곳에서 각각 다른 람다를 사용해 호출한다면 그 두 호출은 각각 따로 인라이닝 된다. 인라인 함수의 본문코드가 호출 지점에 복사되고 각 람다의 본문이 인라인 함수의 본문 코드에서 람다를 사용하는 위치에 복사됨. (호출되는 곳마다 코드 복사된다고 생각하면됨)</li>
-</ul>
-<h3 id="인라인함수의-한계"><a href="#인라인함수의-한계" class="headerlink" title="인라인함수의 한계"></a>인라인함수의 한계</h3><ul>
-<li>람다가 본문에 적용되기때문에 함수가 파라미터로 전달 받은 람다를 본문에 사용하는 방식이 한절될 수밖에 없다. 함수 본문에서 파라미터로 받은 람다를 호출한다면 그 호출을 쉽게 람다 본문으로 바꿀수 있다. </li>
-<li>파라미터로 받은 람다를 다른 변수에 저장하고 나중에 그 변수를 사용한다면 람다를 표현하는 객체가 어딘가는 존재해야 하기 때문에 람다를 인라이닝할 수 없다. </li>
-<li>일반적으로 인라인 함수의 본문에서 람다 식을 바로 호출하거나 람다식을 인자로 전달 받아 바로 호출 하는 경우에는 그 람다를 인라이닝 할수 있다. 그런 경우가 아니라면 컴파일러는 “Illegal usage of inline-paramter”라는 메시지와 함께 인라이닝을 금지시킴 </li>
-<li>둘 이상의 람다를 인자로 받는 함수에서 일부 람다만 인라이닝하고 싶을때도 있음 그럴때는 noinline키워드를 파라미터앞에 붙여서 인라이닝을 금지시킬수있음. </li>
-</ul>
-<h3 id="컬렉션-연산-인라이닝"><a href="#컬렉션-연산-인라이닝" class="headerlink" title="컬렉션 연산 인라이닝"></a>컬렉션 연산 인라이닝</h3><ul>
-<li>filter/map은 인라인함수다</li>
-<li>처리할 원소가 많아지면 중간 리스트를 사용하는 부가 비용도 걱정할 만큼 커진다. asSequence를 통해 리스트 대신 시퀀스를 사용하면 중간 리스트로 인한 부가비용은 줄어든다. 이때 각 중간 시퀀스는 람다를 필드에 저장하는 객체로 표현되며, 최종 연산은 중간 시퀀스에 있는 여러 람다를 연쇄호출한다. 따라서 시퀀스는 ㄹ람다를 인라인 하지 않는다. 결론은 지연 계산을 통해 성능을 향상 시키려는 이유로 모든 컬렉션 연산에 asSequence를 붙여서는 안된다. 시퀀스 연산에는 람다가 인라인닝되지 않기때문에 크기가 작은 컬렉션은 오히려 일반 컬렉션 연산이 더 성능이 나올수도있다. 시퀀스를 통해 성능을 향상시킬수 있는 경우는 컬렉션 크기가 큰 경우 뿐이다. </li>
-</ul>
-<h3 id="함수를-인라인으로-선언해야-하는-경우"><a href="#함수를-인라인으로-선언해야-하는-경우" class="headerlink" title="함수를 인라인으로 선언해야 하는 경우"></a>함수를 인라인으로 선언해야 하는 경우</h3><ul>
-<li>람다를 인자로 받는 함수를 인라이닝하면 이익이 더 많다. 첫째로 인라이닝을 통해 없앨수 있는 부가 비용이 상당함 람다를 표현하는 클래스와 람다 인스턴스에 해당하는 객체를 만들 필요도 없어진다. </li>
-<li>현재의 JVM은 함수호출과 람다를 인라이닝해 줄 정도로 똑똑하지 못함. </li>
-<li>인라이닝을 사용하면 일반람다에서는 사용할수 없는 몇가지 기능을 사용할수있다. (non-local반환)</li>
-<li>inline변경자를 붙일때는 코드 크기에 주의해야함 (함수의 본문에 해당하는 바이트 코드를 모든 호출지점에 복사해서 넣기때문에 전체적으로 코드가 커짐)</li>
-</ul>
-<h3 id="자원관리를-위해-인라인된-람다-사용"><a href="#자원관리를-위해-인라인된-람다-사용" class="headerlink" title="자원관리를 위해 인라인된 람다 사용"></a>자원관리를 위해 인라인된 람다 사용</h3><figure class="highlight kotlin"><figcaption><span>자원관리를 위해 인라인된 람다 사용</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//java try-with-resource </span></span><br><span class="line">static String readFirstLineFromFile(String path) throws IOException &#123; </span><br><span class="line">	<span class="keyword">try</span> (BufferedReader br = new BufferedReader(new FileReader(path))) &#123;</span><br><span class="line">		<span class="keyword">return</span> br.readLine();</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//use함수를 자원 관리에 활용 </span></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">readFirstLineFromFile</span><span class="params">(path:<span class="type">String</span>)</span></span>:String &#123;</span><br><span class="line">	BufferedReader(FileReader(path)).use &#123; br -&gt; </span><br><span class="line">		<span class="keyword">return</span> br.readLine()</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<ul>
-<li>use함수는 닫을수있는(closable) 자원에 대한 확장함수 람다를 인자로 받는다. use는 람다를 호출한 다음에 자원을 닫아줌 이때 람다가 정상 종료한 경우는 물론 람다안에서 예외가 발생한 경우에도 자원을 확실히 닫는다. 물론 use함수도 인라인함수다. 따라서 use를 사용해도 성능에는 영향이 없다. </li>
-<li>람다 본문안에서 사용한 return은 넌로컬 return임. 이 리턴문은 람다가 아니라 readFirstLineFromFile함수를 끝내면서 값을 반환한다. </li>
-</ul>
-<h2 id="고차함수-안에서-흐름제어"><a href="#고차함수-안에서-흐름제어" class="headerlink" title="고차함수 안에서 흐름제어"></a>고차함수 안에서 흐름제어</h2><h3 id="람다-안의-return-문-람다를-둘러싼-함수로부터-반환"><a href="#람다-안의-return-문-람다를-둘러싼-함수로부터-반환" class="headerlink" title="람다 안의 return 문 : 람다를 둘러싼 함수로부터 반환"></a>람다 안의 return 문 : 람다를 둘러싼 함수로부터 반환</h3><figure class="highlight kotlin"><figcaption><span>람다안의 return문</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">data</span> <span class="class"><span class="keyword">class</span> <span class="title">Person</span></span>(<span class="keyword">val</span> name:String, <span class="keyword">val</span> age:<span class="built_in">Int</span>)</span><br><span class="line"><span class="keyword">val</span> people = listOf(Person(<span class="string">&quot;Alice&quot;</span>,<span class="number">29</span>), Person(<span class="string">&quot;Bob&quot;</span>,<span class="number">31</span>))</span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">lookForAlice</span><span class="params">(people:<span class="type">List</span>&lt;<span class="type">Person</span>&gt;)</span></span> &#123;</span><br><span class="line">	<span class="keyword">if</span>(person <span class="keyword">in</span> people) &#123;</span><br><span class="line">		<span class="keyword">if</span>(person.name == <span class="string">&quot;Alice&quot;</span>) &#123;</span><br><span class="line">			println(<span class="string">&quot;Found!&quot;</span>)</span><br><span class="line">			<span class="keyword">return</span> </span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	println(<span class="string">&quot;Alice is not found&quot;</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&gt;&gt; lookForAlice(people)</span><br><span class="line">&gt;&gt;&gt; Found! </span><br><span class="line"> </span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">lookForAlice</span><span class="params">(people:<span class="type">List</span>&lt;<span class="type">Person</span>&gt;)</span></span> &#123;</span><br><span class="line">	people.forEach &#123; </span><br><span class="line">		<span class="keyword">if</span>(it.name == <span class="string">&quot;Alice&quot;</span>) &#123;</span><br><span class="line">			println(<span class="string">&quot;Found!&quot;</span>)</span><br><span class="line">			<span class="keyword">return</span> </span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	println(<span class="string">&quot;Alice is not found&quot;</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<ul>
-<li>위 두 로직은 같은 로직임. </li>
-<li>람다안에서 return문을 사용하면 람다로부터만 반환되는게 아니라 그 람다를 호출하는 함수가 실행을 끝내고 반환된다. 그렇게 자신을 둘러싸고 있는 블록보다 더 바깥에 있는 다른 블록을 반환하게 만드는 return문을 non-local return이라 부른다. </li>
-<li>return이 바깥쪽 함수를 반환시킬수 있는 때는 람다를 인자로 받는 함수가 인라인 함수인 경우뿐이다! (forEach는 인라인함수)</li>
-<li>인라이닝되지 않는 함수는 람다를 변수에 저장할수 있고, 바깥쪽 함수로부터 반환된 뒤에 저장해둔 람다가 호출될수도 있다. 그런 경우 람다안의 return이 실행되는 시점이 바깥쪽 함수를 반환시키기엔 너무 늦은 시점일수도있다. </li>
-</ul>
-<h3 id="람다로부터-반환-레이블을-사용한-return"><a href="#람다로부터-반환-레이블을-사용한-return" class="headerlink" title="람다로부터 반환: 레이블을 사용한 return"></a>람다로부터 반환: 레이블을 사용한 return</h3><ul>
-<li>람다식에서도 local return을 사용할수있다. 로컬 return은 for-loop의 break역할을함 </li>
-</ul>
-<figure class="highlight kotlin"><figcaption><span>람다안의 return문:레이블</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">lookForAlice</span><span class="params">(people:<span class="type">List</span>&lt;<span class="type">Person</span>&gt;)</span></span> &#123;</span><br><span class="line">	people.forEach <span class="symbol">lable@</span> &#123; <span class="comment">//람다식 앞에 레이블 불임  </span></span><br><span class="line">		<span class="keyword">if</span>(it.name == <span class="string">&quot;Alice&quot;</span>) &#123;</span><br><span class="line">			<span class="keyword">return</span><span class="symbol">@label</span></span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	println(<span class="string">&quot;Alice might be somewhere&quot;</span>) <span class="comment">//항상 이줄이 실행됨 </span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&gt;&gt; lookForAlice(people)</span><br><span class="line">&gt;&gt;&gt; Alice might be somewhere</span><br></pre></td></tr></table></figure>
-
-<ul>
-<li>람다식의 레이블을 명시하면 함수이름을 레이블로 사용할수없음 람다식에는 레이블이 2개이상 붙을수없음 </li>
-</ul>
-<h3 id="무명함수-기본적으로-local-return"><a href="#무명함수-기본적으로-local-return" class="headerlink" title="무명함수: 기본적으로 local-return"></a>무명함수: 기본적으로 local-return</h3><figure class="highlight kotlin"><figcaption><span>람다안의 return문:레이블</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">lookForAlice</span><span class="params">(people:<span class="type">List</span>&lt;<span class="type">Person</span>&gt;)</span></span> &#123;</span><br><span class="line">	people.forEach (<span class="function"><span class="title">fun</span> <span class="params">(person)</span></span> &#123;</span><br><span class="line">		<span class="keyword">if</span>(person.name == <span class="string">&quot;Alice&quot;</span>) <span class="keyword">return</span> </span><br><span class="line">		println(<span class="string">&quot;<span class="subst">$&#123;person.name&#125;</span> is not Alice&quot;</span>)</span><br><span class="line">	&#125;) </span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&gt;&gt; lookForAlice(people)</span><br><span class="line">&gt;&gt;&gt; Bob <span class="keyword">is</span> not Alice </span><br></pre></td></tr></table></figure>
-
-<ul>
-<li>람다 내 무명함수는 기본적으로 local-return 임 </li>
-<li>같은 forEach문을 사용하더라도, 인라이닝함수를 사용하면 non-local return 되기때문에 최상위 함수로 리턴되고, forEach내 익명함수는 local-return이기때문에 익명함수로 리턴이된다. (지역함수 리턴이라 생각하면됨 본문 여러곳에서 리턴되는 구조. NON-LOCAL은 최상위로 호출되서 함수 종료됨)</li>
-</ul>
-
-                    
-                        
-
-
-                    
-                    
-                        <p>
-                            <a
-                                href="/2021/09/02/kotlin-basic-6/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                Comment and share
-                            </a>
-                        </p>
-                    
-                </div>
-            
-        </div>
-        
-    </article>
-    
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/2021/08/10/kotlin-basic-5/"
-                            aria-label=": kotlin-basic-5"
-                        >
-                            kotlin-basic-5
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time datetime="2021-08-10T06:44:53+00:00">
-	
-		    Aug 10, 2021
-    	
-    </time>
-    
-        <span>in </span>
-        
-    <a class="category-link" href="/categories/KotlinInAction/">KotlinInAction</a>, <a class="category-link" href="/categories/Study/">Study</a>, <a class="category-link" href="/categories/%EC%BD%94%ED%8B%80%EB%A6%B0%EB%AC%B8%EB%B2%95-%EA%B8%B0%EC%B4%88/">코틀린문법&기초</a>
-
-
-    
-</div>
-
-            </div>
-            
-                <div class="postShorten-content">
-                    <h1 id="연산자-오버로딩과-기타-관례"><a href="#연산자-오버로딩과-기타-관례" class="headerlink" title="연산자 오버로딩과 기타 관례"></a>연산자 오버로딩과 기타 관례</h1><h2 id="산술-연산자-오버로딩"><a href="#산술-연산자-오버로딩" class="headerlink" title="산술 연산자 오버로딩"></a>산술 연산자 오버로딩</h2><h3 id="이항-산술-연산-오버로딩"><a href="#이항-산술-연산-오버로딩" class="headerlink" title="이항 산술 연산 오버로딩"></a>이항 산술 연산 오버로딩</h3><ul>
-<li>연산자 오버로딩 할때는 반드시 <strong>operator</strong> 키워드를 붙여줘야함. </li>
-<li>연산자를 멤버함수로 만드는대신 확장함수로도 정의가능 </li>
-<li>오버로딩 가능한 산술연산자 -&gt; a * b =&gt; times , a / b =&gt; div , a % b =&gt; mod (1.1 부터 rem) , a + b =&gt; plus , a - b =&gt; minus </li>
-<li>연산자를 정의할때 두 피연산자는 같을 필요가 없다. </li>
-<li>연산자 함수의 반환타입이 꼭 두 피연산자 중 하나와 일치해야하는것도 아님 </li>
-</ul>
-<figure class="highlight kotlin"><figcaption><span>이항산술연산 오버로딩 예제</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">data</span> <span class="class"><span class="keyword">class</span> <span class="title">Point</span></span>(<span class="keyword">val</span> x:<span class="built_in">Int</span>, <span class="keyword">val</span> y:<span class="built_in">Int</span>) &#123;</span><br><span class="line">	<span class="keyword">operator</span> <span class="function"><span class="keyword">fun</span> <span class="title">plus</span><span class="params">(other:<span class="type">Point</span>)</span></span> : Point &#123;</span><br><span class="line">		<span class="keyword">return</span> Point(x + other.x, y + other.y)</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">&gt;&gt; <span class="keyword">val</span> p1 = Point(<span class="number">10</span>,<span class="number">20</span>)</span><br><span class="line">&gt;&gt; <span class="keyword">val</span> p2 = Point(<span class="number">30</span>,<span class="number">40</span>)</span><br><span class="line">&gt;&gt; println(p1 + p2)</span><br><span class="line">&gt;&gt;&gt; Point(x=<span class="number">40</span>,y=<span class="number">60</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">operator</span> <span class="function"><span class="keyword">fun</span> Point.<span class="title">times</span><span class="params">(scale:<span class="type">Double</span>)</span></span>: Point &#123;</span><br><span class="line">	<span class="keyword">return</span> Point((x * scale).toInt(), (y * scale).toInt())</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&gt;&gt; <span class="keyword">val</span> p1 = Point(<span class="number">10</span>,<span class="number">20</span>)</span><br><span class="line">&gt;&gt; println(p1 * <span class="number">1.5</span>)</span><br><span class="line">&gt;&gt;&gt; Point(x=<span class="number">15</span>,y=<span class="number">30</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">operator</span> <span class="function"><span class="keyword">fun</span> <span class="built_in">Char</span>.<span class="title">times</span><span class="params">(count:<span class="type">Int</span>)</span></span>: String &#123;</span><br><span class="line">	<span class="keyword">return</span> toString().repeat(count)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&gt;&gt; println(<span class="string">&#x27;a&#x27;</span> * <span class="number">3</span>)</span><br><span class="line">&gt;&gt;&gt; aaa </span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<h3 id="복합-대입-연산자-오버로딩"><a href="#복합-대입-연산자-오버로딩" class="headerlink" title="복합 대입 연산자 오버로딩"></a>복합 대입 연산자 오버로딩</h3><figure class="highlight kotlin"><figcaption><span>복합대입연산자 오버로딩 예제</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">operator</span> <span class="function"><span class="keyword">fun</span> <span class="type">&lt;T&gt;</span> MutableCollection<span class="type">&lt;T&gt;</span>.<span class="title">plusAssign</span><span class="params">(element:<span class="type">T</span>)</span></span> &#123;</span><br><span class="line">	<span class="keyword">this</span>.add(element)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&gt;&gt; <span class="keyword">val</span> list = arrayListOf(<span class="number">1</span>,<span class="number">2</span>)</span><br><span class="line">&gt;&gt; list += <span class="number">3</span> <span class="comment">// list 엘리먼트 추가 </span></span><br><span class="line">&gt;&gt; <span class="keyword">val</span> newList = list + listOf(<span class="number">4</span>,<span class="number">5</span>) <span class="comment">// 두 리스트를 합쳐서 새로운 리스트로 반환 </span></span><br><span class="line">&gt;&gt; println(list)</span><br><span class="line">&gt;&gt;&gt; [<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>]</span><br><span class="line">&gt;&gt; println(newList)</span><br><span class="line">&gt;&gt;&gt; [<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">4</span>,<span class="number">5</span>]</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<h3 id="단항-연산자-오버로딩"><a href="#단항-연산자-오버로딩" class="headerlink" title="단항 연산자 오버로딩"></a>단항 연산자 오버로딩</h3><ul>
-<li>+a =&gt; unaryPlus, -a =&gt; unaryMinus, !a =&gt; not, ++a,a++ =&gt; inc, –a,a– =&gt; dec </li>
-</ul>
-<figure class="highlight kotlin"><figcaption><span>단항 연산자 오버로딩 예제</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">operator</span> <span class="function"><span class="keyword">fun</span> Point.<span class="title">unaryMinus</span><span class="params">()</span></span>: Point &#123;</span><br><span class="line">	<span class="keyword">return</span> Point(-x,-y)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&gt;&gt; <span class="keyword">val</span> p = Point(<span class="number">10</span>,<span class="number">20</span>)</span><br><span class="line">&gt;&gt; println(-p)</span><br><span class="line">&gt;&gt;&gt; Point(x= -<span class="number">10</span>, y= -<span class="number">20</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">operator</span> <span class="function"><span class="keyword">fun</span> BigDecimal.<span class="title">inc</span><span class="params">()</span></span> = <span class="keyword">this</span> + BigDecimal.ONE</span><br><span class="line"></span><br><span class="line">&gt;&gt; <span class="keyword">var</span> bd = BigDecimal.ZERO</span><br><span class="line">&gt;&gt; println(bd++)</span><br><span class="line">&gt;&gt;&gt; <span class="number">0</span></span><br><span class="line">&gt;&gt; println(++bd)</span><br><span class="line">&gt;&gt;&gt; <span class="number">2</span> </span><br></pre></td></tr></table></figure>
-
-<h2 id="비교-연산자-오버로딩"><a href="#비교-연산자-오버로딩" class="headerlink" title="비교 연산자 오버로딩"></a>비교 연산자 오버로딩</h2><h3 id="동등성-연산자-equals"><a href="#동등성-연산자-equals" class="headerlink" title="동등성 연산자: equals"></a>동등성 연산자: equals</h3><ul>
-<li>코틀린에서 ==, != 연산자는 자바로 컴파일시 equals로 컴파일된다. </li>
-<li>코틀린의 ==, != 내부로직에서는 인자가 널인지 검사하므로 다른 연산과 달리 널이 될수있는 값에도 적용가능. </li>
-<li>코틀린에서의 ===는 자바의 ==와 동일하다 </li>
-</ul>
-<h3 id="순서-연산자-compareTo"><a href="#순서-연산자-compareTo" class="headerlink" title="순서 연산자 : compareTo"></a>순서 연산자 : compareTo</h3><ul>
-<li>코틀린은 비교연산자(&lt;,&gt;,&gt;=,&lt;=)는 자바의 compareTo로 호출하여 컴파일함 </li>
-<li>equals와 마찬가지로 operator 변경자가 붙어있어서 하위 클래스의 오버라이딩 함수에 operator를 붙일필요는 없음 </li>
-</ul>
-<h2 id="컬렉션과-범위에-대해-쓸-수-있는-관례"><a href="#컬렉션과-범위에-대해-쓸-수-있는-관례" class="headerlink" title="컬렉션과 범위에 대해 쓸 수 있는 관례"></a>컬렉션과 범위에 대해 쓸 수 있는 관례</h2><h3 id="인덱스로-원소에-접근-get-과-set"><a href="#인덱스로-원소에-접근-get-과-set" class="headerlink" title="인덱스로 원소에 접근: get 과 set"></a>인덱스로 원소에 접근: get 과 set</h3><figure class="highlight kotlin"><figcaption><span>Point get / set 관례 구현</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">operator</span> <span class="function"><span class="keyword">fun</span> Point.<span class="title">get</span><span class="params">(index: <span class="type">Int</span>)</span></span>: <span class="built_in">Int</span> &#123;</span><br><span class="line">	<span class="keyword">return</span> <span class="keyword">when</span>(index) &#123;</span><br><span class="line">		<span class="number">0</span> -&gt; x</span><br><span class="line">		<span class="number">1</span> -&gt; y </span><br><span class="line">		<span class="keyword">else</span> -&gt; </span><br><span class="line">			<span class="keyword">throw</span> IndexOutOfBoundsException(<span class="string">&quot;Invalid coordinnate <span class="variable">$index</span>&quot;</span>)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&gt;&gt; <span class="keyword">val</span> p = Point(<span class="number">10</span>,<span class="number">20</span>);</span><br><span class="line">&gt;&gt; println(p[<span class="number">1</span>])</span><br><span class="line">&gt;&gt;&gt; <span class="number">20</span> </span><br><span class="line"></span><br><span class="line"><span class="keyword">operator</span> <span class="function"><span class="keyword">fun</span> MutablePoint.<span class="title">set</span><span class="params">(index:<span class="type">Int</span>, value:<span class="type">Int</span>)</span></span> &#123;</span><br><span class="line">	<span class="keyword">when</span>(index) &#123;</span><br><span class="line">		<span class="number">0</span> -&gt; x = value </span><br><span class="line">		<span class="number">1</span> -&gt; y = value</span><br><span class="line">		<span class="keyword">else</span> -&gt; </span><br><span class="line">		    <span class="keyword">throw</span> IndexOutOfBoundsException(<span class="string">&quot;Invalid coordinnate <span class="variable">$index</span>&quot;</span>)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&gt;&gt; <span class="keyword">val</span> p = MutablePoint(<span class="number">10</span>,<span class="number">20</span>)</span><br><span class="line">&gt;&gt; p[<span class="number">1</span>] = <span class="number">42</span></span><br><span class="line">&gt;&gt;println(p)</span><br><span class="line">&gt;&gt;&gt; MutablePoint(x=<span class="number">10</span>,y=<span class="number">42</span>)</span><br></pre></td></tr></table></figure>
-
-<h3 id="in-관례"><a href="#in-관례" class="headerlink" title="in 관례"></a>in 관례</h3><figure class="highlight kotlin"><figcaption><span>in 관례 구현</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">data</span> <span class="class"><span class="keyword">class</span> <span class="title">Rectangle</span></span>(<span class="keyword">val</span> upperLeft:Point, <span class="keyword">val</span> lowerRight:Point)</span><br><span class="line"></span><br><span class="line"><span class="keyword">operator</span> <span class="function"><span class="keyword">fun</span> Rectangle.<span class="title">contains</span><span class="params">(p: <span class="type">Point</span>)</span></span>: <span class="built_in">Boolean</span> &#123;</span><br><span class="line">	<span class="keyword">return</span> p.x <span class="keyword">in</span> upperLeft.x until lowerRight.x &amp;&amp; p.y <span class="keyword">in</span> upperLeft.y until lowerRight.y </span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&gt;&gt; <span class="keyword">val</span> rect = Rectangle(Point(<span class="number">10</span>,<span class="number">20</span>), Point(<span class="number">50</span>,<span class="number">50</span>))</span><br><span class="line">&gt;&gt; println(Point(<span class="number">20</span>,<span class="number">30</span>) <span class="keyword">in</span> rect)</span><br><span class="line">&gt;&gt;&gt; <span class="literal">true</span> </span><br><span class="line">&gt;&gt; println(Point(<span class="number">5</span>,<span class="number">5</span>) <span class="keyword">in</span> rect)</span><br><span class="line">&gt;&gt;&gt; <span class="literal">false</span> </span><br></pre></td></tr></table></figure>
-
-<ul>
-<li>열린범위는 끝값을 포함하지 않는 범위 닫힌범위는 끝값을 포함한 범위 </li>
-<li>10 until 20 은 10-19까지를 의미</li>
-</ul>
-<h3 id="rangeTo-관례"><a href="#rangeTo-관례" class="headerlink" title="rangeTo 관례"></a>rangeTo 관례</h3><ul>
-<li>코틀린에서는 rangeTo는 ‘..’으로 이미 정의되어있음 (따로 operator로 개별구현 필요없음)</li>
-<li>rangeTo연산자는 다른 산술 연산자 보다 우선순위가 낮다. 하지만 혼선을 피하기 위해 괄호는 꼭 붙여주자 </li>
-<li>rangeTo는 forEach 호출가능함 (0..n).forEach{ println(it)}</li>
-</ul>
-<h3 id="for-루프를-위한-iterator-관례"><a href="#for-루프를-위한-iterator-관례" class="headerlink" title="for 루프를 위한 iterator 관례"></a>for 루프를 위한 iterator 관례</h3><ul>
-<li>코틀린의 for루프는 범위검사 in 연산자 사용 하지만 for루프의 in절은 iterator를 호출해서 자바와 마찬가지로 hasNext, next 호출을 반복하는 식으로 변환된다. 하지만 코틀린에서는 이 또한 관례이므로 iterator 메소드를 확장 함수로 정의 할 수 있다. </li>
-</ul>
-<figure class="highlight kotlin"><figcaption><span>날짜범위에 대한 iterator구현</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">operator</span> <span class="function"><span class="keyword">fun</span> CloseRange<span class="type">&lt;LocalDate&gt;</span>.<span class="title">iterator</span><span class="params">()</span></span>: Iterator&lt;LocalDate&gt; = <span class="keyword">object</span>: Iterator&lt;LocalDate&gt; &#123;</span><br><span class="line">	<span class="keyword">var</span> current = start</span><br><span class="line">	<span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">hasNext</span><span class="params">()</span></span> = current &lt;= endInclusive </span><br><span class="line">	<span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">next</span><span class="params">()</span></span> = current.apply&#123;</span><br><span class="line">		current = plusDays(<span class="number">1</span>)</span><br><span class="line">	&#125; </span><br><span class="line">&#125;</span><br><span class="line">&gt;&gt; <span class="keyword">val</span> newYear = LocalDate.ofYearDay(<span class="number">2017</span>,<span class="number">1</span>)</span><br><span class="line">&gt;&gt; <span class="keyword">val</span> daysOff = newYear.minusDays(<span class="number">1</span>)..newYear</span><br><span class="line">&gt;&gt; <span class="keyword">for</span> (dayOff <span class="keyword">in</span> daysOff) &#123;println(dayOff)&#125;</span><br><span class="line">&gt;&gt;&gt; <span class="number">2016</span>-<span class="number">12</span>-<span class="number">31</span></span><br><span class="line">&gt;&gt;&gt; <span class="number">2017</span>-<span class="number">01</span>-<span class="number">01</span></span><br></pre></td></tr></table></figure>
-
-<h2 id="구조-분해-선언과-component-함수"><a href="#구조-분해-선언과-component-함수" class="headerlink" title="구조 분해 선언과 component 함수"></a>구조 분해 선언과 component 함수</h2><ul>
-<li><p>구조 분해 선언은 복합적인 값을 분해해서 여러 다른 변수를 한꺼번에 초기화 할 수 있다. </p>
-<figure class="highlight kotlin"><figcaption><span>구조 분해 선언</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">data</span> <span class="class"><span class="keyword">class</span> <span class="title">NameComponents</span></span>(<span class="keyword">val</span> name:String, <span class="keyword">val</span> extension:String)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">splitFilename</span><span class="params">(fullName:<span class="type">String</span>)</span></span>:NameComponents &#123;</span><br><span class="line">	<span class="keyword">val</span> result = fullName.split(<span class="string">&#x27;.&#x27;</span>,limit=<span class="number">2</span>)</span><br><span class="line">	<span class="keyword">return</span> NameComponents(result[<span class="number">0</span>],result[<span class="number">1</span>])</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&gt;&gt; <span class="keyword">val</span> (name,ext) = splitFilename(<span class="string">&quot;example.kt&quot;</span>)</span><br><span class="line">&gt;&gt; println(name)</span><br><span class="line">&gt;&gt;&gt; example</span><br><span class="line">&gt;&gt; println(ext)</span><br><span class="line">&gt;&gt;&gt; kt </span><br><span class="line"></span><br><span class="line"><span class="comment">//구조 분해 선언과 루프 </span></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">printEntries</span><span class="params">(map: <span class="type">Map</span>&lt;<span class="type">String</span>,String&gt;)</span></span> &#123;</span><br><span class="line">	<span class="keyword">for</span> ((key,value) <span class="keyword">in</span> map) &#123;</span><br><span class="line">		println(<span class="string">&quot;<span class="variable">$key</span> -&gt; <span class="variable">$value</span>&quot;</span>)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&gt;&gt; <span class="keyword">val</span> map = mapOf(<span class="string">&quot;Oracle&quot;</span> to <span class="string">&quot;Java&quot;</span>, <span class="string">&quot;JetBrains&quot;</span> to <span class="string">&quot;Kotlin&quot;</span>)</span><br><span class="line">&gt;&gt; printEntries(map)</span><br><span class="line">&gt;&gt;&gt; Oracle -&gt; Java </span><br><span class="line">&gt;&gt;&gt; JetBrains -&gt; Kotlin</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-</li>
-<li><p>구조분해선언은 data클래스의 주 생성자에 들어있는 프로퍼티에 대해서 컴파일러가 자동으로 componentN 함수를 만들어준다. </p>
-</li>
-<li><p>구조분해선언은 함수에서 여러값을 반환할때 유용함 </p>
-</li>
-<li><p>구조분해선언은 data클래스로 정의해둬야함</p>
-</li>
-<li><p>이와 비슷한 Pair/Triple 도 존재하지만, 이는 그 안에 담겨있는 원소의 의미를 말해주지 않으므로 경우에 따라 가독성이 떨어질때도 있음. 하지만 직접 클래스를 작성할 필요는 없어서 코드는 더 단순해짐 </p>
-</li>
-</ul>
-<h2 id="프로퍼티-접근자-로직-재활용-위임-프로퍼티"><a href="#프로퍼티-접근자-로직-재활용-위임-프로퍼티" class="headerlink" title="프로퍼티 접근자 로직 재활용 : 위임 프로퍼티"></a>프로퍼티 접근자 로직 재활용 : 위임 프로퍼티</h2><ul>
-<li>위임프로퍼티 : 위임프로퍼티를 사용하면 접근자 로직을 매번 재구현 할 필요가없음. 예를들어 프로퍼티는 위임을 사용해 자신의 값을 필드가 아니라 데이터베이스, 테이블이나 브라우져 세션, 맵 등에 저장할수있음. </li>
-<li>위임 : 위임은 객체가 직접 작업을 수행하지 않고, 다른 도우미 객체가 그 작업을 처리하게 맡기는 디자인 패턴이다. 이때 작업을 처리하는 도무미 객체를 위임객체 라고 부른다. </li>
-</ul>
-<h3 id="위임프로퍼티-소개"><a href="#위임프로퍼티-소개" class="headerlink" title="위임프로퍼티 소개"></a>위임프로퍼티 소개</h3><figure class="highlight kotlin"><figcaption><span>위임프로퍼티 소개</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Foo</span> </span>&#123;</span><br><span class="line">	<span class="keyword">var</span> p: Type <span class="keyword">by</span> Delegate() </span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//위 Foo클래스를 컴파일하면 아래와 같이 구성됨 </span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Foo</span> </span>&#123;</span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">val</span> delegate = Delegate() <span class="comment">//컴파일러가 생성한 도우미 프로퍼티 </span></span><br><span class="line">	<span class="keyword">var</span> p:Type <span class="comment">// p 프로퍼티를 위해 컴파일러가 생성한 접근자는 delegate의 getValue/setValue 메소드를 호출함.</span></span><br><span class="line">	<span class="keyword">set</span>(value: Type) = delegate.setValue(..., value)</span><br><span class="line">	<span class="keyword">get</span>() = delegate.getValue(...)</span><br><span class="line">	</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Delegate</span> </span>&#123;</span><br><span class="line">	<span class="keyword">operator</span> <span class="function"><span class="keyword">fun</span> <span class="title">getValue</span><span class="params">(...)</span></span> &#123;...&#125;</span><br><span class="line">	<span class="keyword">operator</span> <span class="function"><span class="keyword">fun</span> <span class="title">setValue</span><span class="params">(...,value:<span class="type">Type</span>)</span></span> &#123;...&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&gt;&gt; <span class="keyword">val</span> foo = Foo()</span><br><span class="line">&gt;&gt; <span class="keyword">val</span> oldValue = foo.p </span><br><span class="line">&gt;&gt; foo.p = newValue </span><br></pre></td></tr></table></figure>
-
-<h3 id="위임-프로퍼티-사용-by-lazy-를-사용한-프로퍼티-초기화-지연"><a href="#위임-프로퍼티-사용-by-lazy-를-사용한-프로퍼티-초기화-지연" class="headerlink" title="위임 프로퍼티 사용: by lazy()를 사용한 프로퍼티 초기화 지연"></a>위임 프로퍼티 사용: by lazy()를 사용한 프로퍼티 초기화 지연</h3><ul>
-<li><p>지연 초기화는 객체의 일부분을 초기화 하지 않고 남겨뒀다가 실제로 그 부분의 값이 필요할 경우 초기화 할때 흔히 쓰이는 패턴 </p>
-<figure class="highlight kotlin"><figcaption><span>위임프로퍼티 by lazy() 소개</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Person</span></span>(<span class="keyword">val</span> name:String) &#123;</span><br><span class="line">	<span class="keyword">val</span> emails <span class="keyword">by</span> lazy &#123; loadEmails(<span class="keyword">this</span>)&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>lazy함수는 코틀린 관례에 맞는 시그니처의 getValue메소드가 들어있는 객체를 반환함 따라서 lazy를 by 키워드와 함께 사용해 위임 프로퍼티를 만들수있음  lazy 함수의 인자는 값을 초기화 할때 호출할 람다다. </p>
-</li>
-<li><p>lazy함수는 기본적으로 thread-safe하지만, 필요에 따라 동기화에 사용할 락을 lazy함수에 전달할수도있고, 다중 스레드환경에서 사용하지 않을 프로퍼티를 위해 lazy함수가 동기화를 하지 못하게 막을수도있음 </p>
-</li>
-</ul>
-<h3 id="위임-프로퍼티-구현"><a href="#위임-프로퍼티-구현" class="headerlink" title="위임 프로퍼티 구현"></a>위임 프로퍼티 구현</h3><figure class="highlight kotlin"><figcaption><span>위임프로퍼티 구현 (노가다 버전)</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//PropertyChangeSupport를 사용하기 위한 도우미클래스 </span></span><br><span class="line"><span class="keyword">open</span> <span class="class"><span class="keyword">class</span> <span class="title">PropertyChangeAware</span> </span>&#123;</span><br><span class="line">	<span class="keyword">protected</span> <span class="keyword">val</span> changeSupport = PropertyChangeSupport(<span class="keyword">this</span>)</span><br><span class="line">	<span class="function"><span class="keyword">fun</span> <span class="title">addPropertyChangeListener</span><span class="params">(listener: <span class="type">PropertyChangeListener</span>)</span></span> &#123;</span><br><span class="line">		changeSupport.addPropertyChangeListener(listener)</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="function"><span class="keyword">fun</span> <span class="title">removePropertyChangeListener</span><span class="params">(listener:<span class="type">PropertyChangeListener</span>)</span></span> &#123;</span><br><span class="line">		changeSupport.removePropertyChangeListener(listener)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//프로퍼티 변경 통지를 직접 구현하기 </span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Person</span></span>(<span class="keyword">val</span> name:String, age:<span class="built_in">Int</span>, salary:<span class="built_in">Int</span>): PropertyChangeAware() &#123;</span><br><span class="line">	<span class="keyword">var</span> age:<span class="built_in">Int</span> = age </span><br><span class="line">		<span class="keyword">set</span>(newValue) &#123;</span><br><span class="line">			<span class="keyword">val</span> oldValue = field</span><br><span class="line">			field = newValue</span><br><span class="line">			changeSupport.firePropertyChange(<span class="string">&quot;age&quot;</span>, oldValue, newValue)</span><br><span class="line">		&#125;</span><br><span class="line">	<span class="keyword">var</span> salary:<span class="built_in">Int</span> = salary </span><br><span class="line">		<span class="keyword">set</span>(newValue) &#123;</span><br><span class="line">			<span class="keyword">val</span> oldValue = field</span><br><span class="line">			field = newValue</span><br><span class="line">			changeSupport.firePropertyChange(<span class="string">&quot;salary&quot;</span>,oldValue,newValue)</span><br><span class="line">		&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&gt;&gt; <span class="keyword">val</span> p = Person(<span class="string">&quot;Dmitry&quot;</span>, <span class="number">34</span>, <span class="number">2000</span>)</span><br><span class="line">&gt;&gt; p.addPropertyChangeListener( </span><br><span class="line">		PropertyChangeListener &#123;event -&gt; </span><br><span class="line">			println(<span class="string">&quot;Property <span class="subst">$&#123;event.propertyName&#125;</span> changed from <span class="subst">$&#123;event.oldValue&#125;</span> to <span class="subst">$&#123;event.newValue&#125;</span>&quot;</span>)</span><br><span class="line">		&#125;</span><br><span class="line">	)</span><br><span class="line">&gt;&gt; p.age = <span class="number">35</span> </span><br><span class="line">&gt;&gt;&gt; Property age changed from <span class="number">34</span> to <span class="number">35</span> </span><br><span class="line">&gt;&gt; p.salary = <span class="number">2100</span></span><br><span class="line">&gt;&gt;&gt; Property salary changed from <span class="number">2000</span> to <span class="number">2100</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<figure class="highlight kotlin"><figcaption><span>위임프로퍼티 구현 (프로퍼티 리팩토링)</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ObservableProperty</span></span>(<span class="keyword">val</span> propName:String, <span class="keyword">var</span> propValue:<span class="built_in">Int</span>, <span class="keyword">val</span> changeSupport:PropertyChangeSupport) &#123;</span><br><span class="line">	<span class="function"><span class="keyword">fun</span> <span class="title">getValue</span><span class="params">()</span></span>: <span class="built_in">Int</span> = propValue </span><br><span class="line">	<span class="function"><span class="keyword">fun</span> <span class="title">setValue</span><span class="params">(newValue:<span class="type">Int</span>)</span></span> &#123;</span><br><span class="line">		<span class="keyword">val</span> oldValue = propValue</span><br><span class="line">		propValue = newValue</span><br><span class="line">		changeSupport.firePropertyChange(propName,oldValue,newValue)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Person</span></span>(<span class="keyword">val</span> name:String,age:<span class="built_in">Int</span>,salary:<span class="built_in">Int</span>) &#123;</span><br><span class="line">	<span class="keyword">val</span> _age = ObservableProperty(<span class="string">&quot;age&quot;</span>, age, changeSupport)</span><br><span class="line">	<span class="keyword">var</span> age: <span class="built_in">Int</span> </span><br><span class="line">		<span class="keyword">get</span>() = _age.getValue()</span><br><span class="line">		<span class="keyword">set</span>(value) &#123;_age.setValue(value)&#125;</span><br><span class="line">	<span class="keyword">val</span> _salary:<span class="built_in">Int</span> </span><br><span class="line">		<span class="keyword">get</span>() = _salary.getValue()</span><br><span class="line">		<span class="keyword">set</span>(value) &#123;_salary.setValue(value)&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<figure class="highlight kotlin"><figcaption><span>위임프로퍼티 구현 (위임할수있도록 재구성)</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ObservableProperty</span></span>(<span class="keyword">var</span> propValue:<span class="built_in">Int</span>, <span class="keyword">val</span> changeSupport:PropertyChangeSupport) &#123;</span><br><span class="line">	<span class="keyword">operator</span> <span class="function"><span class="keyword">fun</span> <span class="title">getValue</span><span class="params">(p:<span class="type">Person</span>, prop:<span class="type">KProperty</span>&lt;*&gt;)</span></span>: <span class="built_in">Int</span> = propValue </span><br><span class="line">	<span class="keyword">operator</span> <span class="function"><span class="keyword">fun</span> <span class="title">setValue</span><span class="params">(p:<span class="type">Person</span>, prop:<span class="type">KProperty</span>&lt;*&gt;, newValue:<span class="type">Int</span>)</span></span> &#123;</span><br><span class="line">		<span class="keyword">val</span> oldValue = propValue</span><br><span class="line">		propValue = newValue</span><br><span class="line">		changeSupport.firePropertyChange(propName,oldValue,newValue)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Person</span></span>(<span class="keyword">val</span> name:String,age:<span class="built_in">Int</span>,salary:<span class="built_in">Int</span>): PropertyChangeAware() &#123;</span><br><span class="line">	<span class="keyword">var</span> age:<span class="built_in">Int</span> <span class="keyword">by</span> ObservableProperty(age,changeSupport)</span><br><span class="line">	<span class="keyword">var</span> salary:<span class="built_in">Int</span> <span class="keyword">by</span> ObservableProperty(salary,changeSupport)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>어떤 부분이 재구성되었는가?</p>
-<ul>
-<li>관례에 사용되는 getValue/setValue에 operator가 붙었음</li>
-<li>KProperty사용됨. (KProperty.name을 통해 메소드가 처리할 프로퍼티 이름을 알수있음)</li>
-<li>주생성자의 propName이 빠졌음 (KProperty사용으로인함)</li>
-</ul>
-<figure class="highlight kotlin"><figcaption><span>위임프로퍼티 구현 (Delgate.observable을 사용해 프로퍼티 변경구현)</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Person</span></span>(<span class="keyword">val</span> name:String,age:<span class="built_in">Int</span>,salary:<span class="built_in">Int</span>) : PropertyChangeAware &#123;</span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">val</span> observer = &#123;</span><br><span class="line">		prop: KProperty&lt;*&gt;, oldValue:<span class="built_in">Int</span>, newValue:<span class="built_in">Int</span> -&gt; </span><br><span class="line">		changeSupport.firePropertyChange(prop.name, oldValue,newValue)</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">var</span> age:<span class="built_in">Int</span> <span class="keyword">by</span> Delegates.observable(age,observer)</span><br><span class="line">	<span class="keyword">var</span> salary:<span class="built_in">Int</span> <span class="keyword">by</span> Delegates.observable(salary,observer)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h3 id="위임프로퍼티-컴파일-규칙"><a href="#위임프로퍼티-컴파일-규칙" class="headerlink" title="위임프로퍼티 컴파일 규칙"></a>위임프로퍼티 컴파일 규칙</h3><figure class="highlight kotlin"><figcaption><span>컴파일 규칙</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">C</span> </span>&#123;</span><br><span class="line">	<span class="keyword">var</span> prop:Type <span class="keyword">by</span> MyDelegate()</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">val</span> c = C()</span><br><span class="line"></span><br><span class="line"><span class="comment">//컴파일 시 </span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">C</span> </span>&#123;</span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">val</span> &lt;delegate&gt; = MyDelegate()</span><br><span class="line">	<span class="keyword">var</span> prop:Type </span><br><span class="line">	<span class="keyword">get</span>() = &lt;delegate&gt;.getValue(<span class="keyword">this</span>,&lt;property&gt;)</span><br><span class="line">	<span class="keyword">set</span>(value:Type) = &lt;delegate&gt;.setValue(<span class="keyword">this</span>,&lt;property&gt;,value)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<ul>
-<li>맨처음 설명 그대로 참조하자</li>
-</ul>
-<h3 id="프로퍼티-값을-맵에-저장"><a href="#프로퍼티-값을-맵에-저장" class="headerlink" title="프로퍼티 값을 맵에 저장"></a>프로퍼티 값을 맵에 저장</h3><ul>
-<li>확장가능객체 : 자신의 프로퍼티를 동적으로 정의할 수 있는 객체를 만들때 위임 프로퍼티를 활용하는객체 </li>
-</ul>
-<figure class="highlight kotlin"><figcaption><span>값을 맵에 저장하는 프로퍼티 정의</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Person</span> </span>&#123;</span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">val</span> _attributes = hashMapOf&lt;String,String&gt;()</span><br><span class="line">	<span class="function"><span class="keyword">fun</span> <span class="title">setAttribute</span><span class="params">(attrName:<span class="type">String</span>,value:<span class="type">String</span>)</span></span> &#123;</span><br><span class="line">		_attributes[attrName] = value</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="comment">//필수정보 </span></span><br><span class="line">	<span class="keyword">val</span> name:String </span><br><span class="line">		<span class="keyword">get</span>() = _attributes[<span class="string">&quot;name&quot;</span>]!! <span class="comment">//수동으로 맵에서 꺼냄 </span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//위임사용</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Person</span> </span>&#123;</span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">val</span> _attributes = hashMapOf()</span><br><span class="line">	</span><br><span class="line">	<span class="function"><span class="keyword">fun</span> <span class="title">setAttribute</span><span class="params">(attrName:<span class="type">String</span>, value:<span class="type">String</span>)</span></span> &#123;</span><br><span class="line">		_attributes[attrName] = value </span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">val</span> name:String <span class="keyword">by</span> _attributes</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<ul>
-<li>Map과 MutableMap 인터페이스에 대해 getValue/setValue 확장함수를 제공하기 때문에 위 부분이 동작하게됨.</li>
-<li>getValue에서 맵에 프로퍼티값을 저장할때는 자동으로 프로퍼티 이름을 키로 활용함. </li>
-</ul>
-<h3 id="프레임워크에서-위임-프로퍼티-활용"><a href="#프레임워크에서-위임-프로퍼티-활용" class="headerlink" title="프레임워크에서 위임 프로퍼티 활용"></a>프레임워크에서 위임 프로퍼티 활용</h3><figure class="highlight kotlin"><figcaption><span>위임프로퍼티를 활용해 DB컬럼 접근</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">object</span> Users: IdTable() &#123;</span><br><span class="line">	<span class="keyword">val</span> name = varchar(<span class="string">&quot;name&quot;</span>, length=<span class="number">50</span>,).index()</span><br><span class="line">	<span class="keyword">val</span> age = integer(<span class="string">&quot;age&quot;</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">User</span></span>(id:EntityID): Entity(id) &#123;</span><br><span class="line">	<span class="keyword">var</span> name:String <span class="keyword">by</span> Users.name <span class="comment">//사용자 이름은 디비 name컬럼에 들어있음 </span></span><br><span class="line">	<span class="keyword">var</span> age:<span class="built_in">Int</span> <span class="keyword">by</span> Users.age </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure> 
-
-<ul>
-<li>Users는 디비 전체에서 단 하나만 존재하므로 object(싱글턴객체)로 정의 </li>
-<li>당연한 말이지만 위임을 사용가능한 이유는 getValue/setValue가 Coloumn 클래스내 정의되어있어서 위임이 가능했다. </li>
-<li>위 디비 orm프레임워크는 Exposed프레임워크이다. </li>
-</ul>
-
-                    
-                        
-
-
-                    
-                    
-                        <p>
-                            <a
-                                href="/2021/08/10/kotlin-basic-5/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                Comment and share
-                            </a>
-                        </p>
-                    
-                </div>
-            
-        </div>
-        
-    </article>
-    
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/2021/08/05/kotlin-basic-4/"
-                            aria-label=": kotlin-basic-4"
-                        >
-                            kotlin-basic-4
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time datetime="2021-08-05T07:59:46+00:00">
-	
-		    Aug 05, 2021
-    	
-    </time>
-    
-        <span>in </span>
-        
-    <a class="category-link" href="/categories/KotlinInAction/">KotlinInAction</a>, <a class="category-link" href="/categories/Study/">Study</a>, <a class="category-link" href="/categories/%EC%BD%94%ED%8B%80%EB%A6%B0%EB%AC%B8%EB%B2%95-%EA%B8%B0%EC%B4%88/">코틀린문법&기초</a>
-
-
-    
-</div>
-
-            </div>
-            
-                <div class="postShorten-content">
-                    <h1 id="코틀린-타입-시스템"><a href="#코틀린-타입-시스템" class="headerlink" title="코틀린 타입 시스템"></a>코틀린 타입 시스템</h1><blockquote><ul>
-<li>null 이 될수있는 타입과 null을 처리하는 구문의 문법 </li>
-<li>코틀린 원시 타입 소개와 자바 타입과 코틀린 원시 타입의 관계 </li>
-<li>코틀린 컬렉션 소개와 자바 컬렉션과 코틀린 컬렉션의 관계</li>
-</ul>
-</blockquote>
-
-<h2 id="Null-가능성"><a href="#Null-가능성" class="headerlink" title="Null 가능성"></a>Null 가능성</h2><h3 id="Null이-될수있는-타입"><a href="#Null이-될수있는-타입" class="headerlink" title="Null이 될수있는 타입"></a>Null이 될수있는 타입</h3><ul>
-<li>기본적으로 모든 타입은 null 허용이 안됨.</li>
-<li>타입에 null을 허용하려면 ? 를 타입뒤에 붙여야함. (ex&gt; val x:String? = null) </li>
-</ul>
-<h3 id="안전한-호출-연산자"><a href="#안전한-호출-연산자" class="headerlink" title="안전한 호출 연산자: ?"></a>안전한 호출 연산자: ?</h3><ul>
-<li>?. 연산자는 null검사와 메소드 호출을 한번의 연산으로 수행한다. (ex&gt; s?.toUpperCase() =&gt; if(s != null) s.toUpperCase() else null)</li>
-<li>값이 존재하면 값을 리턴하고, 없으면 Null을 리턴해준다. </li>
-<li>?. 연산자를 사용하면 반환타입은 ?로 반환해야함. (ex&gt; val allCaps: String? = s?.toUpperCase())</li>
-</ul>
-<h3 id="엘비스-연산자"><a href="#엘비스-연산자" class="headerlink" title="엘비스 연산자 : ?:"></a>엘비스 연산자 : ?:</h3><ul>
-<li>?:(엘비스연산자)는 null대신 사용할 디폴트값을 지정할때 편리하게 사용하는 연산자</li>
-</ul>
-<figure class="highlight kotlin"><figcaption><span>evis</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">foo</span><span class="params">(s:<span class="type">String</span>?)</span></span> &#123;</span><br><span class="line">	<span class="keyword">val</span> t:String = s ?: <span class="string">&quot;&quot;</span> </span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">strLenSafe</span><span class="params">(s:<span class="type">String</span>?)</span></span>: <span class="built_in">Int</span> = s?.length ?: <span class="number">0</span></span><br></pre></td></tr></table></figure>
-
-
-<figure class="highlight kotlin"><figcaption><span>evis-throw</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Address</span></span>(<span class="keyword">val</span> streetAddress:String, <span class="keyword">val</span> zipCode:<span class="built_in">Int</span>, <span class="keyword">val</span> city:String, <span class="keyword">val</span> country:String) </span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Company</span></span>(<span class="keyword">val</span> name:String, <span class="keyword">val</span> address:Address?)</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Person</span></span>(<span class="keyword">val</span> name:String, <span class="keyword">val</span> company:Company?)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">printShippingLabel</span><span class="params">(person:<span class="type">Person</span>)</span></span> &#123;</span><br><span class="line">	<span class="keyword">val</span> address = person.company?.address ?: <span class="keyword">throw</span> IlleagalArgumentException(<span class="string">&quot;No Address&quot;</span>)</span><br><span class="line">	with (address) &#123;</span><br><span class="line">		println(streetAddress)</span><br><span class="line">		println(<span class="string">&quot;<span class="variable">$zipcode</span> <span class="variable">$city</span>, <span class="variable">$country</span>&quot;</span>)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&gt;&gt; <span class="keyword">val</span> address = Address(<span class="string">&quot;ElvisStreet&quot;</span>, <span class="number">110</span>, <span class="string">&quot;Sanfrancico&quot;</span>, <span class="string">&quot;USA&quot;</span>)</span><br><span class="line">&gt;&gt; <span class="keyword">val</span> company = Company(<span class="string">&quot;Algo&quot;</span>, address)</span><br><span class="line">&gt;&gt; <span class="keyword">val</span> person = Person(<span class="string">&quot;Dawn&quot;</span>, company)</span><br><span class="line"></span><br><span class="line">&gt;&gt; printShippingLabel(person)</span><br><span class="line">&gt;&gt;&gt; ElvisStreet </span><br><span class="line">&gt;&gt;&gt; <span class="number">110</span> Sanfrancico, USA</span><br><span class="line"></span><br><span class="line">&gt;&gt;&gt; printShippingLabel(Person(<span class="string">&quot;Zero&quot;</span>,<span class="literal">null</span>))</span><br><span class="line">&gt;&gt;&gt; java.lang.IlleagalArgumentException: No Adress </span><br></pre></td></tr></table></figure>
-
-<h3 id="안전한-캐스트-as"><a href="#안전한-캐스트-as" class="headerlink" title="안전한 캐스트: as?"></a>안전한 캐스트: as?</h3><ul>
-<li>as는 타입캐스트를 시켜주는 연산자이다. as?는 ?연산자 처럼 타입이 존재하지 않으면 null을 리턴해줌. </li>
-<li>val otherPerson = o as? Person ?: return false</li>
-</ul>
-<h3 id="Null-아님을-단언"><a href="#Null-아님을-단언" class="headerlink" title="Null 아님을 단언: !!"></a>Null 아님을 단언: !!</h3><ul>
-<li>해당 타입 뒤에 !! 연산자를 붙이면 null이 들어오면 안된다는 소리다. 들어오면 NullPointerException 예외발생 </li>
-<li>val sNotNull:String = s!! //null 들어오면 예외발생 </li>
-<li>!! 연산자를 한줄에 여러 단언문을 사용하는 부분은 피하라 (어디서 예외가 발생했는지 알길이 없다.) (ex&gt; person.company!!.address!!.country -&gt; 이런거하면 어디서 null예외가 떨어졌는지 모른다.)</li>
-</ul>
-<h3 id="let-함수"><a href="#let-함수" class="headerlink" title="let 함수"></a>let 함수</h3><ul>
-<li>let 은 해당 값이 null이아니면 수행, 아니면 미수행 처리해주는 역할을 한다.</li>
-<li>여러값이 null인지를 검사해야한다면, let호출을 중첩시킬수있다. 하지만 코드가 클린하지 못하기때문에, 그럴땐 if를 사용해서 모든값을 한꺼번에 검사하는편이 좋다. </li>
-</ul>
-<figure class="highlight kotlin"><figcaption><span>let</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">sendToEmail</span><span class="params">(email: <span class="type">String</span>)</span></span> &#123;</span><br><span class="line">	println(<span class="string">&quot;Sending email to <span class="variable">$email</span>&quot;</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&gt;&gt; <span class="keyword">var</span> email: String? = <span class="string">&quot;yolo@ex.com&quot;</span></span><br><span class="line">&gt;&gt; email?.let &#123; sendToEmail(it)&#125;</span><br><span class="line">&gt;&gt;&gt; Sending email to <span class="symbol">yolo@</span>ex.com</span><br><span class="line"></span><br><span class="line">&gt;&gt; email = <span class="literal">null</span></span><br><span class="line">&gt;&gt; email?.let&#123;sendToEmail(it)&#125;</span><br><span class="line">&gt;&gt;&gt; 아무실행없음</span><br><span class="line"></span><br><span class="line"><span class="comment">//let 사용안한예 </span></span><br><span class="line"><span class="keyword">val</span> person:Person? = getTheBestPersonInTheWorld()</span><br><span class="line"><span class="keyword">if</span>(persion != <span class="literal">null</span>) sendToEmail(person.email)</span><br><span class="line"></span><br><span class="line"><span class="comment">//let 사용예</span></span><br><span class="line">getTheBestPersonInTheWorld()?.let&#123;sendEmailTo(it.email)&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//위함수가 null을 반환한다면? 아무일도 일어나지 않는다.</span></span><br></pre></td></tr></table></figure>
-
-<h3 id="나중에-초기화할-프로퍼티-lateinit"><a href="#나중에-초기화할-프로퍼티-lateinit" class="headerlink" title="나중에 초기화할 프로퍼티 : lateinit"></a>나중에 초기화할 프로퍼티 : lateinit</h3><ul>
-<li>lateinit을 사용시 반드시 var로 사용해야함. val로 사용시 final 필드로 컴파일되어 반드시 초기값을 요구하게됨. </li>
-<li>프로퍼티를 초기화하기전에 lateinit변수에 접근하면 lateinit property myService has not been initialized 라는 예외가 발생함 </li>
-<li>lateinit은 의존관계주입 (DI) 프레임워크와 함께 사용하는 경우가 많음. </li>
-</ul>
-<figure class="highlight kotlin"><figcaption><span>lateinit</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MyService</span> </span>&#123;</span><br><span class="line">	<span class="function"><span class="keyword">fun</span> <span class="title">performAction</span><span class="params">()</span></span>: String = <span class="string">&quot;foo&quot;</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MyTest</span> </span>&#123;</span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">lateinit</span> <span class="keyword">var</span> myService:MyService</span><br><span class="line">	</span><br><span class="line">	<span class="meta">@Before</span> <span class="function"><span class="keyword">fun</span> <span class="title">setUp</span><span class="params">()</span></span> &#123;</span><br><span class="line">		myService = MyService()</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="meta">@Test</span> <span class="function"><span class="keyword">fun</span> <span class="title">testAction</span><span class="params">()</span></span> &#123;</span><br><span class="line">		Assert.assertEquals(<span class="string">&quot;foo&quot;</span>, myService.performAction())</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h3 id="null이-될수있는-타입-확장"><a href="#null이-될수있는-타입-확장" class="headerlink" title="null이 될수있는 타입 확장"></a>null이 될수있는 타입 확장</h3><ul>
-<li>null이 될수있는 확장함수는 안전한 호출(? 연산자) 없이 호출 가능 </li>
-<li>null이 허용된 변수에 대한 안전한 호출 없이 let 을 호출하면 람다의 인자는 null이 될수있는 타입으로 추론됨. 따라서 안전한 호출을 위해 ?연산자를 반드시 사용해야함. </li>
-</ul>
-<h3 id="타입-파라미터의-null가능성"><a href="#타입-파라미터의-null가능성" class="headerlink" title="타입 파라미터의 null가능성"></a>타입 파라미터의 null가능성</h3><ul>
-<li>제네릭타입 (타입 파라미터) 를 사용하게 되면 타입명끝에 ?가 없더라도 T가 null이 될수 있는 타입이다. </li>
-</ul>
-<figure class="highlight kotlin"><figcaption><span>generic</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="type">&lt;T&gt;</span> <span class="title">printHashCode</span><span class="params">(t:<span class="type">T</span>)</span></span> &#123;</span><br><span class="line">	println(t?.hashCode()) <span class="comment">//타입 파라미터 t는 무조건 안전한 호출을 통해서만 가져와야함.T의 타입은 Any?로 반드시 추론됨. </span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&gt;&gt; printHashCode(<span class="literal">null</span>)</span><br><span class="line">&gt;&gt;&gt; <span class="literal">null</span></span><br></pre></td></tr></table></figure>
-
-<h2 id="코틀린의-원시타입"><a href="#코틀린의-원시타입" class="headerlink" title="코틀린의 원시타입"></a>코틀린의 원시타입</h2><h3 id="원시타입-Int-Boolean-등"><a href="#원시타입-Int-Boolean-등" class="headerlink" title="원시타입 : Int, Boolean 등.."></a>원시타입 : Int, Boolean 등..</h3><ul>
-<li>자바에서는 원시타입 , 참조타입으로 사용하지만 코틀린은 하나의 타입으로만 사용함 </li>
-<li>코틀린은 하나의 타입으로만 사용하기때문에 늘 객체로 타입을 받지않고, 케바케로 자바로 컴파일시 원시타입 으로 줄지 참조타입으로 줄지 구분 해서 반환하게됨. (컬렉션과 같은 제네릭을 사용할경우는 객체로 나머지는 원시타입으로 저장)</li>
-<li>코틀린에서는 오토박싱 처리 되는 부분이 불가능하다. 예를들면 Int형타입의 변수를 Long으로 변경하는것 처럼 자바에서는 되는 부분이 코틀린에서는 불가능하다. 이유는 타입안정성때문. 따라서 Int형타입을 Long으로 변경후 사용해야함.</li>
-</ul>
-<h3 id="Any-Any-최상위타입-Object"><a href="#Any-Any-최상위타입-Object" class="headerlink" title="Any,Any? : 최상위타입 (Object)"></a>Any,Any? : 최상위타입 (Object)</h3><ul>
-<li>Any는 자바에서 Object타입이라 생각하면 됨. </li>
-</ul>
-<h3 id="Unit타입-코틀린의-void"><a href="#Unit타입-코틀린의-void" class="headerlink" title="Unit타입 : 코틀린의 void"></a>Unit타입 : 코틀린의 void</h3><ul>
-<li>Unit타입은 자바의 void와 흡사한 기능을한다. </li>
-<li>Unit과 void는 뭔차이인가? Unit은 void와 달리 타입 인자로 사용가능. (제네릭파라미터를 반환하는 함수를 오버라이드하면서 반환타입으러 Unit을 쓸때 유용함. )</li>
-</ul>
-<figure class="highlight kotlin"><figcaption><span>Unit</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">Processor</span>&lt;<span class="type">T</span>&gt; </span>&#123;</span><br><span class="line">	<span class="function"><span class="keyword">fun</span> <span class="title">process</span><span class="params">()</span></span>:T</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">NoResultProcessor</span>: <span class="type">Processor</span>&lt;<span class="type">Unit</span>&gt; </span>&#123;</span><br><span class="line">	<span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">process</span><span class="params">()</span></span> &#123;</span><br><span class="line">		<span class="comment">// process code </span></span><br><span class="line">		<span class="comment">// Unit이기때문에 return 없음. </span></span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h3 id="Nothing-타입-이-함수는-결코-정상적으로-끝나지-않는다"><a href="#Nothing-타입-이-함수는-결코-정상적으로-끝나지-않는다" class="headerlink" title="Nothing 타입: 이 함수는 결코 정상적으로 끝나지 않는다.."></a>Nothing 타입: 이 함수는 결코 정상적으로 끝나지 않는다..</h3><ul>
-<li>Nothing은 기본적으로 아무것도 포함하지 않음. 따라서 Nothing은 함수의 반환타입이나 반환타입으로 쓰일 타입 파라미터로만 쓸수있음. </li>
-<li>Nothing을 반환하는 함수를 엘비스 연산자의 우항에 사용해서 전제조건을 검사할수있음. </li>
-</ul>
-<h2 id="컬렉션과-배열"><a href="#컬렉션과-배열" class="headerlink" title="컬렉션과 배열"></a>컬렉션과 배열</h2><h3 id="컬렉션"><a href="#컬렉션" class="headerlink" title="컬렉션"></a>컬렉션</h3><ul>
-<li>코틀린에서 컬렉션은 읽기전용 컬렉션 과 변경가능한 컬렉션 두가지를 나눠서 사용가능</li>
-<li>코틀린에서는 가능하면 읽기전용 컬렉션을 디폴트로 사용하길 권장함. (일반적인 규약으로 지침함) 컬렉션을 변경해야할때만 변경가능한 버전을 사용하길 권장 </li>
-<li>읽기전용 컬렉션이 항상 스레드 안전하지는 않다. 따라서 다중 스레드 환경에서는 데이터를 다루는경우, 그 데잍러를 적절히 동기화 하거나 동시 접근을 허용하는 데이터 구조를 활용해야함. </li>
-</ul>
-<h3 id="배열"><a href="#배열" class="headerlink" title="배열"></a>배열</h3><ul>
-<li>배열상태에서 람다로 연산 수행 가능 (ex&gt; val squres = IntArray(5) {i -&gt; (i+1) * (i+1)})</li>
-<li>filter,map 등의 처리도 가능함. </li>
-<li>배열에도 똑같이 확장함수를 사용할수잇다. 다만 이런 함수가 반환하는 값은 배열이 아니라 리스트로 변환됨. </li>
-<li>원시타입 배열 (int/long등) 도 제공함 </li>
-<li>코들린의 Array는 자바 배열로 컴파일됨 </li>
-</ul>
-
-                    
-                        
-
-
-                    
-                    
-                        <p>
-                            <a
-                                href="/2021/08/05/kotlin-basic-4/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                Comment and share
-                            </a>
-                        </p>
-                    
-                </div>
-            
-        </div>
-        
-    </article>
-    
     <div class="pagination-bar">
     <ul class="pagination">
         
@@ -1325,7 +1095,7 @@
 
                 <footer id="footer" class="main-content-wrap">
     <span class="copyrights">
-        Copyrights &copy; 2021 codexdawn. All Rights Reserved.
+        Copyrights &copy; 2022 codexdawn. All Rights Reserved.
     </span>
 </footer>
 
